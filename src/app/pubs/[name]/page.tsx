@@ -33,7 +33,9 @@ export default function PubPage() {
   useEffect(() => {
     async function fetchPub() {
       try {
-        const res = await fetch(`http://localhost:4000/pubs?name=${name}`);
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const res = await fetch(`${apiUrl}/pubs?name=${name}`);
         const data = await res.json();
         setPub(data[0] || null);
       } catch (error) {
