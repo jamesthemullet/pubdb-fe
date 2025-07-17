@@ -112,7 +112,7 @@ export default function PubPage() {
           </p>
         </>
       ) : (
-        <p>Pub not found.</p>
+        <p>Pub not found</p>
       )}
     </StandardLayout>
   );

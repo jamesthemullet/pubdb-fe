@@ -19,7 +19,10 @@ export default function Home() {
   useEffect(() => {
     async function fetchPubs() {
       try {
-        const res = await fetch("http://localhost:4000/pubs");
+        console.log(10, process.env.NEXT_PUBLIC_API_URL);
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const res = await fetch(`${apiUrl}/pubs`);
         const data = await res.json();
         setPubs(data);
       } catch (error) {
