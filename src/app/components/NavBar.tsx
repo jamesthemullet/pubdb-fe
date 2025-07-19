@@ -48,6 +48,9 @@ export default function NavBar() {
         <li>
           <Link href="/pubs">All Pubs</Link>
         </li>
+        <li>
+          <Link href="/add-pub">Add Pub</Link>
+        </li>
         {!userEmail && (
           <li>
             <Link href="/register">Register</Link>

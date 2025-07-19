@@ -42,6 +42,9 @@ export default function Pubs() {
         <p>Loading pubs…</p>
       ) : (
         <ul>
+          <Link href="/add-pub">
+            <button>Add Pub</button>
+          </Link>
           {pubs.map((pub) => (
             <li key={pub.id}>
               <Link href={`/pubs/${pub.name}`}>

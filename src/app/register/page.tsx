@@ -56,6 +56,7 @@ export default function RegisterLoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
+      console.log(50, res);
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || data.errors || "Unknown error");

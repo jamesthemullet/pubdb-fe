@@ -11,8 +11,8 @@ type Pub = {
   city: string;
   address: string;
   postcode: string;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
   website?: string;
   description?: string;
   imageUrl?: string;
