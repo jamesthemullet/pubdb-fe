@@ -22,8 +22,8 @@ export default function AddPubPage() {
     undefined
   );
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [success, setSuccess] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const [user, setUser] = useState<{
     email: string;
@@ -168,7 +168,7 @@ export default function AddPubPage() {
               value={lat ?? ""}
               onChange={(e) =>
                 setLat(
-                  e.target.value === "" ? null : parseFloat(e.target.value)
+                  e.target.value === "" ? undefined : parseFloat(e.target.value)
                 )
               }
               type="number"
@@ -183,7 +183,7 @@ export default function AddPubPage() {
               value={lng ?? ""}
               onChange={(e) =>
                 setLng(
-                  e.target.value === "" ? null : parseFloat(e.target.value)
+                  e.target.value === "" ? undefined : parseFloat(e.target.value)
                 )
               }
               type="number"
@@ -196,7 +196,7 @@ export default function AddPubPage() {
             <input
               name="website"
               value={website ?? ""}
-              onChange={(e) => setWebsite(e.target.value || null)}
+              onChange={(e) => setWebsite(e.target.value || undefined)}
             />
           </label>
           <br />
@@ -205,7 +205,7 @@ export default function AddPubPage() {
             <textarea
               name="description"
               value={description ?? ""}
-              onChange={(e) => setDescription(e.target.value || null)}
+              onChange={(e) => setDescription(e.target.value || undefined)}
             />
           </label>
           <br />
@@ -214,7 +214,7 @@ export default function AddPubPage() {
             <input
               name="imageUrl"
               value={imageUrl ?? ""}
-              onChange={(e) => setImageUrl(e.target.value || null)}
+              onChange={(e) => setImageUrl(e.target.value || undefined)}
             />
           </label>
           <br />
@@ -232,7 +232,7 @@ export default function AddPubPage() {
             <input
               name="operator"
               value={operator ?? ""}
-              onChange={(e) => setOperator(e.target.value || null)}
+              onChange={(e) => setOperator(e.target.value || undefined)}
             />
           </label>
           <br />
@@ -241,7 +241,7 @@ export default function AddPubPage() {
             <input
               name="area"
               value={area ?? ""}
-              onChange={(e) => setArea(e.target.value || null)}
+              onChange={(e) => setArea(e.target.value || undefined)}
             />
           </label>
           <br />
@@ -250,7 +250,7 @@ export default function AddPubPage() {
             <input
               name="phone"
               value={phone ?? ""}
-              onChange={(e) => setPhone(e.target.value || null)}
+              onChange={(e) => setPhone(e.target.value || undefined)}
             />
           </label>
           <br />
@@ -259,7 +259,7 @@ export default function AddPubPage() {
             <input
               name="borough"
               value={borough ?? ""}
-              onChange={(e) => setBorough(e.target.value || null)}
+              onChange={(e) => setBorough(e.target.value || undefined)}
             />
           </label>
           <br />
@@ -268,7 +268,7 @@ export default function AddPubPage() {
             <input
               name="openingHours"
               value={openingHours ?? ""}
-              onChange={(e) => setOpeningHours(e.target.value || null)}
+              onChange={(e) => setOpeningHours(e.target.value || undefined)}
             />
           </label>
           <br />
