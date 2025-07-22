@@ -31,20 +31,29 @@ export default function AddPubPage() {
   } | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setUser({ email: payload.email, approved: payload.approved });
-      } catch {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          setUser({ email: payload.email, approved: payload.approved });
+        } catch {
+          setUser(null);
+        }
+      } else {
         setUser(null);
       }
-    } else {
-      setUser(null);
-    }
+    };
+    checkAuth();
+    window.addEventListener("authChanged", checkAuth);
+    window.addEventListener("storage", checkAuth);
+    return () => {
+      window.removeEventListener("authChanged", checkAuth);
+      window.removeEventListener("storage", checkAuth);
+    };
   }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -91,16 +100,16 @@ export default function AddPubPage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  function handleTagsChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTags(
       e.target.value
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean)
     );
-  }
+  };
 
   return (
     <div>

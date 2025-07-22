@@ -8,7 +8,7 @@ export default function NavBar() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    function checkAuth() {
+    const checkAuth = () => {
       const token = localStorage.getItem("token");
       if (token) {
         try {
@@ -20,7 +20,7 @@ export default function NavBar() {
       } else {
         setUserEmail(null);
       }
-    }
+    };
     checkAuth();
     // Listen for storage changes (cross-tab and same tab)
     window.addEventListener("storage", checkAuth);
@@ -32,12 +32,11 @@ export default function NavBar() {
     };
   }, []);
 
-  function handleLogout() {
+  const handleLogout = () => {
     localStorage.removeItem("token");
     setUserEmail(null);
     window.dispatchEvent(new Event("authChanged"));
-    // No reload needed, UI will update
-  }
+  };
 
   return (
     <nav className={styles.nav}>

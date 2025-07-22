@@ -350,17 +350,27 @@ function EditButton({
     approved?: boolean;
   } | null>(null);
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setUser({ email: payload.email, approved: payload.approved });
-      } catch {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          setUser({ email: payload.email, approved: payload.approved });
+        } catch {
+          setUser(null);
+        }
+      } else {
         setUser(null);
       }
-    } else {
-      setUser(null);
-    }
+    };
+    checkAuth();
+    // Listen for auth changes
+    window.addEventListener("authChanged", checkAuth);
+    window.addEventListener("storage", checkAuth);
+    return () => {
+      window.removeEventListener("authChanged", checkAuth);
+      window.removeEventListener("storage", checkAuth);
+    };
   }, []);
 
   if (!user) {
