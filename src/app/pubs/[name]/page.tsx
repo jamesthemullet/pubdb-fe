@@ -112,7 +112,11 @@ export default function PubPage() {
               style={{ maxWidth: "400px", marginBottom: "1rem" }}
             />
           )}
-          <EditButton pubName={pub.name} onEdit={handleEditClick} />
+          <EditButton
+            pubName={pub.name}
+            onEdit={handleEditClick}
+            pubId={pub.id}
+          />
           {editing ? (
             <div style={{ marginTop: "1rem" }}>
               <label>
@@ -341,21 +345,29 @@ export default function PubPage() {
 function EditButton({
   pubName,
   onEdit,
+  pubId,
 }: {
   pubName: string;
   onEdit: () => void;
+  pubId: string;
 }) {
   const [user, setUser] = useState<{
     email: string;
     approved?: boolean;
+    admin?: boolean;
   } | null>(null);
+  console.log(10, user);
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("token");
       if (token) {
         try {
           const payload = JSON.parse(atob(token.split(".")[1]));
-          setUser({ email: payload.email, approved: payload.approved });
+          setUser({
+            email: payload.email,
+            approved: payload.approved,
+            admin: payload.admin,
+          });
         } catch {
           setUser(null);
         }
@@ -383,7 +395,7 @@ function EditButton({
   if (!user.approved) {
     return (
       <div style={{ marginTop: "1rem" }}>
-        <p>Your account is not approved yet.</p>
+        <p>Your account is not approved for editing.</p>
         <p>
           Please email{" "}
           <a href="mailto:hello@thepubdb.com">hello@thepubdb.com</a> to request
@@ -392,9 +404,51 @@ function EditButton({
       </div>
     );
   }
+
+  async function handleDelete() {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${pubName}"? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${apiUrl}/pubs/${pubId}`, {
+        method: "DELETE",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || "Failed to delete pub");
+      } else {
+        alert("Pub deleted successfully");
+        window.location.href = "/pubs";
+      }
+    } catch (err) {
+      alert("Network error");
+    }
+  }
+
   return (
     <div style={{ marginTop: "1rem" }}>
       <button onClick={onEdit}>Edit this pub</button>
+      {user?.admin && (
+        <button
+          onClick={handleDelete}
+          style={{
+            marginLeft: "1rem",
+            backgroundColor: "#ff4444",
+            color: "white",
+          }}
+        >
+          Delete this pub
+        </button>
+      )}
     </div>
   );
 }

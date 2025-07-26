@@ -121,7 +121,7 @@ export default function AddPubPage() {
         </div>
       ) : !user.approved ? (
         <div>
-          <p>Your account is not approved yet.</p>
+          <p>Your account is not approved for editing.</p>
           <p>
             Please email{" "}
             <a href="mailto:hello@thepubdb.com">hello@thepubdb.com</a> to

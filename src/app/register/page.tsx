@@ -14,13 +14,11 @@ export default function RegisterLoginPage() {
   const [redirectTo, setRedirectTo] = useState<string>("/");
 
   useEffect(() => {
-    // Store previous page in sessionStorage when navigating to /register
     if (typeof window !== "undefined") {
       const prev =
         document.referrer && !document.referrer.includes("/register")
           ? document.referrer
           : "/";
-      // If coming from another page in the app, use window.history
       if (window.history.length > 1) {
         const lastUrl = sessionStorage.getItem("lastUrl");
         if (lastUrl && lastUrl !== "/register") {
@@ -35,13 +33,12 @@ export default function RegisterLoginPage() {
   }, []);
 
   useEffect(() => {
-    // Track last visited page
     if (typeof window !== "undefined") {
       sessionStorage.setItem("lastUrl", window.location.pathname);
     }
   }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -63,7 +60,7 @@ export default function RegisterLoginPage() {
       } else {
         setSuccess(
           mode === "register"
-            ? "Registration successful! You can now log in."
+            ? "Registration successful! Please follow the link in your email to verify your account."
             : "Login successful!"
         );
         if (mode === "login" && data.token) {
@@ -80,7 +77,7 @@ export default function RegisterLoginPage() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div>
@@ -125,12 +122,23 @@ export default function RegisterLoginPage() {
           {loading ? "Submitting…" : mode === "register" ? "Register" : "Login"}
         </button>
       </form>
+      {mode === "login" && (
+        <div style={{ marginTop: "1rem", textAlign: "center" }}>
+          <a
+            href="/forgot-password"
+            style={{ color: "#007bff", fontSize: "0.9rem" }}
+          >
+            Forgot your password?
+          </a>
+        </div>
+      )}
       <button
         onClick={() => {
           setMode(mode === "register" ? "login" : "register");
           setError(null);
           setSuccess(null);
         }}
+        style={{ marginTop: "1rem" }}
       >
         {mode === "register"
           ? "Already have an account? Login"
