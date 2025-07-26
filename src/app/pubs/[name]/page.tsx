@@ -435,7 +435,7 @@ function EditButton({
   }
 
   return (
-    <div style={{ marginTop: "1rem" }}>
+    <StandardLayout>
       <button onClick={onEdit}>Edit this pub</button>
       {user?.admin && (
         <button
@@ -449,6 +449,6 @@ function EditButton({
           Delete this pub
         </button>
       )}
-    </div>
+    </StandardLayout>
   );
 }

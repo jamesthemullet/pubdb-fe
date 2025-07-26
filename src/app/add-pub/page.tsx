@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import StandardLayout from "../StandardLayout";
 
 export default function AddPubPage() {
   const router = useRouter();
@@ -112,7 +113,7 @@ export default function AddPubPage() {
   };
 
   return (
-    <div>
+    <StandardLayout>
       <h2>Add a Pub</h2>
       {!user ? (
         <div>
@@ -129,50 +130,55 @@ export default function AddPubPage() {
           </p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit}>
-          <label>
-            Name:
+        <form onSubmit={handleSubmit} autoComplete="off">
+          <div>
+            <label htmlFor="name">Name:</label>
             <input
-              name="name"
+              id="name"
+              name="pub-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              autoComplete="off"
             />
-          </label>
-          <br />
-          <label>
-            City:
+          </div>
+          <div>
+            <label htmlFor="city">City:</label>
             <input
-              name="city"
+              id="city"
+              name="pub-city"
               value={city}
               onChange={(e) => setCity(e.target.value)}
               required
+              autoComplete="off"
             />
-          </label>
-          <br />
-          <label>
-            Address:
+          </div>
+          <div>
+            <label htmlFor="address">Address:</label>
             <input
-              name="address"
+              id="address"
+              name="pub-address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               required
+              autoComplete="off"
             />
-          </label>
-          <br />
-          <label>
-            Postcode:
+          </div>
+          <div>
+            <label htmlFor="postcode">Postcode:</label>
             <input
-              name="postcode"
+              id="postcode"
+              name="pub-postcode"
               value={postcode}
               onChange={(e) => setPostcode(e.target.value)}
               required
+              autoComplete="off"
             />
-          </label>
-          <br />
-          <label>
-            Latitude:
+          </div>
+          <div>
+            <label htmlFor="lat">Latitude:</label>
             <input
+              id="lat"
               name="lat"
               value={lat ?? ""}
               onChange={(e) =>
@@ -183,11 +189,11 @@ export default function AddPubPage() {
               type="number"
               step="any"
             />
-          </label>
-          <br />
-          <label>
-            Longitude:
+          </div>
+          <div>
+            <label htmlFor="lng">Longitude:</label>
             <input
+              id="lng"
               name="lng"
               value={lng ?? ""}
               onChange={(e) =>
@@ -198,89 +204,90 @@ export default function AddPubPage() {
               type="number"
               step="any"
             />
-          </label>
-          <br />
-          <label>
-            Website:
+          </div>
+          <div>
+            <label htmlFor="website">Website:</label>
             <input
+              id="website"
               name="website"
               value={website ?? ""}
               onChange={(e) => setWebsite(e.target.value || undefined)}
             />
-          </label>
-          <br />
-          <label>
-            Description:
+          </div>
+          <div>
+            <label htmlFor="description">Description:</label>
             <textarea
+              id="description"
               name="description"
               value={description ?? ""}
               onChange={(e) => setDescription(e.target.value || undefined)}
             />
-          </label>
-          <br />
-          <label>
-            Image URL:
+          </div>
+          <div>
+            <label htmlFor="imageUrl">Image URL:</label>
             <input
+              id="imageUrl"
               name="imageUrl"
               value={imageUrl ?? ""}
               onChange={(e) => setImageUrl(e.target.value || undefined)}
             />
-          </label>
-          <br />
-          <label>
-            Tags (comma separated):
+          </div>
+          <div>
+            <label htmlFor="tags">Tags (comma separated):</label>
             <input
+              id="tags"
               name="tags"
               value={tags.join(", ")}
               onChange={handleTagsChange}
             />
-          </label>
-          <br />
-          <label>
-            Operator:
+          </div>
+          <div>
+            <label htmlFor="operator">Operator:</label>
             <input
+              id="operator"
               name="operator"
               value={operator ?? ""}
               onChange={(e) => setOperator(e.target.value || undefined)}
             />
-          </label>
-          <br />
-          <label>
-            Area:
+          </div>
+          <div>
+            <label htmlFor="area">Area:</label>
             <input
+              id="area"
               name="area"
               value={area ?? ""}
               onChange={(e) => setArea(e.target.value || undefined)}
+              autoComplete="off"
             />
-          </label>
-          <br />
-          <label>
-            Phone:
+          </div>
+          <div>
+            <label htmlFor="phone">Phone:</label>
             <input
+              id="phone"
               name="phone"
               value={phone ?? ""}
               onChange={(e) => setPhone(e.target.value || undefined)}
+              autoComplete="off"
             />
-          </label>
-          <br />
-          <label>
-            Borough:
+          </div>
+          <div>
+            <label htmlFor="borough">Borough:</label>
             <input
+              id="borough"
               name="borough"
               value={borough ?? ""}
               onChange={(e) => setBorough(e.target.value || undefined)}
             />
-          </label>
-          <br />
-          <label>
-            Opening Hours:
+          </div>
+          <div>
+            <label htmlFor="openingHours">Opening Hours:</label>
             <input
+              id="openingHours"
               name="openingHours"
               value={openingHours ?? ""}
               onChange={(e) => setOpeningHours(e.target.value || undefined)}
             />
-          </label>
-          <br />
+          </div>
           <button type="submit" disabled={loading}>
             {loading ? "Submitting…" : "Add Pub"}
           </button>
@@ -290,6 +297,6 @@ export default function AddPubPage() {
         <div>{typeof error === "string" ? error : JSON.stringify(error)}</div>
       )}
       {success && <div>{success}</div>}
-    </div>
+    </StandardLayout>
   );
 }

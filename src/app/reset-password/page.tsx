@@ -1,9 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import StandardLayout from "../StandardLayout";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -64,119 +64,125 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <StandardLayout>
-        <div style={{ maxWidth: "400px", margin: "0 auto", padding: "2rem" }}>
-          <h2>Invalid Reset Link</h2>
-          <p>This password reset link is invalid or has expired.</p>
-          <div style={{ marginTop: "2rem" }}>
-            <a href="/forgot-password" style={{ color: "#007bff" }}>
-              Request a new password reset
-            </a>
-          </div>
+      <div style={{ maxWidth: "400px", margin: "0 auto", padding: "2rem" }}>
+        <h2>Invalid Reset Link</h2>
+        <p>This password reset link is invalid or has expired.</p>
+        <div style={{ marginTop: "2rem" }}>
+          <a href="/forgot-password" style={{ color: "#007bff" }}>
+            Request a new password reset
+          </a>
         </div>
-      </StandardLayout>
+      </div>
     );
   }
 
   return (
-    <StandardLayout>
-      <div style={{ maxWidth: "400px", margin: "0 auto", padding: "2rem" }}>
-        <h2>Reset Password</h2>
-        <p>Enter your new password below.</p>
+    <div style={{ maxWidth: "400px", margin: "0 auto", padding: "2rem" }}>
+      <h2>Reset Password</h2>
+      <p>Enter your new password below.</p>
 
-        <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
-          <label style={{ display: "block", marginBottom: "1rem" }}>
-            New Password:
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              style={{
-                display: "block",
-                width: "100%",
-                padding: "0.5rem",
-                marginTop: "0.25rem",
-              }}
-            />
-          </label>
-
-          <label style={{ display: "block", marginBottom: "1rem" }}>
-            Confirm Password:
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={6}
-              style={{
-                display: "block",
-                width: "100%",
-                padding: "0.5rem",
-                marginTop: "0.25rem",
-              }}
-            />
-          </label>
-
-          <button
-            type="submit"
-            disabled={loading}
+      <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
+        <label style={{ display: "block", marginBottom: "1rem" }}>
+          New Password:
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
             style={{
-              padding: "0.75rem 1.5rem",
-              backgroundColor: loading ? "#ccc" : "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: loading ? "not-allowed" : "pointer",
+              display: "block",
+              width: "100%",
+              padding: "0.5rem",
+              marginTop: "0.25rem",
             }}
-          >
-            {loading ? "Resetting..." : "Reset Password"}
-          </button>
-        </form>
+          />
+        </label>
 
-        {message && (
-          <div
+        <label style={{ display: "block", marginBottom: "1rem" }}>
+          Confirm Password:
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            minLength={6}
             style={{
-              marginTop: "1rem",
-              padding: "1rem",
-              backgroundColor: "#d4edda",
-              color: "#155724",
-              borderRadius: "4px",
+              display: "block",
+              width: "100%",
+              padding: "0.5rem",
+              marginTop: "0.25rem",
             }}
-          >
-            {message}
-            <div style={{ marginTop: "1rem" }}>
-              <a
-                href="/register"
-                style={{ color: "#155724", textDecoration: "underline" }}
-              >
-                Go to Login
-              </a>
-            </div>
+          />
+        </label>
+
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            padding: "0.75rem 1.5rem",
+            backgroundColor: loading ? "#ccc" : "#007bff",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
+        >
+          {loading ? "Resetting..." : "Reset Password"}
+        </button>
+      </form>
+
+      {message && (
+        <div
+          style={{
+            marginTop: "1rem",
+            padding: "1rem",
+            backgroundColor: "#d4edda",
+            color: "#155724",
+            borderRadius: "4px",
+          }}
+        >
+          {message}
+          <div style={{ marginTop: "1rem" }}>
+            <a
+              href="/register"
+              style={{ color: "#155724", textDecoration: "underline" }}
+            >
+              Go to Login
+            </a>
           </div>
-        )}
-
-        {error && (
-          <div
-            style={{
-              marginTop: "1rem",
-              padding: "1rem",
-              backgroundColor: "#f8d7da",
-              color: "#721c24",
-              borderRadius: "4px",
-            }}
-          >
-            {typeof error === "string" ? error : JSON.stringify(error)}
-          </div>
-        )}
-
-        <div style={{ marginTop: "2rem", textAlign: "center" }}>
-          <a href="/register" style={{ color: "#007bff" }}>
-            Back to Login
-          </a>
         </div>
+      )}
+
+      {error && (
+        <div
+          style={{
+            marginTop: "1rem",
+            padding: "1rem",
+            backgroundColor: "#f8d7da",
+            color: "#721c24",
+            borderRadius: "4px",
+          }}
+        >
+          {typeof error === "string" ? error : JSON.stringify(error)}
+        </div>
+      )}
+
+      <div style={{ marginTop: "2rem", textAlign: "center" }}>
+        <a href="/register" style={{ color: "#007bff" }}>
+          Back to Login
+        </a>
       </div>
+    </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <StandardLayout>
+      <Suspense fallback={<div>Loading...</div>}>
+        <ResetPasswordForm />
+      </Suspense>
     </StandardLayout>
   );
 }

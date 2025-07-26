@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import StandardLayout from "../StandardLayout";
 
 export default function RegisterLoginPage() {
   const router = useRouter();
@@ -80,43 +81,45 @@ export default function RegisterLoginPage() {
   };
 
   return (
-    <div>
+    <StandardLayout>
       <h2>{mode === "register" ? "Register" : "Login"}</h2>
       <form onSubmit={handleSubmit}>
         {mode === "register" && (
           <div>
-            <label>
-              Name:
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </label>
+            <label>Name:</label>
+            <input
+              type="text"
+              name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="name"
+              required
+            />
           </div>
         )}
         <div>
-          <label>
-            Email:
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
+          <label>Email:</label>
+          <input
+            type="email"
+            name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            required
+          />
         </div>
         <div>
-          <label>
-            Password:
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </label>
+          <label>Password:</label>
+          <input
+            type="password"
+            name="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete={
+              mode === "register" ? "new-password" : "current-password"
+            }
+            required
+          />
         </div>
         <button type="submit" disabled={loading}>
           {loading ? "Submitting…" : mode === "register" ? "Register" : "Login"}
@@ -148,6 +151,6 @@ export default function RegisterLoginPage() {
         <div>{typeof error === "string" ? error : JSON.stringify(error)}</div>
       )}
       {success && <div>{success}</div>}
-    </div>
+    </StandardLayout>
   );
 }
