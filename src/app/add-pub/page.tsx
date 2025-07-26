@@ -139,7 +139,7 @@ export default function AddPubPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              autoComplete="off"
+              autoComplete="pub-name"
             />
           </div>
           <div>
@@ -150,7 +150,7 @@ export default function AddPubPage() {
               value={city}
               onChange={(e) => setCity(e.target.value)}
               required
-              autoComplete="off"
+              autoComplete="pub-city"
             />
           </div>
           <div>
@@ -161,7 +161,7 @@ export default function AddPubPage() {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               required
-              autoComplete="off"
+              autoComplete="pub-address"
             />
           </div>
           <div>
@@ -172,7 +172,7 @@ export default function AddPubPage() {
               value={postcode}
               onChange={(e) => setPostcode(e.target.value)}
               required
-              autoComplete="off"
+              autoComplete="pub-postcode"
             />
           </div>
           <div>
@@ -257,7 +257,7 @@ export default function AddPubPage() {
               name="area"
               value={area ?? ""}
               onChange={(e) => setArea(e.target.value || undefined)}
-              autoComplete="off"
+              autoComplete="pub-area"
             />
           </div>
           <div>
@@ -267,7 +267,7 @@ export default function AddPubPage() {
               name="phone"
               value={phone ?? ""}
               onChange={(e) => setPhone(e.target.value || undefined)}
-              autoComplete="off"
+              autoComplete="pub-phone"
             />
           </div>
           <div>
