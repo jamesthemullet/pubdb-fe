@@ -45,7 +45,8 @@ export default function RegisterLoginPage() {
     setError(null);
     setSuccess(null);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/auth";
       const endpoint = mode === "register" ? "/register" : "/login";
       const body =
         mode === "register" ? { name, email, password } : { email, password };

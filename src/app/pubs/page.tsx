@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import StandardLayout from "../StandardLayout";
 import Link from "next/link";
 
@@ -15,14 +15,39 @@ type Pub = {
 export default function Pubs() {
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const filteredPubs = useMemo(() => {
+    if (!debouncedSearchTerm) return pubs;
+
+    const searchLower = debouncedSearchTerm.toLowerCase();
+    return pubs.filter(
+      (pub) =>
+        pub.name.toLowerCase().includes(searchLower) ||
+        pub.city.toLowerCase().includes(searchLower) ||
+        pub.address.toLowerCase().includes(searchLower) ||
+        pub.tags.some((tag) => tag.toLowerCase().includes(searchLower))
+    );
+  }, [pubs, debouncedSearchTerm]);
 
   useEffect(() => {
     async function fetchPubs() {
       try {
-        console.log(10, process.env.NEXT_PUBLIC_API_URL);
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await fetch(`${apiUrl}/pubs`);
+        const res = await fetch(
+          // `${apiUrl}/api/v1/pubs?limit=1000&api_key=${process.env.TESTING_API_KEY}`)}`
+          `${apiUrl}/pubs`
+        );
         const data = await res.json();
         setPubs(data);
       } catch (error) {
@@ -38,22 +63,42 @@ export default function Pubs() {
   return (
     <StandardLayout>
       <h2>Pub DB</h2>
+
+      <div>
+        <input
+          type="text"
+          placeholder="Search pubs by name, city, address, or tags..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {debouncedSearchTerm && (
+          <p>
+            Showing {filteredPubs.length} of {pubs.length} pubs
+          </p>
+        )}
+      </div>
+
       {loading ? (
         <p>Loading pubs…</p>
       ) : (
-        <ul>
+        <div>
           <Link href="/add-pub">
             <button>Add Pub</button>
           </Link>
-          {pubs.map((pub) => (
-            <li key={pub.id}>
-              <Link href={`/pubs/${pub.name}`}>
-                <strong>{pub.name}</strong>
-              </Link>{" "}
-              – {pub.city}
-            </li>
-          ))}
-        </ul>
+          <ul>
+            {filteredPubs.map((pub) => (
+              <li key={pub.id}>
+                <Link href={`/pubs/${pub.name}`}>
+                  <strong>{pub.name}</strong>
+                </Link>{" "}
+                – {pub.city}
+              </li>
+            ))}
+          </ul>
+          {filteredPubs.length === 0 && debouncedSearchTerm && (
+            <p>No pubs found matching "{debouncedSearchTerm}"</p>
+          )}
+        </div>
       )}
     </StandardLayout>
   );
