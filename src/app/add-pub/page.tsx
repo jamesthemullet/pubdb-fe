@@ -7,6 +7,7 @@ export default function AddPubPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
   const [address, setAddress] = useState("");
   const [postcode, setPostcode] = useState("");
   const [lat, setLat] = useState<number | undefined>(undefined);
@@ -65,6 +66,7 @@ export default function AddPubPage() {
       const body: any = {
         name,
         city,
+        country,
         address,
         postcode,
         lat,
@@ -151,6 +153,17 @@ export default function AddPubPage() {
               onChange={(e) => setCity(e.target.value)}
               required
               autoComplete="pub-city"
+            />
+          </div>
+          <div>
+            <label htmlFor="country">Country:</label>
+            <input
+              id="country"
+              name="pub-country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              required
+              autoComplete="country"
             />
           </div>
           <div>

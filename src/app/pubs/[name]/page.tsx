@@ -11,6 +11,7 @@ type Pub = {
   city: string;
   address: string;
   postcode: string;
+  country: string;
   lat?: number;
   lng?: number;
   website?: string;
@@ -133,6 +134,15 @@ export default function PubPage() {
                 <input
                   value={editFields.city ?? ""}
                   onChange={(e) => handleFieldChange("city", e.target.value)}
+                  required
+                />
+              </label>
+              <br />
+              <label>
+                Country:{" "}
+                <input
+                  value={editFields.country ?? ""}
+                  onChange={(e) => handleFieldChange("country", e.target.value)}
                   required
                 />
               </label>
@@ -279,6 +289,9 @@ export default function PubPage() {
             <>
               <p>
                 <strong>City:</strong> {pub.city}
+              </p>
+              <p>
+                <strong>Country:</strong> {pub.country}
               </p>
               <p>
                 <strong>Address:</strong> {pub.address}
