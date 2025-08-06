@@ -88,7 +88,7 @@ export default function Pubs() {
           <ul>
             {filteredPubs.map((pub) => (
               <li key={pub.id}>
-                <Link href={`/pubs/${pub.name}`}>
+                <Link href={`/pubs/${pub.name}`} prefetch={false}>
                   <strong>{pub.name}</strong>
                 </Link>{" "}
                 – {pub.city}
