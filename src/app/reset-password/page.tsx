@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import StandardLayout from "../StandardLayout";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -179,10 +178,10 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <StandardLayout>
+    <>
       <Suspense fallback={<div>Loading...</div>}>
         <ResetPasswordForm />
       </Suspense>
-    </StandardLayout>
+    </>
   );
 }

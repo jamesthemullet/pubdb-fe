@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import StandardLayout from "./StandardLayout";
 import Link from "next/link";
 
 type Pub = {
@@ -36,7 +35,7 @@ export default function Pubs() {
   }, []);
 
   return (
-    <StandardLayout>
+    <>
       <h2>Pub DB</h2>
       {loading ? (
         <p>Loading pubs…</p>
@@ -52,6 +51,6 @@ export default function Pubs() {
           ))}
         </ul>
       )}
-    </StandardLayout>
+    </>
   );
 }

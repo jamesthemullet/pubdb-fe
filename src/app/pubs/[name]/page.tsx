@@ -1,7 +1,6 @@
 "use client"; // Needed for client-side hooks
 
 import { useParams } from "next/navigation";
-import StandardLayout from "../../StandardLayout";
 
 import { useEffect, useState } from "react";
 
@@ -100,7 +99,7 @@ export default function PubPage() {
   }
 
   return (
-    <StandardLayout>
+    <>
       {loading ? (
         <p>Loading pub details…</p>
       ) : pub ? (
@@ -351,7 +350,7 @@ export default function PubPage() {
       ) : (
         <p>Pub not found</p>
       )}
-    </StandardLayout>
+    </>
   );
 }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import StandardLayout from "../StandardLayout";
 import Link from "next/link";
 
 type Pub = {
@@ -63,7 +62,7 @@ export default function Pubs() {
   }, []);
 
   return (
-    <StandardLayout>
+    <>
       <h2>Pub DB</h2>
 
       <div>
@@ -102,6 +101,6 @@ export default function Pubs() {
           )}
         </div>
       )}
-    </StandardLayout>
+    </>
   );
 }

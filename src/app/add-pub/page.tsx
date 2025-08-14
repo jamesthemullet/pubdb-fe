@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import StandardLayout from "../StandardLayout";
 
 export default function AddPubPage() {
   const router = useRouter();
@@ -115,7 +114,7 @@ export default function AddPubPage() {
   };
 
   return (
-    <StandardLayout>
+    <>
       <h2>Add a Pub</h2>
       {!user ? (
         <div>
@@ -310,6 +309,6 @@ export default function AddPubPage() {
         <div>{typeof error === "string" ? error : JSON.stringify(error)}</div>
       )}
       {success && <div>{success}</div>}
-    </StandardLayout>
+    </>
   );
 }

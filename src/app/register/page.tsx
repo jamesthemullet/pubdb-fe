@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import StandardLayout from "../StandardLayout";
 
 export default function RegisterLoginPage() {
   const router = useRouter();
@@ -82,7 +81,7 @@ export default function RegisterLoginPage() {
   };
 
   return (
-    <StandardLayout>
+    <>
       <h2>{mode === "register" ? "Register" : "Login"}</h2>
       <form onSubmit={handleSubmit}>
         {mode === "register" && (
@@ -152,6 +151,6 @@ export default function RegisterLoginPage() {
         <div>{typeof error === "string" ? error : JSON.stringify(error)}</div>
       )}
       {success && <div>{success}</div>}
-    </StandardLayout>
+    </>
   );
 }

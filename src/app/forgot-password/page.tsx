@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import StandardLayout from "../StandardLayout";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -40,7 +39,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <StandardLayout>
+    <>
       <div style={{ maxWidth: "400px", margin: "0 auto", padding: "2rem" }}>
         <h2>Forgot Password</h2>
         <p>
@@ -115,6 +114,6 @@ export default function ForgotPasswordPage() {
           </a>
         </div>
       </div>
-    </StandardLayout>
+    </>
   );
 }
