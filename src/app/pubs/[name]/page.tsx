@@ -447,20 +447,9 @@ function EditButton({
   }
 
   return (
-    <StandardLayout>
+    <div>
       <button onClick={onEdit}>Edit this pub</button>
-      {user?.admin && (
-        <button
-          onClick={handleDelete}
-          style={{
-            marginLeft: "1rem",
-            backgroundColor: "#ff4444",
-            color: "white",
-          }}
-        >
-          Delete this pub
-        </button>
-      )}
-    </StandardLayout>
+      {user?.admin && <button onClick={handleDelete}>Delete this pub</button>}
+    </div>
   );
 }
