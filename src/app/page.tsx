@@ -1,9 +1,12 @@
 "use client";
 
+import Pricing from "./components/pricing";
+
 export default function Home() {
   return (
     <>
       <h2>Pub DB</h2>
+      <Pricing />
     </>
   );
 }
