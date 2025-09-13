@@ -13,6 +13,7 @@ export default function NavBar() {
       if (token) {
         try {
           const payload = JSON.parse(atob(token.split(".")[1]));
+          console.log(30, payload);
           setUserEmail(payload.email || null);
         } catch {
           setUserEmail(null);
