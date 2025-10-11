@@ -7,6 +7,8 @@ type ApiKey = {
   tier: string;
   keyPrefix: string;
   isActive: boolean;
+  keyStatus?: string;
+  status?: string;
   createdAt: string;
   lastUsed: string | null;
   usageCount: number;
@@ -53,6 +55,9 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelMessage, setCancelMessage] = useState<string | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -69,6 +74,8 @@ const Dashboard: React.FC = () => {
       window.removeEventListener("storage", checkAuth);
     };
   }, []);
+
+  console.log(60, dashboardData);
 
   useEffect(() => {
     async function fetchDashboard() {
@@ -118,6 +125,54 @@ const Dashboard: React.FC = () => {
     fetchDashboard();
   }, [isAuthenticated]);
 
+  async function handleCancelSubscription() {
+    if (
+      !confirm(
+        "Cancel subscription? This will stop automatic renewal — your subscription will remain active until the end of the current billing period."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setCancelling(true);
+      setCancelError(null);
+      setCancelMessage(null);
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${apiUrl}/payments/cancel-subscription`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw data || new Error(`HTTP error ${res.status}`);
+      }
+
+      setCancelMessage(
+        data.message ||
+          "Subscription cancelled. It will expire at the end of the current billing period."
+      );
+      // refresh dashboard data
+      setTimeout(() => window.dispatchEvent(new Event("authChanged")), 800);
+    } catch (err: any) {
+      console.error("Cancel subscription error:", err);
+      setCancelError(
+        err?.message || err?.error || "Failed to cancel subscription"
+      );
+    } finally {
+      setCancelling(false);
+    }
+  }
+
   if (!isAuthenticated) {
     return null;
   }
@@ -149,6 +204,8 @@ const Dashboard: React.FC = () => {
     return { remaining, percentage, used };
   };
 
+  console.log(100, dashboardData);
+
   return (
     <div
       style={{
@@ -176,8 +233,20 @@ const Dashboard: React.FC = () => {
         )}
       </div>
 
+      {/* Cancel messages */}
+      {cancelError && (
+        <div style={{ color: "red", marginBottom: "1rem" }}>
+          Error cancelling subscription: {cancelError}
+        </div>
+      )}
+      {cancelMessage && (
+        <div style={{ color: "green", marginBottom: "1rem" }}>
+          {cancelMessage}
+        </div>
+      )}
+
       {/* API Keys */}
-      {dashboardData.apiKeys.length > 0 ? (
+      {dashboardData?.apiKeys?.length > 0 ? (
         <div>
           <h3>Your API Keys</h3>
           {dashboardData.apiKeys.map((apiKey, index) => {
@@ -222,6 +291,36 @@ const Dashboard: React.FC = () => {
                       {apiKey.usageCount.toLocaleString()}
                     </p>
                   </div>
+                  {apiKey.tier &&
+                    apiKey.tier !== "HOBBY" &&
+                    apiKey.keyStatus === "ACTIVE" && (
+                      <div>
+                        <button
+                          onClick={handleCancelSubscription}
+                          disabled={cancelling}
+                          style={{
+                            backgroundColor: "#ff4444",
+                            color: "#fff",
+                            border: "none",
+                            padding: "0.5rem 1rem",
+                            borderRadius: "4px",
+                            cursor: cancelling ? "not-allowed" : "pointer",
+                          }}
+                        >
+                          {cancelling ? "Cancelling…" : "Cancel subscription"}
+                        </button>
+                        <div
+                          style={{
+                            fontSize: "0.85rem",
+                            color: "#666",
+                            marginTop: "0.5rem",
+                          }}
+                        >
+                          Cancelling will stop renewals — subscription remains
+                          active until period end.
+                        </div>
+                      </div>
+                    )}
                 </div>
 
                 {/* Rate Limits */}

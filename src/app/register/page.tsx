@@ -6,6 +6,7 @@ export default function RegisterLoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"register" | "login">("register");
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,7 +49,9 @@ export default function RegisterLoginPage() {
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/auth";
       const endpoint = mode === "register" ? "/register" : "/login";
       const body =
-        mode === "register" ? { name, email, password } : { email, password };
+        mode === "register"
+          ? { name, username, email, password }
+          : { email, password };
       const res = await fetch(`${apiUrl}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,17 +88,30 @@ export default function RegisterLoginPage() {
       <h2>{mode === "register" ? "Register" : "Login"}</h2>
       <form onSubmit={handleSubmit}>
         {mode === "register" && (
-          <div>
-            <label>Name:</label>
-            <input
-              type="text"
-              name="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoComplete="name"
-              required
-            />
-          </div>
+          <>
+            <div>
+              <label>Name:</label>
+              <input
+                type="text"
+                name="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                autoComplete="name"
+                required
+              />
+            </div>
+            <div>
+              <label>Username:</label>
+              <input
+                type="text"
+                name="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
+                required
+              />
+            </div>
+          </>
         )}
         <div>
           <label>Email:</label>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 const pricingTiers = [
   {
-    name: "Testing",
+    name: "Hobby",
     price: "Free",
     priceId: null,
     features: [
@@ -84,13 +84,11 @@ const Pricing: React.FC = () => {
   }
 
   function handleTierSelection(tier: (typeof pricingTiers)[0]) {
-    if (tier.name === "Testing") {
-      // For free tier, redirect to registration/login
+    if (tier.name === "Hobby") {
       window.location.href = "/register";
       return;
     }
 
-    // Check if user is logged in for paid tiers
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Please log in to subscribe to a paid plan");
@@ -158,7 +156,7 @@ const Pricing: React.FC = () => {
             >
               {loadingTier === tier.name
                 ? "Loading..."
-                : tier.name === "Testing"
+                : tier.name === "Hobby"
                 ? "Get Started Free"
                 : `Subscribe to ${tier.name}`}
             </button>
