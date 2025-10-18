@@ -238,25 +238,21 @@ const Pricing: React.FC = () => {
     }
 
     if (tier.priceId) {
-      // if this is an upgrade (higher index), call upgrade estimate flow
       if (userHighestTier) {
         const userTierIndex = tierOrder.indexOf(userHighestTier);
         const thisTierIndex = tierOrder.indexOf(tierNameToKey[tier.name] || "");
         if (thisTierIndex > userTierIndex) {
-          // upgrade path: estimate then either checkout or show proration
           await requestUpgradeEstimate(tier.priceId, tier.name);
           return;
         }
       }
 
-      // default subscription flow (new subscription or downgrade)
       subscribe(tier.priceId, tier.name);
     }
   }
 
   return (
     <div>
-      {/* Upgrade estimate modal */}
       {upgradeModal ? (
         <div
           style={{
@@ -339,7 +335,7 @@ const Pricing: React.FC = () => {
           const thisTierIndex = tierKey ? tierOrder.indexOf(tierKey) : -1;
 
           const actionLabel = (() => {
-            if (!userTiers) return null; // Still loading user data
+            if (!userTiers) return null;
             if (hasThis) return "Current plan";
             if (userHighestTier) {
               if (thisTierIndex > userTierIndex)
@@ -347,8 +343,10 @@ const Pricing: React.FC = () => {
               if (thisTierIndex < userTierIndex)
                 return `Downgrade to ${tier.name}`;
             }
-            return null; // Default to subscribe logic
+            return null;
           })();
+
+          console.log(20, actionLabel);
 
           return (
             <div
@@ -384,17 +382,11 @@ const Pricing: React.FC = () => {
               </ul>
               <button
                 onClick={() => handleTierSelection(tier)}
-                disabled={loadingTier === tier.name || estimateLoading}
-                style={{
-                  marginTop: "1rem",
-                  padding: "0.75rem 1.5rem",
-                  width: "100%",
-                  backgroundColor:
-                    tier.name === "Developer" ? "#0070f3" : undefined,
-                  color: tier.name === "Developer" ? "white" : undefined,
-                  opacity: loadingTier === tier.name ? 0.7 : 1,
-                  cursor: loadingTier === tier.name ? "not-allowed" : "pointer",
-                }}
+                disabled={
+                  loadingTier === tier.name ||
+                  estimateLoading ||
+                  actionLabel === "Current plan"
+                }
               >
                 {loadingTier === tier.name || estimateLoading
                   ? "Loading..."
