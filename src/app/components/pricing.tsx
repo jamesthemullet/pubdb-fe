@@ -44,9 +44,8 @@ const Pricing: React.FC = () => {
     priceId: string;
     upcoming: any;
     tierName: string;
+    direction?: "upgrade" | "downgrade";
   }>(null);
-
-  console.log(40, upgradeModal);
 
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [performingUpgrade, setPerformingUpgrade] = useState(false);
@@ -67,8 +66,39 @@ const Pricing: React.FC = () => {
     if (amount === null || amount === undefined) return "0.00";
     const n = Number(amount);
     if (Number.isNaN(n)) return String(amount);
-    return (n / 100).toFixed(2);
+    const dollars = Math.abs(n) >= 100 ? n / 100 : n;
+    return dollars.toFixed(2);
   }
+
+  function tierKeyToDisplay(key?: string | null) {
+    if (!key) return "Free";
+    if (key === "TESTING") return "Hobby";
+    if (key === "DEVELOPER") return "Developer";
+    if (key === "BUSINESS") return "Business";
+    return String(key);
+  }
+
+  function getProrationItems(upcoming: any) {
+    if (!upcoming) return [];
+    return (
+      upcoming.proration ||
+      upcoming.proration_lines ||
+      upcoming.lines ||
+      (upcoming.invoice && upcoming.invoice.lines) ||
+      []
+    );
+  }
+
+  function getTierPriceDisplay(tierName?: string) {
+    if (!tierName) return null;
+    const t = pricingTiers.find((p) => p.name === tierName);
+    return t?.price || null;
+  }
+
+  const modalUpcoming = upgradeModal?.upcoming;
+  const modalProrationItems = modalUpcoming
+    ? getProrationItems(modalUpcoming)
+    : [];
 
   const tierNameToKey: Record<string, string> = {
     Hobby: "TESTING",
@@ -81,21 +111,18 @@ const Pricing: React.FC = () => {
   async function fetchUserTiers() {
     const token = localStorage.getItem("token");
     if (!token) return;
-
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const res = await fetch(`${apiUrl}/auth/dashboard`, {
         headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       });
       if (!res.ok) return;
-
       const data = await res.json();
       const tiers = new Set<string>();
       (data.apiKeys || []).forEach((k: any) => {
         if (k.tier) tiers.add(String(k.tier));
       });
       setUserTiers(tiers);
-
       for (const t of tierOrder.slice().reverse()) {
         if (tiers.has(t)) {
           setUserHighestTier(t);
@@ -103,7 +130,7 @@ const Pricing: React.FC = () => {
         }
       }
     } catch (err) {
-      // ignore
+      /* ignore */
     }
   }
 
@@ -113,13 +140,10 @@ const Pricing: React.FC = () => {
 
   async function subscribe(priceId: string, tierName: string) {
     if (!priceId) return;
-
     setLoadingTier(tierName);
-
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const token = localStorage.getItem("token");
-
       const response = await fetch(
         `${apiUrl}/payments/create-checkout-session`,
         {
@@ -131,16 +155,14 @@ const Pricing: React.FC = () => {
           body: JSON.stringify({ priceId }),
         }
       );
-
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(
           errorData.message ||
             errorData.error ||
             "Failed to create checkout session"
         );
       }
-
       const data = await response.json();
       window.location.href = data.url;
     } catch (error) {
@@ -155,7 +177,6 @@ const Pricing: React.FC = () => {
     }
   }
 
-  // Ask server for an upgrade estimate (proration)
   async function requestUpgradeEstimate(priceId: string, tierName: string) {
     setEstimateLoading(true);
     try {
@@ -174,15 +195,55 @@ const Pricing: React.FC = () => {
         throw new Error(err.message || "Failed to get upgrade estimate");
       }
       const data = await res.json();
-
       if (data.needsCheckout) {
         await subscribe(priceId, tierName);
         return;
       }
-
-      setUpgradeModal({ priceId, upcoming: data.upcoming || data, tierName });
+      setUpgradeModal({
+        priceId,
+        upcoming: data.upcoming || data,
+        tierName,
+        direction: "upgrade",
+      });
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to estimate upgrade");
+    } finally {
+      setEstimateLoading(false);
+    }
+  }
+
+  async function requestDowngradeEstimate(priceId: string, tierName: string) {
+    setEstimateLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${apiUrl}/payments/downgrade-estimate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ priceId }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to get downgrade estimate");
+      }
+      const data = await res.json();
+      if (data.needsCheckout) {
+        await subscribe(priceId, tierName);
+        return;
+      }
+      setUpgradeModal({
+        priceId,
+        upcoming: data.upcoming || data,
+        tierName,
+        direction: "downgrade",
+      });
+    } catch (err) {
+      alert(
+        err instanceof Error ? err.message : "Failed to estimate downgrade"
+      );
     } finally {
       setEstimateLoading(false);
     }
@@ -205,7 +266,6 @@ const Pricing: React.FC = () => {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || "Failed to perform upgrade");
       }
-
       await fetchUserTiers();
       setUpgradeModal(null);
       alert("Upgrade successful");
@@ -216,27 +276,50 @@ const Pricing: React.FC = () => {
     }
   }
 
+  async function performDowngrade(priceId: string) {
+    setPerformingUpgrade(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${apiUrl}/payments/perform-downgrade`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ priceId }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to perform downgrade");
+      }
+      await fetchUserTiers();
+      setUpgradeModal(null);
+      alert("Downgrade successful");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Downgrade failed");
+    } finally {
+      setPerformingUpgrade(false);
+    }
+  }
+
   async function handleTierSelection(tier: (typeof pricingTiers)[0]) {
     const tierKey = tierNameToKey[tier.name] || null;
     const hasThis = userTiers && tierKey && userTiers.has(tierKey);
-
     if (hasThis) {
       window.location.href = "/";
       return;
     }
-
     if (tier.name === "Testing") {
       window.location.href = "/register";
       return;
     }
-
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Please log in to manage subscriptions");
       window.location.href = "/register";
       return;
     }
-
     if (tier.priceId) {
       if (userHighestTier) {
         const userTierIndex = tierOrder.indexOf(userHighestTier);
@@ -245,8 +328,11 @@ const Pricing: React.FC = () => {
           await requestUpgradeEstimate(tier.priceId, tier.name);
           return;
         }
+        if (thisTierIndex < userTierIndex) {
+          await requestDowngradeEstimate(tier.priceId, tier.name);
+          return;
+        }
       }
-
       subscribe(tier.priceId, tier.name);
     }
   }
@@ -274,29 +360,83 @@ const Pricing: React.FC = () => {
               maxWidth: "95%",
             }}
           >
-            <h3>Proration summary</h3>
-            <div style={{ margin: "1rem 0" }}>
-              <div>
-                <strong>
-                  Amount due on{" "}
-                  {formatUnix(upgradeModal.upcoming.nextPaymentAttempt)}:
-                </strong>{" "}
-                ${formatMoney(upgradeModal.upcoming.estimatedAmount)}
-              </div>
-              <div style={{ marginTop: 8 }}>
-                <strong>Breakdown:</strong>
-                <ul>
-                  {(upgradeModal.upcoming?.raw.lines.data || []).map(
-                    (ln: any, idx: number) => (
-                      <li key={idx}>
-                        {ln.description ?? JSON.stringify(ln)}: $
-                        {formatMoney(ln.amount ?? 0)}
+            <h3>
+              {upgradeModal.direction === "downgrade"
+                ? "Downgrade details"
+                : "Subscription change details"}
+            </h3>
+
+            {upgradeModal.direction === "upgrade" ? (
+              <div style={{ margin: "1rem 0" }}>
+                <h4 style={{ margin: "0 0 8px 0" }}>Proration summary</h4>
+                {modalProrationItems && modalProrationItems.length > 0 ? (
+                  <ul style={{ paddingLeft: 16, margin: 0 }}>
+                    {modalProrationItems.map((it: any, i: number) => (
+                      <li key={i}>
+                        {(it.description && String(it.description)) ||
+                          it.id ||
+                          "Item"}{" "}
+                        — $
+                        {formatMoney(
+                          it.amount ??
+                            it.unit_amount ??
+                            it.price ??
+                            it.estimatedAmount ??
+                            it.estimated_amount ??
+                            0
+                        )}
                       </li>
-                    )
-                  )}
-                </ul>
+                    ))}
+                  </ul>
+                ) : (
+                  <div>
+                    {modalUpcoming?.estimatedAmount ? (
+                      <div>
+                        <strong>Estimated immediate charge:</strong> $
+                        {formatMoney(modalUpcoming.estimatedAmount)}
+                      </div>
+                    ) : null}
+                    {modalUpcoming?.nextPeriodCharge ? (
+                      <div>
+                        <strong>Next period charge:</strong> $
+                        {formatMoney(modalUpcoming.nextPeriodCharge)}
+                      </div>
+                    ) : null}
+                  </div>
+                )}
               </div>
+            ) : (
+              <div style={{ margin: "1rem 0" }}>
+                <h4 style={{ margin: "0 0 8px 0" }}>Downgrade details</h4>
+                <div>
+                  <strong>New plan:</strong> {upgradeModal.tierName}{" "}
+                  {getTierPriceDisplay(upgradeModal.tierName)
+                    ? `(${getTierPriceDisplay(upgradeModal.tierName)})`
+                    : null}
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  <strong>Next period charge:</strong> $
+                  {formatMoney(
+                    modalUpcoming?.nextPeriodCharge ??
+                      modalUpcoming?.estimatedAmount ??
+                      0
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <em style={{ marginRight: 8, color: "#444" }}>
+                (
+                {userHighestTier
+                  ? tierKeyToDisplay(userHighestTier)
+                  : upgradeModal.tierName || "Free"}
+                )
+              </em>
+              <strong>Subscription ends on:</strong>{" "}
+              {formatUnix(upgradeModal.upcoming.nextPaymentAttempt)}
             </div>
+
             <div
               style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}
             >
@@ -307,17 +447,27 @@ const Pricing: React.FC = () => {
                 Cancel
               </button>
               <button
-                onClick={() => performUpgrade(upgradeModal.priceId)}
+                onClick={() =>
+                  upgradeModal.direction === "downgrade"
+                    ? performDowngrade(upgradeModal.priceId)
+                    : performUpgrade(upgradeModal.priceId)
+                }
                 disabled={performingUpgrade}
                 style={{ background: "#0070f3", color: "white" }}
               >
-                {performingUpgrade ? "Processing..." : "Confirm upgrade"}
+                {performingUpgrade
+                  ? "Processing..."
+                  : upgradeModal.direction === "downgrade"
+                  ? "Confirm downgrade"
+                  : "Confirm upgrade"}
               </button>
             </div>
           </div>
         </div>
       ) : null}
+
       <h2 style={{ textAlign: "center", marginBottom: "2rem" }}>API Pricing</h2>
+
       <div
         style={{
           display: "flex",
@@ -333,7 +483,6 @@ const Pricing: React.FC = () => {
             ? tierOrder.indexOf(userHighestTier)
             : -1;
           const thisTierIndex = tierKey ? tierOrder.indexOf(tierKey) : -1;
-
           const actionLabel = (() => {
             if (!userTiers) return null;
             if (hasThis) return "Current plan";
@@ -345,8 +494,6 @@ const Pricing: React.FC = () => {
             }
             return null;
           })();
-
-          console.log(20, actionLabel);
 
           return (
             <div
@@ -361,41 +508,31 @@ const Pricing: React.FC = () => {
               }}
             >
               <h3>{tier.name}</h3>
-              <p
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: "bold",
-                  margin: "1rem 0",
-                }}
-              >
+              <p style={{ fontSize: "2rem", fontWeight: "bold", margin: 0 }}>
                 {tier.price}
               </p>
-              <ul style={{ listStyle: "none", padding: 0, margin: "1rem 0" }}>
-                {tier.features.map((feature) => (
-                  <li
-                    key={feature}
-                    style={{ margin: "0.5rem 0", fontSize: "0.9rem" }}
-                  >
-                    ✓ {feature}
-                  </li>
+              <ul style={{ textAlign: "left", paddingLeft: 16 }}>
+                {tier.features.map((f) => (
+                  <li key={f}>{f}</li>
                 ))}
               </ul>
-              <button
-                onClick={() => handleTierSelection(tier)}
-                disabled={
-                  loadingTier === tier.name ||
-                  estimateLoading ||
-                  actionLabel === "Current plan"
-                }
-              >
-                {loadingTier === tier.name || estimateLoading
-                  ? "Loading..."
-                  : actionLabel
-                  ? actionLabel
-                  : tier.name === "Testing"
-                  ? "Get Started Free"
-                  : `Subscribe to ${tier.name}`}
-              </button>
+              <div style={{ marginTop: 12 }}>
+                {actionLabel ? (
+                  <button
+                    onClick={() => handleTierSelection(tier)}
+                    disabled={loadingTier === tier.name}
+                  >
+                    {loadingTier === tier.name ? "Processing..." : actionLabel}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleTierSelection(tier)}
+                    disabled={loadingTier === tier.name}
+                  >
+                    Subscribe
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
