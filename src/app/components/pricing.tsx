@@ -44,7 +44,6 @@ const Pricing: React.FC = () => {
     priceId: string;
     upcoming: any;
     tierName: string;
-    direction?: "upgrade" | "downgrade";
   }>(null);
 
   const [estimateLoading, setEstimateLoading] = useState(false);
@@ -203,47 +202,9 @@ const Pricing: React.FC = () => {
         priceId,
         upcoming: data.upcoming || data,
         tierName,
-        direction: "upgrade",
       });
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to estimate upgrade");
-    } finally {
-      setEstimateLoading(false);
-    }
-  }
-
-  async function requestDowngradeEstimate(priceId: string, tierName: string) {
-    setEstimateLoading(true);
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${apiUrl}/payments/downgrade-estimate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ priceId }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Failed to get downgrade estimate");
-      }
-      const data = await res.json();
-      if (data.needsCheckout) {
-        await subscribe(priceId, tierName);
-        return;
-      }
-      setUpgradeModal({
-        priceId,
-        upcoming: data.upcoming || data,
-        tierName,
-        direction: "downgrade",
-      });
-    } catch (err) {
-      alert(
-        err instanceof Error ? err.message : "Failed to estimate downgrade"
-      );
     } finally {
       setEstimateLoading(false);
     }
@@ -276,33 +237,6 @@ const Pricing: React.FC = () => {
     }
   }
 
-  async function performDowngrade(priceId: string) {
-    setPerformingUpgrade(true);
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${apiUrl}/payments/perform-downgrade`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ priceId }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Failed to perform downgrade");
-      }
-      await fetchUserTiers();
-      setUpgradeModal(null);
-      alert("Downgrade successful");
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Downgrade failed");
-    } finally {
-      setPerformingUpgrade(false);
-    }
-  }
-
   async function handleTierSelection(tier: (typeof pricingTiers)[0]) {
     const tierKey = tierNameToKey[tier.name] || null;
     const hasThis = userTiers && tierKey && userTiers.has(tierKey);
@@ -326,10 +260,6 @@ const Pricing: React.FC = () => {
         const thisTierIndex = tierOrder.indexOf(tierNameToKey[tier.name] || "");
         if (thisTierIndex > userTierIndex) {
           await requestUpgradeEstimate(tier.priceId, tier.name);
-          return;
-        }
-        if (thisTierIndex < userTierIndex) {
-          await requestDowngradeEstimate(tier.priceId, tier.name);
           return;
         }
       }
@@ -360,71 +290,46 @@ const Pricing: React.FC = () => {
               maxWidth: "95%",
             }}
           >
-            <h3>
-              {upgradeModal.direction === "downgrade"
-                ? "Downgrade details"
-                : "Subscription change details"}
-            </h3>
-
-            {upgradeModal.direction === "upgrade" ? (
-              <div style={{ margin: "1rem 0" }}>
-                <h4 style={{ margin: "0 0 8px 0" }}>Proration summary</h4>
-                {modalProrationItems && modalProrationItems.length > 0 ? (
-                  <ul style={{ paddingLeft: 16, margin: 0 }}>
-                    {modalProrationItems.map((it: any, i: number) => (
-                      <li key={i}>
-                        {(it.description && String(it.description)) ||
-                          it.id ||
-                          "Item"}{" "}
-                        — $
-                        {formatMoney(
-                          it.amount ??
-                            it.unit_amount ??
-                            it.price ??
-                            it.estimatedAmount ??
-                            it.estimated_amount ??
-                            0
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div>
-                    {modalUpcoming?.estimatedAmount ? (
-                      <div>
-                        <strong>Estimated immediate charge:</strong> $
-                        {formatMoney(modalUpcoming.estimatedAmount)}
-                      </div>
-                    ) : null}
-                    {modalUpcoming?.nextPeriodCharge ? (
-                      <div>
-                        <strong>Next period charge:</strong> $
-                        {formatMoney(modalUpcoming.nextPeriodCharge)}
-                      </div>
-                    ) : null}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div style={{ margin: "1rem 0" }}>
-                <h4 style={{ margin: "0 0 8px 0" }}>Downgrade details</h4>
+            <h3>{"Subscription change details"}</h3>(
+            <div style={{ margin: "1rem 0" }}>
+              <h4 style={{ margin: "0 0 8px 0" }}>Proration summary</h4>
+              {modalProrationItems && modalProrationItems.length > 0 ? (
+                <ul style={{ paddingLeft: 16, margin: 0 }}>
+                  {modalProrationItems.map((it: any, i: number) => (
+                    <li key={i}>
+                      {(it.description && String(it.description)) ||
+                        it.id ||
+                        "Item"}{" "}
+                      — $
+                      {formatMoney(
+                        it.amount ??
+                          it.unit_amount ??
+                          it.price ??
+                          it.estimatedAmount ??
+                          it.estimated_amount ??
+                          0
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
                 <div>
-                  <strong>New plan:</strong> {upgradeModal.tierName}{" "}
-                  {getTierPriceDisplay(upgradeModal.tierName)
-                    ? `(${getTierPriceDisplay(upgradeModal.tierName)})`
-                    : null}
+                  {modalUpcoming?.estimatedAmount ? (
+                    <div>
+                      <strong>Estimated immediate charge:</strong> $
+                      {formatMoney(modalUpcoming.estimatedAmount)}
+                    </div>
+                  ) : null}
+                  {modalUpcoming?.nextPeriodCharge ? (
+                    <div>
+                      <strong>Next period charge:</strong> $
+                      {formatMoney(modalUpcoming.nextPeriodCharge)}
+                    </div>
+                  ) : null}
                 </div>
-                <div style={{ marginTop: 8 }}>
-                  <strong>Next period charge:</strong> $
-                  {formatMoney(
-                    modalUpcoming?.nextPeriodCharge ??
-                      modalUpcoming?.estimatedAmount ??
-                      0
-                  )}
-                </div>
-              </div>
-            )}
-
+              )}
+            </div>
+            )
             <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
               <em style={{ marginRight: 8, color: "#444" }}>
                 (
@@ -436,7 +341,6 @@ const Pricing: React.FC = () => {
               <strong>Subscription ends on:</strong>{" "}
               {formatUnix(upgradeModal.upcoming.nextPaymentAttempt)}
             </div>
-
             <div
               style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}
             >
@@ -447,19 +351,11 @@ const Pricing: React.FC = () => {
                 Cancel
               </button>
               <button
-                onClick={() =>
-                  upgradeModal.direction === "downgrade"
-                    ? performDowngrade(upgradeModal.priceId)
-                    : performUpgrade(upgradeModal.priceId)
-                }
+                onClick={() => performUpgrade(upgradeModal.priceId)}
                 disabled={performingUpgrade}
                 style={{ background: "#0070f3", color: "white" }}
               >
-                {performingUpgrade
-                  ? "Processing..."
-                  : upgradeModal.direction === "downgrade"
-                  ? "Confirm downgrade"
-                  : "Confirm upgrade"}
+                {performingUpgrade ? "Processing..." : "Confirm upgrade"}
               </button>
             </div>
           </div>
@@ -489,8 +385,6 @@ const Pricing: React.FC = () => {
             if (userHighestTier) {
               if (thisTierIndex > userTierIndex)
                 return `Upgrade to ${tier.name}`;
-              if (thisTierIndex < userTierIndex)
-                return `Downgrade to ${tier.name}`;
             }
             return null;
           })();
