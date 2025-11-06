@@ -8,10 +8,10 @@ type SubscriptionStatus = {
   success: boolean;
   message: string;
   subscription?: {
-    id: string;
+    subscriptionId: string;
     status: string;
     tier: string;
-    current_period_end: string;
+    billingDay: number;
   };
 };
 
@@ -21,6 +21,31 @@ function SuccessContent() {
   const [status, setStatus] = useState<SubscriptionStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  console.log(50, status);
+
+  function getOrdinalSuffix(day: number): string {
+    if (day > 3 && day < 21) return "th";
+    switch (day % 10) {
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
+    }
+  }
+
+  function formatBillingDay(billingDay: number): string {
+    if (billingDay >= 29) {
+      return `${billingDay}${getOrdinalSuffix(
+        billingDay
+      )} (or last day of month)`;
+    }
+    return `${billingDay}${getOrdinalSuffix(billingDay)}`;
+  }
 
   useEffect(() => {
     async function verifySession() {
@@ -145,13 +170,12 @@ function SuccessContent() {
                 <strong>Status:</strong> {status.subscription.status}
               </p>
               <p>
-                <strong>Next billing:</strong>{" "}
-                {new Date(
-                  status.subscription.current_period_end
-                ).toLocaleDateString()}
+                <strong>Billing Date:</strong>{" "}
+                {formatBillingDay(status.subscription.billingDay)} of each month
               </p>
               <p>
-                <strong>Subscription ID:</strong> {status.subscription.id}
+                <strong>Subscription ID:</strong>{" "}
+                {status.subscription.subscriptionId}
               </p>
             </div>
           )}
