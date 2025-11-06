@@ -1,3 +1,4 @@
+import { loadProjectInfo } from "next/dist/build/webpack-config";
 import React, { useEffect, useState } from "react";
 
 const pricingTiers = [
@@ -38,6 +39,7 @@ const pricingTiers = [
 
 const Pricing: React.FC = () => {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  console.log(10, loadingTier);
   const [userTiers, setUserTiers] = useState<Set<string> | null>(null);
   const [userHighestTier, setUserHighestTier] = useState<string | null>(null);
   const [upgradeModal, setUpgradeModal] = useState<null | {
@@ -45,6 +47,8 @@ const Pricing: React.FC = () => {
     upcoming: any;
     tierName: string;
   }>(null);
+
+  console.log(11, userTiers);
 
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [performingUpgrade, setPerformingUpgrade] = useState(false);
@@ -137,7 +141,7 @@ const Pricing: React.FC = () => {
     fetchUserTiers();
   }, []);
 
-  async function subscribe(priceId: string, tierName: string) {
+  const subscribe = async (priceId: string, tierName: string) => {
     if (!priceId) return;
     setLoadingTier(tierName);
     try {
@@ -174,9 +178,9 @@ const Pricing: React.FC = () => {
     } finally {
       setLoadingTier(null);
     }
-  }
+  };
 
-  async function requestUpgradeEstimate(priceId: string, tierName: string) {
+  const requestUpgradeEstimate = async (priceId: string, tierName: string) => {
     setEstimateLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -208,9 +212,9 @@ const Pricing: React.FC = () => {
     } finally {
       setEstimateLoading(false);
     }
-  }
+  };
 
-  async function performUpgrade(priceId: string) {
+  const performUpgrade = async (priceId: string) => {
     setPerformingUpgrade(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -235,9 +239,10 @@ const Pricing: React.FC = () => {
     } finally {
       setPerformingUpgrade(false);
     }
-  }
+  };
 
-  async function handleTierSelection(tier: (typeof pricingTiers)[0]) {
+  const handleTierSelection = async (tier: (typeof pricingTiers)[0]) => {
+    console.log(101, tier);
     const tierKey = tierNameToKey[tier.name] || null;
     const hasThis = userTiers && tierKey && userTiers.has(tierKey);
     if (hasThis) {
@@ -265,7 +270,7 @@ const Pricing: React.FC = () => {
       }
       subscribe(tier.priceId, tier.name);
     }
-  }
+  };
 
   return (
     <div>
@@ -379,6 +384,11 @@ const Pricing: React.FC = () => {
             ? tierOrder.indexOf(userHighestTier)
             : -1;
           const thisTierIndex = tierKey ? tierOrder.indexOf(tierKey) : -1;
+          const isLowerTier =
+            userTierIndex >= 0 &&
+            thisTierIndex >= 0 &&
+            thisTierIndex <= userTierIndex;
+
           const actionLabel = (() => {
             if (!userTiers) return null;
             if (hasThis) return "Current plan";
@@ -414,14 +424,14 @@ const Pricing: React.FC = () => {
                 {actionLabel ? (
                   <button
                     onClick={() => handleTierSelection(tier)}
-                    disabled={loadingTier === tier.name}
+                    disabled={loadingTier === tier.name || isLowerTier}
                   >
                     {loadingTier === tier.name ? "Processing..." : actionLabel}
                   </button>
                 ) : (
                   <button
                     onClick={() => handleTierSelection(tier)}
-                    disabled={loadingTier === tier.name}
+                    disabled={loadingTier === tier.name || isLowerTier}
                   >
                     Subscribe
                   </button>
