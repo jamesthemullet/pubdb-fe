@@ -22,8 +22,6 @@ function SuccessContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  console.log(50, status);
-
   function getOrdinalSuffix(day: number): string {
     if (day > 3 && day < 21) return "th";
     switch (day % 10) {
@@ -79,7 +77,6 @@ function SuccessContent() {
         const data = await response.json();
         setStatus(data);
 
-        // Trigger auth refresh to update dashboard
         window.dispatchEvent(new Event("authChanged"));
       } catch (error) {
         console.error("Session verification error:", error);
@@ -104,6 +101,8 @@ function SuccessContent() {
       </div>
     );
   }
+
+  console.log(200, error);
 
   if (error) {
     return (
@@ -176,6 +175,9 @@ function SuccessContent() {
               <p>
                 <strong>Subscription ID:</strong>{" "}
                 {status.subscription.subscriptionId}
+              </p>
+              <p>
+                <strong>API key:</strong> {status.apiKey.key}
               </p>
             </div>
           )}

@@ -31,12 +31,13 @@ export default function Pubs() {
     if (!debouncedSearchTerm) return pubs;
 
     const searchLower = debouncedSearchTerm.toLowerCase();
+    console.log(300, pubs);
     return pubs.filter(
       (pub) =>
         pub.name.toLowerCase().includes(searchLower) ||
         pub.city.toLowerCase().includes(searchLower) ||
         pub.address.toLowerCase().includes(searchLower) ||
-        pub.country.toLowerCase().includes(searchLower) ||
+        // pub.country.toLowerCase().includes(searchLower) ||
         pub.tags.some((tag) => tag.toLowerCase().includes(searchLower))
     );
   }, [pubs, debouncedSearchTerm]);
@@ -48,8 +49,7 @@ export default function Pubs() {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
         const res = await fetch(
-          `${apiUrl}/api/v1/pubs?limit=1000&api_key=${process.env.TESTING_API_KEY})}`
-          // `${apiUrl}/pubs`
+          `${apiUrl}/api/v1/pubs?limit=1000&api_key=${process.env.NEXT_PUBLIC_TESTING_API_KEY}`
         );
 
         if (!res.ok) {
@@ -58,7 +58,8 @@ export default function Pubs() {
         }
 
         const data = await res.json();
-        setPubs(data);
+        console.log(298, data.data);
+        setPubs(data.data);
       } catch (error: any) {
         console.error("Error fetching pubs:", error);
 

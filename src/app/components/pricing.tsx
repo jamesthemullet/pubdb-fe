@@ -1,4 +1,3 @@
-import { loadProjectInfo } from "next/dist/build/webpack-config";
 import React, { useEffect, useState } from "react";
 
 const pricingTiers = [
@@ -52,6 +51,7 @@ const Pricing: React.FC = () => {
 
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [performingUpgrade, setPerformingUpgrade] = useState(false);
+  const [apiKey, setApiKey] = useState<any>(null);
 
   function formatUnix(value: any) {
     if (!value && value !== 0) return "—";
@@ -249,8 +249,48 @@ const Pricing: React.FC = () => {
       window.location.href = "/";
       return;
     }
-    if (tier.name === "Testing") {
-      window.location.href = "/register";
+    if (tier.name === "Hobby") {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to manage subscriptions");
+        window.location.href = "/register";
+        return;
+      }
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const response = await fetch(`${apiUrl}/payments/subscribe-to-hobby`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.message ||
+              errorData.error ||
+              "Failed to subscribe to Hobby tier"
+          );
+        }
+        const data = await response.json();
+        setUserTiers(new Set([...(userTiers || []), "TESTING"]));
+        setUserHighestTier("TESTING");
+        setUpgradeModal({
+          priceId: "",
+          upcoming: null,
+          tierName: "Hobby",
+        });
+        setApiKey(data.apiKey);
+      } catch (error) {
+        console.error("Hobby subscription error:", error);
+        alert(
+          error instanceof Error
+            ? error.message
+            : "Failed to subscribe to Hobby tier"
+        );
+      }
       return;
     }
     const token = localStorage.getItem("token");
@@ -295,57 +335,30 @@ const Pricing: React.FC = () => {
               maxWidth: "95%",
             }}
           >
-            <h3>{"Subscription change details"}</h3>(
-            <div style={{ margin: "1rem 0" }}>
-              <h4 style={{ margin: "0 0 8px 0" }}>Proration summary</h4>
-              {modalProrationItems && modalProrationItems.length > 0 ? (
-                <ul style={{ paddingLeft: 16, margin: 0 }}>
-                  {modalProrationItems.map((it: any, i: number) => (
-                    <li key={i}>
-                      {(it.description && String(it.description)) ||
-                        it.id ||
-                        "Item"}{" "}
-                      — $
-                      {formatMoney(
-                        it.amount ??
-                          it.unit_amount ??
-                          it.price ??
-                          it.estimatedAmount ??
-                          it.estimated_amount ??
-                          0
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div>
-                  {modalUpcoming?.estimatedAmount ? (
-                    <div>
-                      <strong>Estimated immediate charge:</strong> $
-                      {formatMoney(modalUpcoming.estimatedAmount)}
-                    </div>
-                  ) : null}
-                  {modalUpcoming?.nextPeriodCharge ? (
-                    <div>
-                      <strong>Next period charge:</strong> $
-                      {formatMoney(modalUpcoming.nextPeriodCharge)}
-                    </div>
-                  ) : null}
-                </div>
-              )}
-            </div>
-            )
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-              <em style={{ marginRight: 8, color: "#444" }}>
-                (
-                {userHighestTier
-                  ? tierKeyToDisplay(userHighestTier)
-                  : upgradeModal.tierName || "Free"}
-                )
-              </em>
-              <strong>Subscription ends on:</strong>{" "}
-              {formatUnix(upgradeModal.upcoming.nextPaymentAttempt)}
-            </div>
+            <h3>{"Subscription change details"}</h3>
+            {apiKey && (
+              <div style={{ marginTop: "1rem" }}>
+                <h4>API Key Details</h4>
+                <p>
+                  <strong>Name:</strong> {apiKey.name}
+                </p>
+                <p>
+                  <strong>Key Prefix:</strong> {apiKey.keyPrefix}
+                </p>
+                <p>
+                  <strong>Tier:</strong> {apiKey.tier}
+                </p>
+                <p>
+                  <strong>Status:</strong> {apiKey.keyStatus}
+                </p>
+                <p>
+                  <strong>Permissions:</strong> {apiKey.permissions.join(", ")}
+                </p>
+                <p>
+                  <strong>API Key:</strong> {apiKey.key}
+                </p>
+              </div>
+            )}
             <div
               style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}
             >
@@ -353,14 +366,7 @@ const Pricing: React.FC = () => {
                 onClick={() => setUpgradeModal(null)}
                 disabled={performingUpgrade}
               >
-                Cancel
-              </button>
-              <button
-                onClick={() => performUpgrade(upgradeModal.priceId)}
-                disabled={performingUpgrade}
-                style={{ background: "#0070f3", color: "white" }}
-              >
-                {performingUpgrade ? "Processing..." : "Confirm upgrade"}
+                Close
               </button>
             </div>
           </div>
