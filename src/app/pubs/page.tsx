@@ -49,7 +49,7 @@ export default function Pubs() {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
         const res = await fetch(
-          `${apiUrl}/api/v1/pubs?limit=1000&api_key=${process.env.NEXT_PUBLIC_TESTING_API_KEY}`
+          `${apiUrl}/api/v1/pubs?api_key=${process.env.NEXT_PUBLIC_TESTING_API_KEY}`
         );
 
         if (!res.ok) {

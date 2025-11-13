@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 
 const pricingTiers = [
   {
-    name: "Hobby",
+    index: 0,
+    name: "HOBBY",
     price: "Free",
     priceId: null,
     features: [
@@ -13,7 +14,8 @@ const pricingTiers = [
     ],
   },
   {
-    name: "Developer",
+    index: 1,
+    name: "DEVELOPER",
     price: "$9/mo",
     priceId: "price_1S6cBZ0k31jD9MVaQH1JSrAl",
     features: [
@@ -24,7 +26,8 @@ const pricingTiers = [
     ],
   },
   {
-    name: "Business",
+    index: 2,
+    name: "BUSINESS",
     price: "$19/mo",
     priceId: "price_1S6cBq0k31jD9MVaRYKvxRek",
     features: [
@@ -38,8 +41,8 @@ const pricingTiers = [
 
 const Pricing: React.FC = () => {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
-  console.log(10, loadingTier);
-  const [userTiers, setUserTiers] = useState<Set<string> | null>(null);
+
+  const [userTier, setUserTier] = useState<string | null>(null);
   const [userHighestTier, setUserHighestTier] = useState<string | null>(null);
   const [upgradeModal, setUpgradeModal] = useState<null | {
     priceId: string;
@@ -47,39 +50,11 @@ const Pricing: React.FC = () => {
     tierName: string;
   }>(null);
 
-  console.log(11, userTiers);
+  console.log(11.01, userTier);
 
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [performingUpgrade, setPerformingUpgrade] = useState(false);
   const [apiKey, setApiKey] = useState<any>(null);
-
-  function formatUnix(value: any) {
-    if (!value && value !== 0) return "—";
-    const n = Number(value);
-    if (Number.isNaN(n)) return String(value);
-    const date = n > 1e12 ? new Date(n) : new Date(n * 1000);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  }
-
-  function formatMoney(amount: any) {
-    if (amount === null || amount === undefined) return "0.00";
-    const n = Number(amount);
-    if (Number.isNaN(n)) return String(amount);
-    const dollars = Math.abs(n) >= 100 ? n / 100 : n;
-    return dollars.toFixed(2);
-  }
-
-  function tierKeyToDisplay(key?: string | null) {
-    if (!key) return "Free";
-    if (key === "TESTING") return "Hobby";
-    if (key === "DEVELOPER") return "Developer";
-    if (key === "BUSINESS") return "Business";
-    return String(key);
-  }
 
   function getProrationItems(upcoming: any) {
     if (!upcoming) return [];
@@ -92,26 +67,12 @@ const Pricing: React.FC = () => {
     );
   }
 
-  function getTierPriceDisplay(tierName?: string) {
-    if (!tierName) return null;
-    const t = pricingTiers.find((p) => p.name === tierName);
-    return t?.price || null;
-  }
-
   const modalUpcoming = upgradeModal?.upcoming;
   const modalProrationItems = modalUpcoming
     ? getProrationItems(modalUpcoming)
     : [];
 
-  const tierNameToKey: Record<string, string> = {
-    Hobby: "TESTING",
-    Testing: "TESTING",
-    Developer: "DEVELOPER",
-    Business: "BUSINESS",
-  };
-  const tierOrder = ["TESTING", "DEVELOPER", "BUSINESS"];
-
-  async function fetchUserTiers() {
+  async function fetchUserTier() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
@@ -121,24 +82,17 @@ const Pricing: React.FC = () => {
       });
       if (!res.ok) return;
       const data = await res.json();
-      const tiers = new Set<string>();
-      (data.apiKeys || []).forEach((k: any) => {
-        if (k.tier) tiers.add(String(k.tier));
-      });
-      setUserTiers(tiers);
-      for (const t of tierOrder.slice().reverse()) {
-        if (tiers.has(t)) {
-          setUserHighestTier(t);
-          break;
-        }
-      }
+
+      console.log(11, data.apiKeys);
+
+      setUserTier(data.apiKeys[0].tier);
     } catch (err) {
       /* ignore */
     }
   }
 
   useEffect(() => {
-    fetchUserTiers();
+    fetchUserTier();
   }, []);
 
   const subscribe = async (priceId: string, tierName: string) => {
@@ -231,7 +185,7 @@ const Pricing: React.FC = () => {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || "Failed to perform upgrade");
       }
-      await fetchUserTiers();
+      await fetchUserTier();
       setUpgradeModal(null);
       alert("Upgrade successful");
     } catch (err) {
@@ -243,73 +197,73 @@ const Pricing: React.FC = () => {
 
   const handleTierSelection = async (tier: (typeof pricingTiers)[0]) => {
     console.log(101, tier);
-    const tierKey = tierNameToKey[tier.name] || null;
-    const hasThis = userTiers && tierKey && userTiers.has(tierKey);
-    if (hasThis) {
-      window.location.href = "/";
-      return;
-    }
-    if (tier.name === "Hobby") {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Please log in to manage subscriptions");
-        window.location.href = "/register";
-        return;
-      }
-      try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const response = await fetch(`${apiUrl}/payments/subscribe-to-hobby`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(
-            errorData.message ||
-              errorData.error ||
-              "Failed to subscribe to Hobby tier"
-          );
-        }
-        const data = await response.json();
-        setUserTiers(new Set([...(userTiers || []), "TESTING"]));
-        setUserHighestTier("TESTING");
-        setUpgradeModal({
-          priceId: "",
-          upcoming: null,
-          tierName: "Hobby",
-        });
-        setApiKey(data.apiKey);
-      } catch (error) {
-        console.error("Hobby subscription error:", error);
-        alert(
-          error instanceof Error
-            ? error.message
-            : "Failed to subscribe to Hobby tier"
-        );
-      }
-      return;
-    }
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Please log in to manage subscriptions");
-      window.location.href = "/register";
-      return;
-    }
-    if (tier.priceId) {
-      if (userHighestTier) {
-        const userTierIndex = tierOrder.indexOf(userHighestTier);
-        const thisTierIndex = tierOrder.indexOf(tierNameToKey[tier.name] || "");
-        if (thisTierIndex > userTierIndex) {
-          await requestUpgradeEstimate(tier.priceId, tier.name);
-          return;
-        }
-      }
-      subscribe(tier.priceId, tier.name);
-    }
+    // const tierKey = tierNameToKey[tier.name] || null;
+    // const hasThis = userTiers && tierKey && userTiers.has(tierKey);
+    // if (hasThis) {
+    //   window.location.href = "/";
+    //   return;
+    // }
+    // if (tier.name === "Hobby") {
+    //   const token = localStorage.getItem("token");
+    //   if (!token) {
+    //     alert("Please log in to manage subscriptions");
+    //     window.location.href = "/register";
+    //     return;
+    //   }
+    //   try {
+    //     const apiUrl =
+    //       process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    //     const response = await fetch(`${apiUrl}/payments/subscribe-to-hobby`, {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         Authorization: `Bearer ${token}`,
+    //       },
+    //     });
+    //     if (!response.ok) {
+    //       const errorData = await response.json().catch(() => ({}));
+    //       throw new Error(
+    //         errorData.message ||
+    //           errorData.error ||
+    //           "Failed to subscribe to Hobby tier"
+    //       );
+    //     }
+    //     const data = await response.json();
+    //     setUserTiers(new Set([...(userTiers || []), "HOBBY"]));
+    //     setUserHighestTier("TESTING");
+    //     setUpgradeModal({
+    //       priceId: "",
+    //       upcoming: null,
+    //       tierName: "Hobby",
+    //     });
+    //     setApiKey(data.apiKey);
+    //   } catch (error) {
+    //     console.error("Hobby subscription error:", error);
+    //     alert(
+    //       error instanceof Error
+    //         ? error.message
+    //         : "Failed to subscribe to Hobby tier"
+    //     );
+    //   }
+    //   return;
+    // }
+    // const token = localStorage.getItem("token");
+    // if (!token) {
+    //   alert("Please log in to manage subscriptions");
+    //   window.location.href = "/register";
+    //   return;
+    // }
+    // if (tier.priceId) {
+    //   if (userHighestTier) {
+    //     const userTierIndex = tierOrder.indexOf(userHighestTier);
+    //     const thisTierIndex = tierOrder.indexOf(tierNameToKey[tier.name] || "");
+    //     if (thisTierIndex > userTierIndex) {
+    //       await requestUpgradeEstimate(tier.priceId, tier.name);
+    //       return;
+    //     }
+    //   }
+    //   subscribe(tier.priceId, tier.name);
+    // }
   };
 
   return (
@@ -384,24 +338,13 @@ const Pricing: React.FC = () => {
         }}
       >
         {pricingTiers.map((tier) => {
-          const tierKey = tierNameToKey[tier.name] || null;
-          const hasThis = userTiers && tierKey && userTiers.has(tierKey);
-          const userTierIndex = userHighestTier
-            ? tierOrder.indexOf(userHighestTier)
-            : -1;
-          const thisTierIndex = tierKey ? tierOrder.indexOf(tierKey) : -1;
-          const isLowerTier =
-            userTierIndex >= 0 &&
-            thisTierIndex >= 0 &&
-            thisTierIndex <= userTierIndex;
-
+          const userTierIndex = pricingTiers.find(
+            (tier) => tier.name === userTier
+          )?.index;
           const actionLabel = (() => {
-            if (!userTiers) return null;
-            if (hasThis) return "Current plan";
-            if (userHighestTier) {
-              if (thisTierIndex > userTierIndex)
-                return `Upgrade to ${tier.name}`;
-            }
+            if (userTierIndex === tier.index) return "Current plan";
+            if (userTierIndex !== undefined && tier.index > userTierIndex)
+              return `Upgrade to ${tier.name.toLowerCase()}`;
             return null;
           })();
 
@@ -430,14 +373,14 @@ const Pricing: React.FC = () => {
                 {actionLabel ? (
                   <button
                     onClick={() => handleTierSelection(tier)}
-                    disabled={loadingTier === tier.name || isLowerTier}
+                    disabled={userTierIndex === tier.index}
                   >
                     {loadingTier === tier.name ? "Processing..." : actionLabel}
                   </button>
                 ) : (
                   <button
                     onClick={() => handleTierSelection(tier)}
-                    disabled={loadingTier === tier.name || isLowerTier}
+                    disabled={userTierIndex === tier.index}
                   >
                     Subscribe
                   </button>
