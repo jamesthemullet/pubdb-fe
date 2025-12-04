@@ -7,11 +7,15 @@ import Link from "next/link";
 type SubscriptionStatus = {
   success: boolean;
   message: string;
-  subscription?: {
+  subscription: {
     subscriptionId: string;
     status: string;
     tier: string;
     billingDay: number;
+  };
+  apiKey: {
+    key?: string;
+    keyPrefix?: string;
   };
 };
 
@@ -19,6 +23,8 @@ function SuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const [status, setStatus] = useState<SubscriptionStatus | null>(null);
+
+  console.log(140, status);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,6 +81,7 @@ function SuccessContent() {
         }
 
         const data = await response.json();
+        console.log(139, data);
         setStatus(data);
 
         window.dispatchEvent(new Event("authChanged"));
@@ -101,8 +108,6 @@ function SuccessContent() {
       </div>
     );
   }
-
-  console.log(200, error);
 
   if (error) {
     return (
@@ -177,7 +182,9 @@ function SuccessContent() {
                 {status.subscription.subscriptionId}
               </p>
               <p>
-                <strong>API key:</strong> {status.apiKey.key}
+                <strong>API key:</strong>{" "}
+                {status.apiKey.key ||
+                  `Api key remains unchanged - ${status.apiKey.keyPrefix}`}
               </p>
             </div>
           )}

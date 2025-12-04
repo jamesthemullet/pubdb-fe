@@ -50,8 +50,6 @@ const Pricing: React.FC = () => {
     tierName: string;
   }>(null);
 
-  console.log(11.01, userTier);
-
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [performingUpgrade, setPerformingUpgrade] = useState(false);
   const [apiKey, setApiKey] = useState<any>(null);
@@ -121,6 +119,7 @@ const Pricing: React.FC = () => {
         );
       }
       const data = await response.json();
+      console.log(130, data);
       window.location.href = data.url;
     } catch (error) {
       console.error("Subscription error:", error);
@@ -161,6 +160,7 @@ const Pricing: React.FC = () => {
         upcoming: data.upcoming || data,
         tierName,
       });
+      setApiKey(data.apiKey);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to estimate upgrade");
     } finally {
@@ -196,74 +196,64 @@ const Pricing: React.FC = () => {
   };
 
   const handleTierSelection = async (tier: (typeof pricingTiers)[0]) => {
-    console.log(101, tier);
-    // const tierKey = tierNameToKey[tier.name] || null;
-    // const hasThis = userTiers && tierKey && userTiers.has(tierKey);
-    // if (hasThis) {
-    //   window.location.href = "/";
-    //   return;
-    // }
-    // if (tier.name === "Hobby") {
-    //   const token = localStorage.getItem("token");
-    //   if (!token) {
-    //     alert("Please log in to manage subscriptions");
-    //     window.location.href = "/register";
-    //     return;
-    //   }
-    //   try {
-    //     const apiUrl =
-    //       process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-    //     const response = await fetch(`${apiUrl}/payments/subscribe-to-hobby`, {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         Authorization: `Bearer ${token}`,
-    //       },
-    //     });
-    //     if (!response.ok) {
-    //       const errorData = await response.json().catch(() => ({}));
-    //       throw new Error(
-    //         errorData.message ||
-    //           errorData.error ||
-    //           "Failed to subscribe to Hobby tier"
-    //       );
-    //     }
-    //     const data = await response.json();
-    //     setUserTiers(new Set([...(userTiers || []), "HOBBY"]));
-    //     setUserHighestTier("TESTING");
-    //     setUpgradeModal({
-    //       priceId: "",
-    //       upcoming: null,
-    //       tierName: "Hobby",
-    //     });
-    //     setApiKey(data.apiKey);
-    //   } catch (error) {
-    //     console.error("Hobby subscription error:", error);
-    //     alert(
-    //       error instanceof Error
-    //         ? error.message
-    //         : "Failed to subscribe to Hobby tier"
-    //     );
-    //   }
-    //   return;
-    // }
-    // const token = localStorage.getItem("token");
-    // if (!token) {
-    //   alert("Please log in to manage subscriptions");
-    //   window.location.href = "/register";
-    //   return;
-    // }
-    // if (tier.priceId) {
-    //   if (userHighestTier) {
-    //     const userTierIndex = tierOrder.indexOf(userHighestTier);
-    //     const thisTierIndex = tierOrder.indexOf(tierNameToKey[tier.name] || "");
-    //     if (thisTierIndex > userTierIndex) {
-    //       await requestUpgradeEstimate(tier.priceId, tier.name);
-    //       return;
-    //     }
-    //   }
-    //   subscribe(tier.priceId, tier.name);
-    // }
+    console.log(101, tier.name);
+    console.log(102, userTier);
+    const token = localStorage.getItem("token");
+    if (tier.name === userTier) {
+      window.location.href = "/";
+      return;
+    }
+    if (tier.name === "HOBBY") {
+      if (!token) {
+        alert("Please log in to manage subscriptions");
+        window.location.href = "/register";
+        return;
+      }
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const response = await fetch(`${apiUrl}/payments/subscribe-to-hobby`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.message ||
+              errorData.error ||
+              "Failed to subscribe to Hobby tier"
+          );
+        }
+        const data = await response.json();
+        console.log(110, data);
+        setUserTier("HOBBY");
+        setUpgradeModal({
+          priceId: "",
+          upcoming: null,
+          tierName: "Hobby",
+        });
+        setApiKey(data.apiKey);
+      } catch (error) {
+        console.error("Hobby subscription error:", error);
+        alert(
+          error instanceof Error
+            ? error.message
+            : "Failed to subscribe to Hobby tier"
+        );
+      }
+      return;
+    }
+    if (!token) {
+      alert("Please log in to manage subscriptions");
+      window.location.href = "/register";
+      return;
+    }
+    if (tier.priceId) {
+      await requestUpgradeEstimate(tier.priceId, tier.name);
+    }
   };
 
   return (
@@ -289,7 +279,7 @@ const Pricing: React.FC = () => {
               maxWidth: "95%",
             }}
           >
-            <h3>{"Subscription change details"}</h3>
+            <h3>{"Subscription details"}</h3>
             {apiKey && (
               <div style={{ marginTop: "1rem" }}>
                 <h4>API Key Details</h4>

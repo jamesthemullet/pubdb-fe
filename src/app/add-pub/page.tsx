@@ -133,7 +133,9 @@ export default function AddPubPage() {
       ) : (
         <form onSubmit={handleSubmit} autoComplete="off">
           <div>
-            <label htmlFor="name">Name:</label>
+            <label htmlFor="name">
+              Name: <span style={{ color: "red" }}>*</span>
+            </label>
             <input
               id="name"
               name="pub-name"
@@ -141,10 +143,13 @@ export default function AddPubPage() {
               onChange={(e) => setName(e.target.value)}
               required
               autoComplete="pub-name"
+              placeholder="Enter pub name"
             />
           </div>
           <div>
-            <label htmlFor="city">City:</label>
+            <label htmlFor="city">
+              City: <span style={{ color: "red" }}>*</span>
+            </label>
             <input
               id="city"
               name="pub-city"
@@ -152,10 +157,13 @@ export default function AddPubPage() {
               onChange={(e) => setCity(e.target.value)}
               required
               autoComplete="pub-city"
+              placeholder="Enter city"
             />
           </div>
           <div>
-            <label htmlFor="country">Country:</label>
+            <label htmlFor="country">
+              Country: <span style={{ color: "red" }}>*</span>
+            </label>
             <input
               id="country"
               name="pub-country"
@@ -163,10 +171,13 @@ export default function AddPubPage() {
               onChange={(e) => setCountry(e.target.value)}
               required
               autoComplete="country"
+              placeholder="Enter country"
             />
           </div>
           <div>
-            <label htmlFor="address">Address:</label>
+            <label htmlFor="address">
+              Address: <span style={{ color: "red" }}>*</span>
+            </label>
             <input
               id="address"
               name="pub-address"
@@ -174,10 +185,13 @@ export default function AddPubPage() {
               onChange={(e) => setAddress(e.target.value)}
               required
               autoComplete="pub-address"
+              placeholder="Enter address"
             />
           </div>
           <div>
-            <label htmlFor="postcode">Postcode:</label>
+            <label htmlFor="postcode">
+              Postcode: <span style={{ color: "red" }}>*</span>
+            </label>
             <input
               id="postcode"
               name="pub-postcode"
@@ -185,6 +199,7 @@ export default function AddPubPage() {
               onChange={(e) => setPostcode(e.target.value)}
               required
               autoComplete="pub-postcode"
+              placeholder="Enter postcode"
             />
           </div>
           <div>
@@ -254,7 +269,7 @@ export default function AddPubPage() {
             />
           </div>
           <div>
-            <label htmlFor="operator">Operator:</label>
+            <label htmlFor="operator">Operator/Owner:</label>
             <input
               id="operator"
               name="operator"
