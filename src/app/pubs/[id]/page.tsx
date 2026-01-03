@@ -30,12 +30,15 @@ type Pub = {
 };
 
 export default function PubPage() {
-  const { name } = useParams();
-  const id = name; // route param is now treated as the id
+  const { id } = useParams();
   const [pub, setPub] = useState<Pub | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editFields, setEditFields] = useState<Partial<Pub>>({});
+
+  console.log(2, pub);
+
+  console.log(3, editFields);
 
   useEffect(() => {
     async function fetchPub() {
@@ -46,6 +49,7 @@ export default function PubPage() {
         const resById = await fetch(`${apiUrl}/pubs/${id}`);
         if (resById.ok) {
           const dataById = await resById.json();
+          console.log(1.5, dataById);
           setPub(dataById || null);
         } else {
           setPub(null);
@@ -57,8 +61,8 @@ export default function PubPage() {
         setLoading(false);
       }
     }
-    if (name) fetchPub();
-  }, [name]);
+    if (id) fetchPub();
+  }, [id]);
 
   function handleEditClick() {
     if (pub) {
@@ -232,15 +236,7 @@ export default function PubPage() {
               <label>
                 Opening Hours:{" "}
                 <OpeningHoursEditor
-                  value={
-                    editFields.openingHours as
-                      | Record<
-                          string,
-                          { open?: string; close?: string; closed?: boolean }
-                        >
-                      | string
-                      | undefined
-                  }
+                  value={editFields.openingHours}
                   onChange={(val) => handleFieldChange("openingHours", val)}
                 />
               </label>
