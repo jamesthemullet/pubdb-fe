@@ -275,13 +275,13 @@ const Pricing: React.FC = () => {
               background: "white",
               padding: 24,
               borderRadius: 8,
-              width: 480,
               maxWidth: "95%",
+              width: "600px",
             }}
           >
             <h3>{"Subscription details"}</h3>
             {apiKey && (
-              <div style={{ marginTop: "1rem" }}>
+              <div style={{ margin: "1rem 0" }}>
                 <h4>API Key Details</h4>
                 <p>
                   <strong>Name:</strong> {apiKey.name}

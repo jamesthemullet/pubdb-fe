@@ -43,7 +43,7 @@ export default function Pubs() {
         <ul>
           {pubs.map((pub) => (
             <li key={pub.id}>
-              <Link href={`/pubs/${pub.name}`}>
+              <Link href={`/pubs/${pub.id}`}>
                 <strong>{pub.name}</strong>
               </Link>{" "}
               – {pub.city}

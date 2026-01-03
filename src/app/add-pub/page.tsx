@@ -25,6 +25,7 @@ export default function AddPubPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [editLink, setEditLink] = useState<string | null>(null);
 
   const [user, setUser] = useState<{
     email: string;
@@ -59,6 +60,7 @@ export default function AddPubPage() {
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setEditLink(null);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const token = localStorage.getItem("token");
@@ -88,13 +90,22 @@ export default function AddPubPage() {
         },
         body: JSON.stringify(body),
       });
+
+      console.log(90, res);
+
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || data.errors || "Unknown error");
+        if (res.status === 409 && data && data.id) {
+          setEditLink(`/pubs/${data.id}`);
+          setError(data.error || data.errors || "Pub already exists");
+        } else {
+          setError(data.error || data.errors || "Unknown error");
+        }
       } else {
+        setEditLink(null);
         setSuccess("Pub added successfully!");
         setTimeout(() => {
-          router.push(`/pubs/${data.name}`);
+          router.push(`/pubs/${data.id}`);
         }, 1000);
       }
     } catch (err) {
@@ -322,6 +333,11 @@ export default function AddPubPage() {
       )}
       {error && (
         <div>{typeof error === "string" ? error : JSON.stringify(error)}</div>
+      )}
+      {editLink && (
+        <div style={{ marginTop: 8 }}>
+          <a href={editLink}>Edit existing pub</a>
+        </div>
       )}
       {success && <div>{success}</div>}
     </>

@@ -27,6 +27,7 @@ type Pub = {
 
 export default function PubPage() {
   const { name } = useParams();
+  const id = name; // route param is now treated as the id
   const [pub, setPub] = useState<Pub | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -37,9 +38,14 @@ export default function PubPage() {
       try {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await fetch(`${apiUrl}/pubs?name=${name}`);
-        const data = await res.json();
-        setPub(data[0] || null);
+
+        const resById = await fetch(`${apiUrl}/pubs/${id}`);
+        if (resById.ok) {
+          const dataById = await resById.json();
+          setPub(dataById || null);
+        } else {
+          setPub(null);
+        }
       } catch (error) {
         console.error("Error fetching pub:", error);
         setPub(null);

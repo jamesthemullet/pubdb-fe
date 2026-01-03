@@ -164,6 +164,7 @@ function SuccessContent() {
                 padding: "2rem",
                 marginBottom: "2rem",
                 textAlign: "left",
+                width: "600px",
               }}
             >
               <h3>Subscription Details</h3>
