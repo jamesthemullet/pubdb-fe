@@ -91,8 +91,6 @@ export default function AddPubPage() {
         body: JSON.stringify(body),
       });
 
-      console.log(90, res);
-
       const data = await res.json();
       if (!res.ok) {
         if (res.status === 409 && data && data.id) {

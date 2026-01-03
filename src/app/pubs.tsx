@@ -18,7 +18,6 @@ export default function Pubs() {
   useEffect(() => {
     async function fetchPubs() {
       try {
-        console.log(10, process.env.NEXT_PUBLIC_API_URL);
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
         const res = await fetch(`${apiUrl}/pubs`);

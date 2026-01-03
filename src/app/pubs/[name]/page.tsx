@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 
 import { useEffect, useState } from "react";
+import OpeningHoursEditor from "../../components/OpeningHoursEditor";
 
 type Pub = {
   id: string;
@@ -22,7 +23,10 @@ type Pub = {
   area?: string;
   phone?: string;
   borough?: string;
-  openingHours?: string;
+  openingHours?: Record<
+    string,
+    { open?: string; close?: string; closed?: boolean }
+  >;
 };
 
 export default function PubPage() {
@@ -84,6 +88,7 @@ export default function PubPage() {
           body[key] = value;
         }
       });
+
       const res = await fetch(`${apiUrl}/pubs/${pub.id}`, {
         method: "PATCH",
         headers: {
@@ -226,11 +231,17 @@ export default function PubPage() {
               <br />
               <label>
                 Opening Hours:{" "}
-                <input
-                  value={editFields.openingHours ?? ""}
-                  onChange={(e) =>
-                    handleFieldChange("openingHours", e.target.value)
+                <OpeningHoursEditor
+                  value={
+                    editFields.openingHours as
+                      | Record<
+                          string,
+                          { open?: string; close?: string; closed?: boolean }
+                        >
+                      | string
+                      | undefined
                   }
+                  onChange={(val) => handleFieldChange("openingHours", val)}
                 />
               </label>
               <br />
@@ -334,7 +345,14 @@ export default function PubPage() {
                 <strong>Description:</strong> {pub.description || "-"}
               </p>
               <p>
-                <strong>Opening Hours:</strong> {pub.openingHours || "-"}
+                <strong>Opening Hours:</strong>
+                {pub.openingHours ? (
+                  <div style={{ marginTop: "0.5rem" }}>
+                    {renderOpeningHours(pub.openingHours)}
+                  </div>
+                ) : (
+                  " -"
+                )}
               </p>
               <p>
                 <strong>Tags:</strong>{" "}
@@ -374,7 +392,6 @@ function EditButton({
     approved?: boolean;
     admin?: boolean;
   } | null>(null);
-  console.log(10, user);
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("token");
@@ -456,6 +473,80 @@ function EditButton({
     <div>
       <button onClick={onEdit}>Edit this pub</button>
       {user?.admin && <button onClick={handleDelete}>Delete this pub</button>}
+    </div>
+  );
+}
+
+function renderOpeningHours(ohAny: any) {
+  const weekdays = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+  // If the backend returned a JSON string, parse it.
+  let oh: Record<
+    string,
+    { open?: string; close?: string; closed?: boolean }
+  > | null = null;
+  if (typeof ohAny === "string") {
+    try {
+      oh = JSON.parse(ohAny);
+    } catch (e) {
+      console.warn("Invalid openingHours JSON:", e, ohAny);
+      oh = null;
+    }
+  } else if (ohAny && typeof ohAny === "object") {
+    oh = ohAny;
+  }
+
+  if (!oh) {
+    return (
+      <div>
+        {weekdays.map((day) => (
+          <div key={day}>
+            <strong>{day}:</strong> -
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Build case-insensitive map for lookup (handles "monday" or "Monday").
+  const map: Record<string, any> = {};
+  Object.entries(oh).forEach(([k, v]) => {
+    map[k.toLowerCase()] = v;
+  });
+
+  return (
+    <div>
+      {weekdays.map((day) => {
+        const entry = map[day.toLowerCase()];
+        if (!entry) {
+          return (
+            <div key={day}>
+              <strong>{day}:</strong> -
+            </div>
+          );
+        }
+        if (entry.closed) {
+          return (
+            <div key={day}>
+              <strong>{day}:</strong> Closed
+            </div>
+          );
+        }
+        const open = entry.open || "-";
+        const close = entry.close || "-";
+        return (
+          <div key={day}>
+            <strong>{day}:</strong> {open} – {close}
+          </div>
+        );
+      })}
     </div>
   );
 }

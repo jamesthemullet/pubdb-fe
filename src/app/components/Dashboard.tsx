@@ -75,8 +75,6 @@ const Dashboard: React.FC = () => {
     };
   }, []);
 
-  console.log(60, dashboardData);
-
   useEffect(() => {
     async function fetchDashboard() {
       if (!isAuthenticated) {
@@ -203,8 +201,6 @@ const Dashboard: React.FC = () => {
     const percentage = ((used / limit) * 100).toFixed(1);
     return { remaining, percentage, used };
   };
-
-  console.log(100, dashboardData);
 
   return (
     <div
