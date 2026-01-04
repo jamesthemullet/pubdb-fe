@@ -35,10 +35,7 @@ export default function PubPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editFields, setEditFields] = useState<Partial<Pub>>({});
-
-  console.log(2, pub);
-
-  console.log(3, editFields);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     async function fetchPub() {
@@ -49,7 +46,6 @@ export default function PubPage() {
         const resById = await fetch(`${apiUrl}/pubs/${id}`);
         if (resById.ok) {
           const dataById = await resById.json();
-          console.log(1.5, dataById);
           setPub(dataById || null);
         } else {
           setPub(null);
@@ -67,24 +63,69 @@ export default function PubPage() {
   function handleEditClick() {
     if (pub) {
       setEditFields({ ...pub });
+      // Initialize errors for required fields
+      const requiredFields: (keyof Pub)[] = [
+        "name",
+        "city",
+        "address",
+        "postcode",
+        "country",
+      ];
+      const initialErrors: Record<string, string> = {};
+      requiredFields.forEach((field) => {
+        const value = pub[field];
+        initialErrors[`${field}Error`] =
+          !value || value.toString().trim() === ""
+            ? `${field} is required`
+            : "";
+      });
+      setFieldErrors(initialErrors);
       setEditing(true);
     }
   }
 
   function handleFieldChange(field: keyof Pub, value: any) {
     setEditFields((prev) => ({ ...prev, [field]: value }));
+    if (["name", "city", "address", "postcode", "country"].includes(field)) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [`${field}Error`]:
+          !value || value.trim() === "" ? `${field} is required` : "",
+      }));
+    }
   }
 
   async function handleSave() {
     if (!pub) return;
+
+    const requiredFields: (keyof Pub)[] = [
+      "name",
+      "city",
+      "address",
+      "postcode",
+      "country",
+    ];
+    const missingFields = requiredFields.filter(
+      (field) =>
+        !editFields[field] || editFields[field]?.toString().trim() === ""
+    );
+
+    // Set errors for missing fields
+    if (missingFields.length > 0) {
+      const newErrors: Record<string, string> = { ...fieldErrors };
+      missingFields.forEach((field) => {
+        newErrors[`${field}Error`] = `${field} is required`;
+      });
+      setFieldErrors(newErrors);
+      return;
+    }
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const token = localStorage.getItem("token");
       const body: any = {};
       Object.entries(editFields).forEach(([key, value]) => {
         if (
-          key !== "id" &&
-          key !== "createdAt" &&
           value !== undefined &&
           value !== null &&
           (Array.isArray(value) ? value.length > 0 : value !== "")
@@ -92,6 +133,14 @@ export default function PubPage() {
           body[key] = value;
         }
       });
+
+      body.id = pub.id;
+      if (pub.tags) {
+        body.tags = pub.tags;
+      }
+      if (pub.createdAt) {
+        body.createdAt = pub.createdAt;
+      }
 
       const res = await fetch(`${apiUrl}/pubs/${pub.id}`, {
         method: "PATCH",
@@ -141,6 +190,11 @@ export default function PubPage() {
                   onChange={(e) => handleFieldChange("name", e.target.value)}
                   required
                 />
+                {fieldErrors.nameError && (
+                  <span style={{ color: "red", marginLeft: "0.5rem" }}>
+                    {fieldErrors.nameError}
+                  </span>
+                )}
               </label>
               <br />
               <label>
@@ -150,6 +204,11 @@ export default function PubPage() {
                   onChange={(e) => handleFieldChange("city", e.target.value)}
                   required
                 />
+                {fieldErrors.cityError && (
+                  <span style={{ color: "red", marginLeft: "0.5rem" }}>
+                    {fieldErrors.cityError}
+                  </span>
+                )}
               </label>
               <br />
               <label>
@@ -159,6 +218,11 @@ export default function PubPage() {
                   onChange={(e) => handleFieldChange("country", e.target.value)}
                   required
                 />
+                {fieldErrors.countryError && (
+                  <span style={{ color: "red", marginLeft: "0.5rem" }}>
+                    {fieldErrors.countryError}
+                  </span>
+                )}
               </label>
               <br />
               <label>
@@ -168,6 +232,11 @@ export default function PubPage() {
                   onChange={(e) => handleFieldChange("address", e.target.value)}
                   required
                 />
+                {fieldErrors.addressError && (
+                  <span style={{ color: "red", marginLeft: "0.5rem" }}>
+                    {fieldErrors.addressError}
+                  </span>
+                )}
               </label>
               <br />
               <label>
@@ -177,8 +246,12 @@ export default function PubPage() {
                   onChange={(e) =>
                     handleFieldChange("postcode", e.target.value)
                   }
-                  required
                 />
+                {fieldErrors.postcodeError && (
+                  <span style={{ color: "red", marginLeft: "0.5rem" }}>
+                    {fieldErrors.postcodeError}
+                  </span>
+                )}
               </label>
               <br />
               <label>
@@ -211,8 +284,22 @@ export default function PubPage() {
                 Phone:{" "}
                 <input
                   value={editFields.phone ?? ""}
-                  onChange={(e) => handleFieldChange("phone", e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\+?[0-9\-\s]*$/.test(value) || value === "") {
+                      handleFieldChange("phone", value);
+                    } else {
+                      setEditFields((prev) => ({
+                        ...prev,
+                        phoneError:
+                          "Invalid phone number format. Only numbers, spaces, and dashes are allowed.",
+                      }));
+                    }
+                  }}
                 />
+                {editFields.phoneError && (
+                  <span style={{ color: "red" }}>{editFields.phoneError}</span>
+                )}
               </label>
               <br />
               <label>
@@ -289,7 +376,19 @@ export default function PubPage() {
                 />
               </label>
               <br />
-              <button onClick={handleSave}>Save</button>
+              <button
+                onClick={handleSave}
+                disabled={
+                  Object.values(fieldErrors).some((err) => !!err) ||
+                  ["name", "city", "address", "postcode", "country"].some(
+                    (field) =>
+                      !editFields[field as keyof Pub] ||
+                      editFields[field as keyof Pub]?.toString().trim() === ""
+                  )
+                }
+              >
+                Save
+              </button>
               <button
                 onClick={() => setEditing(false)}
                 style={{ marginLeft: "1rem" }}
