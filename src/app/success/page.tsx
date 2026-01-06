@@ -203,33 +203,14 @@ function SuccessContent() {
                 View Dashboard
               </button>
             </Link>
-            <Link href="/api-docs">
+            {/* <Link href="/api-docs">
               <button
                 style={{ padding: "1rem 2rem", fontSize: "1.1rem" }}
                 className="secondary"
               >
                 API Documentation
               </button>
-            </Link>
-          </div>
-
-          <div
-            style={{
-              marginTop: "3rem",
-              padding: "1.5rem",
-              backgroundColor: "#e8f4fd",
-              borderRadius: "8px",
-            }}
-          >
-            <h4>What's Next?</h4>
-            <ul
-              style={{ textAlign: "left", maxWidth: "400px", margin: "0 auto" }}
-            >
-              <li>Check your dashboard for your new API limits</li>
-              <li>Generate or upgrade your API keys</li>
-              <li>Start making API calls with your enhanced tier</li>
-              <li>Review the API documentation for advanced features</li>
-            </ul>
+            </Link> */}
           </div>
         </>
       ) : (

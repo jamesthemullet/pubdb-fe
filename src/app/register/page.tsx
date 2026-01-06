@@ -166,7 +166,26 @@ export default function RegisterLoginPage() {
       {error && (
         <div>{typeof error === "string" ? error : JSON.stringify(error)}</div>
       )}
-      {success && <div>{success}</div>}
+      {success && (
+        <div>
+          {success}
+          {mode === "register" && (
+            <div
+              style={{
+                marginTop: "0.75rem",
+                color: "#555",
+                fontSize: "0.95rem",
+              }}
+            >
+              If you don't receive your verification email, please contact{" "}
+              <a href="mailto:hello@thepubdb.com" style={{ color: "#007bff" }}>
+                hello@thepubdb.com
+              </a>{" "}
+              for assistance.
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
