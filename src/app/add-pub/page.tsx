@@ -33,12 +33,21 @@ export default function AddPubPage() {
   } | null>(null);
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const payload = JSON.parse(atob(token.split(".")[1]));
-          setUser({ email: payload.email, approved: payload.approved });
+          const apiUrl =
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+          const res = await fetch(`${apiUrl}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setUser({ email: data.email, approved: data.approved });
+          } else {
+            setUser(null);
+          }
         } catch {
           setUser(null);
         }
