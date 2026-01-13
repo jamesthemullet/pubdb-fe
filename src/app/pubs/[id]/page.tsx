@@ -582,7 +582,6 @@ function renderOpeningHours(ohAny: any) {
     "Saturday",
     "Sunday",
   ];
-  // If the backend returned a JSON string, parse it.
   let oh: Record<
     string,
     { open?: string; close?: string; closed?: boolean }

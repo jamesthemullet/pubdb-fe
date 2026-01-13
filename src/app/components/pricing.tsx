@@ -50,9 +50,29 @@ const Pricing: React.FC = () => {
     tierName: string;
   }>(null);
 
+  console.log(31, upgradeModal);
+
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [performingUpgrade, setPerformingUpgrade] = useState(false);
   const [apiKey, setApiKey] = useState<any>(null);
+
+  const formatCurrency = (amount?: number, currency: string = "usd") => {
+    if (typeof amount !== "number") return "-";
+    const normalizedCurrency = currency?.toUpperCase() || "USD";
+    try {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: normalizedCurrency,
+      }).format(amount / 100);
+    } catch {
+      return `$${(amount / 100).toFixed(2)}`;
+    }
+  };
+
+  const formatDateTime = (timestamp?: number) => {
+    if (!timestamp) return null;
+    return new Date(timestamp * 1000).toLocaleString();
+  };
 
   function getProrationItems(upcoming: any) {
     if (!upcoming) return [];
@@ -65,10 +85,63 @@ const Pricing: React.FC = () => {
     );
   }
 
+  function getInvoiceLike(upcoming: any) {
+    if (!upcoming) return null;
+    if (typeof upcoming.amount_due === "number") return upcoming;
+    if (upcoming.invoice && typeof upcoming.invoice.amount_due === "number")
+      return upcoming.invoice;
+    if (
+      upcoming.latest_invoice &&
+      typeof upcoming.latest_invoice.amount_due === "number"
+    )
+      return upcoming.latest_invoice;
+    return null;
+  }
+
+  function firstNumber(...values: Array<number | null | undefined>) {
+    for (const value of values) {
+      if (typeof value === "number" && Number.isFinite(value)) {
+        return value;
+      }
+    }
+    return undefined;
+  }
+
   const modalUpcoming = upgradeModal?.upcoming;
   const modalProrationItems = modalUpcoming
     ? getProrationItems(modalUpcoming)
     : [];
+  const modalInvoice = getInvoiceLike(modalUpcoming);
+  const estimateCurrency =
+    modalUpcoming?.currency ||
+    modalInvoice?.currency ||
+    modalProrationItems[0]?.currency ||
+    "usd";
+  const estimatedDueNow = firstNumber(
+    modalUpcoming?.estimatedAmount,
+    modalUpcoming?.proratedCharge,
+    modalInvoice?.amount_due,
+    modalUpcoming?.amount_due
+  );
+  const nextPeriodCharge = firstNumber(
+    modalUpcoming?.nextPeriodCharge,
+    modalInvoice?.amount_remaining,
+    modalUpcoming?.amount_remaining
+  );
+  const prorationOnlyCharge = firstNumber(
+    modalUpcoming?.prorationOnlyCharge,
+    modalUpcoming?.proratedCharge
+  );
+  const nextPaymentTimestamp = firstNumber(
+    modalUpcoming?.nextPaymentAttempt,
+    modalInvoice?.next_payment_attempt,
+    modalUpcoming?.next_payment_attempt,
+    modalInvoice?.period_end,
+    modalUpcoming?.period_end,
+    modalInvoice?.current_period_end,
+    modalUpcoming?.current_period_end
+  );
+  const nextPaymentDisplay = formatDateTime(nextPaymentTimestamp);
 
   async function fetchUserTier() {
     const token = localStorage.getItem("token");
@@ -151,6 +224,7 @@ const Pricing: React.FC = () => {
         throw new Error(err.message || "Failed to get upgrade estimate");
       }
       const data = await res.json();
+      console.log(30, data);
       if (data.needsCheckout) {
         await subscribe(priceId, tierName);
         return;
@@ -303,6 +377,76 @@ const Pricing: React.FC = () => {
                 </p>
               </div>
             )}
+            {modalUpcoming ? (
+              <div style={{ margin: "1rem 0" }}>
+                <h4>Estimated charges</h4>
+                {typeof estimatedDueNow === "number" ? (
+                  <p>
+                    <strong>Due now:</strong>{" "}
+                    {formatCurrency(estimatedDueNow, estimateCurrency)}
+                  </p>
+                ) : (
+                  <p style={{ color: "#666" }}>
+                    We could not determine your immediate charge. You can
+                    continue to checkout to view the final amount.
+                  </p>
+                )}
+                {typeof nextPeriodCharge === "number" ? (
+                  <p>
+                    <strong>Next period charge:</strong>{" "}
+                    {formatCurrency(nextPeriodCharge, estimateCurrency)}
+                  </p>
+                ) : null}
+                {typeof prorationOnlyCharge === "number" &&
+                typeof modalUpcoming?.prorationOnlyCharge === "number" ? (
+                  <p>
+                    <strong>Proration credit:</strong>{" "}
+                    {formatCurrency(prorationOnlyCharge, estimateCurrency)}
+                  </p>
+                ) : null}
+                {nextPaymentDisplay ? (
+                  <p>
+                    <strong>Next payment:</strong> {nextPaymentDisplay}
+                  </p>
+                ) : null}
+                {modalProrationItems.length ? (
+                  <div>
+                    <strong>Breakdown:</strong>
+                    <ul style={{ paddingLeft: 16 }}>
+                      {modalProrationItems.map((item: any, index: number) => (
+                        <li key={item.id || index}>
+                          {(item.description || "Proration").trim()} {" - "}
+                          {formatCurrency(
+                            typeof item.amount === "number"
+                              ? item.amount
+                              : item.amount_excluding_tax,
+                            item.currency || modalUpcoming.currency
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+            {upgradeModal?.priceId ? (
+              <div
+                style={{
+                  margin: "1.5rem 0",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <button
+                  onClick={() => performUpgrade(upgradeModal.priceId)}
+                  disabled={performingUpgrade}
+                >
+                  {performingUpgrade
+                    ? "Upgrading..."
+                    : `Confirm upgrade to ${upgradeModal.tierName}`}
+                </button>
+              </div>
+            ) : null}
             <div
               style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}
             >
@@ -331,10 +475,15 @@ const Pricing: React.FC = () => {
           const userTierIndex = pricingTiers.find(
             (tier) => tier.name === userTier
           )?.index;
+          const isCurrentTier = userTierIndex === tier.index;
+          const isLowerTier =
+            userTierIndex !== undefined && tier.index < userTierIndex;
+          const isHigherTier =
+            userTierIndex !== undefined && tier.index > userTierIndex;
           const actionLabel = (() => {
-            if (userTierIndex === tier.index) return "Current plan";
-            if (userTierIndex !== undefined && tier.index > userTierIndex)
-              return `Upgrade to ${tier.name.toLowerCase()}`;
+            if (isCurrentTier) return "Current plan";
+            if (isHigherTier) return `Upgrade to ${tier.name.toLowerCase()}`;
+            if (isLowerTier) return "Contact support to downgrade";
             return null;
           })();
 
@@ -363,14 +512,14 @@ const Pricing: React.FC = () => {
                 {actionLabel ? (
                   <button
                     onClick={() => handleTierSelection(tier)}
-                    disabled={userTierIndex === tier.index}
+                    disabled={isCurrentTier || isLowerTier}
                   >
                     {loadingTier === tier.name ? "Processing..." : actionLabel}
                   </button>
                 ) : (
                   <button
                     onClick={() => handleTierSelection(tier)}
-                    disabled={userTierIndex === tier.index}
+                    disabled={isCurrentTier || isLowerTier}
                   >
                     Subscribe
                   </button>
