@@ -31,13 +31,12 @@ export default function Pubs() {
     if (!debouncedSearchTerm) return pubs;
 
     const searchLower = debouncedSearchTerm.toLowerCase();
-    console.log(300, pubs);
+
     return pubs.filter(
       (pub) =>
         pub.name.toLowerCase().includes(searchLower) ||
         pub.city.toLowerCase().includes(searchLower) ||
         pub.address.toLowerCase().includes(searchLower) ||
-        // pub.country.toLowerCase().includes(searchLower) ||
         pub.tags.some((tag) => tag.toLowerCase().includes(searchLower))
     );
   }, [pubs, debouncedSearchTerm]);

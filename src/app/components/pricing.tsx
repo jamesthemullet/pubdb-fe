@@ -50,8 +50,6 @@ const Pricing: React.FC = () => {
     tierName: string;
   }>(null);
 
-  console.log(31, upgradeModal);
-
   const [estimateLoading, setEstimateLoading] = useState(false);
   const [performingUpgrade, setPerformingUpgrade] = useState(false);
   const [apiKey, setApiKey] = useState<any>(null);
@@ -224,7 +222,6 @@ const Pricing: React.FC = () => {
         throw new Error(err.message || "Failed to get upgrade estimate");
       }
       const data = await res.json();
-      console.log(30, data);
       if (data.needsCheckout) {
         await subscribe(priceId, tierName);
         return;
