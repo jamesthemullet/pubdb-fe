@@ -36,6 +36,7 @@ export default function PubPage() {
   const [editing, setEditing] = useState(false);
   const [editFields, setEditFields] = useState<Partial<Pub>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [countries, setCountries] = useState<{ name: string; code: string }[]>(
     []
   );
@@ -103,6 +104,7 @@ export default function PubPage() {
   function handleEditClick() {
     if (pub) {
       setEditFields({ ...pub });
+      setSaveError(null);
       // Initialize errors for required fields
       const requiredFields: (keyof Pub)[] = [
         "name",
@@ -119,6 +121,7 @@ export default function PubPage() {
             ? `${field} is required`
             : "";
       });
+      initialErrors.websiteError = "";
       setFieldErrors(initialErrors);
       setEditing(true);
     }
@@ -131,6 +134,17 @@ export default function PubPage() {
         ...prev,
         [`${field}Error`]:
           !value || value.trim() === "" ? `${field} is required` : "",
+      }));
+    }
+    if (field === "website") {
+      const trimmed = typeof value === "string" ? value.trim() : "";
+      const errorMessage =
+        trimmed && !isValidHttpUrl(trimmed)
+          ? "Please enter a valid URL (include http:// or https://)"
+          : "";
+      setFieldErrors((prev) => ({
+        ...prev,
+        websiteError: errorMessage,
       }));
     }
   }
@@ -157,10 +171,17 @@ export default function PubPage() {
         newErrors[`${field}Error`] = `${field} is required`;
       });
       setFieldErrors(newErrors);
+      setSaveError("Please fill out all required fields.");
+      return;
+    }
+
+    if (fieldErrors.websiteError) {
+      setSaveError(fieldErrors.websiteError);
       return;
     }
 
     try {
+      setSaveError(null);
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const token = localStorage.getItem("token");
       const body: any = {};
@@ -192,13 +213,15 @@ export default function PubPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || data.errors || "Unknown error");
+        console.log(10, data.errors);
+        setSaveError(extractErrorMessage(data));
       } else {
         setPub(data);
         setEditing(false);
+        setSaveError(null);
       }
     } catch (err) {
-      alert("Network error");
+      setSaveError("Network error");
     }
   }
 
@@ -359,6 +382,11 @@ export default function PubPage() {
                   value={editFields.website ?? ""}
                   onChange={(e) => handleFieldChange("website", e.target.value)}
                 />
+                {fieldErrors.websiteError && (
+                  <span style={{ color: "red", marginLeft: "0.5rem" }}>
+                    {fieldErrors.websiteError}
+                  </span>
+                )}
               </label>
               <br />
               <label>
@@ -440,6 +468,9 @@ export default function PubPage() {
               >
                 Save
               </button>
+              {saveError && (
+                <p style={{ color: "red", marginTop: "0.5rem" }}>{saveError}</p>
+              )}
               <button
                 onClick={() => setEditing(false)}
                 style={{ marginLeft: "1rem" }}
@@ -522,6 +553,74 @@ export default function PubPage() {
       )}
     </>
   );
+}
+
+function isValidHttpUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function extractErrorMessage(errorPayload: unknown): string {
+  if (!errorPayload) {
+    return "Unknown error";
+  }
+
+  if (typeof errorPayload === "string") {
+    const trimmed = errorPayload.trim();
+    return trimmed || "Unknown error";
+  }
+
+  if (typeof errorPayload === "object") {
+    const record = errorPayload as Record<string, unknown>;
+
+    if (record.errors && typeof record.errors === "object") {
+      const flattened = record.errors as {
+        fieldErrors?: Record<string, string[]>;
+        formErrors?: string[];
+      };
+
+      if (flattened.fieldErrors && typeof flattened.fieldErrors === "object") {
+        const firstFieldMessage = Object.entries(flattened.fieldErrors)
+          .map(([field, messages]) => {
+            if (Array.isArray(messages) && messages.length) {
+              return `${field}: ${messages[0]}`;
+            }
+            return undefined;
+          })
+          .filter((msg): msg is string => Boolean(msg));
+        if (firstFieldMessage.length) {
+          return firstFieldMessage.join("\n");
+        }
+      }
+
+      if (
+        Array.isArray(flattened.formErrors) &&
+        flattened.formErrors.length &&
+        typeof flattened.formErrors[0] === "string"
+      ) {
+        return flattened.formErrors[0];
+      }
+    }
+
+    if (typeof record.error === "string" && record.error.trim()) {
+      return record.error.trim();
+    }
+    if (typeof record.message === "string" && record.message.trim()) {
+      return record.message.trim();
+    }
+
+    try {
+      return JSON.stringify(record);
+    } catch {
+      return "Unknown error";
+    }
+  }
+
+  return String(errorPayload);
 }
 
 function EditButton({
