@@ -18,7 +18,6 @@ export type Pub = {
   website?: string;
   description?: string;
   imageUrl?: string;
-  tags: string[];
   createdAt: string;
   operator?: string;
   area?: string;

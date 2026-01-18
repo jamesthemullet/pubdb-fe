@@ -9,7 +9,6 @@ type Pub = {
   city: string;
   address: string;
   country: string;
-  tags: string[];
 };
 
 export default function Pubs() {
@@ -36,8 +35,7 @@ export default function Pubs() {
       (pub) =>
         pub.name.toLowerCase().includes(searchLower) ||
         pub.city.toLowerCase().includes(searchLower) ||
-        pub.address.toLowerCase().includes(searchLower) ||
-        pub.tags.some((tag) => tag.toLowerCase().includes(searchLower))
+        pub.address.toLowerCase().includes(searchLower)
     );
   }, [pubs, debouncedSearchTerm]);
 
@@ -88,7 +86,7 @@ export default function Pubs() {
       <div>
         <input
           type="text"
-          placeholder="Search pubs by name, city, country, address, or tags..."
+          placeholder="Search pubs by name, city, country, or address..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />

@@ -17,7 +17,6 @@ type Pub = {
   website?: string;
   description?: string;
   imageUrl?: string;
-  tags: string[];
   createdAt: string;
   operator?: string;
   area?: string;
@@ -196,9 +195,7 @@ export default function PubPage() {
       });
 
       body.id = pub.id;
-      if (pub.tags) {
-        body.tags = pub.tags;
-      }
+
       if (pub.createdAt) {
         body.createdAt = pub.createdAt;
       }
@@ -408,22 +405,6 @@ export default function PubPage() {
               </label>
               <br />
               <label>
-                Tags:{" "}
-                <input
-                  value={editFields.tags ? editFields.tags.join(", ") : ""}
-                  onChange={(e) =>
-                    handleFieldChange(
-                      "tags",
-                      e.target.value
-                        .split(",")
-                        .map((t: string) => t.trim())
-                        .filter(Boolean)
-                    )
-                  }
-                />
-              </label>
-              <br />
-              <label>
                 Latitude:{" "}
                 <input
                   type="number"
@@ -530,10 +511,6 @@ export default function PubPage() {
                 ) : (
                   " -"
                 )}
-              </p>
-              <p>
-                <strong>Tags:</strong>{" "}
-                {pub.tags.length ? pub.tags.join(", ") : "-"}
               </p>
               <p>
                 <strong>Latitude:</strong> {pub.lat}

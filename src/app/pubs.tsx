@@ -8,7 +8,6 @@ type Pub = {
   name: string;
   city: string;
   address: string;
-  tags: string[];
 };
 
 export default function Pubs() {

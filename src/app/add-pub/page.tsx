@@ -14,7 +14,6 @@ export default function AddPubPage() {
   const [website, setWebsite] = useState<string | undefined>(undefined);
   const [description, setDescription] = useState<string | undefined>(undefined);
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
-  const [tags, setTags] = useState<string[]>([]);
   const [operator, setOperator] = useState<string | undefined>(undefined);
   const [area, setArea] = useState<string | undefined>(undefined);
   const [phone, setPhone] = useState<string | undefined>(undefined);
@@ -84,7 +83,6 @@ export default function AddPubPage() {
         website,
         description,
         imageUrl,
-        tags,
         operator,
         area,
         phone,
@@ -120,15 +118,6 @@ export default function AddPubPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTags(
-      e.target.value
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean)
-    );
   };
 
   return (
@@ -275,15 +264,6 @@ export default function AddPubPage() {
               name="imageUrl"
               value={imageUrl ?? ""}
               onChange={(e) => setImageUrl(e.target.value || undefined)}
-            />
-          </div>
-          <div>
-            <label htmlFor="tags">Tags (comma separated):</label>
-            <input
-              id="tags"
-              name="tags"
-              value={tags.join(", ")}
-              onChange={handleTagsChange}
             />
           </div>
           <div>
