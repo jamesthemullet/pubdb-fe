@@ -121,6 +121,7 @@ export default function PubPage() {
             : "";
       });
       initialErrors.websiteError = "";
+      initialErrors.phoneError = "";
       setFieldErrors(initialErrors);
       setEditing(true);
     }
@@ -144,6 +145,12 @@ export default function PubPage() {
       setFieldErrors((prev) => ({
         ...prev,
         websiteError: errorMessage,
+      }));
+    }
+    if (field === "phone") {
+      setFieldErrors((prev) => ({
+        ...prev,
+        phoneError: "",
       }));
     }
   }
@@ -174,8 +181,8 @@ export default function PubPage() {
       return;
     }
 
-    if (fieldErrors.websiteError) {
-      setSaveError(fieldErrors.websiteError);
+    if (fieldErrors.websiteError || fieldErrors.phoneError) {
+      setSaveError(fieldErrors.websiteError || fieldErrors.phoneError);
       return;
     }
 
@@ -359,8 +366,12 @@ export default function PubPage() {
                     const value = e.target.value;
                     if (/^\+?[0-9\-\s]*$/.test(value) || value === "") {
                       handleFieldChange("phone", value);
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        phoneError: "",
+                      }));
                     } else {
-                      setEditFields((prev) => ({
+                      setFieldErrors((prev) => ({
                         ...prev,
                         phoneError:
                           "Invalid phone number format. Only numbers, spaces, and dashes are allowed.",
@@ -368,8 +379,8 @@ export default function PubPage() {
                     }
                   }}
                 />
-                {editFields.phoneError && (
-                  <span style={{ color: "red" }}>{editFields.phoneError}</span>
+                {fieldErrors.phoneError && (
+                  <span style={{ color: "red" }}>{fieldErrors.phoneError}</span>
                 )}
               </label>
               <br />
