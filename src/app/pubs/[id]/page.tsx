@@ -26,7 +26,37 @@ type Pub = {
     string,
     { open?: string; close?: string; closed?: boolean }
   >;
+  beerGardens?: BeerGarden[];
 };
+
+type SunExposure = "FULL_SUN" | "PARTIAL_SUN" | "SHADED";
+
+type BeerGarden = {
+  id?: string;
+  pubId?: string;
+  name: string;
+  description?: string;
+  seatingCapacity?: number;
+  sunExposure?: SunExposure;
+  isCovered?: boolean;
+  isHeated?: boolean;
+  isFamilyFriendly?: boolean;
+  petFriendly?: boolean;
+  openingHours?: Record<
+    string,
+    { open?: string; close?: string; closed?: boolean }
+  >;
+  imageUrl?: string;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+const SUN_EXPOSURE_OPTIONS: Array<{ label: string; value: SunExposure }> = [
+  { label: "Full sun", value: "FULL_SUN" },
+  { label: "Partial sun", value: "PARTIAL_SUN" },
+  { label: "Shaded", value: "SHADED" },
+];
 
 export default function PubPage() {
   const { id } = useParams();
@@ -102,7 +132,10 @@ export default function PubPage() {
 
   function handleEditClick() {
     if (pub) {
-      setEditFields({ ...pub });
+      setEditFields({
+        ...pub,
+        beerGardens: pub.beerGardens ? [...pub.beerGardens] : [],
+      });
       setSaveError(null);
       // Initialize errors for required fields
       const requiredFields: (keyof Pub)[] = [
@@ -155,6 +188,30 @@ export default function PubPage() {
     }
   }
 
+  function updateBeerGarden(index: number, patch: Partial<BeerGarden>) {
+    setEditFields((prev) => {
+      const gardens = [...(prev.beerGardens ?? [])];
+      const current = gardens[index] ?? createEmptyBeerGarden();
+      gardens[index] = { ...current, ...patch };
+      return { ...prev, beerGardens: gardens };
+    });
+  }
+
+  function addBeerGarden() {
+    setEditFields((prev) => ({
+      ...prev,
+      beerGardens: [...(prev.beerGardens ?? []), createEmptyBeerGarden()],
+    }));
+  }
+
+  function removeBeerGarden(index: number) {
+    setEditFields((prev) => {
+      const gardens = [...(prev.beerGardens ?? [])];
+      gardens.splice(index, 1);
+      return { ...prev, beerGardens: gardens };
+    });
+  }
+
   async function handleSave() {
     if (!pub) return;
 
@@ -192,11 +249,16 @@ export default function PubPage() {
       const token = localStorage.getItem("token");
       const body: any = {};
       Object.entries(editFields).forEach(([key, value]) => {
-        if (
-          value !== undefined &&
-          value !== null &&
-          (Array.isArray(value) ? value.length > 0 : value !== "")
-        ) {
+        if (value === undefined || value === null) return;
+        if (Array.isArray(value)) {
+          if (key === "beerGardens") {
+            body[key] = value.map((garden) => sanitizeBeerGarden(garden));
+          } else if (value.length > 0) {
+            body[key] = value;
+          }
+          return;
+        }
+        if (value !== "") {
           body[key] = value;
         }
       });
@@ -415,6 +477,177 @@ export default function PubPage() {
                 />
               </label>
               <br />
+              <div style={{ marginTop: "1rem" }}>
+                <h3>Beer Gardens</h3>
+                {(editFields.beerGardens || []).length === 0 && (
+                  <p style={{ color: "#666" }}>No beer gardens added yet.</p>
+                )}
+                {(editFields.beerGardens || []).map((garden, index) => (
+                  <div
+                    key={garden.id || `garden-${index}`}
+                    style={{
+                      border: "1px solid #ddd",
+                      padding: "0.75rem",
+                      borderRadius: 6,
+                      marginBottom: "0.75rem",
+                      display: "grid",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <strong>Garden {index + 1}</strong>
+                      <button
+                        type="button"
+                        onClick={() => removeBeerGarden(index)}
+                        className="secondary"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <label>
+                      Name:{" "}
+                      <input
+                        value={garden.name}
+                        onChange={(e) =>
+                          updateBeerGarden(index, { name: e.target.value })
+                        }
+                        required
+                      />
+                    </label>
+                    <label>
+                      Description:{" "}
+                      <textarea
+                        value={garden.description ?? ""}
+                        onChange={(e) =>
+                          updateBeerGarden(index, {
+                            description: e.target.value || undefined,
+                          })
+                        }
+                      />
+                    </label>
+                    <label>
+                      Seating capacity:{" "}
+                      <input
+                        type="number"
+                        value={garden.seatingCapacity ?? ""}
+                        onChange={(e) =>
+                          updateBeerGarden(index, {
+                            seatingCapacity:
+                              e.target.value === ""
+                                ? undefined
+                                : Number.parseInt(e.target.value, 10),
+                          })
+                        }
+                        min={0}
+                      />
+                    </label>
+                    <label>
+                      Sun exposure:{" "}
+                      <select
+                        value={garden.sunExposure ?? ""}
+                        onChange={(e) =>
+                          updateBeerGarden(index, {
+                            sunExposure:
+                              (e.target.value as SunExposure) || undefined,
+                          })
+                        }
+                      >
+                        <option value="">Select sun exposure</option>
+                        {SUN_EXPOSURE_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Image URL:{" "}
+                      <input
+                        value={garden.imageUrl ?? ""}
+                        onChange={(e) =>
+                          updateBeerGarden(index, {
+                            imageUrl: e.target.value || undefined,
+                          })
+                        }
+                      />
+                    </label>
+                    <label>
+                      Notes:{" "}
+                      <textarea
+                        value={garden.notes ?? ""}
+                        onChange={(e) =>
+                          updateBeerGarden(index, {
+                            notes: e.target.value || undefined,
+                          })
+                        }
+                      />
+                    </label>
+                    <div style={{ display: "grid", gap: "0.35rem" }}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={garden.isCovered ?? false}
+                          onChange={(e) =>
+                            updateBeerGarden(index, {
+                              isCovered: e.target.checked,
+                            })
+                          }
+                        />{" "}
+                        Covered
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={garden.isHeated ?? false}
+                          onChange={(e) =>
+                            updateBeerGarden(index, {
+                              isHeated: e.target.checked,
+                            })
+                          }
+                        />{" "}
+                        Heated
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={garden.isFamilyFriendly ?? false}
+                          onChange={(e) =>
+                            updateBeerGarden(index, {
+                              isFamilyFriendly: e.target.checked,
+                            })
+                          }
+                        />{" "}
+                        Family friendly
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={garden.petFriendly ?? false}
+                          onChange={(e) =>
+                            updateBeerGarden(index, {
+                              petFriendly: e.target.checked,
+                            })
+                          }
+                        />{" "}
+                        Pet friendly
+                      </label>
+                    </div>
+                    <label>
+                      Opening Hours:{" "}
+                      <OpeningHoursEditor
+                        value={garden.openingHours}
+                        onChange={(val) =>
+                          updateBeerGarden(index, { openingHours: val })
+                        }
+                      />
+                    </label>
+                  </div>
+                ))}
+                <button type="button" onClick={addBeerGarden}>
+                  Add beer garden
+                </button>
+              </div>
+              <br />
               <label>
                 Latitude:{" "}
                 <input
@@ -523,6 +756,85 @@ export default function PubPage() {
                   " -"
                 )}
               </p>
+              <div>
+                <strong>Beer Gardens:</strong>
+                {pub.beerGardens && pub.beerGardens.length > 0 ? (
+                  <div style={{ marginTop: "0.5rem", display: "grid" }}>
+                    {pub.beerGardens.map((garden, index) => (
+                      <div
+                        key={garden.id || `garden-${index}`}
+                        style={{
+                          border: "1px solid #ddd",
+                          padding: "0.75rem",
+                          borderRadius: 6,
+                          marginBottom: "0.75rem",
+                        }}
+                      >
+                        <p>
+                          <strong>Name:</strong> {garden.name}
+                        </p>
+                        <p>
+                          <strong>Description:</strong>{" "}
+                          {garden.description || "-"}
+                        </p>
+                        <p>
+                          <strong>Seating capacity:</strong>{" "}
+                          {garden.seatingCapacity ?? "-"}
+                        </p>
+                        <p>
+                          <strong>Sun exposure:</strong>{" "}
+                          {garden.sunExposure || "-"}
+                        </p>
+                        <p>
+                          <strong>Covered:</strong>{" "}
+                          {garden.isCovered ? "Yes" : "No"}
+                        </p>
+                        <p>
+                          <strong>Heated:</strong>{" "}
+                          {garden.isHeated ? "Yes" : "No"}
+                        </p>
+                        <p>
+                          <strong>Family friendly:</strong>{" "}
+                          {garden.isFamilyFriendly ? "Yes" : "No"}
+                        </p>
+                        <p>
+                          <strong>Pet friendly:</strong>{" "}
+                          {garden.petFriendly ? "Yes" : "No"}
+                        </p>
+                        <p>
+                          <strong>Image:</strong>{" "}
+                          {garden.imageUrl ? (
+                            <a
+                              href={garden.imageUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {garden.imageUrl}
+                            </a>
+                          ) : (
+                            "-"
+                          )}
+                        </p>
+                        <p>
+                          <strong>Notes:</strong> {garden.notes || "-"}
+                        </p>
+                        <p>
+                          <strong>Opening Hours:</strong>
+                          {garden.openingHours ? (
+                            <div style={{ marginTop: "0.5rem" }}>
+                              {renderOpeningHours(garden.openingHours)}
+                            </div>
+                          ) : (
+                            " -"
+                          )}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  " -"
+                )}
+              </div>
               <p>
                 <strong>Latitude:</strong> {pub.lat}
               </p>
@@ -609,6 +921,46 @@ function extractErrorMessage(errorPayload: unknown): string {
   }
 
   return String(errorPayload);
+}
+
+function createEmptyBeerGarden(): BeerGarden {
+  return {
+    id: `temp-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    name: "",
+    description: "",
+    seatingCapacity: undefined,
+    sunExposure: undefined,
+    isCovered: false,
+    isHeated: false,
+    isFamilyFriendly: false,
+    petFriendly: false,
+    openingHours: undefined,
+    imageUrl: "",
+    notes: "",
+  };
+}
+
+function sanitizeBeerGarden(garden: BeerGarden): BeerGarden {
+  const cleaned: BeerGarden = { ...garden };
+  if (cleaned.id && cleaned.id.startsWith("temp-")) {
+    delete cleaned.id;
+  }
+  if (typeof cleaned.name === "string") {
+    cleaned.name = cleaned.name.trim();
+  }
+  if (cleaned.description !== undefined && cleaned.description !== null) {
+    cleaned.description = cleaned.description.trim() || undefined;
+  }
+  if (cleaned.imageUrl !== undefined && cleaned.imageUrl !== null) {
+    cleaned.imageUrl = cleaned.imageUrl.trim() || undefined;
+  }
+  if (cleaned.notes !== undefined && cleaned.notes !== null) {
+    cleaned.notes = cleaned.notes.trim() || undefined;
+  }
+  if (Number.isNaN(cleaned.seatingCapacity)) {
+    cleaned.seatingCapacity = undefined;
+  }
+  return cleaned;
 }
 
 function EditButton({

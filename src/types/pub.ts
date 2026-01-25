@@ -6,6 +6,26 @@ export type OpeningHoursEntry = {
 
 export type OpeningHoursMap = Record<string, OpeningHoursEntry>;
 
+export type SunExposure = "FULL_SUN" | "PARTIAL_SUN" | "SHADED";
+
+export type BeerGarden = {
+  id?: string;
+  pubId?: string;
+  name: string;
+  description?: string;
+  seatingCapacity?: number;
+  sunExposure?: SunExposure;
+  isCovered?: boolean;
+  isHeated?: boolean;
+  isFamilyFriendly?: boolean;
+  petFriendly?: boolean;
+  openingHours?: OpeningHoursMap;
+  imageUrl?: string;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type Pub = {
   id: string;
   name: string;
@@ -24,4 +44,5 @@ export type Pub = {
   phone?: string;
   borough?: string;
   openingHours?: OpeningHoursMap;
+  beerGardens?: BeerGarden[];
 };

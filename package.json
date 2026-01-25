@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "ts-check": "tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "lint:errors": "biome check . | findstr error"
