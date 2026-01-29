@@ -27,9 +27,28 @@ type Pub = {
     { open?: string; close?: string; closed?: boolean }
   >;
   beerGardens?: BeerGarden[];
+  beerTypes?: Array<BeerType | PubBeerType>;
+  beerTypeIds?: string[];
+  beerType?: BeerType | string | null;
 };
 
 type SunExposure = "FULL_SUN" | "PARTIAL_SUN" | "SHADED";
+
+type BeerColour = "PALE" | "GOLDEN" | "AMBER" | "BROWN" | "DARK" | "BLACK";
+
+type BeerType = {
+  id: string;
+  name: string;
+  description?: string | null;
+  colour?: BeerColour | null;
+  isSystem?: boolean;
+  isActive?: boolean;
+};
+
+type PubBeerType = {
+  beerTypeId: string;
+  beerType?: BeerType | null;
+};
 
 type BeerGarden = {
   id?: string;
@@ -70,6 +89,9 @@ export default function PubPage() {
     []
   );
   const [countriesLoading, setCountriesLoading] = useState(false);
+  const [beerTypeOptions, setBeerTypeOptions] = useState<BeerType[]>([]);
+  const [beerTypesLoading, setBeerTypesLoading] = useState(false);
+  const [beerTypesError, setBeerTypesError] = useState<string | null>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -108,6 +130,54 @@ export default function PubPage() {
   }, []);
 
   useEffect(() => {
+    let ignore = false;
+    async function fetchBeerTypes() {
+      setBeerTypesLoading(true);
+      setBeerTypesError(null);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const token = localStorage.getItem("token");
+      const apiKey = process.env.NEXT_PUBLIC_TESTING_API_KEY;
+      const url = `${apiUrl}/api/v1/beer-types`;
+
+      try {
+        const urlWithKey = apiKey ? `${url}?api_key=${apiKey}` : url;
+        const res = await fetch(urlWithKey, {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(apiKey ? { "X-API-Key": apiKey } : {}),
+          },
+        });
+        if (!res.ok) {
+          throw new Error(`Failed to fetch beer types: ${res.status}`);
+        }
+        const payload = await res.json();
+        const list = normalizeBeerTypes(payload);
+        if (!ignore) {
+          const sorted = list
+            .filter((type) => type && (type.isActive ?? true))
+            .sort((a, b) => a.name.localeCompare(b.name));
+          setBeerTypeOptions(sorted);
+        }
+      } catch (err) {
+        if (!ignore) {
+          setBeerTypesError(
+            err instanceof Error ? err.message : "Unable to load beer types."
+          );
+        }
+      } finally {
+        if (!ignore) {
+          setBeerTypesLoading(false);
+        }
+      }
+    }
+
+    fetchBeerTypes();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  useEffect(() => {
     async function fetchPub() {
       try {
         const apiUrl =
@@ -135,6 +205,7 @@ export default function PubPage() {
       setEditFields({
         ...pub,
         beerGardens: pub.beerGardens ? [...pub.beerGardens] : [],
+        beerTypeIds: getBeerTypeIdsFromPub(pub),
       });
       setSaveError(null);
       // Initialize errors for required fields
@@ -186,6 +257,18 @@ export default function PubPage() {
         phoneError: "",
       }));
     }
+  }
+
+  function toggleBeerType(beerTypeId: string) {
+    setEditFields((prev) => {
+      const current = new Set(prev.beerTypeIds ?? []);
+      if (current.has(beerTypeId)) {
+        current.delete(beerTypeId);
+      } else {
+        current.add(beerTypeId);
+      }
+      return { ...prev, beerTypeIds: Array.from(current) };
+    });
   }
 
   function updateBeerGarden(index: number, patch: Partial<BeerGarden>) {
@@ -248,11 +331,21 @@ export default function PubPage() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const token = localStorage.getItem("token");
       const body: any = {};
+      if (Array.isArray(editFields.beerTypeIds)) {
+        body.beerTypes = editFields.beerTypeIds.map((beerTypeId) => ({
+          beerTypeId,
+        }));
+      }
       Object.entries(editFields).forEach(([key, value]) => {
         if (value === undefined || value === null) return;
+        if (key === "beerType") return;
         if (Array.isArray(value)) {
           if (key === "beerGardens") {
             body[key] = value.map((garden) => sanitizeBeerGarden(garden));
+          } else if (key === "beerTypes") {
+            return;
+          } else if (key === "beerTypeIds") {
+            return;
           } else if (value.length > 0) {
             body[key] = value;
           }
@@ -467,6 +560,37 @@ export default function PubPage() {
                     handleFieldChange("description", e.target.value)
                   }
                 />
+              </label>
+              <br />
+              <label>
+                Beer Types:{" "}
+                <div style={{ marginTop: "0.35rem", display: "grid" }}>
+                  {beerTypesLoading ? (
+                    <span>Loading beer types…</span>
+                  ) : beerTypeOptions.length > 0 ? (
+                    <div style={{ display: "grid", gap: "0.35rem" }}>
+                      {beerTypeOptions.map((type) => (
+                        <label key={type.id} style={{ display: "flex" }}>
+                          <input
+                            type="checkbox"
+                            checked={(editFields.beerTypeIds ?? []).includes(
+                              type.id
+                            )}
+                            onChange={() => toggleBeerType(type.id)}
+                          />
+                          <span style={{ marginLeft: "0.5rem" }}>
+                            {type.name}
+                            {type.colour ? ` (${type.colour})` : ""}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <span style={{ color: "#666" }}>
+                      {beerTypesError || "No beer types available."}
+                    </span>
+                  )}
+                </div>
               </label>
               <br />
               <label>
@@ -747,6 +871,12 @@ export default function PubPage() {
                 <strong>Description:</strong> {pub.description || "-"}
               </p>
               <p>
+                <strong>Beer Types:</strong>{" "}
+                {getBeerTypeNames(pub).length
+                  ? getBeerTypeNames(pub).join(", ")
+                  : "-"}
+              </p>
+              <p>
                 <strong>Opening Hours:</strong>
                 {pub.openingHours ? (
                   <div style={{ marginTop: "0.5rem" }}>
@@ -853,6 +983,69 @@ export default function PubPage() {
       )}
     </>
   );
+}
+
+function normalizeBeerTypes(payload: unknown): BeerType[] {
+  if (!payload) return [];
+  if (Array.isArray(payload)) {
+    return payload as BeerType[];
+  }
+  if (typeof payload === "object") {
+    const record = payload as Record<string, unknown>;
+    if (Array.isArray(record.data)) {
+      return record.data as BeerType[];
+    }
+    if (Array.isArray(record.beerTypes)) {
+      return record.beerTypes as BeerType[];
+    }
+  }
+  return [];
+}
+
+function getBeerTypeIdsFromPub(pub: Pub): string[] {
+  if (Array.isArray(pub.beerTypeIds) && pub.beerTypeIds.length > 0) {
+    return pub.beerTypeIds;
+  }
+  if (Array.isArray(pub.beerTypes) && pub.beerTypes.length > 0) {
+    return pub.beerTypes
+      .map((entry) => {
+        if (!entry) return undefined;
+        if ("beerTypeId" in entry) return entry.beerTypeId;
+        return entry.id;
+      })
+      .filter(Boolean) as string[];
+  }
+  if (pub.beerType) {
+    if (typeof pub.beerType === "string") {
+      return [pub.beerType];
+    }
+    return pub.beerType.id ? [pub.beerType.id] : [];
+  }
+  return [];
+}
+
+function getBeerTypeNames(pub: Pub): string[] {
+  if (Array.isArray(pub.beerTypes) && pub.beerTypes.length > 0) {
+    return pub.beerTypes
+      .map((entry) => {
+        if (!entry) return undefined;
+        if ("beerType" in entry) {
+          return entry.beerType?.name || entry.beerTypeId;
+        }
+        return entry.name || entry.id;
+      })
+      .filter(Boolean) as string[];
+  }
+  if (pub.beerType) {
+    if (typeof pub.beerType === "string") {
+      return [pub.beerType];
+    }
+    return [pub.beerType.name || pub.beerType.id].filter(Boolean);
+  }
+  if (Array.isArray(pub.beerTypeIds) && pub.beerTypeIds.length > 0) {
+    return pub.beerTypeIds;
+  }
+  return [];
 }
 
 function isValidHttpUrl(url: string): boolean {
