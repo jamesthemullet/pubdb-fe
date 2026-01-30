@@ -290,6 +290,14 @@ export default function PubPage() {
     });
   }
 
+  function isBeerGarden(item: unknown): item is BeerGarden {
+    return (
+      typeof item === "object" &&
+      item !== null &&
+      "name" in (item as BeerGarden)
+    );
+  }
+
   async function handleSave() {
     if (!pub) return;
 
@@ -336,7 +344,8 @@ export default function PubPage() {
         if (key === "beerType") return;
         if (Array.isArray(value)) {
           if (key === "beerGardens") {
-            body[key] = value.map((garden) => sanitizeBeerGarden(garden));
+            const gardens = value.filter(isBeerGarden);
+            body[key] = gardens.map((garden) => sanitizeBeerGarden(garden));
           } else if (key === "beerTypes") {
             return;
           } else if (key === "beerTypeIds") {
@@ -1026,6 +1035,9 @@ function getBeerTypeNames(pub: Pub): string[] {
         if (!entry) return undefined;
         if ("beerType" in entry) {
           return entry.beerType?.name || entry.beerTypeId;
+        }
+        if ("beerTypeId" in entry) {
+          return entry.beerTypeId;
         }
         return entry.name || entry.id;
       })
