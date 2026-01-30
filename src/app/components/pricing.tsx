@@ -116,8 +116,6 @@ const Pricing: React.FC = () => {
     modalProrationItems[0]?.currency ||
     "usd";
   const estimatedDueNow = firstNumber(
-    modalUpcoming?.estimatedAmount,
-    modalUpcoming?.proratedCharge,
     modalInvoice?.amount_due,
     modalUpcoming?.amount_due
   );
@@ -130,6 +128,16 @@ const Pricing: React.FC = () => {
     modalUpcoming?.prorationOnlyCharge,
     modalUpcoming?.proratedCharge
   );
+  const upcomingBillCharge = firstNumber(
+    modalUpcoming?.proratedCharge,
+    modalUpcoming?.estimatedAmount
+  );
+  const inferredProrationAddedToNextBill =
+    typeof estimatedDueNow !== "number" &&
+    typeof nextPeriodCharge === "number" &&
+    typeof prorationOnlyCharge === "number" &&
+    typeof modalUpcoming?.estimatedAmount === "number" &&
+    modalUpcoming.estimatedAmount === nextPeriodCharge + prorationOnlyCharge;
   const nextPaymentTimestamp = firstNumber(
     modalUpcoming?.nextPaymentAttempt,
     modalInvoice?.next_payment_attempt,
@@ -382,6 +390,11 @@ const Pricing: React.FC = () => {
                     <strong>Due now:</strong>{" "}
                     {formatCurrency(estimatedDueNow, estimateCurrency)}
                   </p>
+                ) : inferredProrationAddedToNextBill ? (
+                  <p style={{ color: "#666" }}>
+                    No immediate charge. The mid-cycle adjustment will be added
+                    to your next bill.
+                  </p>
                 ) : (
                   <p style={{ color: "#666" }}>
                     We could not determine your immediate charge. You can
@@ -390,15 +403,14 @@ const Pricing: React.FC = () => {
                 )}
                 {typeof nextPeriodCharge === "number" ? (
                   <p>
-                    <strong>Next period charge:</strong>{" "}
+                    <strong>Normal bill:</strong>{" "}
                     {formatCurrency(nextPeriodCharge, estimateCurrency)}
                   </p>
                 ) : null}
-                {typeof prorationOnlyCharge === "number" &&
-                typeof modalUpcoming?.prorationOnlyCharge === "number" ? (
+                {typeof upcomingBillCharge === "number" ? (
                   <p>
-                    <strong>Proration credit:</strong>{" "}
-                    {formatCurrency(prorationOnlyCharge, estimateCurrency)}
+                    <strong>Upcoming bill (with adjustment):</strong>{" "}
+                    {formatCurrency(upcomingBillCharge, estimateCurrency)}
                   </p>
                 ) : null}
                 {nextPaymentDisplay ? (
@@ -412,7 +424,7 @@ const Pricing: React.FC = () => {
                     <ul style={{ paddingLeft: 16 }}>
                       {modalProrationItems.map((item: any, index: number) => (
                         <li key={item.id || index}>
-                          {(item.description || "Proration").trim()} {" - "}
+                          {(item.description || "Adjustment").trim()} {" - "}
                           {formatCurrency(
                             typeof item.amount === "number"
                               ? item.amount
