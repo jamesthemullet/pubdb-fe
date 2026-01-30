@@ -43,11 +43,7 @@ export default function Pubs() {
     async function fetchPubs() {
       try {
         setError(null);
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await fetch(
-          `${apiUrl}/api/v1/pubs?api_key=${process.env.NEXT_PUBLIC_TESTING_API_KEY}`
-        );
+        const res = await fetch("/api/pubs");
 
         if (!res.ok) {
           const errorData = await res.json();

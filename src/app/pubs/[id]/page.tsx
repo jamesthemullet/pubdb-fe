@@ -134,17 +134,12 @@ export default function PubPage() {
     async function fetchBeerTypes() {
       setBeerTypesLoading(true);
       setBeerTypesError(null);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const token = localStorage.getItem("token");
-      const apiKey = process.env.NEXT_PUBLIC_TESTING_API_KEY;
-      const url = `${apiUrl}/api/v1/beer-types`;
 
       try {
-        const urlWithKey = apiKey ? `${url}?api_key=${apiKey}` : url;
-        const res = await fetch(urlWithKey, {
+        const res = await fetch("/api/beer-types", {
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            ...(apiKey ? { "X-API-Key": apiKey } : {}),
           },
         });
         if (!res.ok) {
