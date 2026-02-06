@@ -41,9 +41,11 @@ export default function Pubs() {
 
   useEffect(() => {
     async function fetchPubs() {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       try {
         setError(null);
-        const res = await fetch("/api/pubs");
+        console.log(100000);
+        const res = await fetch(`${apiUrl}/pubs`);
 
         if (!res.ok) {
           const errorData = await res.json();
@@ -100,7 +102,7 @@ export default function Pubs() {
           <p style={{ color: "red" }}>Error loading pubs: {error}</p>
           <button onClick={() => window.location.reload()}>Try Again</button>
         </div>
-      ) : pubs.length === 0 ? (
+      ) : !pubs || pubs.length === 0 ? (
         <p>No pubs found in the database.</p>
       ) : (
         <div>

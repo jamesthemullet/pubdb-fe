@@ -1142,23 +1142,55 @@ function createEmptyBeerGarden(): BeerGarden {
 
 function sanitizeBeerGarden(garden: BeerGarden): BeerGarden {
   const cleaned: BeerGarden = { ...garden };
+  Object.keys(cleaned).forEach((key) => {
+    const value = cleaned[key as keyof BeerGarden];
+    if (value === null) {
+      delete cleaned[key as keyof BeerGarden];
+    }
+  });
   if (cleaned.id && cleaned.id.startsWith("temp-")) {
     delete cleaned.id;
   }
   if (typeof cleaned.name === "string") {
     cleaned.name = cleaned.name.trim();
+  } else if (cleaned.name === undefined) {
+    cleaned.name = "";
   }
-  if (cleaned.description !== undefined && cleaned.description !== null) {
+  if (typeof cleaned.description === "string") {
     cleaned.description = cleaned.description.trim() || undefined;
   }
-  if (cleaned.imageUrl !== undefined && cleaned.imageUrl !== null) {
+  if (typeof cleaned.imageUrl === "string") {
     cleaned.imageUrl = cleaned.imageUrl.trim() || undefined;
   }
-  if (cleaned.notes !== undefined && cleaned.notes !== null) {
+  if (typeof cleaned.notes === "string") {
     cleaned.notes = cleaned.notes.trim() || undefined;
   }
-  if (Number.isNaN(cleaned.seatingCapacity)) {
+  if (cleaned.openingHours === null) {
+    cleaned.openingHours = undefined;
+  }
+  if (cleaned.sunExposure === null) {
+    cleaned.sunExposure = undefined;
+  }
+  if (
+    cleaned.seatingCapacity === null ||
+    Number.isNaN(cleaned.seatingCapacity)
+  ) {
     cleaned.seatingCapacity = undefined;
+  }
+  if (cleaned.isCovered === null) {
+    cleaned.isCovered = undefined;
+  }
+  if (cleaned.isHeated === null) {
+    cleaned.isHeated = undefined;
+  }
+  if (cleaned.isFamilyFriendly === null) {
+    cleaned.isFamilyFriendly = undefined;
+  }
+  if (cleaned.petFriendly === null) {
+    cleaned.petFriendly = undefined;
+  }
+  if (cleaned.pubId === null) {
+    cleaned.pubId = undefined;
   }
   return cleaned;
 }
