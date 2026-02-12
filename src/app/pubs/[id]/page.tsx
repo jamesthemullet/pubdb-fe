@@ -17,6 +17,19 @@ type Pub = {
   website?: string;
   description?: string;
   imageUrl?: string;
+  chainName?: string;
+  isIndependent?: boolean;
+  hasFood?: boolean;
+  hasSundayRoast?: boolean;
+  hasBeerGarden?: boolean;
+  hasCaskAle?: boolean;
+  isBeerFocused?: boolean;
+  isDogFriendly?: boolean;
+  isFamilyFriendly?: boolean;
+  hasStepFreeAccess?: boolean;
+  hasAccessibleToilet?: boolean;
+  hasLiveSport?: boolean;
+  hasLiveMusic?: boolean;
   createdAt: string;
   operator?: string;
   area?: string;
@@ -89,6 +102,11 @@ export default function PubPage() {
     []
   );
   const [countriesLoading, setCountriesLoading] = useState(false);
+
+  const getCountryName = (code: string) => {
+    const country = countries.find((c) => c.code === code);
+    return country?.name || code;
+  };
   const [beerTypeOptions, setBeerTypeOptions] = useState<BeerType[]>([]);
   const [beerTypesLoading, setBeerTypesLoading] = useState(false);
   const [beerTypesError, setBeerTypesError] = useState<string | null>(null);
@@ -450,7 +468,7 @@ export default function PubPage() {
                       : "Select a country"}
                   </option>
                   {countries.map((country) => (
-                    <option key={country.code} value={country.name}>
+                    <option key={country.code} value={country.code}>
                       {country.name}
                     </option>
                   ))}
@@ -565,6 +583,139 @@ export default function PubPage() {
                   }
                 />
               </label>
+              <br />
+              <label>
+                Chain name:{" "}
+                <input
+                  value={editFields.chainName ?? ""}
+                  onChange={(e) =>
+                    handleFieldChange("chainName", e.target.value)
+                  }
+                />
+              </label>
+              <br />
+              <div style={{ display: "grid", gap: "0.35rem" }}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editFields.isIndependent ?? false}
+                    onChange={(e) =>
+                      handleFieldChange("isIndependent", e.target.checked)
+                    }
+                  />{" "}
+                  Independent
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editFields.hasFood ?? false}
+                    onChange={(e) =>
+                      handleFieldChange("hasFood", e.target.checked)
+                    }
+                  />{" "}
+                  Food available
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editFields.hasSundayRoast ?? false}
+                    onChange={(e) =>
+                      handleFieldChange("hasSundayRoast", e.target.checked)
+                    }
+                  />{" "}
+                  Sunday roast
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editFields.hasBeerGarden ?? false}
+                    onChange={(e) =>
+                      handleFieldChange("hasBeerGarden", e.target.checked)
+                    }
+                  />{" "}
+                  Beer garden
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editFields.hasCaskAle ?? false}
+                    onChange={(e) =>
+                      handleFieldChange("hasCaskAle", e.target.checked)
+                    }
+                  />{" "}
+                  Cask ale
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editFields.isBeerFocused ?? false}
+                    onChange={(e) =>
+                      handleFieldChange("isBeerFocused", e.target.checked)
+                    }
+                  />{" "}
+                  Beer-focused
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editFields.isDogFriendly ?? false}
+                    onChange={(e) =>
+                      handleFieldChange("isDogFriendly", e.target.checked)
+                    }
+                  />{" "}
+                  Dog friendly
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editFields.isFamilyFriendly ?? false}
+                    onChange={(e) =>
+                      handleFieldChange("isFamilyFriendly", e.target.checked)
+                    }
+                  />{" "}
+                  Family friendly
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editFields.hasStepFreeAccess ?? false}
+                    onChange={(e) =>
+                      handleFieldChange("hasStepFreeAccess", e.target.checked)
+                    }
+                  />{" "}
+                  Step-free access
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editFields.hasAccessibleToilet ?? false}
+                    onChange={(e) =>
+                      handleFieldChange("hasAccessibleToilet", e.target.checked)
+                    }
+                  />{" "}
+                  Accessible toilet
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editFields.hasLiveSport ?? false}
+                    onChange={(e) =>
+                      handleFieldChange("hasLiveSport", e.target.checked)
+                    }
+                  />{" "}
+                  Live sport
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={editFields.hasLiveMusic ?? false}
+                    onChange={(e) =>
+                      handleFieldChange("hasLiveMusic", e.target.checked)
+                    }
+                  />{" "}
+                  Live music
+                </label>
+              </div>
               <br />
               <label>
                 Beer Types:{" "}
@@ -837,7 +988,7 @@ export default function PubPage() {
                 <strong>City:</strong> {pub.city}
               </p>
               <p>
-                <strong>Country:</strong> {pub.country}
+                <strong>Country:</strong> {getCountryName(pub.country)}
               </p>
               <p>
                 <strong>Address:</strong> {pub.address}
@@ -873,6 +1024,97 @@ export default function PubPage() {
               </p>
               <p>
                 <strong>Description:</strong> {pub.description || "-"}
+              </p>
+              <p>
+                <strong>Chain name:</strong> {pub.chainName || "-"}
+              </p>
+              <p>
+                <strong>Independent:</strong>{" "}
+                {pub.isIndependent == null
+                  ? "-"
+                  : pub.isIndependent
+                  ? "Yes"
+                  : "No"}
+              </p>
+              <p>
+                <strong>Food available:</strong>{" "}
+                {pub.hasFood == null ? "-" : pub.hasFood ? "Yes" : "No"}
+              </p>
+              <p>
+                <strong>Sunday roast:</strong>{" "}
+                {pub.hasSundayRoast == null
+                  ? "-"
+                  : pub.hasSundayRoast
+                  ? "Yes"
+                  : "No"}
+              </p>
+              <p>
+                <strong>Beer garden:</strong>{" "}
+                {pub.hasBeerGarden == null
+                  ? "-"
+                  : pub.hasBeerGarden
+                  ? "Yes"
+                  : "No"}
+              </p>
+              <p>
+                <strong>Cask ale:</strong>{" "}
+                {pub.hasCaskAle == null ? "-" : pub.hasCaskAle ? "Yes" : "No"}
+              </p>
+              <p>
+                <strong>Beer-focused:</strong>{" "}
+                {pub.isBeerFocused == null
+                  ? "-"
+                  : pub.isBeerFocused
+                  ? "Yes"
+                  : "No"}
+              </p>
+              <p>
+                <strong>Dog friendly:</strong>{" "}
+                {pub.isDogFriendly == null
+                  ? "-"
+                  : pub.isDogFriendly
+                  ? "Yes"
+                  : "No"}
+              </p>
+              <p>
+                <strong>Family friendly:</strong>{" "}
+                {pub.isFamilyFriendly == null
+                  ? "-"
+                  : pub.isFamilyFriendly
+                  ? "Yes"
+                  : "No"}
+              </p>
+              <p>
+                <strong>Step-free access:</strong>{" "}
+                {pub.hasStepFreeAccess == null
+                  ? "-"
+                  : pub.hasStepFreeAccess
+                  ? "Yes"
+                  : "No"}
+              </p>
+              <p>
+                <strong>Accessible toilet:</strong>{" "}
+                {pub.hasAccessibleToilet == null
+                  ? "-"
+                  : pub.hasAccessibleToilet
+                  ? "Yes"
+                  : "No"}
+              </p>
+              <p>
+                <strong>Live sport:</strong>{" "}
+                {pub.hasLiveSport == null
+                  ? "-"
+                  : pub.hasLiveSport
+                  ? "Yes"
+                  : "No"}
+              </p>
+              <p>
+                <strong>Live music:</strong>{" "}
+                {pub.hasLiveMusic == null
+                  ? "-"
+                  : pub.hasLiveMusic
+                  ? "Yes"
+                  : "No"}
               </p>
               <p>
                 <strong>Beer Types:</strong>{" "}
