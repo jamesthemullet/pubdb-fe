@@ -1,12 +1,26 @@
 :root {
-  --background: #ffffff;
-  --text-color: #171717;
-  --button-primary: #0070f3;
-  --button-primary-hover: #005bb5;
-  --button-primary-text: #ffffff;
-  --button-secondary: #eaeaea;
-  --button-secondary-hover: #d4d4d4;
-  --button-secondary-text: #171717;
+  --background: #f7f1e6;
+  --surface: #ffffff;
+  --surface-alt: #f0e6d2;
+  --text-color: #2a1c12;
+  --text-muted: #6b4f3a;
+  --brand: #7a3e1d;
+  --brand-hover: #5f2f16;
+  --accent: #c27a2c;
+  --accent-hover: #a36222;
+  --button-primary: var(--brand);
+  --button-primary-hover: var(--brand-hover);
+  --button-primary-text: #f7f1e6;
+  --button-secondary: var(--surface-alt);
+  --button-secondary-hover: #e1d3b7;
+  --button-secondary-text: var(--text-color);
+  --action-blue: #1c5d99;
+  --action-blue-hover: #154773;
+  --action-red: #b23a32;
+  --action-red-hover: #8f2f29;
+  --action-contrast-text: #f7f1e6;
+  --border-color: #d7c4a3;
+  --input-background: #fffaf0;
 }
 
 @media (prefers-color-scheme: dark) {
