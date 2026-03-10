@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Input from "@/app/components/input/Input";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -50,7 +51,7 @@ export default function ForgotPasswordPage() {
         <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
           <label style={{ display: "block", marginBottom: "1rem" }}>
             Email:
-            <input
+            <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 
 import { useEffect, useState } from "react";
+import Input from "@/app/components/input/Input";
 import OpeningHoursEditor from "../../components/OpeningHoursEditor";
 
 type Pub = {
@@ -429,7 +430,7 @@ export default function PubPage() {
             <div style={{ marginTop: "1rem" }}>
               <label>
                 Name:{" "}
-                <input
+                <Input
                   value={editFields.name ?? ""}
                   onChange={(e) => handleFieldChange("name", e.target.value)}
                   required
@@ -443,7 +444,7 @@ export default function PubPage() {
               <br />
               <label>
                 City:{" "}
-                <input
+                <Input
                   value={editFields.city ?? ""}
                   onChange={(e) => handleFieldChange("city", e.target.value)}
                   required
@@ -482,7 +483,7 @@ export default function PubPage() {
               <br />
               <label>
                 Address:{" "}
-                <input
+                <Input
                   value={editFields.address ?? ""}
                   onChange={(e) => handleFieldChange("address", e.target.value)}
                   required
@@ -496,7 +497,7 @@ export default function PubPage() {
               <br />
               <label>
                 Postcode:{" "}
-                <input
+                <Input
                   value={editFields.postcode ?? ""}
                   onChange={(e) =>
                     handleFieldChange("postcode", e.target.value)
@@ -511,7 +512,7 @@ export default function PubPage() {
               <br />
               <label>
                 Area:{" "}
-                <input
+                <Input
                   value={editFields.area ?? ""}
                   onChange={(e) => handleFieldChange("area", e.target.value)}
                 />
@@ -519,7 +520,7 @@ export default function PubPage() {
               <br />
               <label>
                 Borough:{" "}
-                <input
+                <Input
                   value={editFields.borough ?? ""}
                   onChange={(e) => handleFieldChange("borough", e.target.value)}
                 />
@@ -527,7 +528,7 @@ export default function PubPage() {
               <br />
               <label>
                 Operator:{" "}
-                <input
+                <Input
                   value={editFields.operator ?? ""}
                   onChange={(e) =>
                     handleFieldChange("operator", e.target.value)
@@ -537,7 +538,7 @@ export default function PubPage() {
               <br />
               <label>
                 Phone:{" "}
-                <input
+                <Input
                   value={editFields.phone ?? ""}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -563,7 +564,7 @@ export default function PubPage() {
               <br />
               <label>
                 Website:{" "}
-                <input
+                <Input
                   value={editFields.website ?? ""}
                   onChange={(e) => handleFieldChange("website", e.target.value)}
                 />
@@ -586,7 +587,7 @@ export default function PubPage() {
               <br />
               <label>
                 Chain name:{" "}
-                <input
+                <Input
                   value={editFields.chainName ?? ""}
                   onChange={(e) =>
                     handleFieldChange("chainName", e.target.value)
@@ -596,7 +597,7 @@ export default function PubPage() {
               <br />
               <div style={{ display: "grid", gap: "0.35rem" }}>
                 <label>
-                  <input
+                  <Input
                     type="checkbox"
                     checked={editFields.isIndependent ?? false}
                     onChange={(e) =>
@@ -606,7 +607,7 @@ export default function PubPage() {
                   Independent
                 </label>
                 <label>
-                  <input
+                  <Input
                     type="checkbox"
                     checked={editFields.hasFood ?? false}
                     onChange={(e) =>
@@ -616,7 +617,7 @@ export default function PubPage() {
                   Food available
                 </label>
                 <label>
-                  <input
+                  <Input
                     type="checkbox"
                     checked={editFields.hasSundayRoast ?? false}
                     onChange={(e) =>
@@ -626,7 +627,7 @@ export default function PubPage() {
                   Sunday roast
                 </label>
                 <label>
-                  <input
+                  <Input
                     type="checkbox"
                     checked={editFields.hasBeerGarden ?? false}
                     onChange={(e) =>
@@ -636,7 +637,7 @@ export default function PubPage() {
                   Beer garden
                 </label>
                 <label>
-                  <input
+                  <Input
                     type="checkbox"
                     checked={editFields.hasCaskAle ?? false}
                     onChange={(e) =>
@@ -646,7 +647,7 @@ export default function PubPage() {
                   Cask ale
                 </label>
                 <label>
-                  <input
+                  <Input
                     type="checkbox"
                     checked={editFields.isBeerFocused ?? false}
                     onChange={(e) =>
@@ -656,7 +657,7 @@ export default function PubPage() {
                   Beer-focused
                 </label>
                 <label>
-                  <input
+                  <Input
                     type="checkbox"
                     checked={editFields.isDogFriendly ?? false}
                     onChange={(e) =>
@@ -666,7 +667,7 @@ export default function PubPage() {
                   Dog friendly
                 </label>
                 <label>
-                  <input
+                  <Input
                     type="checkbox"
                     checked={editFields.isFamilyFriendly ?? false}
                     onChange={(e) =>
@@ -676,7 +677,7 @@ export default function PubPage() {
                   Family friendly
                 </label>
                 <label>
-                  <input
+                  <Input
                     type="checkbox"
                     checked={editFields.hasStepFreeAccess ?? false}
                     onChange={(e) =>
@@ -686,7 +687,7 @@ export default function PubPage() {
                   Step-free access
                 </label>
                 <label>
-                  <input
+                  <Input
                     type="checkbox"
                     checked={editFields.hasAccessibleToilet ?? false}
                     onChange={(e) =>
@@ -696,7 +697,7 @@ export default function PubPage() {
                   Accessible toilet
                 </label>
                 <label>
-                  <input
+                  <Input
                     type="checkbox"
                     checked={editFields.hasLiveSport ?? false}
                     onChange={(e) =>
@@ -706,7 +707,7 @@ export default function PubPage() {
                   Live sport
                 </label>
                 <label>
-                  <input
+                  <Input
                     type="checkbox"
                     checked={editFields.hasLiveMusic ?? false}
                     onChange={(e) =>
@@ -726,7 +727,7 @@ export default function PubPage() {
                     <div style={{ display: "grid", gap: "0.35rem" }}>
                       {beerTypeOptions.map((type) => (
                         <label key={type.id} style={{ display: "flex" }}>
-                          <input
+                          <Input
                             type="checkbox"
                             checked={(editFields.beerTypeIds ?? []).includes(
                               type.id
@@ -785,7 +786,7 @@ export default function PubPage() {
                     </div>
                     <label>
                       Name:{" "}
-                      <input
+                      <Input
                         value={garden.name}
                         onChange={(e) =>
                           updateBeerGarden(index, { name: e.target.value })
@@ -806,7 +807,7 @@ export default function PubPage() {
                     </label>
                     <label>
                       Seating capacity:{" "}
-                      <input
+                      <Input
                         type="number"
                         value={garden.seatingCapacity ?? ""}
                         onChange={(e) =>
@@ -841,7 +842,7 @@ export default function PubPage() {
                     </label>
                     <label>
                       Image URL:{" "}
-                      <input
+                      <Input
                         value={garden.imageUrl ?? ""}
                         onChange={(e) =>
                           updateBeerGarden(index, {
@@ -863,7 +864,7 @@ export default function PubPage() {
                     </label>
                     <div style={{ display: "grid", gap: "0.35rem" }}>
                       <label>
-                        <input
+                        <Input
                           type="checkbox"
                           checked={garden.isCovered ?? false}
                           onChange={(e) =>
@@ -875,7 +876,7 @@ export default function PubPage() {
                         Covered
                       </label>
                       <label>
-                        <input
+                        <Input
                           type="checkbox"
                           checked={garden.isHeated ?? false}
                           onChange={(e) =>
@@ -887,7 +888,7 @@ export default function PubPage() {
                         Heated
                       </label>
                       <label>
-                        <input
+                        <Input
                           type="checkbox"
                           checked={garden.isFamilyFriendly ?? false}
                           onChange={(e) =>
@@ -899,7 +900,7 @@ export default function PubPage() {
                         Family friendly
                       </label>
                       <label>
-                        <input
+                        <Input
                           type="checkbox"
                           checked={garden.petFriendly ?? false}
                           onChange={(e) =>
@@ -929,7 +930,7 @@ export default function PubPage() {
               <br />
               <label>
                 Latitude:{" "}
-                <input
+                <Input
                   type="number"
                   value={editFields.lat ?? ""}
                   onChange={(e) =>
@@ -945,7 +946,7 @@ export default function PubPage() {
               <br />
               <label>
                 Longitude:{" "}
-                <input
+                <Input
                   type="number"
                   value={editFields.lng ?? ""}
                   onChange={(e) =>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import Input from "@/app/components/input/Input";
 
 type Pub = {
   id: string;
@@ -44,8 +45,7 @@ export default function Pubs() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       try {
         setError(null);
-        console.log(100000);
-        const res = await fetch(`${apiUrl}/pubs`);
+        const res = await fetch(`${apiUrl}/pubs?limit=10000`);
 
         if (!res.ok) {
           const errorData = await res.json();
@@ -82,7 +82,7 @@ export default function Pubs() {
       <h2>Pub DB</h2>
 
       <div>
-        <input
+        <Input
           type="text"
           placeholder="Search pubs by name, city, country, or address..."
           value={searchTerm}

@@ -19,7 +19,7 @@ export default function Pubs() {
       try {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await fetch(`${apiUrl}/pubs`);
+        const res = await fetch(`${apiUrl}/pubs?`);
         const data = await res.json();
         setPubs(data);
       } catch (error) {

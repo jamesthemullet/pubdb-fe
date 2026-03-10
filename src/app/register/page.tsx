@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Input from "@/app/components/input/Input";
 
 export default function RegisterLoginPage() {
   const router = useRouter();
@@ -91,7 +92,7 @@ export default function RegisterLoginPage() {
           <>
             <div>
               <label>Name:</label>
-              <input
+              <Input
                 type="text"
                 name="name"
                 value={name}
@@ -102,7 +103,7 @@ export default function RegisterLoginPage() {
             </div>
             <div>
               <label>Username:</label>
-              <input
+              <Input
                 type="text"
                 name="username"
                 value={username}
@@ -115,7 +116,7 @@ export default function RegisterLoginPage() {
         )}
         <div>
           <label>Email:</label>
-          <input
+          <Input
             type="email"
             name="email"
             value={email}
@@ -126,7 +127,7 @@ export default function RegisterLoginPage() {
         </div>
         <div>
           <label>Password:</label>
-          <input
+          <Input
             type="password"
             name="password"
             value={password}

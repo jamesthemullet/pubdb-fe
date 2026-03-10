@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Input from "@/app/components/input/Input";
 
 export default function AddPubPage() {
   const router = useRouter();
@@ -143,7 +144,7 @@ export default function AddPubPage() {
             <label htmlFor="name">
               Name: <span style={{ color: "red" }}>*</span>
             </label>
-            <input
+            <Input
               id="name"
               name="pub-name"
               value={name}
@@ -157,7 +158,7 @@ export default function AddPubPage() {
             <label htmlFor="city">
               City: <span style={{ color: "red" }}>*</span>
             </label>
-            <input
+            <Input
               id="city"
               name="pub-city"
               value={city}
@@ -171,7 +172,7 @@ export default function AddPubPage() {
             <label htmlFor="country">
               Country: <span style={{ color: "red" }}>*</span>
             </label>
-            <input
+            <Input
               id="country"
               name="pub-country"
               value={country}
@@ -185,7 +186,7 @@ export default function AddPubPage() {
             <label htmlFor="address">
               Address: <span style={{ color: "red" }}>*</span>
             </label>
-            <input
+            <Input
               id="address"
               name="pub-address"
               value={address}
@@ -199,7 +200,7 @@ export default function AddPubPage() {
             <label htmlFor="postcode">
               Postcode: <span style={{ color: "red" }}>*</span>
             </label>
-            <input
+            <Input
               id="postcode"
               name="pub-postcode"
               value={postcode}
@@ -211,7 +212,7 @@ export default function AddPubPage() {
           </div>
           <div>
             <label htmlFor="lat">Latitude:</label>
-            <input
+            <Input
               id="lat"
               name="lat"
               value={lat ?? ""}
@@ -226,7 +227,7 @@ export default function AddPubPage() {
           </div>
           <div>
             <label htmlFor="lng">Longitude:</label>
-            <input
+            <Input
               id="lng"
               name="lng"
               value={lng ?? ""}
@@ -241,7 +242,7 @@ export default function AddPubPage() {
           </div>
           <div>
             <label htmlFor="website">Website:</label>
-            <input
+            <Input
               id="website"
               name="website"
               value={website ?? ""}
@@ -259,7 +260,7 @@ export default function AddPubPage() {
           </div>
           <div>
             <label htmlFor="imageUrl">Image URL:</label>
-            <input
+            <Input
               id="imageUrl"
               name="imageUrl"
               value={imageUrl ?? ""}
@@ -268,7 +269,7 @@ export default function AddPubPage() {
           </div>
           <div>
             <label htmlFor="operator">Operator/Owner:</label>
-            <input
+            <Input
               id="operator"
               name="operator"
               value={operator ?? ""}
@@ -277,7 +278,7 @@ export default function AddPubPage() {
           </div>
           <div>
             <label htmlFor="area">Area:</label>
-            <input
+            <Input
               id="area"
               name="area"
               value={area ?? ""}
@@ -287,7 +288,7 @@ export default function AddPubPage() {
           </div>
           <div>
             <label htmlFor="phone">Phone:</label>
-            <input
+            <Input
               id="phone"
               name="phone"
               value={phone ?? ""}
@@ -297,7 +298,7 @@ export default function AddPubPage() {
           </div>
           <div>
             <label htmlFor="borough">Borough:</label>
-            <input
+            <Input
               id="borough"
               name="borough"
               value={borough ?? ""}
@@ -306,7 +307,7 @@ export default function AddPubPage() {
           </div>
           <div>
             <label htmlFor="openingHours">Opening Hours:</label>
-            <input
+            <Input
               id="openingHours"
               name="openingHours"
               value={openingHours ?? ""}

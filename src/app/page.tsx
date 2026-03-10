@@ -8,7 +8,9 @@ export default function Home() {
   return (
     <>
       <Heading text="Pub DB" />
-      <Typography>Welcome to Pub DB</Typography>
+      <Typography>
+        Welcome to Pub DB - probably the best database of pubs in the world.
+      </Typography>
       <Pricing />
     </>
   );

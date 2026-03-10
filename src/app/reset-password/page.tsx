@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Input from "@/app/components/input/Input";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -83,7 +84,7 @@ function ResetPasswordForm() {
       <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
         <label style={{ display: "block", marginBottom: "1rem" }}>
           New Password:
-          <input
+          <Input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -100,7 +101,7 @@ function ResetPasswordForm() {
 
         <label style={{ display: "block", marginBottom: "1rem" }}>
           Confirm Password:
-          <input
+          <Input
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}

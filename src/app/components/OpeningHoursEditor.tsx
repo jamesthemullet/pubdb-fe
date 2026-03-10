@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Input from "@/app/components/input/Input";
 
 type DayHours = {
   open: string;
@@ -78,7 +79,7 @@ export default function OpeningHoursEditor({
           >
             <div style={{ width: 90 }}>{day}</div>
 
-            <input
+            <Input
               type="time"
               value={d.open}
               disabled={d.closed}
@@ -87,7 +88,7 @@ export default function OpeningHoursEditor({
 
             <span>-</span>
 
-            <input
+            <Input
               type="time"
               value={d.close}
               disabled={d.closed}
@@ -95,7 +96,7 @@ export default function OpeningHoursEditor({
             />
 
             <label style={{ marginLeft: "0.5rem" }}>
-              <input
+              <Input
                 type="checkbox"
                 checked={d.closed}
                 onChange={(e) =>

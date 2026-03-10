@@ -160,8 +160,6 @@ const Pricing: React.FC = () => {
       if (!res.ok) return;
       const data = await res.json();
 
-      console.log(11, data.apiKeys);
-
       setUserTier(data.apiKeys[0].tier);
     } catch (err) {
       /* ignore */

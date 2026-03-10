@@ -1,0 +1,27 @@
+.input {
+  background-color: var(--input-background);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.5rem;
+  font: inherit;
+}
+
+.input:focus {
+  outline: 2px solid color-mix(in srgb, var(--brand) 45%, white);
+  outline-offset: 1px;
+}
+
+.input:disabled {
+  opacity: 0.65;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.toggle {
+  width: auto;
+  padding: 0;
+  accent-color: var(--brand);
+}
