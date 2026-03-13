@@ -14,7 +14,7 @@ describe("Home page", () => {
     expect(
       screen.getByRole("heading", { name: "Pub DB", level: 1 })
     ).toBeInTheDocument();
-    expect(screen.getByText("Welcome to Pub DB")).toBeInTheDocument();
+    expect(screen.getByText(/welcome to pub db/i)).toBeInTheDocument();
   });
 
   it("renders the pricing section", () => {

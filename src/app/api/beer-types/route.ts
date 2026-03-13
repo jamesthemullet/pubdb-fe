@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
+export const GET = async (request: Request) => {
   const apiUrl =
     process.env.API_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
@@ -8,10 +8,7 @@ export async function GET(request: Request) {
   const apiKey = process.env.TESTING_API_KEY;
 
   if (!apiKey) {
-    return NextResponse.json(
-      { error: "Missing API key" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Missing API key" }, { status: 500 });
   }
 
   const headers: HeadersInit = { "X-API-Key": apiKey };
@@ -44,4 +41,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-}
+};
