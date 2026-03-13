@@ -1,0 +1,45 @@
+.requiredAsterisk {
+  color: var(--action-red);
+}
+
+.editLinkContainer {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--action-red) 45%, white);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--action-red) 10%, white);
+}
+
+.errorText {
+  color: var(--action-red);
+  margin-top: 4px;
+}
+
+.feedbackPanel {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editLinkLead {
+  color: var(--action-red);
+  font-weight: 600;
+}
+
+.editLinkAction {
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: var(--button-primary);
+  color: var(--button-primary-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.editLinkAction:hover {
+  background-color: var(--button-primary-hover);
+}

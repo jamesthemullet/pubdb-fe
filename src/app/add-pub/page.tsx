@@ -2,8 +2,75 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/app/components/input/Input";
+import Button from "@/app/components/button/button";
+import Typography from "@/app/components/typography/typography";
+import styles from "./page.module.css";
 
-export default function AddPubPage() {
+type FieldErrors = Record<string, string[]>;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function toStringArray(value: unknown): string[] {
+  if (typeof value === "string") {
+    return [value];
+  }
+
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === "string");
+  }
+
+  return [];
+}
+
+function parseApiValidationErrors(data: unknown): {
+  formErrors: string[];
+  fieldErrors: FieldErrors;
+} {
+  const rootPayload = isRecord(data) ? data : {};
+  const candidates: Record<string, unknown>[] = [rootPayload];
+
+  if (isRecord(rootPayload.error)) {
+    candidates.push(rootPayload.error);
+  }
+
+  if (isRecord(rootPayload.errors)) {
+    candidates.push(rootPayload.errors);
+  }
+
+  const formErrors: string[] = [];
+  const fieldErrors: FieldErrors = {};
+
+  for (const payload of candidates) {
+    const localFormErrors = toStringArray(payload.formErrors);
+    if (localFormErrors.length > 0) {
+      formErrors.push(...localFormErrors);
+    }
+
+    if (isRecord(payload.fieldErrors)) {
+      for (const [field, value] of Object.entries(payload.fieldErrors)) {
+        const messages = toStringArray(value);
+        if (messages.length > 0) {
+          fieldErrors[field] = [...(fieldErrors[field] ?? []), ...messages];
+        }
+      }
+    }
+  }
+
+  const fallbackMessages = [
+    ...toStringArray(rootPayload.error),
+    ...toStringArray(rootPayload.errors),
+  ];
+
+  if (formErrors.length === 0 && fallbackMessages.length > 0) {
+    formErrors.push(...fallbackMessages);
+  }
+
+  return { formErrors, fieldErrors };
+}
+
+const AddPubPage = () => {
   const router = useRouter();
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
@@ -24,6 +91,8 @@ export default function AddPubPage() {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<string[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [success, setSuccess] = useState<string | null>(null);
   const [editLink, setEditLink] = useState<string | null>(null);
 
@@ -31,6 +100,10 @@ export default function AddPubPage() {
     email: string;
     approved?: boolean;
   } | null>(null);
+  const [countries, setCountries] = useState<{ name: string; code: string }[]>(
+    []
+  );
+  const [countriesLoading, setCountriesLoading] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -64,10 +137,51 @@ export default function AddPubPage() {
     };
   }, []);
 
+  useEffect(() => {
+    let ignore = false;
+
+    async function fetchCountries() {
+      setCountriesLoading(true);
+      try {
+        const res = await fetch(
+          "https://restcountries.com/v3.1/all?fields=name,cca2"
+        );
+        if (!res.ok) {
+          throw new Error(`Failed to fetch countries: ${res.status}`);
+        }
+        const data: Array<{ name: { common: string }; cca2: string }> =
+          await res.json();
+        if (!ignore) {
+          const options = data
+            .map((countryOption) => ({
+              name: countryOption.name.common,
+              code: countryOption.cca2,
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+          setCountries(options);
+        }
+      } catch (err) {
+        console.error("Error fetching countries", err);
+      } finally {
+        if (!ignore) {
+          setCountriesLoading(false);
+        }
+      }
+    }
+
+    fetchCountries();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setFormErrors([]);
+    setFieldErrors({});
     setSuccess(null);
     setEditLink(null);
     try {
@@ -101,14 +215,27 @@ export default function AddPubPage() {
 
       const data = await res.json();
       if (!res.ok) {
+        const { formErrors: nextFormErrors, fieldErrors: nextFieldErrors } =
+          parseApiValidationErrors(data);
+
+        setFormErrors(nextFormErrors);
+        setFieldErrors(nextFieldErrors);
+
         if (res.status === 409 && data && data.id) {
           setEditLink(`/pubs/${data.id}`);
-          setError(data.error || data.errors || "Pub already exists");
+          if (nextFormErrors.length === 0) {
+            setError("Pub already exists");
+          }
         } else {
-          setError(data.error || data.errors || "Unknown error");
+          const hasFieldErrors = Object.keys(nextFieldErrors).length > 0;
+          if (nextFormErrors.length === 0 && !hasFieldErrors) {
+            setError("Unknown error");
+          }
         }
       } else {
         setEditLink(null);
+        setFormErrors([]);
+        setFieldErrors({});
         setSuccess("Pub added successfully!");
         setTimeout(() => {
           router.push(`/pubs/${data.id}`);
@@ -123,26 +250,33 @@ export default function AddPubPage() {
 
   return (
     <>
-      <h2>Add a Pub</h2>
+      <Typography variant="headingMedium">Add a Pub</Typography>
+      <Typography variant="bodyMedium">
+        Please fill out the form below to add a pub to the database.
+      </Typography>
       {!user ? (
         <div>
-          <p>You must be logged in to add a pub.</p>
+          <Typography variant="bodyMedium">
+            You must be logged in to add a pub.
+          </Typography>
           <a href="/register">Register or Login</a>
         </div>
       ) : !user.approved ? (
         <div>
-          <p>Your account is not approved for editing.</p>
-          <p>
+          <Typography variant="bodyMedium">
+            Your account is not approved for editing.
+          </Typography>
+          <Typography variant="bodyMedium">
             Please email{" "}
             <a href="mailto:hello@thepubdb.com">hello@thepubdb.com</a> to
             request approval.
-          </p>
+          </Typography>
         </div>
       ) : (
         <form onSubmit={handleSubmit} autoComplete="off">
           <div>
             <label htmlFor="name">
-              Name: <span style={{ color: "red" }}>*</span>
+              Name: <span className={styles.requiredAsterisk}>*</span>
             </label>
             <Input
               id="name"
@@ -153,10 +287,19 @@ export default function AddPubPage() {
               autoComplete="pub-name"
               placeholder="Enter pub name"
             />
+            {fieldErrors.name?.map((fieldError, index) => (
+              <Typography
+                key={`name-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="city">
-              City: <span style={{ color: "red" }}>*</span>
+              City: <span className={styles.requiredAsterisk}>*</span>
             </label>
             <Input
               id="city"
@@ -167,24 +310,51 @@ export default function AddPubPage() {
               autoComplete="pub-city"
               placeholder="Enter city"
             />
+            {fieldErrors.city?.map((fieldError, index) => (
+              <Typography
+                key={`city-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="country">
-              Country: <span style={{ color: "red" }}>*</span>
+              Country: <span className={styles.requiredAsterisk}>*</span>
             </label>
-            <Input
+            <select
               id="country"
               name="pub-country"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               required
-              autoComplete="country"
-              placeholder="Enter country"
-            />
+            >
+              <option value="">
+                {countriesLoading && countries.length === 0
+                  ? "Loading countries..."
+                  : "Select a country"}
+              </option>
+              {countries.map((countryOption) => (
+                <option key={countryOption.code} value={countryOption.code}>
+                  {countryOption.name}
+                </option>
+              ))}
+            </select>
+            {fieldErrors.country?.map((fieldError, index) => (
+              <Typography
+                key={`country-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="address">
-              Address: <span style={{ color: "red" }}>*</span>
+              Address: <span className={styles.requiredAsterisk}>*</span>
             </label>
             <Input
               id="address"
@@ -195,10 +365,19 @@ export default function AddPubPage() {
               autoComplete="pub-address"
               placeholder="Enter address"
             />
+            {fieldErrors.address?.map((fieldError, index) => (
+              <Typography
+                key={`address-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="postcode">
-              Postcode: <span style={{ color: "red" }}>*</span>
+              Postcode: <span className={styles.requiredAsterisk}>*</span>
             </label>
             <Input
               id="postcode"
@@ -209,6 +388,15 @@ export default function AddPubPage() {
               autoComplete="pub-postcode"
               placeholder="Enter postcode"
             />
+            {fieldErrors.postcode?.map((fieldError, index) => (
+              <Typography
+                key={`postcode-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="lat">Latitude:</label>
@@ -224,6 +412,15 @@ export default function AddPubPage() {
               type="number"
               step="any"
             />
+            {fieldErrors.lat?.map((fieldError, index) => (
+              <Typography
+                key={`lat-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="lng">Longitude:</label>
@@ -239,6 +436,15 @@ export default function AddPubPage() {
               type="number"
               step="any"
             />
+            {fieldErrors.lng?.map((fieldError, index) => (
+              <Typography
+                key={`lng-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="website">Website:</label>
@@ -248,6 +454,15 @@ export default function AddPubPage() {
               value={website ?? ""}
               onChange={(e) => setWebsite(e.target.value || undefined)}
             />
+            {fieldErrors.website?.map((fieldError, index) => (
+              <Typography
+                key={`website-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="description">Description:</label>
@@ -257,6 +472,15 @@ export default function AddPubPage() {
               value={description ?? ""}
               onChange={(e) => setDescription(e.target.value || undefined)}
             />
+            {fieldErrors.description?.map((fieldError, index) => (
+              <Typography
+                key={`description-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="imageUrl">Image URL:</label>
@@ -266,6 +490,15 @@ export default function AddPubPage() {
               value={imageUrl ?? ""}
               onChange={(e) => setImageUrl(e.target.value || undefined)}
             />
+            {fieldErrors.imageUrl?.map((fieldError, index) => (
+              <Typography
+                key={`imageUrl-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="operator">Operator/Owner:</label>
@@ -275,6 +508,15 @@ export default function AddPubPage() {
               value={operator ?? ""}
               onChange={(e) => setOperator(e.target.value || undefined)}
             />
+            {fieldErrors.operator?.map((fieldError, index) => (
+              <Typography
+                key={`operator-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="area">Area:</label>
@@ -285,6 +527,15 @@ export default function AddPubPage() {
               onChange={(e) => setArea(e.target.value || undefined)}
               autoComplete="pub-area"
             />
+            {fieldErrors.area?.map((fieldError, index) => (
+              <Typography
+                key={`area-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="phone">Phone:</label>
@@ -295,6 +546,15 @@ export default function AddPubPage() {
               onChange={(e) => setPhone(e.target.value || undefined)}
               autoComplete="pub-phone"
             />
+            {fieldErrors.phone?.map((fieldError, index) => (
+              <Typography
+                key={`phone-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="borough">Borough:</label>
@@ -304,6 +564,15 @@ export default function AddPubPage() {
               value={borough ?? ""}
               onChange={(e) => setBorough(e.target.value || undefined)}
             />
+            {fieldErrors.borough?.map((fieldError, index) => (
+              <Typography
+                key={`borough-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
           <div>
             <label htmlFor="openingHours">Opening Hours:</label>
@@ -313,21 +582,64 @@ export default function AddPubPage() {
               value={openingHours ?? ""}
               onChange={(e) => setOpeningHours(e.target.value || undefined)}
             />
+            {fieldErrors.openingHours?.map((fieldError, index) => (
+              <Typography
+                key={`openingHours-error-${index}`}
+                variant="bodySmall"
+                className={styles.errorText}
+              >
+                {fieldError}
+              </Typography>
+            ))}
           </div>
-          <button type="submit" disabled={loading}>
-            {loading ? "Submitting…" : "Add Pub"}
-          </button>
+          <Button type="submit" disabled={loading}>
+            <Typography as="span" variant="bodySmall">
+              {loading ? "Submitting..." : "Add Pub"}
+            </Typography>
+          </Button>
+          {(formErrors.length > 0 || error || editLink) && (
+            <div className={styles.feedbackPanel}>
+              {!editLink &&
+                formErrors.map((formError, index) => (
+                  <Typography
+                    key={`form-error-${index}`}
+                    variant="bodySmall"
+                    className={styles.errorText}
+                  >
+                    {formError}
+                  </Typography>
+                ))}
+              {error && (
+                <Typography variant="bodySmall" className={styles.errorText}>
+                  {error}
+                </Typography>
+              )}
+              {editLink && (
+                <div className={styles.editLinkContainer}>
+                  <Typography
+                    variant="bodySmall"
+                    className={styles.editLinkLead}
+                  >
+                    A matching pub already exists.
+                  </Typography>
+                  <Button
+                    type="button"
+                    className={styles.editLinkAction}
+                    onClick={() => router.push(editLink)}
+                  >
+                    <Typography as="span" variant="bodySmall">
+                      Open existing pub to edit
+                    </Typography>
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </form>
       )}
-      {error && (
-        <div>{typeof error === "string" ? error : JSON.stringify(error)}</div>
-      )}
-      {editLink && (
-        <div style={{ marginTop: 8 }}>
-          <a href={editLink}>Edit existing pub</a>
-        </div>
-      )}
-      {success && <div>{success}</div>}
+      {success && <Typography variant="bodyMedium">{success}</Typography>}
     </>
   );
-}
+};
+
+export default AddPubPage;
