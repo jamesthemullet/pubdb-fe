@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/app/components/input/Input";
+import Textarea from "@/app/components/textarea/Textarea";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
 import styles from "./page.module.css";
@@ -466,7 +467,7 @@ const AddPubPage = () => {
           </div>
           <div>
             <label htmlFor="description">Description:</label>
-            <textarea
+            <Textarea
               id="description"
               name="description"
               value={description ?? ""}
