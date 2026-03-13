@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import styles from "./dashboard.module.css";
+import Button from "../components/button/button";
+import Typography from "../components/typography/typography";
 
 type ApiKey = {
   name: string;
@@ -280,17 +283,23 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>
-        <p>Loading dashboard...</p>
+      <div className={styles.loadingContainer}>
+        <Typography variant="bodyMedium">Loading dashboard...</Typography>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ padding: "2rem", textAlign: "center", color: "red" }}>
-        <p>Error loading dashboard: {error}</p>
-        <button onClick={() => window.location.reload()}>Try Again</button>
+      <div className={styles.errorContainer}>
+        <Typography variant="bodyMedium">
+          Error loading dashboard: {error}
+        </Typography>
+        <Button variant="primary" onClick={() => window.location.reload()}>
+          <Typography as="span" variant="bodySmall">
+            Try Again
+          </Typography>
+        </Button>
       </div>
     );
   }
@@ -308,149 +317,106 @@ const Dashboard: React.FC = () => {
   return (
     <>
       {forgotKeyDetails && showForgotKeyModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.55)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
-            zIndex: 2000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: "10px",
-              width: "min(640px, 100%)",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              padding: "2rem",
-              boxShadow: "0 20px 45px rgba(0,0,0,0.25)",
-            }}
-          >
-            <h3 style={{ marginTop: 0 }}>New API key generated</h3>
-            <p style={{ marginBottom: "1.25rem", color: "#444" }}>
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalCard}>
+            <Typography variant="headingSmall">
+              New API key generated
+            </Typography>
+            <Typography variant="bodySmall" className={styles.modalDescription}>
               This key is shown only once. Copy it now and store it securely.
-            </p>
-            <div style={{ marginBottom: "0.75rem" }}>
-              <strong>Name:</strong> {forgotKeyDetails.name || "Untitled key"}
-            </div>
-            <div style={{ marginBottom: "0.75rem" }}>
-              <strong>Tier:</strong> {forgotKeyDetails.tier || "—"}
-            </div>
-            <div style={{ marginBottom: "0.75rem" }}>
-              <strong>Status:</strong> {forgotKeyDetails.keyStatus || "—"}
-            </div>
-            <div style={{ marginBottom: "0.75rem" }}>
-              <strong>Key prefix:</strong> {forgotKeyDetails.keyPrefix || "—"}
-            </div>
+            </Typography>
+            <Typography variant="bodySmall" className={styles.fieldRow}>
+              Name: {forgotKeyDetails.name || "Untitled key"}
+            </Typography>
+            <Typography variant="bodySmall" className={styles.fieldRow}>
+              Tier: {forgotKeyDetails.tier || "—"}
+            </Typography>
+            <Typography variant="bodySmall" className={styles.fieldRow}>
+              Status: {forgotKeyDetails.keyStatus || "—"}
+            </Typography>
+            <Typography variant="bodySmall" className={styles.fieldRow}>
+              Key prefix: {forgotKeyDetails.keyPrefix || "—"}
+            </Typography>
             {forgotKeyDetails.permissions?.length ? (
-              <div style={{ marginBottom: "0.75rem" }}>
-                <strong>Permissions:</strong>{" "}
-                {forgotKeyDetails.permissions.join(", ")}
-              </div>
+              <Typography variant="bodySmall" className={styles.fieldRow}>
+                Permissions: {forgotKeyDetails.permissions.join(", ")}
+              </Typography>
             ) : null}
             {forgotKeyDetails.key && (
-              <div style={{ marginBottom: "1.5rem" }}>
-                <strong style={{ display: "block", marginBottom: "0.4rem" }}>
+              <div className={styles.modalKeyContainer}>
+                <Typography
+                  as="span"
+                  variant="bodySmall"
+                  className={styles.modalKeyLabel}
+                >
                   API key
-                </strong>
-                <pre
-                  style={{
-                    background: "#f5f5f5",
-                    borderRadius: "6px",
-                    padding: "0.75rem",
-                    fontFamily:
-                      'SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace',
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-all",
-                    margin: 0,
-                  }}
-                >
-                  {forgotKeyDetails.key}
+                </Typography>
+                <pre className={styles.apiKeyPre}>
+                  <Typography as="span" variant="bodySmall">
+                    {forgotKeyDetails.key}
+                  </Typography>
                 </pre>
-                <button
+                <Button
+                  type="button"
+                  variant="primary"
                   onClick={handleCopyNewApiKey}
-                  style={{
-                    marginTop: "0.5rem",
-                    padding: "0.5rem 1rem",
-                    borderRadius: "4px",
-                    border: "none",
-                    backgroundColor: "#007bff",
-                    color: "#fff",
-                    cursor: "pointer",
-                  }}
                 >
-                  {forgotKeyCopyStatus === "copied"
-                    ? "Copied!"
-                    : forgotKeyCopyStatus === "error"
-                    ? "Copy failed"
-                    : "Copy API key"}
-                </button>
+                  <Typography as="span" variant="bodySmall">
+                    {forgotKeyCopyStatus === "copied"
+                      ? "Copied!"
+                      : forgotKeyCopyStatus === "error"
+                      ? "Copy failed"
+                      : "Copy API key"}
+                  </Typography>
+                </Button>
               </div>
             )}
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button
-                onClick={handleCloseForgotKeyModal}
-                style={{
-                  padding: "0.5rem 1.25rem",
-                  borderRadius: "4px",
-                  border: "1px solid #ccc",
-                  backgroundColor: "#fff",
-                  cursor: "pointer",
-                }}
-              >
-                Close
-              </button>
+            <div className={styles.modalActions}>
+              <Button onClick={handleCloseForgotKeyModal} variant="secondary">
+                <Typography as="span" variant="bodySmall">
+                  Close
+                </Typography>
+              </Button>
             </div>
           </div>
         </div>
       )}
-      <div
-        style={{
-          padding: "2rem",
-          marginBottom: "2rem",
-          border: "1px solid #ddd",
-          borderRadius: "8px",
-        }}
-      >
-        <h2>Dashboard</h2>
+      <div className={styles.mainCard}>
+        <Typography variant="headingMedium">Dashboard</Typography>
 
-        {/* User Info */}
-        <div style={{ marginBottom: "2rem" }}>
-          <p>
-            <strong>
-              Welcome, {dashboardData.user.name || dashboardData.user.username}
-            </strong>
-          </p>
-          <p>Email: {dashboardData.user.email}</p>
+        <div className={styles.userInfo}>
+          <Typography variant="bodyMedium">
+            Welcome, {dashboardData.user.name || dashboardData.user.username}
+          </Typography>
+          <Typography variant="bodyMedium">
+            Email: {dashboardData.user.email}
+          </Typography>
           {!dashboardData.user.approved && (
-            <p style={{ color: "orange" }}>⚠️ Account pending approval</p>
+            <Typography variant="bodySmall" className={styles.warningText}>
+              ⚠️ Account pending approval
+            </Typography>
           )}
           {!dashboardData.user.emailVerified && (
-            <p style={{ color: "orange" }}>⚠️ Email not verified</p>
+            <Typography variant="bodySmall" className={styles.warningText}>
+              ⚠️ Email not verified
+            </Typography>
           )}
         </div>
 
-        {/* Cancel messages */}
         {cancelError && (
-          <div style={{ color: "red", marginBottom: "1rem" }}>
+          <Typography variant="bodySmall" className={styles.cancelError}>
             Error cancelling subscription: {cancelError}
-          </div>
+          </Typography>
         )}
         {cancelMessage && (
-          <div style={{ color: "green", marginBottom: "1rem" }}>
+          <Typography variant="bodySmall" className={styles.cancelError}>
             {cancelMessage}
-          </div>
+          </Typography>
         )}
 
-        {/* API Keys */}
         {dashboardData?.apiKeys?.length > 0 ? (
           <div>
-            <h3>Your API Keys</h3>
+            <Typography variant="headingSmall">Your API Keys</Typography>
             {dashboardData.apiKeys.map((apiKey, index) => {
               const hourlyUsage = formatUsagePercentage(
                 apiKey.limits.requestsPerHour - apiKey.remaining.hour,
@@ -466,62 +432,35 @@ const Dashboard: React.FC = () => {
               );
 
               return (
-                <div
-                  key={index}
-                  style={{
-                    border: "1px solid #eee",
-                    borderRadius: "4px",
-                    padding: "1rem",
-                    marginBottom: "1rem",
-                    backgroundColor: "#f9f9f9",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "1rem",
-                    }}
-                  >
+                <div key={index} className={styles.apiKeyCard}>
+                  <div className={styles.apiHeader}>
                     <div>
-                      <h4>{apiKey.name}</h4>
-                      <p style={{ margin: 0, color: "#666" }}>
-                        <strong>Tier:</strong> {apiKey.tier} |
-                        <strong> Key:</strong> {apiKey.keyPrefix}*** |
-                        <strong> Total Usage:</strong>{" "}
-                        {apiKey.usageCount.toLocaleString()}
-                      </p>
+                      <Typography variant="headingSmall">
+                        {apiKey.name}
+                      </Typography>
+                      <Typography variant="bodySmall">
+                        Tier: {apiKey.tier} | Key: {apiKey.keyPrefix}*** | Total
+                        Usage: {apiKey.usageCount.toLocaleString()}
+                      </Typography>
                     </div>
                     {apiKey.tier &&
                       apiKey.tier !== "HOBBY" &&
                       apiKey.keyStatus === "ACTIVE" && (
                         <div>
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "0.5rem",
-                              flexWrap: "wrap",
-                              marginBottom: "0.5rem",
-                            }}
-                          >
-                            <button
+                          <div className={styles.actionsContainer}>
+                            <Button
+                              variant="red"
                               onClick={handleCancelSubscription}
                               disabled={cancelling}
-                              style={{
-                                backgroundColor: "#ff4444",
-                                color: "#fff",
-                                border: "none",
-                                padding: "0.5rem 1rem",
-                                borderRadius: "4px",
-                                cursor: cancelling ? "not-allowed" : "pointer",
-                              }}
                             >
-                              {cancelling
-                                ? "Cancelling…"
-                                : "Cancel subscription"}
-                            </button>
-                            <button
+                              <Typography as="span" variant="bodySmall">
+                                {cancelling
+                                  ? "Cancelling…"
+                                  : "Cancel subscription"}
+                              </Typography>
+                            </Button>
+                            <Button
+                              variant="secondary"
                               onClick={() =>
                                 handleForgotApiKey(apiKey.keyPrefix)
                               }
@@ -529,174 +468,116 @@ const Dashboard: React.FC = () => {
                                 forgotKeyLoading &&
                                 forgotKeyTarget === apiKey.keyPrefix
                               }
-                              style={{
-                                backgroundColor: "#007bff",
-                                color: "#fff",
-                                border: "none",
-                                padding: "0.5rem 1rem",
-                                borderRadius: "4px",
-                                cursor:
-                                  forgotKeyLoading &&
-                                  forgotKeyTarget === apiKey.keyPrefix
-                                    ? "not-allowed"
-                                    : "pointer",
-                              }}
                             >
-                              {forgotKeyLoading &&
-                              forgotKeyTarget === apiKey.keyPrefix
-                                ? "Sending…"
-                                : "Forgot API key"}
-                            </button>
+                              <Typography as="span" variant="bodySmall">
+                                {forgotKeyLoading &&
+                                forgotKeyTarget === apiKey.keyPrefix
+                                  ? "Sending…"
+                                  : "Forgot API key"}
+                              </Typography>
+                            </Button>
                           </div>
                           {forgotKeyTarget === apiKey.keyPrefix && (
                             <>
                               {forgotKeyError && (
-                                <div
-                                  style={{
-                                    color: "red",
-                                    marginBottom: "0.25rem",
-                                  }}
+                                <Typography
+                                  variant="bodySmall"
+                                  className={styles.inlineError}
                                 >
                                   {forgotKeyError}
-                                </div>
+                                </Typography>
                               )}
                               {forgotKeyMessage && (
-                                <div
-                                  style={{
-                                    color: "green",
-                                    marginBottom: "0.25rem",
-                                  }}
+                                <Typography
+                                  variant="bodySmall"
+                                  className={styles.inlineSuccess}
                                 >
                                   {forgotKeyMessage}
-                                </div>
+                                </Typography>
                               )}
                             </>
                           )}
-                          <div
-                            style={{
-                              fontSize: "0.85rem",
-                              color: "#666",
-                              marginTop: "0.5rem",
-                            }}
+                          <Typography
+                            variant="bodySmall"
+                            className={styles.helperText}
                           >
                             Cancelling will stop renewals — subscription remains
                             active until period end.
-                          </div>
+                          </Typography>
                         </div>
                       )}
                   </div>
 
-                  {/* Rate Limits */}
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr 1fr",
-                      gap: "1rem",
-                    }}
-                  >
+                  <div className={styles.rateLimitsGrid}>
                     <div>
-                      <p>
-                        <strong>Hourly</strong>
-                      </p>
-                      <p>
+                      <Typography variant="bodySmall">Hourly</Typography>
+                      <Typography variant="bodySmall">
                         {hourlyUsage.remaining.toLocaleString()} /{" "}
                         {apiKey.limits.requestsPerHour.toLocaleString()}{" "}
                         remaining
-                      </p>
-                      <div
-                        style={{
-                          backgroundColor: "#e0e0e0",
-                          borderRadius: "4px",
-                          height: "8px",
-                        }}
-                      >
+                      </Typography>
+                      <div className={styles.progressTrack}>
                         <div
-                          style={{
-                            backgroundColor:
-                              parseFloat(hourlyUsage.percentage) > 80
-                                ? "#ff4444"
-                                : "#4CAF50",
-                            width: `${hourlyUsage.percentage}%`,
-                            height: "100%",
-                            borderRadius: "4px",
-                          }}
+                          className={`${styles.progressBar} ${
+                            parseFloat(hourlyUsage.percentage) > 80
+                              ? styles.progressDanger
+                              : styles.progressSafe
+                          }`}
+                          style={{ width: `${hourlyUsage.percentage}%` }}
                         />
                       </div>
-                      <small>{hourlyUsage.percentage}% used</small>
+                      <Typography variant="bodySmall">
+                        {hourlyUsage.percentage}% used
+                      </Typography>
                     </div>
 
                     <div>
-                      <p>
-                        <strong>Daily</strong>
-                      </p>
-                      <p>
+                      <Typography variant="bodySmall">Daily</Typography>
+                      <Typography variant="bodySmall">
                         {dailyUsage.remaining.toLocaleString()} /{" "}
                         {apiKey.limits.requestsPerDay.toLocaleString()}{" "}
                         remaining
-                      </p>
-                      <div
-                        style={{
-                          backgroundColor: "#e0e0e0",
-                          borderRadius: "4px",
-                          height: "8px",
-                        }}
-                      >
+                      </Typography>
+                      <div className={styles.progressTrack}>
                         <div
-                          style={{
-                            backgroundColor:
-                              parseFloat(dailyUsage.percentage) > 80
-                                ? "#ff4444"
-                                : "#4CAF50",
-                            width: `${dailyUsage.percentage}%`,
-                            height: "100%",
-                            borderRadius: "4px",
-                          }}
+                          className={`${styles.progressBar} ${
+                            parseFloat(dailyUsage.percentage) > 80
+                              ? styles.progressDanger
+                              : styles.progressSafe
+                          }`}
+                          style={{ width: `${dailyUsage.percentage}%` }}
                         />
                       </div>
-                      <small>{dailyUsage.percentage}% used</small>
+                      <Typography variant="bodySmall">
+                        {dailyUsage.percentage}% used
+                      </Typography>
                     </div>
 
                     <div>
-                      <p>
-                        <strong>Monthly</strong>
-                      </p>
-                      <p>
+                      <Typography variant="bodySmall">Monthly</Typography>
+                      <Typography variant="bodySmall">
                         {monthlyUsage.remaining.toLocaleString()} /{" "}
                         {apiKey.limits.requestsPerMonth.toLocaleString()}{" "}
                         remaining
-                      </p>
-                      <div
-                        style={{
-                          backgroundColor: "#e0e0e0",
-                          borderRadius: "4px",
-                          height: "8px",
-                        }}
-                      >
+                      </Typography>
+                      <div className={styles.progressTrack}>
                         <div
-                          style={{
-                            backgroundColor:
-                              parseFloat(monthlyUsage.percentage) > 80
-                                ? "#ff4444"
-                                : "#4CAF50",
-                            width: `${monthlyUsage.percentage}%`,
-                            height: "100%",
-                            borderRadius: "4px",
-                          }}
+                          className={`${styles.progressBar} ${
+                            parseFloat(monthlyUsage.percentage) > 80
+                              ? styles.progressDanger
+                              : styles.progressSafe
+                          }`}
+                          style={{ width: `${monthlyUsage.percentage}%` }}
                         />
                       </div>
-                      <small>{monthlyUsage.percentage}% used</small>
+                      <Typography variant="bodySmall">
+                        {monthlyUsage.percentage}% used
+                      </Typography>
                     </div>
                   </div>
 
-                  {/* Features */}
-                  <div
-                    style={{
-                      marginTop: "1rem",
-                      fontSize: "0.9em",
-                      color: "#666",
-                    }}
-                  >
-                    <strong>Features:</strong>
+                  <Typography variant="bodySmall" className={styles.features}>
+                    Features:
                     {apiKey.features.allowLocationSearch && " Location Search"}
                     {apiKey.features.allowLocationSearch &&
                       apiKey.features.allowStats &&
@@ -705,46 +586,31 @@ const Dashboard: React.FC = () => {
                     {!apiKey.features.allowLocationSearch &&
                       !apiKey.features.allowStats &&
                       " Basic API access only"}
-                  </div>
+                  </Typography>
 
                   {apiKey.lastUsed && (
-                    <p
-                      style={{
-                        fontSize: "0.9em",
-                        color: "#666",
-                        margin: "0.5rem 0 0 0",
-                      }}
-                    >
+                    <Typography variant="bodySmall" className={styles.lastUsed}>
                       Last used: {new Date(apiKey.lastUsed).toLocaleString()}
-                    </p>
+                    </Typography>
                   )}
                 </div>
               );
             })}
 
-            {/* Summary */}
-            <div
-              style={{
-                marginTop: "1rem",
-                padding: "1rem",
-                backgroundColor: "#f0f0f0",
-                borderRadius: "4px",
-              }}
-            >
-              <p>
-                <strong>Summary:</strong> {dashboardData.summary.totalApiKeys}{" "}
-                API key(s) with{" "}
+            <div className={styles.summaryCard}>
+              <Typography variant="bodySmall">
+                Summary: {dashboardData.summary.totalApiKeys} API key(s) with{" "}
                 {dashboardData.summary.totalUsage.toLocaleString()} total
                 requests
-              </p>
+              </Typography>
             </div>
           </div>
         ) : (
           <div>
-            <p>
+            <Typography variant="bodyMedium">
               No API keys found. You may need to create an API key to get
               started.
-            </p>
+            </Typography>
           </div>
         )}
       </div>
