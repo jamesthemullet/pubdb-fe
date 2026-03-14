@@ -109,7 +109,9 @@ const AddPubPage = () => {
   const approvalRequestMailto = `mailto:hello@thepubdb.com?subject=${encodeURIComponent(
     "Approval request for PubDB editor access"
   )}&body=${encodeURIComponent(
-    `Hi PubDB team,\n\nPlease approve my account for editing pubs.\n\nAccount email: ${user?.email ?? "Unknown"}\n\nThanks!`
+    `Hi PubDB team,\n\nPlease approve my account for editing pubs.\n\nAccount email: ${
+      user?.email ?? "Unknown"
+    }\n\nThanks!`
   )}`;
 
   useEffect(() => {

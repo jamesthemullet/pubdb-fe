@@ -1452,25 +1452,47 @@ function EditButton({
     approved?: boolean;
     admin?: boolean;
   } | null>(null);
+
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const payload = JSON.parse(atob(token.split(".")[1]));
+      if (!token) {
+        setUser(null);
+        return;
+      }
+
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const res = await fetch(`${apiUrl}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
           setUser({
-            email: payload.email,
-            approved: payload.approved,
-            admin: payload.admin,
+            email: data.email,
+            approved: data.approved,
+            admin: data.admin,
           });
-        } catch {
-          setUser(null);
+          return;
         }
-      } else {
+      } catch {
+        // Fall through to token decoding fallback.
+      }
+
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        setUser({
+          email: payload.email,
+          approved: payload.approved,
+          admin: payload.admin,
+        });
+      } catch {
         setUser(null);
       }
     };
-    checkAuth();
+
+    void checkAuth();
     // Listen for auth changes
     window.addEventListener("authChanged", checkAuth);
     window.addEventListener("storage", checkAuth);
