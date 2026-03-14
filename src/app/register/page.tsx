@@ -1,10 +1,29 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Input from "@/app/components/input/Input";
 
+const getSafeInternalPath = (value: string | null | undefined): string | null => {
+  if (!value || typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const url = new URL(value, window.location.origin);
+    if (url.origin !== window.location.origin) {
+      return null;
+    }
+
+    if (!url.pathname.startsWith("/")) {
+      return null;
+    }
+
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return null;
+  }
+};
+
 export default function RegisterLoginPage() {
-  const router = useRouter();
   const [mode, setMode] = useState<"register" | "login">("register");
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -17,12 +36,10 @@ export default function RegisterLoginPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const prev =
-        document.referrer && !document.referrer.includes("/register")
-          ? document.referrer
-          : "/";
+      const safeReferrer = getSafeInternalPath(document.referrer);
+      const prev = safeReferrer && safeReferrer !== "/register" ? safeReferrer : "/";
       if (window.history.length > 1) {
-        const lastUrl = sessionStorage.getItem("lastUrl");
+        const lastUrl = getSafeInternalPath(sessionStorage.getItem("lastUrl"));
         if (lastUrl && lastUrl !== "/register") {
           setRedirectTo(lastUrl);
         } else {
