@@ -46,14 +46,13 @@ export default function RegisterLoginPage() {
     setError(null);
     setSuccess(null);
     try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/auth";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const endpoint = mode === "register" ? "/register" : "/login";
       const body =
         mode === "register"
           ? { name, username, email, password }
           : { email, password };
-      const res = await fetch(`${apiUrl}${endpoint}`, {
+      const res = await fetch(`${apiUrl}/auth${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
