@@ -106,6 +106,12 @@ const AddPubPage = () => {
   );
   const [countriesLoading, setCountriesLoading] = useState(false);
 
+  const approvalRequestMailto = `mailto:hello@thepubdb.com?subject=${encodeURIComponent(
+    "Approval request for PubDB editor access"
+  )}&body=${encodeURIComponent(
+    `Hi PubDB team,\n\nPlease approve my account for editing pubs.\n\nAccount email: ${user?.email ?? "Unknown"}\n\nThanks!`
+  )}`;
+
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
@@ -265,6 +271,9 @@ const AddPubPage = () => {
           <Typography variant="bodyMedium">
             Your account is not approved for editing - all accounts need to be
             manually approved.
+          </Typography>
+          <Typography variant="bodyMedium">
+            <a href={approvalRequestMailto}>Request approval by email</a>
           </Typography>
           <Typography variant="bodyMedium">
             Please email{" "}
