@@ -2,7 +2,9 @@
 import { useState, useEffect } from "react";
 import Input from "@/app/components/input/Input";
 
-const getSafeInternalPath = (value: string | null | undefined): string | null => {
+const getSafeInternalPath = (
+  value: string | null | undefined
+): string | null => {
   if (!value || typeof window === "undefined") {
     return null;
   }
@@ -37,7 +39,8 @@ export default function RegisterLoginPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const safeReferrer = getSafeInternalPath(document.referrer);
-      const prev = safeReferrer && safeReferrer !== "/register" ? safeReferrer : "/";
+      const prev =
+        safeReferrer && safeReferrer !== "/register" ? safeReferrer : "/";
       if (window.history.length > 1) {
         const lastUrl = getSafeInternalPath(sessionStorage.getItem("lastUrl"));
         if (lastUrl && lastUrl !== "/register") {

@@ -252,9 +252,7 @@ const AddPubPage = () => {
   return (
     <>
       <Typography variant="headingMedium">Add a Pub</Typography>
-      <Typography variant="bodyMedium">
-        Please fill out the form below to add a pub to the database.
-      </Typography>
+
       {!user ? (
         <div>
           <Typography variant="bodyMedium">
@@ -265,7 +263,8 @@ const AddPubPage = () => {
       ) : !user.approved ? (
         <div>
           <Typography variant="bodyMedium">
-            Your account is not approved for editing.
+            Your account is not approved for editing - all accounts need to be
+            manually approved.
           </Typography>
           <Typography variant="bodyMedium">
             Please email{" "}
@@ -274,369 +273,378 @@ const AddPubPage = () => {
           </Typography>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} autoComplete="off">
-          <div>
-            <label htmlFor="name">
-              Name: <span className={styles.requiredAsterisk}>*</span>
-            </label>
-            <Input
-              id="name"
-              name="pub-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              autoComplete="pub-name"
-              placeholder="Enter pub name"
-            />
-            {fieldErrors.name?.map((fieldError, index) => (
-              <Typography
-                key={`name-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="city">
-              City: <span className={styles.requiredAsterisk}>*</span>
-            </label>
-            <Input
-              id="city"
-              name="pub-city"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              required
-              autoComplete="pub-city"
-              placeholder="Enter city"
-            />
-            {fieldErrors.city?.map((fieldError, index) => (
-              <Typography
-                key={`city-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="country">
-              Country: <span className={styles.requiredAsterisk}>*</span>
-            </label>
-            <select
-              id="country"
-              name="pub-country"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              required
-            >
-              <option value="">
-                {countriesLoading && countries.length === 0
-                  ? "Loading countries..."
-                  : "Select a country"}
-              </option>
-              {countries.map((countryOption) => (
-                <option key={countryOption.code} value={countryOption.code}>
-                  {countryOption.name}
-                </option>
-              ))}
-            </select>
-            {fieldErrors.country?.map((fieldError, index) => (
-              <Typography
-                key={`country-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="address">
-              Address: <span className={styles.requiredAsterisk}>*</span>
-            </label>
-            <Input
-              id="address"
-              name="pub-address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              required
-              autoComplete="pub-address"
-              placeholder="Enter address"
-            />
-            {fieldErrors.address?.map((fieldError, index) => (
-              <Typography
-                key={`address-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="postcode">
-              Postcode: <span className={styles.requiredAsterisk}>*</span>
-            </label>
-            <Input
-              id="postcode"
-              name="pub-postcode"
-              value={postcode}
-              onChange={(e) => setPostcode(e.target.value)}
-              required
-              autoComplete="pub-postcode"
-              placeholder="Enter postcode"
-            />
-            {fieldErrors.postcode?.map((fieldError, index) => (
-              <Typography
-                key={`postcode-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="lat">Latitude:</label>
-            <Input
-              id="lat"
-              name="lat"
-              value={lat ?? ""}
-              onChange={(e) =>
-                setLat(
-                  e.target.value === "" ? undefined : parseFloat(e.target.value)
-                )
-              }
-              type="number"
-              step="any"
-            />
-            {fieldErrors.lat?.map((fieldError, index) => (
-              <Typography
-                key={`lat-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="lng">Longitude:</label>
-            <Input
-              id="lng"
-              name="lng"
-              value={lng ?? ""}
-              onChange={(e) =>
-                setLng(
-                  e.target.value === "" ? undefined : parseFloat(e.target.value)
-                )
-              }
-              type="number"
-              step="any"
-            />
-            {fieldErrors.lng?.map((fieldError, index) => (
-              <Typography
-                key={`lng-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="website">Website:</label>
-            <Input
-              id="website"
-              name="website"
-              value={website ?? ""}
-              onChange={(e) => setWebsite(e.target.value || undefined)}
-            />
-            {fieldErrors.website?.map((fieldError, index) => (
-              <Typography
-                key={`website-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="description">Description:</label>
-            <Textarea
-              id="description"
-              name="description"
-              value={description ?? ""}
-              onChange={(e) => setDescription(e.target.value || undefined)}
-            />
-            {fieldErrors.description?.map((fieldError, index) => (
-              <Typography
-                key={`description-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="imageUrl">Image URL:</label>
-            <Input
-              id="imageUrl"
-              name="imageUrl"
-              value={imageUrl ?? ""}
-              onChange={(e) => setImageUrl(e.target.value || undefined)}
-            />
-            {fieldErrors.imageUrl?.map((fieldError, index) => (
-              <Typography
-                key={`imageUrl-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="operator">Operator/Owner:</label>
-            <Input
-              id="operator"
-              name="operator"
-              value={operator ?? ""}
-              onChange={(e) => setOperator(e.target.value || undefined)}
-            />
-            {fieldErrors.operator?.map((fieldError, index) => (
-              <Typography
-                key={`operator-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="area">Area:</label>
-            <Input
-              id="area"
-              name="area"
-              value={area ?? ""}
-              onChange={(e) => setArea(e.target.value || undefined)}
-              autoComplete="pub-area"
-            />
-            {fieldErrors.area?.map((fieldError, index) => (
-              <Typography
-                key={`area-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="phone">Phone:</label>
-            <Input
-              id="phone"
-              name="phone"
-              value={phone ?? ""}
-              onChange={(e) => setPhone(e.target.value || undefined)}
-              autoComplete="pub-phone"
-            />
-            {fieldErrors.phone?.map((fieldError, index) => (
-              <Typography
-                key={`phone-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="borough">Borough:</label>
-            <Input
-              id="borough"
-              name="borough"
-              value={borough ?? ""}
-              onChange={(e) => setBorough(e.target.value || undefined)}
-            />
-            {fieldErrors.borough?.map((fieldError, index) => (
-              <Typography
-                key={`borough-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <div>
-            <label htmlFor="openingHours">Opening Hours:</label>
-            <Input
-              id="openingHours"
-              name="openingHours"
-              value={openingHours ?? ""}
-              onChange={(e) => setOpeningHours(e.target.value || undefined)}
-            />
-            {fieldErrors.openingHours?.map((fieldError, index) => (
-              <Typography
-                key={`openingHours-error-${index}`}
-                variant="bodySmall"
-                className={styles.errorText}
-              >
-                {fieldError}
-              </Typography>
-            ))}
-          </div>
-          <Button type="submit" disabled={loading}>
-            <Typography as="span" variant="bodySmall">
-              {loading ? "Submitting..." : "Add Pub"}
-            </Typography>
-          </Button>
-          {(formErrors.length > 0 || error || editLink) && (
-            <div className={styles.feedbackPanel}>
-              {!editLink &&
-                formErrors.map((formError, index) => (
-                  <Typography
-                    key={`form-error-${index}`}
-                    variant="bodySmall"
-                    className={styles.errorText}
-                  >
-                    {formError}
-                  </Typography>
-                ))}
-              {error && (
-                <Typography variant="bodySmall" className={styles.errorText}>
-                  {error}
+        <>
+          <Typography variant="bodyMedium">
+            Please fill out the form below to add a pub to the database.
+          </Typography>
+          <form onSubmit={handleSubmit} autoComplete="off">
+            <div>
+              <label htmlFor="name">
+                Name: <span className={styles.requiredAsterisk}>*</span>
+              </label>
+              <Input
+                id="name"
+                name="pub-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoComplete="pub-name"
+                placeholder="Enter pub name"
+              />
+              {fieldErrors.name?.map((fieldError, index) => (
+                <Typography
+                  key={`name-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
                 </Typography>
-              )}
-              {editLink && (
-                <div className={styles.editLinkContainer}>
-                  <Typography
-                    variant="bodySmall"
-                    className={styles.editLinkLead}
-                  >
-                    A matching pub already exists.
-                  </Typography>
-                  <Button
-                    type="button"
-                    className={styles.editLinkAction}
-                    onClick={() => router.push(editLink)}
-                  >
-                    <Typography as="span" variant="bodySmall">
-                      Open existing pub to edit
-                    </Typography>
-                  </Button>
-                </div>
-              )}
+              ))}
             </div>
-          )}
-        </form>
+            <div>
+              <label htmlFor="city">
+                City: <span className={styles.requiredAsterisk}>*</span>
+              </label>
+              <Input
+                id="city"
+                name="pub-city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                required
+                autoComplete="pub-city"
+                placeholder="Enter city"
+              />
+              {fieldErrors.city?.map((fieldError, index) => (
+                <Typography
+                  key={`city-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="country">
+                Country: <span className={styles.requiredAsterisk}>*</span>
+              </label>
+              <select
+                id="country"
+                name="pub-country"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                required
+              >
+                <option value="">
+                  {countriesLoading && countries.length === 0
+                    ? "Loading countries..."
+                    : "Select a country"}
+                </option>
+                {countries.map((countryOption) => (
+                  <option key={countryOption.code} value={countryOption.code}>
+                    {countryOption.name}
+                  </option>
+                ))}
+              </select>
+              {fieldErrors.country?.map((fieldError, index) => (
+                <Typography
+                  key={`country-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="address">
+                Address: <span className={styles.requiredAsterisk}>*</span>
+              </label>
+              <Input
+                id="address"
+                name="pub-address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
+                autoComplete="pub-address"
+                placeholder="Enter address"
+              />
+              {fieldErrors.address?.map((fieldError, index) => (
+                <Typography
+                  key={`address-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="postcode">
+                Postcode: <span className={styles.requiredAsterisk}>*</span>
+              </label>
+              <Input
+                id="postcode"
+                name="pub-postcode"
+                value={postcode}
+                onChange={(e) => setPostcode(e.target.value)}
+                required
+                autoComplete="pub-postcode"
+                placeholder="Enter postcode"
+              />
+              {fieldErrors.postcode?.map((fieldError, index) => (
+                <Typography
+                  key={`postcode-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="lat">Latitude:</label>
+              <Input
+                id="lat"
+                name="lat"
+                value={lat ?? ""}
+                onChange={(e) =>
+                  setLat(
+                    e.target.value === ""
+                      ? undefined
+                      : parseFloat(e.target.value)
+                  )
+                }
+                type="number"
+                step="any"
+              />
+              {fieldErrors.lat?.map((fieldError, index) => (
+                <Typography
+                  key={`lat-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="lng">Longitude:</label>
+              <Input
+                id="lng"
+                name="lng"
+                value={lng ?? ""}
+                onChange={(e) =>
+                  setLng(
+                    e.target.value === ""
+                      ? undefined
+                      : parseFloat(e.target.value)
+                  )
+                }
+                type="number"
+                step="any"
+              />
+              {fieldErrors.lng?.map((fieldError, index) => (
+                <Typography
+                  key={`lng-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="website">Website:</label>
+              <Input
+                id="website"
+                name="website"
+                value={website ?? ""}
+                onChange={(e) => setWebsite(e.target.value || undefined)}
+              />
+              {fieldErrors.website?.map((fieldError, index) => (
+                <Typography
+                  key={`website-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="description">Description:</label>
+              <Textarea
+                id="description"
+                name="description"
+                value={description ?? ""}
+                onChange={(e) => setDescription(e.target.value || undefined)}
+              />
+              {fieldErrors.description?.map((fieldError, index) => (
+                <Typography
+                  key={`description-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="imageUrl">Image URL:</label>
+              <Input
+                id="imageUrl"
+                name="imageUrl"
+                value={imageUrl ?? ""}
+                onChange={(e) => setImageUrl(e.target.value || undefined)}
+              />
+              {fieldErrors.imageUrl?.map((fieldError, index) => (
+                <Typography
+                  key={`imageUrl-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="operator">Operator/Owner:</label>
+              <Input
+                id="operator"
+                name="operator"
+                value={operator ?? ""}
+                onChange={(e) => setOperator(e.target.value || undefined)}
+              />
+              {fieldErrors.operator?.map((fieldError, index) => (
+                <Typography
+                  key={`operator-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="area">Area:</label>
+              <Input
+                id="area"
+                name="area"
+                value={area ?? ""}
+                onChange={(e) => setArea(e.target.value || undefined)}
+                autoComplete="pub-area"
+              />
+              {fieldErrors.area?.map((fieldError, index) => (
+                <Typography
+                  key={`area-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="phone">Phone:</label>
+              <Input
+                id="phone"
+                name="phone"
+                value={phone ?? ""}
+                onChange={(e) => setPhone(e.target.value || undefined)}
+                autoComplete="pub-phone"
+              />
+              {fieldErrors.phone?.map((fieldError, index) => (
+                <Typography
+                  key={`phone-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="borough">Borough:</label>
+              <Input
+                id="borough"
+                name="borough"
+                value={borough ?? ""}
+                onChange={(e) => setBorough(e.target.value || undefined)}
+              />
+              {fieldErrors.borough?.map((fieldError, index) => (
+                <Typography
+                  key={`borough-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <div>
+              <label htmlFor="openingHours">Opening Hours:</label>
+              <Input
+                id="openingHours"
+                name="openingHours"
+                value={openingHours ?? ""}
+                onChange={(e) => setOpeningHours(e.target.value || undefined)}
+              />
+              {fieldErrors.openingHours?.map((fieldError, index) => (
+                <Typography
+                  key={`openingHours-error-${index}`}
+                  variant="bodySmall"
+                  className={styles.errorText}
+                >
+                  {fieldError}
+                </Typography>
+              ))}
+            </div>
+            <Button type="submit" disabled={loading}>
+              <Typography as="span" variant="bodySmall">
+                {loading ? "Submitting..." : "Add Pub"}
+              </Typography>
+            </Button>
+            {(formErrors.length > 0 || error || editLink) && (
+              <div className={styles.feedbackPanel}>
+                {!editLink &&
+                  formErrors.map((formError, index) => (
+                    <Typography
+                      key={`form-error-${index}`}
+                      variant="bodySmall"
+                      className={styles.errorText}
+                    >
+                      {formError}
+                    </Typography>
+                  ))}
+                {error && (
+                  <Typography variant="bodySmall" className={styles.errorText}>
+                    {error}
+                  </Typography>
+                )}
+                {editLink && (
+                  <div className={styles.editLinkContainer}>
+                    <Typography
+                      variant="bodySmall"
+                      className={styles.editLinkLead}
+                    >
+                      A matching pub already exists.
+                    </Typography>
+                    <Button
+                      type="button"
+                      className={styles.editLinkAction}
+                      onClick={() => router.push(editLink)}
+                    >
+                      <Typography as="span" variant="bodySmall">
+                        Open existing pub to edit
+                      </Typography>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </form>
+        </>
       )}
       {success && <Typography variant="bodyMedium">{success}</Typography>}
     </>
