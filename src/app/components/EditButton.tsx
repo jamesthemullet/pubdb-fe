@@ -22,12 +22,31 @@ export default function EditButton({
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
         setUser(null);
         return;
       }
+
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const res = await fetch(`${apiUrl}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUser({
+            email: data.email,
+            approved: data.approved,
+            admin: data.admin,
+          });
+          return;
+        }
+      } catch {
+        // Fall back to token decoding below when API check fails.
+      }
+
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         setUser({
@@ -40,7 +59,7 @@ export default function EditButton({
       }
     };
 
-    checkAuth();
+    void checkAuth();
     window.addEventListener("authChanged", checkAuth);
     window.addEventListener("storage", checkAuth);
     return () => {
