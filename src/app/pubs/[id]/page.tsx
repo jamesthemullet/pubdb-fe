@@ -4,8 +4,9 @@ import { useParams } from "next/navigation";
 
 import { useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
+import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
+import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
 import {
-  PUB_AMENITY_FIELDS,
   type PubAmenityKey,
 } from "@/constants/pubFormFields";
 import OpeningHoursEditor from "../../components/OpeningHoursEditor";
@@ -432,87 +433,37 @@ export default function PubPage() {
           />
           {editing ? (
             <div style={{ marginTop: "1rem" }}>
-              <label>
-                Name:{" "}
-                <Input
-                  value={editFields.name ?? ""}
-                  onChange={(e) => handleFieldChange("name", e.target.value)}
-                  required
-                />
-                {fieldErrors.nameError && (
-                  <span style={{ color: "red", marginLeft: "0.5rem" }}>
-                    {fieldErrors.nameError}
-                  </span>
-                )}
-              </label>
-              <br />
-              <label>
-                City:{" "}
-                <Input
-                  value={editFields.city ?? ""}
-                  onChange={(e) => handleFieldChange("city", e.target.value)}
-                  required
-                />
-                {fieldErrors.cityError && (
-                  <span style={{ color: "red", marginLeft: "0.5rem" }}>
-                    {fieldErrors.cityError}
-                  </span>
-                )}
-              </label>
-              <br />
-              <label>
-                Country:{" "}
-                <select
-                  value={editFields.country ?? ""}
-                  onChange={(e) => handleFieldChange("country", e.target.value)}
-                  required
-                >
-                  <option value="">
-                    {countriesLoading && countries.length === 0
-                      ? "Loading countries…"
-                      : "Select a country"}
-                  </option>
-                  {countries.map((country) => (
-                    <option key={country.code} value={country.code}>
-                      {country.name}
-                    </option>
-                  ))}
-                </select>
-                {fieldErrors.countryError && (
-                  <span style={{ color: "red", marginLeft: "0.5rem" }}>
-                    {fieldErrors.countryError}
-                  </span>
-                )}
-              </label>
-              <br />
-              <label>
-                Address:{" "}
-                <Input
-                  value={editFields.address ?? ""}
-                  onChange={(e) => handleFieldChange("address", e.target.value)}
-                  required
-                />
-                {fieldErrors.addressError && (
-                  <span style={{ color: "red", marginLeft: "0.5rem" }}>
-                    {fieldErrors.addressError}
-                  </span>
-                )}
-              </label>
-              <br />
-              <label>
-                Postcode:{" "}
-                <Input
-                  value={editFields.postcode ?? ""}
-                  onChange={(e) =>
-                    handleFieldChange("postcode", e.target.value)
-                  }
-                />
-                {fieldErrors.postcodeError && (
-                  <span style={{ color: "red", marginLeft: "0.5rem" }}>
-                    {fieldErrors.postcodeError}
-                  </span>
-                )}
-              </label>
+              <PubCoreIdentityFields
+                values={{
+                  name: editFields.name ?? "",
+                  city: editFields.city ?? "",
+                  country: editFields.country ?? "",
+                  address: editFields.address ?? "",
+                  postcode: editFields.postcode ?? "",
+                  lat: editFields.lat,
+                  lng: editFields.lng,
+                }}
+                onFieldChange={(field, value) =>
+                  handleFieldChange(field as keyof Pub, value)
+                }
+                countries={countries}
+                countriesLoading={countriesLoading}
+                fieldErrors={{
+                  name: fieldErrors.nameError ? [fieldErrors.nameError] : [],
+                  city: fieldErrors.cityError ? [fieldErrors.cityError] : [],
+                  country: fieldErrors.countryError
+                    ? [fieldErrors.countryError]
+                    : [],
+                  address: fieldErrors.addressError
+                    ? [fieldErrors.addressError]
+                    : [],
+                  postcode: fieldErrors.postcodeError
+                    ? [fieldErrors.postcodeError]
+                    : [],
+                }}
+                showRequiredMarkers={false}
+                namePrefix="edit-pub"
+              />
               <br />
               <label>
                 Area:{" "}
@@ -599,27 +550,12 @@ export default function PubPage() {
                 />
               </label>
               <br />
-              <div style={{ display: "grid", gap: "0.35rem" }}>
-                {PUB_AMENITY_FIELDS.map((amenityField) => (
-                  <label key={amenityField.key}>
-                    <Input
-                      type="checkbox"
-                      checked={
-                        (editFields[amenityField.key as keyof Pub] as
-                          | boolean
-                          | undefined) ?? false
-                      }
-                      onChange={(e) =>
-                        handleFieldChange(
-                          amenityField.key as PubAmenityKey,
-                          e.target.checked
-                        )
-                      }
-                    />{" "}
-                    {amenityField.label}
-                  </label>
-                ))}
-              </div>
+              <PubAmenitiesFields
+                values={editFields as Partial<Record<PubAmenityKey, boolean>>}
+                onChange={(key, checked) =>
+                  handleFieldChange(key as keyof Pub, checked)
+                }
+              />
               <br />
               <label>
                 Beer Types:{" "}
@@ -830,38 +766,6 @@ export default function PubPage() {
                   Add beer garden
                 </button>
               </div>
-              <br />
-              <label>
-                Latitude:{" "}
-                <Input
-                  type="number"
-                  value={editFields.lat ?? ""}
-                  onChange={(e) =>
-                    handleFieldChange(
-                      "lat",
-                      e.target.value === ""
-                        ? undefined
-                        : parseFloat(e.target.value)
-                    )
-                  }
-                />
-              </label>
-              <br />
-              <label>
-                Longitude:{" "}
-                <Input
-                  type="number"
-                  value={editFields.lng ?? ""}
-                  onChange={(e) =>
-                    handleFieldChange(
-                      "lng",
-                      e.target.value === ""
-                        ? undefined
-                        : parseFloat(e.target.value)
-                    )
-                  }
-                />
-              </label>
               <br />
               <button
                 onClick={handleSave}

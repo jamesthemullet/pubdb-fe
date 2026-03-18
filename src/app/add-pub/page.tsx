@@ -5,8 +5,10 @@ import Input from "@/app/components/input/Input";
 import Textarea from "@/app/components/textarea/Textarea";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
+import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
+import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
+import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
 import {
-  PUB_AMENITY_FIELDS,
   type PubAmenityKey,
 } from "@/constants/pubFormFields";
 import styles from "./page.module.css";
@@ -299,182 +301,59 @@ const AddPubPage = () => {
             Please fill out the form below to add a pub to the database.
           </Typography>
           <form onSubmit={handleSubmit} autoComplete="off">
-            <div>
-              <label htmlFor="name">
-                Name: <span className={styles.requiredAsterisk}>*</span>
-              </label>
-              <Input
-                id="name"
-                name="pub-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                autoComplete="pub-name"
-                placeholder="Enter pub name"
-              />
-              {fieldErrors.name?.map((fieldError, index) => (
-                <Typography
-                  key={`name-error-${index}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
-            </div>
-            <div>
-              <label htmlFor="city">
-                City: <span className={styles.requiredAsterisk}>*</span>
-              </label>
-              <Input
-                id="city"
-                name="pub-city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                required
-                autoComplete="pub-city"
-                placeholder="Enter city"
-              />
-              {fieldErrors.city?.map((fieldError, index) => (
-                <Typography
-                  key={`city-error-${index}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
-            </div>
-            <div>
-              <label htmlFor="country">
-                Country: <span className={styles.requiredAsterisk}>*</span>
-              </label>
-              <select
-                id="country"
-                name="pub-country"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                required
-              >
-                <option value="">
-                  {countriesLoading && countries.length === 0
-                    ? "Loading countries..."
-                    : "Select a country"}
-                </option>
-                {countries.map((countryOption) => (
-                  <option key={countryOption.code} value={countryOption.code}>
-                    {countryOption.name}
-                  </option>
-                ))}
-              </select>
-              {fieldErrors.country?.map((fieldError, index) => (
-                <Typography
-                  key={`country-error-${index}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
-            </div>
-            <div>
-              <label htmlFor="address">
-                Address: <span className={styles.requiredAsterisk}>*</span>
-              </label>
-              <Input
-                id="address"
-                name="pub-address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                required
-                autoComplete="pub-address"
-                placeholder="Enter address"
-              />
-              {fieldErrors.address?.map((fieldError, index) => (
-                <Typography
-                  key={`address-error-${index}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
-            </div>
-            <div>
-              <label htmlFor="postcode">
-                Postcode: <span className={styles.requiredAsterisk}>*</span>
-              </label>
-              <Input
-                id="postcode"
-                name="pub-postcode"
-                value={postcode}
-                onChange={(e) => setPostcode(e.target.value)}
-                required
-                autoComplete="pub-postcode"
-                placeholder="Enter postcode"
-              />
-              {fieldErrors.postcode?.map((fieldError, index) => (
-                <Typography
-                  key={`postcode-error-${index}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
-            </div>
-            <div>
-              <label htmlFor="lat">Latitude:</label>
-              <Input
-                id="lat"
-                name="lat"
-                value={lat ?? ""}
-                onChange={(e) =>
-                  setLat(
-                    e.target.value === ""
-                      ? undefined
-                      : parseFloat(e.target.value)
-                  )
+            <PubCoreIdentityFields
+              values={{
+                name,
+                city,
+                country,
+                address,
+                postcode,
+                lat,
+                lng,
+              }}
+              onFieldChange={(field, value) => {
+                if (field === "name") {
+                  setName(value as string);
+                  return;
                 }
-                type="number"
-                step="any"
-              />
-              {fieldErrors.lat?.map((fieldError, index) => (
-                <Typography
-                  key={`lat-error-${index}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
-            </div>
-            <div>
-              <label htmlFor="lng">Longitude:</label>
-              <Input
-                id="lng"
-                name="lng"
-                value={lng ?? ""}
-                onChange={(e) =>
-                  setLng(
-                    e.target.value === ""
-                      ? undefined
-                      : parseFloat(e.target.value)
-                  )
+                if (field === "city") {
+                  setCity(value as string);
+                  return;
                 }
-                type="number"
-                step="any"
-              />
-              {fieldErrors.lng?.map((fieldError, index) => (
-                <Typography
-                  key={`lng-error-${index}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
-            </div>
+                if (field === "country") {
+                  setCountry(value as string);
+                  return;
+                }
+                if (field === "address") {
+                  setAddress(value as string);
+                  return;
+                }
+                if (field === "postcode") {
+                  setPostcode(value as string);
+                  return;
+                }
+                if (field === "lat") {
+                  setLat(value as number | undefined);
+                  return;
+                }
+
+                setLng(value as number | undefined);
+              }}
+              countries={countries}
+              countriesLoading={countriesLoading}
+              fieldErrors={{
+                name: fieldErrors.name,
+                city: fieldErrors.city,
+                country: fieldErrors.country,
+                address: fieldErrors.address,
+                postcode: fieldErrors.postcode,
+                lat: fieldErrors.lat,
+                lng: fieldErrors.lng,
+              }}
+              requiredAsteriskClassName={styles.requiredAsterisk}
+              errorClassName={styles.errorText}
+              showPlaceholders
+            />
             <div>
               <label htmlFor="website">Website:</label>
               <Input
@@ -542,39 +421,24 @@ const AddPubPage = () => {
                     value={chainName ?? ""}
                     onChange={(e) => setChainName(e.target.value || undefined)}
                   />
-                  {fieldErrors.chainName?.map((fieldError, index) => (
-                    <Typography
-                      key={`chainName-error-${index}`}
-                      variant="bodySmall"
-                      className={styles.errorText}
-                    >
-                      {fieldError}
-                    </Typography>
-                  ))}
+                  <FieldErrorList
+                    errors={fieldErrors.chainName}
+                    className={styles.errorText}
+                    idPrefix="chainName"
+                  />
                 </div>
-                <div className={styles.amenitiesGrid}>
-                  {PUB_AMENITY_FIELDS.map((amenityField) => (
-                    <label
-                      key={amenityField.key}
-                      className={styles.amenityLabel}
-                      htmlFor={`amenity-${amenityField.key}`}
-                    >
-                      <Input
-                        id={`amenity-${amenityField.key}`}
-                        name={amenityField.key}
-                        type="checkbox"
-                        checked={amenities[amenityField.key] ?? false}
-                        onChange={(e) =>
-                          setAmenities((prev) => ({
-                            ...prev,
-                            [amenityField.key]: e.target.checked,
-                          }))
-                        }
-                      />
-                      <span>{amenityField.label}</span>
-                    </label>
-                  ))}
-                </div>
+                <PubAmenitiesFields
+                  values={amenities}
+                  onChange={(key, checked) =>
+                    setAmenities((prev) => ({
+                      ...prev,
+                      [key]: checked,
+                    }))
+                  }
+                  containerClassName={styles.amenitiesGrid}
+                  labelClassName={styles.amenityLabel}
+                  idPrefix="amenity"
+                />
               </div>
             </details>
             <div>

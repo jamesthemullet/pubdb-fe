@@ -575,9 +575,15 @@ describe("AddPubPage", () => {
       expect(submittedBody).not.toBeNull();
     });
 
-    expect(submittedBody?.chainName).toBeUndefined();
+    if (submittedBody === null) {
+      throw new Error("Expected submit payload to be captured");
+    }
+
+    const submitted = submittedBody;
+
+    expect(submitted["chainName"]).toBeUndefined();
     for (const amenity of PUB_AMENITY_FIELDS) {
-      expect(submittedBody?.[amenity.key]).toBe(true);
+      expect(submitted[amenity.key]).toBe(true);
     }
   });
 });
