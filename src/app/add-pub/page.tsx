@@ -5,6 +5,10 @@ import Input from "@/app/components/input/Input";
 import Textarea from "@/app/components/textarea/Textarea";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
+import {
+  PUB_AMENITY_FIELDS,
+  type PubAmenityKey,
+} from "@/constants/pubFormFields";
 import styles from "./page.module.css";
 
 type FieldErrors = Record<string, string[]>;
@@ -83,10 +87,14 @@ const AddPubPage = () => {
   const [website, setWebsite] = useState<string | undefined>(undefined);
   const [description, setDescription] = useState<string | undefined>(undefined);
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+  const [chainName, setChainName] = useState<string | undefined>(undefined);
   const [operator, setOperator] = useState<string | undefined>(undefined);
   const [area, setArea] = useState<string | undefined>(undefined);
   const [phone, setPhone] = useState<string | undefined>(undefined);
   const [borough, setBorough] = useState<string | undefined>(undefined);
+  const [amenities, setAmenities] = useState<
+    Partial<Record<PubAmenityKey, boolean>>
+  >({});
   const [openingHours, setOpeningHours] = useState<string | undefined>(
     undefined
   );
@@ -207,11 +215,13 @@ const AddPubPage = () => {
         website,
         description,
         imageUrl,
+        chainName,
         operator,
         area,
         phone,
         borough,
         openingHours,
+        ...amenities,
       };
       const res = await fetch(`${apiUrl}/pubs`, {
         method: "POST",
@@ -519,6 +529,54 @@ const AddPubPage = () => {
                 </Typography>
               ))}
             </div>
+            <details className={styles.advancedSection}>
+              <summary className={styles.advancedSummary}>
+                Advanced details (optional)
+              </summary>
+              <div className={styles.advancedContent}>
+                <div>
+                  <label htmlFor="chainName">Chain name:</label>
+                  <Input
+                    id="chainName"
+                    name="chainName"
+                    value={chainName ?? ""}
+                    onChange={(e) => setChainName(e.target.value || undefined)}
+                  />
+                  {fieldErrors.chainName?.map((fieldError, index) => (
+                    <Typography
+                      key={`chainName-error-${index}`}
+                      variant="bodySmall"
+                      className={styles.errorText}
+                    >
+                      {fieldError}
+                    </Typography>
+                  ))}
+                </div>
+                <div className={styles.amenitiesGrid}>
+                  {PUB_AMENITY_FIELDS.map((amenityField) => (
+                    <label
+                      key={amenityField.key}
+                      className={styles.amenityLabel}
+                      htmlFor={`amenity-${amenityField.key}`}
+                    >
+                      <Input
+                        id={`amenity-${amenityField.key}`}
+                        name={amenityField.key}
+                        type="checkbox"
+                        checked={amenities[amenityField.key] ?? false}
+                        onChange={(e) =>
+                          setAmenities((prev) => ({
+                            ...prev,
+                            [amenityField.key]: e.target.checked,
+                          }))
+                        }
+                      />
+                      <span>{amenityField.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </details>
             <div>
               <label htmlFor="operator">Operator/Owner:</label>
               <Input

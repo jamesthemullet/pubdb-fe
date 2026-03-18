@@ -4,6 +4,10 @@ import { useParams } from "next/navigation";
 
 import { useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
+import {
+  PUB_AMENITY_FIELDS,
+  type PubAmenityKey,
+} from "@/constants/pubFormFields";
 import OpeningHoursEditor from "../../components/OpeningHoursEditor";
 
 type Pub = {
@@ -596,126 +600,25 @@ export default function PubPage() {
               </label>
               <br />
               <div style={{ display: "grid", gap: "0.35rem" }}>
-                <label>
-                  <Input
-                    type="checkbox"
-                    checked={editFields.isIndependent ?? false}
-                    onChange={(e) =>
-                      handleFieldChange("isIndependent", e.target.checked)
-                    }
-                  />{" "}
-                  Independent
-                </label>
-                <label>
-                  <Input
-                    type="checkbox"
-                    checked={editFields.hasFood ?? false}
-                    onChange={(e) =>
-                      handleFieldChange("hasFood", e.target.checked)
-                    }
-                  />{" "}
-                  Food available
-                </label>
-                <label>
-                  <Input
-                    type="checkbox"
-                    checked={editFields.hasSundayRoast ?? false}
-                    onChange={(e) =>
-                      handleFieldChange("hasSundayRoast", e.target.checked)
-                    }
-                  />{" "}
-                  Sunday roast
-                </label>
-                <label>
-                  <Input
-                    type="checkbox"
-                    checked={editFields.hasBeerGarden ?? false}
-                    onChange={(e) =>
-                      handleFieldChange("hasBeerGarden", e.target.checked)
-                    }
-                  />{" "}
-                  Beer garden
-                </label>
-                <label>
-                  <Input
-                    type="checkbox"
-                    checked={editFields.hasCaskAle ?? false}
-                    onChange={(e) =>
-                      handleFieldChange("hasCaskAle", e.target.checked)
-                    }
-                  />{" "}
-                  Cask ale
-                </label>
-                <label>
-                  <Input
-                    type="checkbox"
-                    checked={editFields.isBeerFocused ?? false}
-                    onChange={(e) =>
-                      handleFieldChange("isBeerFocused", e.target.checked)
-                    }
-                  />{" "}
-                  Beer-focused
-                </label>
-                <label>
-                  <Input
-                    type="checkbox"
-                    checked={editFields.isDogFriendly ?? false}
-                    onChange={(e) =>
-                      handleFieldChange("isDogFriendly", e.target.checked)
-                    }
-                  />{" "}
-                  Dog friendly
-                </label>
-                <label>
-                  <Input
-                    type="checkbox"
-                    checked={editFields.isFamilyFriendly ?? false}
-                    onChange={(e) =>
-                      handleFieldChange("isFamilyFriendly", e.target.checked)
-                    }
-                  />{" "}
-                  Family friendly
-                </label>
-                <label>
-                  <Input
-                    type="checkbox"
-                    checked={editFields.hasStepFreeAccess ?? false}
-                    onChange={(e) =>
-                      handleFieldChange("hasStepFreeAccess", e.target.checked)
-                    }
-                  />{" "}
-                  Step-free access
-                </label>
-                <label>
-                  <Input
-                    type="checkbox"
-                    checked={editFields.hasAccessibleToilet ?? false}
-                    onChange={(e) =>
-                      handleFieldChange("hasAccessibleToilet", e.target.checked)
-                    }
-                  />{" "}
-                  Accessible toilet
-                </label>
-                <label>
-                  <Input
-                    type="checkbox"
-                    checked={editFields.hasLiveSport ?? false}
-                    onChange={(e) =>
-                      handleFieldChange("hasLiveSport", e.target.checked)
-                    }
-                  />{" "}
-                  Live sport
-                </label>
-                <label>
-                  <Input
-                    type="checkbox"
-                    checked={editFields.hasLiveMusic ?? false}
-                    onChange={(e) =>
-                      handleFieldChange("hasLiveMusic", e.target.checked)
-                    }
-                  />{" "}
-                  Live music
-                </label>
+                {PUB_AMENITY_FIELDS.map((amenityField) => (
+                  <label key={amenityField.key}>
+                    <Input
+                      type="checkbox"
+                      checked={
+                        (editFields[amenityField.key as keyof Pub] as
+                          | boolean
+                          | undefined) ?? false
+                      }
+                      onChange={(e) =>
+                        handleFieldChange(
+                          amenityField.key as PubAmenityKey,
+                          e.target.checked
+                        )
+                      }
+                    />{" "}
+                    {amenityField.label}
+                  </label>
+                ))}
               </div>
               <br />
               <label>

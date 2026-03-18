@@ -43,3 +43,34 @@
 .editLinkAction:hover {
   background-color: var(--button-primary-hover);
 }
+
+.advancedSection {
+  margin-top: 12px;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--button-primary) 30%, white);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--button-primary) 6%, white);
+}
+
+.advancedSummary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.advancedContent {
+  margin-top: 10px;
+  display: grid;
+  gap: 12px;
+}
+
+.amenitiesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.amenityLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

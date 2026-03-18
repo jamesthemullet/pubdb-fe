@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 
 import AddPubPage from "./page";
 
@@ -261,7 +262,9 @@ describe("AddPubPage", () => {
         }
 
         if (url.includes("restcountries.com")) {
-          return jsonResponse([{ name: { common: "United Kingdom" }, cca2: "GB" }]);
+          return jsonResponse([
+            { name: { common: "United Kingdom" }, cca2: "GB" },
+          ]);
         }
 
         if (url.endsWith("/pubs") && init?.method === "POST") {
@@ -325,6 +328,7 @@ describe("AddPubPage", () => {
               description: ["Description is invalid"],
               imageUrl: ["Image URL is invalid"],
               website: ["Website is invalid"],
+              chainName: ["Chain name is invalid"],
               lng: ["Longitude is invalid"],
               lat: ["Latitude is invalid"],
             },
@@ -352,6 +356,7 @@ describe("AddPubPage", () => {
     expect(screen.getByText("Description is invalid")).toBeInTheDocument();
     expect(screen.getByText("Image URL is invalid")).toBeInTheDocument();
     expect(screen.getByText("Website is invalid")).toBeInTheDocument();
+    expect(screen.getByText("Chain name is invalid")).toBeInTheDocument();
     expect(screen.getByText("Longitude is invalid")).toBeInTheDocument();
     expect(screen.getByText("Latitude is invalid")).toBeInTheDocument();
     expect(screen.queryByText("Unknown error")).not.toBeInTheDocument();
@@ -520,5 +525,59 @@ describe("AddPubPage", () => {
     expect(
       await screen.findByRole("option", { name: "Loading countries..." })
     ).toBeInTheDocument();
+  });
+
+  it("submits cleared chainName as undefined and includes amenity selections", async () => {
+    localStorage.setItem("token", "test-token");
+
+    let submittedBody: Record<string, unknown> | null = null;
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+      const url = toUrl(input);
+
+      if (url.endsWith("/auth/me")) {
+        return jsonResponse({ email: "editor@example.com", approved: true });
+      }
+
+      if (url.includes("restcountries.com")) {
+        return jsonResponse([
+          { name: { common: "United Kingdom" }, cca2: "GB" },
+        ]);
+      }
+
+      if (url.endsWith("/pubs") && init?.method === "POST") {
+        submittedBody = JSON.parse(String(init.body));
+        return jsonResponse({ id: "pub-amenities" }, 201);
+      }
+
+      throw new Error(`Unexpected fetch URL: ${url}`);
+    });
+
+    render(<AddPubPage />);
+    await screen.findByText(/please fill out the form below/i);
+
+    fireEvent.change(screen.getByLabelText(/^Chain name:/i), {
+      target: { value: "Fuller's" },
+    });
+    fireEvent.change(screen.getByLabelText(/^Chain name:/i), {
+      target: { value: "" },
+    });
+
+    for (const amenity of PUB_AMENITY_FIELDS) {
+      const checkbox = screen.getByRole("checkbox", { name: amenity.label });
+      fireEvent.click(checkbox);
+      expect(checkbox).toBeChecked();
+    }
+
+    submitCurrentForm();
+
+    await waitFor(() => {
+      expect(submittedBody).not.toBeNull();
+    });
+
+    expect(submittedBody?.chainName).toBeUndefined();
+    for (const amenity of PUB_AMENITY_FIELDS) {
+      expect(submittedBody?.[amenity.key]).toBe(true);
+    }
   });
 });
