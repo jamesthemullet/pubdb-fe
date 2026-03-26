@@ -6,9 +6,8 @@ import { useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
 import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
 import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
-import {
-  type PubAmenityKey,
-} from "@/constants/pubFormFields";
+import { type PubAmenityKey } from "@/constants/pubFormFields";
+import { useCountries } from "@/hooks/useCountries";
 import OpeningHoursEditor from "../../components/OpeningHoursEditor";
 
 type Pub = {
@@ -104,10 +103,7 @@ export default function PubPage() {
   const [editFields, setEditFields] = useState<Partial<Pub>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [countries, setCountries] = useState<{ name: string; code: string }[]>(
-    []
-  );
-  const [countriesLoading, setCountriesLoading] = useState(false);
+  const { countries, countriesLoading } = useCountries();
 
   const getCountryName = (code: string) => {
     const country = countries.find((c) => c.code === code);
@@ -116,42 +112,6 @@ export default function PubPage() {
   const [beerTypeOptions, setBeerTypeOptions] = useState<BeerType[]>([]);
   const [beerTypesLoading, setBeerTypesLoading] = useState(false);
   const [beerTypesError, setBeerTypesError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let ignore = false;
-    async function fetchCountries() {
-      setCountriesLoading(true);
-      try {
-        const res = await fetch(
-          "https://restcountries.com/v3.1/all?fields=name,cca2"
-        );
-        if (!res.ok) {
-          throw new Error(`Failed to fetch countries: ${res.status}`);
-        }
-        const data: Array<{ name: { common: string }; cca2: string }> =
-          await res.json();
-        if (!ignore) {
-          const options = data
-            .map((country) => ({
-              name: country.name.common,
-              code: country.cca2,
-            }))
-            .sort((a, b) => a.name.localeCompare(b.name));
-          setCountries(options);
-        }
-      } catch (err) {
-        console.error("Error fetching countries", err);
-      } finally {
-        if (!ignore) {
-          setCountriesLoading(false);
-        }
-      }
-    }
-    fetchCountries();
-    return () => {
-      ignore = true;
-    };
-  }, []);
 
   useEffect(() => {
     let ignore = false;

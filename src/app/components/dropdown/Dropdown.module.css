@@ -1,0 +1,26 @@
+.dropdown {
+  background-color: var(--input-background);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.5rem;
+  padding-right: 2.25rem;
+  font: inherit;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+}
+
+.dropdown:focus {
+  outline: 2px solid color-mix(in srgb, var(--brand) 45%, white);
+  outline-offset: 1px;
+}
+
+.dropdown:disabled {
+  opacity: 0.65;
+}
+
+.fullWidth {
+  width: 100%;
+}
