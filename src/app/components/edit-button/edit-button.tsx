@@ -1,6 +1,12 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import styles from "./edit-button.module.css";
+import Typography from "../typography/typography";
+import Button from "../button/button";
 
 type EditButtonProps = {
   pubName: string;
@@ -14,12 +20,10 @@ type AuthUser = {
   admin?: boolean;
 };
 
-export default function EditButton({
-  pubName,
-  onEdit,
-  pubId,
-}: EditButtonProps) {
+const EditButton = ({ pubName, onEdit, pubId }: EditButtonProps) => {
+  const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -71,26 +75,28 @@ export default function EditButton({
 
   if (!user) {
     return (
-      <div style={{ marginTop: "1rem" }}>
-        <a href="/register">Log in to edit this pub</a>
+      <div className={styles.notice}>
+        <Link href="/register">Log in to edit this pub</Link>
       </div>
     );
   }
 
   if (!user.approved) {
     return (
-      <div style={{ marginTop: "1rem" }}>
-        <p>Your account is not approved for editing.</p>
-        <p>
+      <div className={styles.notice}>
+        <Typography>Your account is not approved for editing.</Typography>
+        <Typography>
           Please email{" "}
           <a href="mailto:hello@thepubdb.com">hello@thepubdb.com</a> to request
           approval.
-        </p>
+        </Typography>
       </div>
     );
   }
 
   const handleDelete = async () => {
+    setDeleteError(null);
+
     if (
       !confirm(
         `Are you sure you want to delete "${pubName}"? This action cannot be undone.`
@@ -107,20 +113,35 @@ export default function EditButton({
       });
       if (!res.ok) {
         const data = await res.json();
-        alert(data.error || "Failed to delete pub");
+        setDeleteError(data.error || "Failed to delete pub");
         return;
       }
-      alert("Pub deleted successfully");
-      window.location.href = "/pubs";
+      router.push("/pubs");
     } catch {
-      alert("Network error");
+      setDeleteError("Network error");
     }
   };
 
   return (
     <div>
-      <button onClick={onEdit}>Edit this pub</button>
-      {user.admin && <button onClick={handleDelete}>Delete this pub</button>}
+      <Button onClick={onEdit}>Edit this pub</Button>
+      {user.admin && (
+        <Button variant="red" onClick={handleDelete}>
+          Delete this pub
+        </Button>
+      )}
+      {deleteError && (
+        <Typography
+          as="p"
+          variant="bodySmall"
+          className={styles.errorMessage}
+          role="alert"
+        >
+          {deleteError}
+        </Typography>
+      )}
     </div>
   );
-}
+};
+
+export default EditButton;

@@ -6,9 +6,7 @@ import { useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
 import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
 import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
-import {
-  type PubAmenityKey,
-} from "@/constants/pubFormFields";
+import { type PubAmenityKey } from "@/constants/pubFormFields";
 import OpeningHoursEditor from "../../components/OpeningHoursEditor";
 
 type Pub = {
@@ -412,6 +410,14 @@ export default function PubPage() {
     }
   }
 
+  const isSaveDisabled =
+    Object.values(fieldErrors).some((err) => !!err) ||
+    ["name", "city", "address", "postcode", "country"].some(
+      (field) =>
+        !editFields[field as keyof Pub] ||
+        editFields[field as keyof Pub]?.toString().trim() === ""
+    );
+
   return (
     <>
       {loading ? (
@@ -426,11 +432,25 @@ export default function PubPage() {
               style={{ maxWidth: "400px", marginBottom: "1rem" }}
             />
           )}
-          <EditButton
-            pubName={pub.name}
-            onEdit={handleEditClick}
-            pubId={pub.id}
-          />
+          {editing ? (
+            <div style={{ marginTop: "1rem" }}>
+              <button onClick={handleSave} disabled={isSaveDisabled}>
+                Save
+              </button>
+              <button
+                onClick={() => setEditing(false)}
+                style={{ marginLeft: "1rem" }}
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <EditButton
+              pubName={pub.name}
+              onEdit={handleEditClick}
+              pubId={pub.id}
+            />
+          )}
           {editing ? (
             <div style={{ marginTop: "1rem" }}>
               <PubCoreIdentityFields
@@ -767,17 +787,7 @@ export default function PubPage() {
                 </button>
               </div>
               <br />
-              <button
-                onClick={handleSave}
-                disabled={
-                  Object.values(fieldErrors).some((err) => !!err) ||
-                  ["name", "city", "address", "postcode", "country"].some(
-                    (field) =>
-                      !editFields[field as keyof Pub] ||
-                      editFields[field as keyof Pub]?.toString().trim() === ""
-                  )
-                }
-              >
+              <button onClick={handleSave} disabled={isSaveDisabled}>
                 Save
               </button>
               {saveError && (

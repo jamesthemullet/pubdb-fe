@@ -8,9 +8,7 @@ import Typography from "@/app/components/typography/typography";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
 import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
 import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
-import {
-  type PubAmenityKey,
-} from "@/constants/pubFormFields";
+import { type PubAmenityKey } from "@/constants/pubFormFields";
 import styles from "./page.module.css";
 
 type FieldErrors = Record<string, string[]>;

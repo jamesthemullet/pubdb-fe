@@ -29,7 +29,10 @@ type CountryOption = {
 
 type PubCoreIdentityFieldsProps = {
   values: CoreValues;
-  onFieldChange: <K extends CoreFieldKey>(field: K, value: CoreValues[K]) => void;
+  onFieldChange: <K extends CoreFieldKey>(
+    field: K,
+    value: CoreValues[K]
+  ) => void;
   countries: CountryOption[];
   countriesLoading: boolean;
   fieldErrors?: CoreFieldErrors;
