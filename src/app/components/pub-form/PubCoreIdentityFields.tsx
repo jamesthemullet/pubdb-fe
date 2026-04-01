@@ -1,3 +1,4 @@
+import Dropdown from "@/app/components/dropdown/Dropdown";
 import Input from "@/app/components/input/Input";
 import FieldErrorList from "./FieldErrorList";
 
@@ -116,7 +117,7 @@ export default function PubCoreIdentityFields({
             </span>
           )}
         </label>
-        <select
+        <Dropdown
           id="country"
           name={`${namePrefix}-country`}
           value={values.country}
@@ -133,7 +134,7 @@ export default function PubCoreIdentityFields({
               {countryOption.name}
             </option>
           ))}
-        </select>
+        </Dropdown>
         <FieldErrorList
           errors={fieldErrors?.country}
           className={errorClassName}
