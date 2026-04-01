@@ -1,4 +1,4 @@
-import type { ElementType, ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
 import styles from "./typography.module.css";
 
 type TypographyVariant =
@@ -15,7 +15,7 @@ type TypographyProps = {
   as?: ElementType;
   variant?: TypographyVariant;
   className?: string;
-};
+} & ComponentPropsWithoutRef<"p">;
 
 const variantClassMap: Record<TypographyVariant, string> = {
   bodySmall: styles.bodySmall,
@@ -41,11 +41,16 @@ export default function Typography({
   as,
   variant = "bodyMedium",
   className = "",
+  ...props
 }: TypographyProps) {
   const Component = as ?? defaultElementMap[variant];
   const classes = [variantClassMap[variant], className]
     .filter(Boolean)
     .join(" ");
 
-  return <Component className={classes}>{children ?? text}</Component>;
+  return (
+    <Component className={classes} {...props}>
+      {children ?? text}
+    </Component>
+  );
 }
