@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import styles from "./dashboard.module.css";
-import Button from "../components/button/button";
-import Typography from "../components/typography/typography";
+import Button from "../../components/button/button";
+import Typography from "../../components/typography/typography";
 
 type ApiKey = {
   name: string;

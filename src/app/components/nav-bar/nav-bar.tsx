@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import styles from "./NavBar.module.css";
+import styles from "./nav-bar.module.css";
 import { useEffect, useState } from "react";
+import Typography from "../typography/typography";
+import Button from "../button/button";
 
-export default function NavBar() {
+const NavBar = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,32 +43,22 @@ export default function NavBar() {
   return (
     <nav className={styles.nav}>
       <ul>
-        <li>
-          <Link href="/">Home</Link>
-        </li>
-        <li>
-          <Link href="/pubs">All Pubs</Link>
-        </li>
-        <li>
-          <Link href="/profile">Profile</Link>
-        </li>
-        <li>
-          <Link href="/add-pub">Add Pub</Link>
-        </li>
-        {!userEmail && (
-          <li>
-            <Link href="/register">Register</Link>
-          </li>
-        )}
+        <Link href="/">Home</Link>
+        <Link href="/pubs">All Pubs</Link>
+        <Link href="/profile">Profile</Link>
+        <Link href="/add-pub">Add Pub</Link>
+        {!userEmail && <Link href="/register">Register</Link>}
         {userEmail && (
-          <li style={{ marginLeft: "auto" }}>
-            <span>{userEmail}</span>
-            <button onClick={handleLogout} style={{ marginLeft: 8 }}>
+          <>
+            <Typography>{userEmail}</Typography>
+            <Button onClick={handleLogout} className={styles.logoutButton}>
               Logout
-            </button>
-          </li>
+            </Button>
+          </>
         )}
       </ul>
     </nav>
   );
-}
+};
+
+export default NavBar;

@@ -27,3 +27,7 @@
 .nav a:hover {
   text-decoration: underline;
 }
+
+.logoutButton {
+  margin-left: 0.5rem;
+}

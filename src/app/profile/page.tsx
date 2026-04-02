@@ -1,6 +1,6 @@
 "use client";
 
-import Dashboard from "../features/dashboard";
+import Dashboard from "../features/dashboard/dashboard";
 import Heading from "../components/heading/heading";
 import Typography from "../components/typography/typography";
 
