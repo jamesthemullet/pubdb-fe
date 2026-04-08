@@ -16,7 +16,7 @@ const countries = [
   { name: "France", code: "FR" },
 ];
 
-function renderDefault(overrides: Parameters<typeof PubCoreIdentityFields>[0] = {}) {
+function renderDefault(overrides: Partial<Parameters<typeof PubCoreIdentityFields>[0]> = {}) {
   const props = {
     values: baseValues,
     onFieldChange: vi.fn(),
