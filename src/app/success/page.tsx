@@ -24,7 +24,6 @@ function SuccessContent() {
   const sessionId = searchParams.get("session_id");
   const [status, setStatus] = useState<SubscriptionStatus | null>(null);
 
-  console.log(140, status);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,7 +80,6 @@ function SuccessContent() {
         }
 
         const data = await response.json();
-        console.log(139, data);
         setStatus(data);
 
         window.dispatchEvent(new Event("authChanged"));
