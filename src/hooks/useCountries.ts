@@ -12,11 +12,30 @@ type RestCountryResponse = {
   cca2: string;
 };
 
+// Module-level cache: countries are static data that never change within a session.
+// Populated on first successful fetch; subsequent hook mounts return instantly.
+let countriesCache: CountryOption[] | null = null;
+
+/** Reset the module-level cache. Exposed for testing only. */
+export function clearCountriesCache(): void {
+  countriesCache = null;
+}
+
 export function useCountries() {
-  const [countries, setCountries] = useState<CountryOption[]>([]);
-  const [countriesLoading, setCountriesLoading] = useState(false);
+  const [countries, setCountries] = useState<CountryOption[]>(
+    countriesCache ?? []
+  );
+  const [countriesLoading, setCountriesLoading] = useState(
+    countriesCache === null
+  );
 
   useEffect(() => {
+    if (countriesCache !== null) {
+      setCountries(countriesCache);
+      setCountriesLoading(false);
+      return;
+    }
+
     let ignore = false;
 
     async function fetchCountries() {
@@ -37,6 +56,7 @@ export function useCountries() {
               code: country.cca2,
             }))
             .sort((a, b) => a.name.localeCompare(b.name));
+          countriesCache = options;
           setCountries(options);
         }
       } catch (err) {
