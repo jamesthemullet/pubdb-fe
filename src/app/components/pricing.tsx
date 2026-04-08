@@ -41,6 +41,10 @@ const pricingTiers = [
 
 const Pricing: React.FC = () => {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const [userTier, setUserTier] = useState<string | null>(null);
   const [userHighestTier, setUserHighestTier] = useState<string | null>(null);
@@ -196,15 +200,16 @@ const Pricing: React.FC = () => {
         );
       }
       const data = await response.json();
-      console.log(130, data);
       window.location.href = data.url;
     } catch (error) {
       console.error("Subscription error:", error);
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Failed to start checkout process"
-      );
+      setFeedbackMessage({
+        type: "error",
+        text:
+          error instanceof Error
+            ? error.message
+            : "Failed to start checkout process",
+      });
     } finally {
       setLoadingTier(null);
     }
@@ -239,7 +244,11 @@ const Pricing: React.FC = () => {
       });
       setApiKey(data.apiKey);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to estimate upgrade");
+      setFeedbackMessage({
+        type: "error",
+        text:
+          err instanceof Error ? err.message : "Failed to estimate upgrade",
+      });
     } finally {
       setEstimateLoading(false);
     }
@@ -264,17 +273,18 @@ const Pricing: React.FC = () => {
       }
       await fetchUserTier();
       setUpgradeModal(null);
-      alert("Upgrade successful");
+      setFeedbackMessage({ type: "success", text: "Upgrade successful" });
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Upgrade failed");
+      setFeedbackMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "Upgrade failed",
+      });
     } finally {
       setPerformingUpgrade(false);
     }
   };
 
   const handleTierSelection = async (tier: (typeof pricingTiers)[0]) => {
-    console.log(101, tier.name);
-    console.log(102, userTier);
     const token = localStorage.getItem("token");
     if (tier.name === userTier) {
       window.location.href = "/";
@@ -282,7 +292,10 @@ const Pricing: React.FC = () => {
     }
     if (tier.name === "HOBBY") {
       if (!token) {
-        alert("Please log in to manage subscriptions");
+        setFeedbackMessage({
+          type: "error",
+          text: "Please log in to manage subscriptions",
+        });
         window.location.href = "/register";
         return;
       }
@@ -305,7 +318,6 @@ const Pricing: React.FC = () => {
           );
         }
         const data = await response.json();
-        console.log(110, data);
         setUserTier("HOBBY");
         setUpgradeModal({
           priceId: "",
@@ -315,16 +327,21 @@ const Pricing: React.FC = () => {
         setApiKey(data.apiKey);
       } catch (error) {
         console.error("Hobby subscription error:", error);
-        alert(
-          error instanceof Error
-            ? error.message
-            : "Failed to subscribe to Hobby tier"
-        );
+        setFeedbackMessage({
+          type: "error",
+          text:
+            error instanceof Error
+              ? error.message
+              : "Failed to subscribe to Hobby tier",
+        });
       }
       return;
     }
     if (!token) {
-      alert("Please log in to manage subscriptions");
+      setFeedbackMessage({
+        type: "error",
+        text: "Please log in to manage subscriptions",
+      });
       window.location.href = "/register";
       return;
     }
@@ -335,6 +352,33 @@ const Pricing: React.FC = () => {
 
   return (
     <div>
+      {feedbackMessage && (
+        <div
+          style={{
+            padding: "0.75rem 1rem",
+            marginBottom: "1rem",
+            borderRadius: "4px",
+            color: feedbackMessage.type === "success" ? "#155724" : "#721c24",
+            backgroundColor:
+              feedbackMessage.type === "success" ? "#d4edda" : "#f8d7da",
+            border: `1px solid ${feedbackMessage.type === "success" ? "#c3e6cb" : "#f5c6cb"}`,
+          }}
+        >
+          {feedbackMessage.text}
+          <button
+            onClick={() => setFeedbackMessage(null)}
+            style={{
+              float: "right",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
       {upgradeModal ? (
         <div
           style={{

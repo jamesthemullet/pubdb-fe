@@ -398,7 +398,6 @@ export default function PubPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        console.log(10, data.errors);
         setSaveError(extractErrorMessage(data));
       } else {
         setPub(data);
@@ -1269,6 +1268,10 @@ function EditButton({
     approved?: boolean;
     admin?: boolean;
   } | null>(null);
+  const [deleteMessage, setDeleteMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -1359,18 +1362,31 @@ function EditButton({
       });
       if (!res.ok) {
         const data = await res.json();
-        alert(data.error || "Failed to delete pub");
+        setDeleteMessage({
+          type: "error",
+          text: data.error || "Failed to delete pub",
+        });
       } else {
-        alert("Pub deleted successfully");
+        setDeleteMessage({ type: "success", text: "Pub deleted successfully" });
         window.location.href = "/pubs";
       }
     } catch (err) {
-      alert("Network error");
+      setDeleteMessage({ type: "error", text: "Network error" });
     }
   }
 
   return (
     <div>
+      {deleteMessage && (
+        <p
+          style={{
+            color: deleteMessage.type === "success" ? "green" : "red",
+            marginBottom: "0.5rem",
+          }}
+        >
+          {deleteMessage.text}
+        </p>
+      )}
       <button onClick={onEdit}>Edit this pub</button>
       {user?.admin && <button onClick={handleDelete}>Delete this pub</button>}
     </div>

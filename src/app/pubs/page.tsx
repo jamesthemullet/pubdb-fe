@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import Input from "@/app/components/input/Input";
+import styles from "./page.module.css";
 
 type Pub = {
   id: string;
@@ -53,7 +54,6 @@ export default function Pubs() {
         }
 
         const data = await res.json();
-        console.log(298, data.data);
         setPubs(data.data);
       } catch (error: any) {
         console.error("Error fetching pubs:", error);
@@ -99,7 +99,7 @@ export default function Pubs() {
         <p>Loading pubs…</p>
       ) : error ? (
         <div>
-          <p style={{ color: "red" }}>Error loading pubs: {error}</p>
+          <p className={styles.errorText}>Error loading pubs: {error}</p>
           <button onClick={() => window.location.reload()}>Try Again</button>
         </div>
       ) : !pubs || pubs.length === 0 ? (
