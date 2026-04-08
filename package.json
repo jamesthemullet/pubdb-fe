@@ -11,7 +11,9 @@
     "ts-check": "tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "lint:errors": "biome check . | findstr error"
+    "lint:errors": "biome check . | findstr error",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@biomejs/biome": "^2.3.11",
@@ -21,12 +23,13 @@
     "react-dom": "19.1.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/react": "^16.2.0",
     "@vitest/coverage-v8": "^2.1.9",
     "jsdom": "^25.0.1",
     "typescript": "^5",
