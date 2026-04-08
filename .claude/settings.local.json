@@ -4,7 +4,8 @@
       "Bash(yarn test:*)",
       "Bash(yarn e2e:*)",
       "Bash(yarn lint:*)",
-      "Bash(yarn lint:fix)"
+      "Bash(yarn lint:fix)",
+      "Bash(yarn test:e2e:*)"
     ]
   }
 }
