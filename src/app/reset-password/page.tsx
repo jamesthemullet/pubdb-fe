@@ -38,7 +38,7 @@ function ResetPasswordForm() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const res = await fetch(`${apiUrl}/reset-password`, {
+      const res = await fetch(`${apiUrl}/auth/reset-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(yarn test:*)",
-      "Bash(yarn e2e:*)"
+      "Bash(yarn e2e:*)",
+      "Bash(yarn lint:*)",
+      "Bash(yarn lint:fix)"
     ]
   }
 }
