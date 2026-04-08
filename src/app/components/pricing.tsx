@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import styles from "./pricing.module.css";
 
 const pricingTiers = [
   {
@@ -354,26 +355,12 @@ const Pricing: React.FC = () => {
     <div>
       {feedbackMessage && (
         <div
-          style={{
-            padding: "0.75rem 1rem",
-            marginBottom: "1rem",
-            borderRadius: "4px",
-            color: feedbackMessage.type === "success" ? "#155724" : "#721c24",
-            backgroundColor:
-              feedbackMessage.type === "success" ? "#d4edda" : "#f8d7da",
-            border: `1px solid ${feedbackMessage.type === "success" ? "#c3e6cb" : "#f5c6cb"}`,
-          }}
+          className={`${styles.feedbackBanner} ${feedbackMessage.type === "success" ? styles.feedbackBannerSuccess : styles.feedbackBannerError}`}
         >
           {feedbackMessage.text}
           <button
             onClick={() => setFeedbackMessage(null)}
-            style={{
-              float: "right",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
+            className={styles.feedbackBannerDismiss}
           >
             ×
           </button>

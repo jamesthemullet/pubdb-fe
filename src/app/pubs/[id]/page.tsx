@@ -8,6 +8,7 @@ import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
 import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
 import { type PubAmenityKey } from "@/constants/pubFormFields";
 import OpeningHoursEditor from "../../components/OpeningHoursEditor";
+import styles from "./page.module.css";
 
 type Pub = {
   id: string;
@@ -1379,10 +1380,11 @@ function EditButton({
     <div>
       {deleteMessage && (
         <p
-          style={{
-            color: deleteMessage.type === "success" ? "green" : "red",
-            marginBottom: "0.5rem",
-          }}
+          className={
+            deleteMessage.type === "success"
+              ? styles.deleteMessageSuccess
+              : styles.deleteMessageError
+          }
         >
           {deleteMessage.text}
         </p>
