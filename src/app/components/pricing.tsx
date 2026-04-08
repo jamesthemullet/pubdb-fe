@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styles from "./pricing.module.css";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
 const pricingTiers = [
   {
     index: 0,
@@ -46,6 +48,7 @@ const Pricing: React.FC = () => {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const setError = (text: string) => setFeedbackMessage({ type: "error", text });
 
   const [userTier, setUserTier] = useState<string | null>(null);
   const [userHighestTier, setUserHighestTier] = useState<string | null>(null);
@@ -158,8 +161,7 @@ const Pricing: React.FC = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const res = await fetch(`${apiUrl}/auth/dashboard`, {
+      const res = await fetch(`${API_URL}/auth/dashboard`, {
         headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       });
       if (!res.ok) return;
@@ -179,10 +181,9 @@ const Pricing: React.FC = () => {
     if (!priceId) return;
     setLoadingTier(tierName);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${apiUrl}/payments/create-checkout-session`,
+        `${API_URL}/payments/create-checkout-session`,
         {
           method: "POST",
           headers: {
@@ -204,13 +205,11 @@ const Pricing: React.FC = () => {
       window.location.href = data.url;
     } catch (error) {
       console.error("Subscription error:", error);
-      setFeedbackMessage({
-        type: "error",
-        text:
-          error instanceof Error
-            ? error.message
-            : "Failed to start checkout process",
-      });
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to start checkout process"
+      );
     } finally {
       setLoadingTier(null);
     }
@@ -219,9 +218,8 @@ const Pricing: React.FC = () => {
   const requestUpgradeEstimate = async (priceId: string, tierName: string) => {
     setEstimateLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const token = localStorage.getItem("token");
-      const res = await fetch(`${apiUrl}/payments/upgrade-estimate`, {
+      const res = await fetch(`${API_URL}/payments/upgrade-estimate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -245,11 +243,7 @@ const Pricing: React.FC = () => {
       });
       setApiKey(data.apiKey);
     } catch (err) {
-      setFeedbackMessage({
-        type: "error",
-        text:
-          err instanceof Error ? err.message : "Failed to estimate upgrade",
-      });
+      setError(err instanceof Error ? err.message : "Failed to estimate upgrade");
     } finally {
       setEstimateLoading(false);
     }
@@ -258,9 +252,8 @@ const Pricing: React.FC = () => {
   const performUpgrade = async (priceId: string) => {
     setPerformingUpgrade(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const token = localStorage.getItem("token");
-      const res = await fetch(`${apiUrl}/payments/perform-upgrade`, {
+      const res = await fetch(`${API_URL}/payments/perform-upgrade`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -276,10 +269,7 @@ const Pricing: React.FC = () => {
       setUpgradeModal(null);
       setFeedbackMessage({ type: "success", text: "Upgrade successful" });
     } catch (err) {
-      setFeedbackMessage({
-        type: "error",
-        text: err instanceof Error ? err.message : "Upgrade failed",
-      });
+      setError(err instanceof Error ? err.message : "Upgrade failed");
     } finally {
       setPerformingUpgrade(false);
     }
@@ -293,17 +283,12 @@ const Pricing: React.FC = () => {
     }
     if (tier.name === "HOBBY") {
       if (!token) {
-        setFeedbackMessage({
-          type: "error",
-          text: "Please log in to manage subscriptions",
-        });
+        setError("Please log in to manage subscriptions");
         window.location.href = "/register";
         return;
       }
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const response = await fetch(`${apiUrl}/payments/subscribe-to-hobby`, {
+        const response = await fetch(`${API_URL}/payments/subscribe-to-hobby`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -328,21 +313,16 @@ const Pricing: React.FC = () => {
         setApiKey(data.apiKey);
       } catch (error) {
         console.error("Hobby subscription error:", error);
-        setFeedbackMessage({
-          type: "error",
-          text:
-            error instanceof Error
-              ? error.message
-              : "Failed to subscribe to Hobby tier",
-        });
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to subscribe to Hobby tier"
+        );
       }
       return;
     }
     if (!token) {
-      setFeedbackMessage({
-        type: "error",
-        text: "Please log in to manage subscriptions",
-      });
+      setError("Please log in to manage subscriptions");
       window.location.href = "/register";
       return;
     }
@@ -547,21 +527,14 @@ const Pricing: React.FC = () => {
                 ))}
               </ul>
               <div style={{ marginTop: 12 }}>
-                {actionLabel ? (
-                  <button
-                    onClick={() => handleTierSelection(tier)}
-                    disabled={isCurrentTier || isLowerTier}
-                  >
-                    {loadingTier === tier.name ? "Processing..." : actionLabel}
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleTierSelection(tier)}
-                    disabled={isCurrentTier || isLowerTier}
-                  >
-                    Subscribe
-                  </button>
-                )}
+                <button
+                  onClick={() => handleTierSelection(tier)}
+                  disabled={isCurrentTier || isLowerTier}
+                >
+                  {loadingTier === tier.name
+                    ? "Processing..."
+                    : actionLabel ?? "Subscribe"}
+                </button>
               </div>
             </div>
           );
