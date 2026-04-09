@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import type { BeerType } from "@/types/pub";
 import { buildAuthHeaders } from "@/lib/auth";
+import type { BeerType } from "@/types/pub";
 
 export type { BeerType };
 

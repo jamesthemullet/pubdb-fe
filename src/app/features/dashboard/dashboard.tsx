@@ -2,10 +2,10 @@
 
 import type React from "react";
 import { useEffect, useState } from "react";
-import Button from "../../components/button/button";
-import Typography from "../../components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
+import Button from "../../components/button/button";
+import Typography from "../../components/typography/typography";
 import styles from "./dashboard.module.css";
 
 type ApiKey = {
