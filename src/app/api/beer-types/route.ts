@@ -1,3 +1,4 @@
+<<<<<<< copilot/refactor-api-url-constant
 import { NextResponse } from "next/server";
 import { getServerApiBaseUrl } from "@/lib/serverApiUrl";
 
@@ -40,3 +41,11 @@ export const GET = async (request: Request) => {
     );
   }
 };
+=======
+import { createApiProxyHandler } from "../utils/proxyHandler";
+
+export const GET = createApiProxyHandler("/api/v1/beer-types", {
+  forwardAuth: true,
+  resourceName: "beer types",
+});
+>>>>>>> main

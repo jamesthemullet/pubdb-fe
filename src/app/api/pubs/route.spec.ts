@@ -18,7 +18,7 @@ describe("GET /api/pubs", () => {
   });
 
   it("returns 500 when TESTING_API_KEY is missing", async () => {
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/pubs"));
 
     expect(response.status).toBe(500);
     await expect(response.json()).resolves.toEqual({
@@ -38,11 +38,11 @@ describe("GET /api/pubs", () => {
       })
     );
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/pubs"));
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://api.example.com/api/v1/pubs?api_key=test-key",
-      { cache: "no-store" }
+      "https://api.example.com/api/v1/pubs",
+      { headers: { "X-API-Key": "test-key" }, cache: "no-store" }
     );
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual(payload);
@@ -59,11 +59,11 @@ describe("GET /api/pubs", () => {
       })
     );
 
-    await GET();
+    await GET(new Request("http://localhost/api/pubs"));
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://public-api.example.com/api/v1/pubs?api_key=public-key",
-      { cache: "no-store" }
+      "https://public-api.example.com/api/v1/pubs",
+      { headers: { "X-API-Key": "public-key" }, cache: "no-store" }
     );
   });
 
@@ -77,7 +77,7 @@ describe("GET /api/pubs", () => {
       })
     );
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/pubs"));
 
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toEqual({ error: "Bad Request" });
@@ -92,7 +92,7 @@ describe("GET /api/pubs", () => {
       })
     );
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/pubs"));
 
     expect(response.status).toBe(502);
     await expect(response.json()).resolves.toEqual({
@@ -105,7 +105,7 @@ describe("GET /api/pubs", () => {
 
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network down"));
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/pubs"));
 
     expect(response.status).toBe(500);
     await expect(response.json()).resolves.toEqual({ error: "Network down" });
@@ -116,7 +116,7 @@ describe("GET /api/pubs", () => {
 
     vi.spyOn(globalThis, "fetch").mockRejectedValue("boom");
 
-    const response = await GET();
+    const response = await GET(new Request("http://localhost/api/pubs"));
 
     expect(response.status).toBe(500);
     await expect(response.json()).resolves.toEqual({
@@ -134,11 +134,12 @@ describe("GET /api/pubs", () => {
       })
     );
 
-    await GET();
+    await GET(new Request("http://localhost/api/pubs"));
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:4000/api/v1/pubs?api_key=test-key",
-      { cache: "no-store" }
+      "http://localhost:4000/api/v1/pubs",
+      { headers: { "X-API-Key": "test-key" }, cache: "no-store" }
     );
   });
 });
+
