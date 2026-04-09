@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-type Pub = {
-  id: string;
-  name: string;
-  city: string;
-  address: string;
-};
+import type { Pub } from "@/types/pub";
 
 export default function Pubs() {
   const [pubs, setPubs] = useState<Pub[]>([]);
@@ -17,9 +11,7 @@ export default function Pubs() {
   useEffect(() => {
     async function fetchPubs() {
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await fetch(`${apiUrl}/pubs?`);
+        const res = await fetch("/api/pubs");
         const data = await res.json();
         setPubs(data);
       } catch (_error) {

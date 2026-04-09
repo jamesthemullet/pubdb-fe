@@ -8,77 +8,18 @@ import Input from "@/app/components/input/Input";
 import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
 import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
 import type { PubAmenityKey } from "@/constants/pubFormFields";
-import { type BeerType, useBeerTypes } from "@/hooks/useBeerTypes";
+import { useBeerTypes } from "@/hooks/useBeerTypes";
+import { API_URL } from "@/lib/apiConfig";
+import { buildAuthHeaders } from "@/lib/auth";
+import type {
+  BeerGarden,
+  BeerType,
+  Pub,
+  PubBeerType,
+  SunExposure,
+} from "@/types/pub";
 import OpeningHoursEditor from "../../components/OpeningHoursEditor";
 import styles from "./page.module.css";
-
-type Pub = {
-  id: string;
-  name: string;
-  city: string;
-  address: string;
-  postcode: string;
-  country: string;
-  lat?: number;
-  lng?: number;
-  website?: string;
-  description?: string;
-  imageUrl?: string;
-  chainName?: string;
-  isIndependent?: boolean;
-  hasFood?: boolean;
-  hasSundayRoast?: boolean;
-  hasBeerGarden?: boolean;
-  hasCaskAle?: boolean;
-  isBeerFocused?: boolean;
-  isDogFriendly?: boolean;
-  isFamilyFriendly?: boolean;
-  hasStepFreeAccess?: boolean;
-  hasAccessibleToilet?: boolean;
-  hasLiveSport?: boolean;
-  hasLiveMusic?: boolean;
-  createdAt: string;
-  operator?: string;
-  area?: string;
-  phone?: string;
-  borough?: string;
-  openingHours?: Record<
-    string,
-    { open?: string; close?: string; closed?: boolean }
-  >;
-  beerGardens?: BeerGarden[];
-  beerTypes?: Array<BeerType | PubBeerType>;
-  beerTypeIds?: string[];
-  beerType?: BeerType | string | null;
-};
-
-type SunExposure = "FULL_SUN" | "PARTIAL_SUN" | "SHADED";
-
-type PubBeerType = {
-  beerTypeId: string;
-  beerType?: BeerType | null;
-};
-
-type BeerGarden = {
-  id?: string;
-  pubId?: string;
-  name: string;
-  description?: string;
-  seatingCapacity?: number;
-  sunExposure?: SunExposure;
-  isCovered?: boolean;
-  isHeated?: boolean;
-  isFamilyFriendly?: boolean;
-  petFriendly?: boolean;
-  openingHours?: Record<
-    string,
-    { open?: string; close?: string; closed?: boolean }
-  >;
-  imageUrl?: string;
-  notes?: string;
-  createdAt?: string;
-  updatedAt?: string;
-};
 
 const SUN_EXPOSURE_OPTIONS: Array<{ label: string; value: SunExposure }> = [
   { label: "Full sun", value: "FULL_SUN" },
@@ -145,8 +86,7 @@ export default function PubPage() {
   useEffect(() => {
     async function fetchPub() {
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const apiUrl = API_URL;
 
         const resById = await fetch(`${apiUrl}/pubs/${id}`);
         if (resById.ok) {
@@ -300,7 +240,7 @@ export default function PubPage() {
 
     try {
       setSaveError(null);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const apiUrl = API_URL;
       const token = localStorage.getItem("token");
       const body: Record<string, unknown> = {};
       if (Array.isArray(editFields.beerTypeIds)) {
@@ -339,7 +279,7 @@ export default function PubPage() {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...buildAuthHeaders(token),
         },
         body: JSON.stringify(body),
       });
@@ -1231,8 +1171,7 @@ function EditButton({
       }
 
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const apiUrl = API_URL;
         const res = await fetch(`${apiUrl}/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -1301,13 +1240,11 @@ function EditButton({
       return;
     }
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const apiUrl = API_URL;
       const token = localStorage.getItem("token");
       const res = await fetch(`${apiUrl}/pubs/${pubId}`, {
         method: "DELETE",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: buildAuthHeaders(token),
       });
       if (!res.ok) {
         const data = await res.json();

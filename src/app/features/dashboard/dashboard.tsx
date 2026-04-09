@@ -4,6 +4,8 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import Button from "../../components/button/button";
 import Typography from "../../components/typography/typography";
+import { API_URL } from "@/lib/apiConfig";
+import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./dashboard.module.css";
 
 type ApiKey = {
@@ -107,14 +109,11 @@ const Dashboard: React.FC = () => {
 
       try {
         setError(null);
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const apiUrl = API_URL;
         const token = localStorage.getItem("token");
 
         const res = await fetch(`${apiUrl}/auth/dashboard`, {
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
+          headers: buildAuthHeaders(token),
         });
 
         if (!res.ok) {
@@ -163,14 +162,14 @@ const Dashboard: React.FC = () => {
       setCancelError(null);
       setCancelMessage(null);
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const apiUrl = API_URL;
       const token = localStorage.getItem("token");
 
       const res = await fetch(`${apiUrl}/payments/cancel-subscription`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({}),
       });
@@ -213,14 +212,14 @@ const Dashboard: React.FC = () => {
       setForgotKeyCopyStatus("idle");
       setForgotKeyTarget(keyPrefix);
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const apiUrl = API_URL;
       const token = localStorage.getItem("token");
 
       const res = await fetch(`${apiUrl}/auth/forgot-api-key`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({ keyPrefix, email: userEmail }),
       });

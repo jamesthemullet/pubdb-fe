@@ -12,7 +12,8 @@ export const GET = async () => {
   }
 
   try {
-    const response = await fetch(`${apiUrl}/api/v1/pubs?api_key=${apiKey}`, {
+    const response = await fetch(`${apiUrl}/api/v1/pubs`, {
+      headers: { "X-API-Key": apiKey },
       cache: "no-store",
     });
     const data = await response.json().catch(() => null);

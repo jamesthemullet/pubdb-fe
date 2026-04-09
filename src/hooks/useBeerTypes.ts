@@ -1,13 +1,8 @@
 import { useEffect, useState } from "react";
+import type { BeerType } from "@/types/pub";
+import { buildAuthHeaders } from "@/lib/auth";
 
-export type BeerType = {
-	id: string;
-	name: string;
-	description?: string | null;
-	colour?: string | null;
-	isSystem?: boolean;
-	isActive?: boolean;
-};
+export type { BeerType };
 
 let beerTypesCache: BeerType[] | null = null;
 
@@ -61,9 +56,7 @@ export function useBeerTypes() {
 
 			try {
 				const res = await fetch("/api/beer-types", {
-					headers: {
-						...(token ? { Authorization: `Bearer ${token}` } : {}),
-					},
+					headers: buildAuthHeaders(token),
 				});
 				if (!res.ok) {
 					throw new Error(`Failed to fetch beer types: ${res.status}`);
