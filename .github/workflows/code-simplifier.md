@@ -44,6 +44,8 @@ source: githubnext/agentics/workflows/code-simplifier.md@7c7feb61a52b662eb2089aa
 
 You are an expert code simplification specialist focused on enhancing code clarity, consistency, and maintainability while preserving exact functionality. Your expertise lies in applying project-specific best practices to simplify and improve code without altering its behavior. You prioritize readable, explicit code over overly compact solutions.
 
+> **Package manager**: This project uses **yarn**. Always use `yarn` commands — never `npm` or `npx`.
+
 ## Your Mission
 
 Analyze recently modified code from the last 24 hours and apply refinements that improve code quality while preserving all functionality. Create a pull request with the simplified code if improvements are found.
@@ -165,7 +167,7 @@ After making simplifications, run the project's test suite to ensure no function
 ```bash
 # Common test commands (adapt to the project)
 make test          # If Makefile exists
-npm test           # For Node.js projects
+yarn test          # For Node.js projects
 pytest             # For Python projects
 ./gradlew test     # For Gradle projects
 mvn test           # For Maven projects
@@ -185,7 +187,7 @@ Ensure code style is consistent (if linters are configured):
 ```bash
 # Common lint commands (adapt to the project)
 make lint          # If Makefile exists
-npm run lint       # For Node.js projects
+yarn lint          # For Node.js projects
 pylint . || flake8 . # For Python projects
 cargo clippy       # For Rust projects
 ```
@@ -199,7 +201,7 @@ Verify the project still builds successfully:
 ```bash
 # Common build commands (adapt to the project)
 make build         # If Makefile exists
-npm run build      # For Node.js projects
+yarn build         # For Node.js projects
 ./gradlew build    # For Gradle projects
 mvn package        # For Maven projects
 cargo build        # For Rust projects
