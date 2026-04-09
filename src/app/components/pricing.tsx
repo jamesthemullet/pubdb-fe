@@ -160,7 +160,7 @@ const Pricing: React.FC = () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const res = await fetch(`${apiUrl}/auth/dashboard`, {
-        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
       const data = await res.json();
@@ -291,15 +291,15 @@ const Pricing: React.FC = () => {
       window.location.href = "/";
       return;
     }
+    if (!token) {
+      setFeedbackMessage({
+        type: "error",
+        text: "Please log in to manage subscriptions",
+      });
+      window.location.href = "/register";
+      return;
+    }
     if (tier.name === "HOBBY") {
-      if (!token) {
-        setFeedbackMessage({
-          type: "error",
-          text: "Please log in to manage subscriptions",
-        });
-        window.location.href = "/register";
-        return;
-      }
       try {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -336,14 +336,6 @@ const Pricing: React.FC = () => {
               : "Failed to subscribe to Hobby tier",
         });
       }
-      return;
-    }
-    if (!token) {
-      setFeedbackMessage({
-        type: "error",
-        text: "Please log in to manage subscriptions",
-      });
-      window.location.href = "/register";
       return;
     }
     if (tier.priceId) {
@@ -547,21 +539,14 @@ const Pricing: React.FC = () => {
                 ))}
               </ul>
               <div style={{ marginTop: 12 }}>
-                {actionLabel ? (
-                  <button
-                    onClick={() => handleTierSelection(tier)}
-                    disabled={isCurrentTier || isLowerTier}
-                  >
-                    {loadingTier === tier.name ? "Processing..." : actionLabel}
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleTierSelection(tier)}
-                    disabled={isCurrentTier || isLowerTier}
-                  >
-                    Subscribe
-                  </button>
-                )}
+                <button
+                  onClick={() => handleTierSelection(tier)}
+                  disabled={isCurrentTier || isLowerTier}
+                >
+                  {loadingTier === tier.name
+                    ? "Processing..."
+                    : (actionLabel ?? "Subscribe")}
+                </button>
               </div>
             </div>
           );
