@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 type SubscriptionStatus = {
   success: boolean;
@@ -84,7 +84,6 @@ function SuccessContent() {
 
         window.dispatchEvent(new Event("authChanged"));
       } catch (error) {
-        console.error("Session verification error:", error);
         setError(
           error instanceof Error
             ? error.message
@@ -244,14 +243,12 @@ function SuccessContent() {
 
 export default function SuccessPage() {
   return (
-    <>
-      <Suspense
+    <Suspense
         fallback={
           <div style={{ textAlign: "center", padding: "4rem" }}>Loading...</div>
         }
       >
         <SuccessContent />
       </Suspense>
-    </>
   );
 }

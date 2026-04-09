@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 const PUBS_API = (url: URL) => url.href.includes("/pubs?limit=");
 

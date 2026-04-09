@@ -128,8 +128,7 @@ export default function PubPage() {
             .sort((a, b) => a.name.localeCompare(b.name));
           setCountries(options);
         }
-      } catch (err) {
-        console.error("Error fetching countries", err);
+      } catch (_err) {
       } finally {
         if (!ignore) {
           setCountriesLoading(false);
@@ -157,8 +156,7 @@ export default function PubPage() {
         } else {
           setPub(null);
         }
-      } catch (error) {
-        console.error("Error fetching pub:", error);
+      } catch (_error) {
         setPub(null);
       } finally {
         setLoading(false);
@@ -354,7 +352,7 @@ export default function PubPage() {
         setEditing(false);
         setSaveError(null);
       }
-    } catch (err) {
+    } catch (_err) {
       setSaveError("Network error");
     }
   }
@@ -1141,7 +1139,7 @@ function sanitizeBeerGarden(garden: BeerGarden): BeerGarden {
       delete cleaned[key as keyof BeerGarden];
     }
   });
-  if (cleaned.id && cleaned.id.startsWith("temp-")) {
+  if (cleaned.id?.startsWith("temp-")) {
     delete cleaned.id;
   }
   if (typeof cleaned.name === "string") {
@@ -1304,7 +1302,7 @@ function EditButton({
         setDeleteMessage({ type: "success", text: "Pub deleted successfully" });
         window.location.href = "/pubs";
       }
-    } catch (err) {
+    } catch (_err) {
       setDeleteMessage({ type: "error", text: "Network error" });
     }
   }
@@ -1345,8 +1343,7 @@ function renderOpeningHours(ohAny: any) {
   if (typeof ohAny === "string") {
     try {
       oh = JSON.parse(ohAny);
-    } catch (e) {
-      console.warn("Invalid openingHours JSON:", e, ohAny);
+    } catch (_e) {
       oh = null;
     }
   } else if (ohAny && typeof ohAny === "object") {

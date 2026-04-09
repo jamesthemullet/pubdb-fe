@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
 
 function ResetPasswordForm() {
@@ -55,7 +55,7 @@ function ResetPasswordForm() {
         setPassword("");
         setConfirmPassword("");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("Network error");
     } finally {
       setLoading(false);
@@ -179,10 +179,8 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <>
-      <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
         <ResetPasswordForm />
       </Suspense>
-    </>
   );
 }

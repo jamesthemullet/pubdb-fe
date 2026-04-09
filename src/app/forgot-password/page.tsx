@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
         setMessage(data.message);
         setEmail(""); // Clear the form
       }
-    } catch (err) {
+    } catch (_err) {
       setError("Network error");
     } finally {
       setLoading(false);
@@ -40,8 +40,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <>
-      <div style={{ maxWidth: "400px", margin: "0 auto", padding: "2rem" }}>
+    <div style={{ maxWidth: "400px", margin: "0 auto", padding: "2rem" }}>
         <h2>Forgot Password</h2>
         <p>
           Enter your email address and we'll send you a link to reset your
@@ -115,6 +114,5 @@ export default function ForgotPasswordPage() {
           </a>
         </div>
       </div>
-    </>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import Input from "@/app/components/input/Input";
 import styles from "./page.module.css";
 
@@ -56,7 +56,6 @@ export default function Pubs() {
         const data = await res.json();
         setPubs(data.data);
       } catch (error: any) {
-        console.error("Error fetching pubs:", error);
 
         if (error.response && error.data) {
           setError(

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { makeFakeJwt } from "../fixtures/auth";
 
 const AUTH_ME_API = (url: URL) => url.port === "4000" && url.pathname === "/auth/me";

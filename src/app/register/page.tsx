@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
 
 const getSafeInternalPath = (
@@ -95,7 +95,7 @@ export default function RegisterLoginPage() {
           }, 500);
         }
       }
-    } catch (err) {
+    } catch (_err) {
       setError("Network error");
     } finally {
       setLoading(false);

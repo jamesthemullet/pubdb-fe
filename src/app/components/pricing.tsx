@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import styles from "./pricing.module.css";
 
 const pricingTiers = [
@@ -48,14 +49,14 @@ const Pricing: React.FC = () => {
   } | null>(null);
 
   const [userTier, setUserTier] = useState<string | null>(null);
-  const [userHighestTier, setUserHighestTier] = useState<string | null>(null);
+  const [_userHighestTier, _setUserHighestTier] = useState<string | null>(null);
   const [upgradeModal, setUpgradeModal] = useState<null | {
     priceId: string;
     upcoming: any;
     tierName: string;
   }>(null);
 
-  const [estimateLoading, setEstimateLoading] = useState(false);
+  const [_estimateLoading, setEstimateLoading] = useState(false);
   const [performingUpgrade, setPerformingUpgrade] = useState(false);
   const [apiKey, setApiKey] = useState<any>(null);
 
@@ -83,7 +84,7 @@ const Pricing: React.FC = () => {
       upcoming.proration ||
       upcoming.proration_lines ||
       upcoming.lines ||
-      (upcoming.invoice && upcoming.invoice.lines) ||
+      (upcoming.invoice?.lines) ||
       []
     );
   }
@@ -166,14 +167,14 @@ const Pricing: React.FC = () => {
       const data = await res.json();
 
       setUserTier(data.apiKeys[0].tier);
-    } catch (err) {
+    } catch (_err) {
       /* ignore */
     }
   }
 
   useEffect(() => {
     fetchUserTier();
-  }, []);
+  }, [fetchUserTier]);
 
   const subscribe = async (priceId: string, tierName: string) => {
     if (!priceId) return;
@@ -203,7 +204,6 @@ const Pricing: React.FC = () => {
       const data = await response.json();
       window.location.href = data.url;
     } catch (error) {
-      console.error("Subscription error:", error);
       setFeedbackMessage({
         type: "error",
         text:
@@ -327,7 +327,6 @@ const Pricing: React.FC = () => {
         });
         setApiKey(data.apiKey);
       } catch (error) {
-        console.error("Hobby subscription error:", error);
         setFeedbackMessage({
           type: "error",
           text:

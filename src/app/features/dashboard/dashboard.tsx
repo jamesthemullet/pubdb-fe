@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import styles from "./dashboard.module.css";
+import type React from "react";
+import { useEffect, useState } from "react";
 import Button from "../../components/button/button";
 import Typography from "../../components/typography/typography";
+import styles from "./dashboard.module.css";
 
 type ApiKey = {
   name: string;
@@ -124,7 +125,6 @@ const Dashboard: React.FC = () => {
         const data = await res.json();
         setDashboardData(data);
       } catch (error: any) {
-        console.error("Error fetching dashboard:", error);
 
         if (error.response && error.data) {
           setError(
@@ -184,7 +184,6 @@ const Dashboard: React.FC = () => {
       // refresh dashboard data
       setTimeout(() => window.dispatchEvent(new Event("authChanged")), 800);
     } catch (err: any) {
-      console.error("Cancel subscription error:", err);
       setCancelError(
         err?.message || err?.error || "Failed to cancel subscription"
       );
@@ -240,7 +239,6 @@ const Dashboard: React.FC = () => {
         setForgotKeyCopyStatus("idle");
       }
     } catch (err: any) {
-      console.error("Forgot API key error:", err);
       setForgotKeyError(
         err?.message || err?.error || "Failed to request API key reminder"
       );
@@ -265,8 +263,7 @@ const Dashboard: React.FC = () => {
       }
       setForgotKeyCopyStatus("copied");
       setTimeout(() => setForgotKeyCopyStatus("idle"), 2000);
-    } catch (err) {
-      console.error("Copy API key error:", err);
+    } catch (_err) {
       setForgotKeyCopyStatus("error");
     }
   }

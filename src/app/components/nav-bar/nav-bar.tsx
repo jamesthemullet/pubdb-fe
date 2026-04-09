@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import styles from "./nav-bar.module.css";
 import { useEffect, useState } from "react";
-import Typography from "../typography/typography";
 import Button from "../button/button";
+import Typography from "../typography/typography";
+import styles from "./nav-bar.module.css";
 
 const NavBar = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);

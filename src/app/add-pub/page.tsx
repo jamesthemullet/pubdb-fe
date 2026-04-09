@@ -1,14 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Input from "@/app/components/input/Input";
-import Textarea from "@/app/components/textarea/Textarea";
+import { useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
-import Typography from "@/app/components/typography/typography";
+import Input from "@/app/components/input/Input";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
 import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
 import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
-import { type PubAmenityKey } from "@/constants/pubFormFields";
+import Textarea from "@/app/components/textarea/Textarea";
+import Typography from "@/app/components/typography/typography";
+import type { PubAmenityKey } from "@/constants/pubFormFields";
 import { useCountries } from "@/hooks/useCountries";
 import styles from "./page.module.css";
 
@@ -219,7 +219,7 @@ const AddPubPage = () => {
           router.push(`/pubs/${data.id}`);
         }, 1000);
       }
-    } catch (err) {
+    } catch (_err) {
       setError("Network error");
     } finally {
       setLoading(false);

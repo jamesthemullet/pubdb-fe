@@ -581,7 +581,7 @@ describe("AddPubPage", () => {
 
     const submitted = submittedBody;
 
-    expect(submitted["chainName"]).toBeUndefined();
+    expect(submitted.chainName).toBeUndefined();
     for (const amenity of PUB_AMENITY_FIELDS) {
       expect(submitted[amenity.key]).toBe(true);
     }
