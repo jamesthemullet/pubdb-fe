@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import Input from "@/app/components/input/Input";
-import styles from "./page.module.css";
 import { API_BASE_URL } from "@/lib/apiUrl";
+import styles from "./page.module.css";
 
 type Pub = {
   id: string;

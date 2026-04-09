@@ -9,9 +9,9 @@ import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
 import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
 import type { PubAmenityKey } from "@/constants/pubFormFields";
 import { type BeerType, useBeerTypes } from "@/hooks/useBeerTypes";
+import { API_BASE_URL } from "@/lib/apiUrl";
 import OpeningHoursEditor from "../../components/OpeningHoursEditor";
 import styles from "./page.module.css";
-import { API_BASE_URL } from "@/lib/apiUrl";
 
 type Pub = {
   id: string;

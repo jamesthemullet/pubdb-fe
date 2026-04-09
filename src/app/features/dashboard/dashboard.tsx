@@ -2,10 +2,10 @@
 
 import type React from "react";
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/lib/apiUrl";
 import Button from "../../components/button/button";
 import Typography from "../../components/typography/typography";
 import styles from "./dashboard.module.css";
-import { API_BASE_URL } from "@/lib/apiUrl";
 
 type ApiKey = {
   name: string;

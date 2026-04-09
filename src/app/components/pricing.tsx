@@ -1,7 +1,7 @@
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
-import styles from "./pricing.module.css";
 import { API_BASE_URL } from "@/lib/apiUrl";
+import styles from "./pricing.module.css";
 
 const API_URL = API_BASE_URL;
 type UpcomingBill = {

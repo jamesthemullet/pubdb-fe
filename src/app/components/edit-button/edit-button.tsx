@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/lib/apiUrl";
 import Button from "../button/button";
 import Typography from "../typography/typography";
 import styles from "./edit-button.module.css";
-import { API_BASE_URL } from "@/lib/apiUrl";
 
 type EditButtonProps = {
   pubName: string;
