@@ -11,6 +11,7 @@ import type { PubAmenityKey } from "@/constants/pubFormFields";
 import { type BeerType, useBeerTypes } from "@/hooks/useBeerTypes";
 import OpeningHoursEditor from "../../components/OpeningHoursEditor";
 import styles from "./page.module.css";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
 type Pub = {
   id: string;
@@ -145,8 +146,7 @@ export default function PubPage() {
   useEffect(() => {
     async function fetchPub() {
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const apiUrl = API_BASE_URL;
 
         const resById = await fetch(`${apiUrl}/pubs/${id}`);
         if (resById.ok) {
@@ -300,7 +300,7 @@ export default function PubPage() {
 
     try {
       setSaveError(null);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const apiUrl = API_BASE_URL;
       const token = localStorage.getItem("token");
       const body: Record<string, unknown> = {};
       if (Array.isArray(editFields.beerTypeIds)) {
@@ -1231,8 +1231,7 @@ function EditButton({
       }
 
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const apiUrl = API_BASE_URL;
         const res = await fetch(`${apiUrl}/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -1301,7 +1300,7 @@ function EditButton({
       return;
     }
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const apiUrl = API_BASE_URL;
       const token = localStorage.getItem("token");
       const res = await fetch(`${apiUrl}/pubs/${pubId}`, {
         method: "DELETE",

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import Input from "@/app/components/input/Input";
 import styles from "./page.module.css";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
 type Pub = {
   id: string;
@@ -43,7 +44,7 @@ export default function Pubs() {
 
   useEffect(() => {
     async function fetchPubs() {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const apiUrl = API_BASE_URL;
       try {
         setError(null);
         const res = await fetch(`${apiUrl}/pubs?limit=10000`);

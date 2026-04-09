@@ -11,6 +11,7 @@ import Typography from "@/app/components/typography/typography";
 import type { PubAmenityKey } from "@/constants/pubFormFields";
 import { useCountries } from "@/hooks/useCountries";
 import styles from "./page.module.css";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
 type FieldErrors = Record<string, string[]>;
 
@@ -125,8 +126,7 @@ const AddPubPage = () => {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const apiUrl =
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+          const apiUrl = API_BASE_URL;
           const res = await fetch(`${apiUrl}/auth/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
@@ -161,7 +161,7 @@ const AddPubPage = () => {
     setSuccess(null);
     setEditLink(null);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const apiUrl = API_BASE_URL;
       const token = localStorage.getItem("token");
       const body: Record<string, unknown> = {
         name,

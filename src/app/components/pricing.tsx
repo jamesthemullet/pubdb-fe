@@ -1,8 +1,9 @@
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import styles from "./pricing.module.css";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_URL = API_BASE_URL;
 type UpcomingBill = {
   proration?: Array<{
     id?: string;

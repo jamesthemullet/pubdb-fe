@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
 type Pub = {
   id: string;
@@ -17,8 +18,7 @@ export default function Pubs() {
   useEffect(() => {
     async function fetchPubs() {
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const apiUrl = API_BASE_URL;
         const res = await fetch(`${apiUrl}/pubs?`);
         const data = await res.json();
         setPubs(data);

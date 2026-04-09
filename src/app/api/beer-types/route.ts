@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
+import { getServerApiBaseUrl } from "@/lib/serverApiUrl";
 
 export const GET = async (request: Request) => {
-  const apiUrl =
-    process.env.API_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:4000";
+  const apiUrl = getServerApiBaseUrl();
   const apiKey = process.env.TESTING_API_KEY;
 
   if (!apiKey) {
