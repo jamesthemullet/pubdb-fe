@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useCountries } from "./useCountries";
+import { clearCountriesCache, useCountries } from "./useCountries";
 
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -12,10 +12,12 @@ function jsonResponse(data: unknown, status = 200): Response {
 
 describe("useCountries", () => {
   beforeEach(() => {
+    clearCountriesCache();
     vi.spyOn(console, "error").mockImplementation(() => undefined);
   });
 
   afterEach(() => {
+    clearCountriesCache();
     vi.restoreAllMocks();
   });
 
@@ -68,5 +70,30 @@ describe("useCountries", () => {
     await waitFor(() => expect(result.current.countriesLoading).toBe(false));
 
     expect(result.current.countries).toEqual([]);
+  });
+
+  it("returns cached countries immediately on subsequent mounts without fetching", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse([
+        { name: { common: "Australia" }, cca2: "AU" },
+        { name: { common: "France" }, cca2: "FR" },
+      ])
+    );
+
+    // First mount — populates the cache
+    const { result: first } = renderHook(() => useCountries());
+    await waitFor(() => expect(first.current.countriesLoading).toBe(false));
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+    // Second mount — should use cache, no new fetch
+    const { result: second } = renderHook(() => useCountries());
+
+    expect(second.current.countriesLoading).toBe(false);
+    expect(second.current.countries).toEqual([
+      { name: "Australia", code: "AU" },
+      { name: "France", code: "FR" },
+    ]);
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
