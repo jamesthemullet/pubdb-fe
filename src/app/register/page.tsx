@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
-import { API_BASE_URL } from "@/lib/apiUrl";
+import { API_URL } from "@/lib/apiConfig";
 
 const getSafeInternalPath = (
   value: string | null | undefined
@@ -67,7 +67,8 @@ export default function RegisterLoginPage() {
     setError(null);
     setSuccess(null);
     try {
-      const apiUrl = API_BASE_URL;      const endpoint = mode === "register" ? "/register" : "/login";
+      const apiUrl = API_URL;
+      const endpoint = mode === "register" ? "/register" : "/login";
       const body =
         mode === "register"
           ? { name, username, email, password }

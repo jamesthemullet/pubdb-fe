@@ -3,16 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import Input from "@/app/components/input/Input";
-import { API_BASE_URL } from "@/lib/apiUrl";
+import { API_URL } from "@/lib/apiConfig";
+import type { Pub } from "@/types/pub";
 import styles from "./page.module.css";
-
-type Pub = {
-  id: string;
-  name: string;
-  city: string;
-  address: string;
-  country: string;
-};
 
 export default function Pubs() {
   const [pubs, setPubs] = useState<Pub[]>([]);
@@ -44,7 +37,7 @@ export default function Pubs() {
 
   useEffect(() => {
     async function fetchPubs() {
-      const apiUrl = API_BASE_URL;
+      const apiUrl = API_URL;
       try {
         setError(null);
         const res = await fetch(`${apiUrl}/pubs?limit=10000`);

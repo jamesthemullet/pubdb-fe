@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { API_BASE_URL } from "@/lib/apiUrl";
+import { API_URL } from "@/lib/apiConfig";
+import { buildAuthHeaders } from "@/lib/auth";
 
 type SubscriptionStatus = {
   success: boolean;
@@ -60,14 +61,14 @@ function SuccessContent() {
       }
 
       try {
-        const apiUrl = API_BASE_URL;
+        const apiUrl = API_URL;
         const token = localStorage.getItem("token");
 
         const response = await fetch(`${apiUrl}/payments/verify-session`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...buildAuthHeaders(token),
           },
           body: JSON.stringify({ sessionId }),
         });

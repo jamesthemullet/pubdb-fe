@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { API_BASE_URL } from "@/lib/apiUrl";
-
-type Pub = {
-  id: string;
-  name: string;
-  city: string;
-  address: string;
-};
+import type { Pub } from "@/types/pub";
 
 export default function Pubs() {
   const [pubs, setPubs] = useState<Pub[]>([]);
@@ -18,8 +11,7 @@ export default function Pubs() {
   useEffect(() => {
     async function fetchPubs() {
       try {
-        const apiUrl = API_BASE_URL;
-        const res = await fetch(`${apiUrl}/pubs?`);
+        const res = await fetch("/api/pubs");
         const data = await res.json();
         setPubs(data);
       } catch (_error) {

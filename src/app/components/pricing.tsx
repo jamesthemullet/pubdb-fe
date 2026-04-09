@@ -1,6 +1,7 @@
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
-import { API_BASE_URL as API_URL } from "@/lib/apiUrl";
+import { API_URL } from "@/lib/apiConfig";
+import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./pricing.module.css";
 
 type UpcomingBill = {
@@ -238,7 +239,7 @@ const Pricing: React.FC = () => {
     if (!token) return;
     try {
       const res = await fetch(`${API_URL}/auth/dashboard`, {
-        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        headers: buildAuthHeaders(token),
       });
       if (!res.ok) return;
       const data = await res.json();
@@ -264,7 +265,7 @@ const Pricing: React.FC = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...buildAuthHeaders(token),
           },
           body: JSON.stringify({ priceId }),
         }
@@ -300,7 +301,7 @@ const Pricing: React.FC = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({ priceId }),
       });
@@ -334,7 +335,7 @@ const Pricing: React.FC = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({ priceId }),
       });
@@ -369,7 +370,7 @@ const Pricing: React.FC = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            ...buildAuthHeaders(token),
           },
         });
         if (!response.ok) {
