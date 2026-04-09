@@ -15,9 +15,9 @@ export default function FieldErrorList({
     return null;
   }
 
-  return errors.map((fieldError, index) => (
+  return errors.map((fieldError) => (
     <Typography
-      key={`${idPrefix}-error-${index}`}
+      key={`${idPrefix}-error-${fieldError}`}
       variant="bodySmall"
       className={className}
     >

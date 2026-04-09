@@ -1,5 +1,5 @@
-import { test, expect } from "@playwright/test";
-import { setAuthToken, mockDashboardEndpoint } from "../fixtures/auth";
+import { expect, test } from "@playwright/test";
+import { mockDashboardEndpoint, setAuthToken } from "../fixtures/auth";
 
 test.describe("NavBar navigation", () => {
   test("All Pubs link navigates to /pubs", async ({ page }) => {

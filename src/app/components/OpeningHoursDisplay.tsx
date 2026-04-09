@@ -1,5 +1,5 @@
 import { WEEKDAYS } from "../../constants/pub";
-import { OpeningHoursEntry, OpeningHoursMap } from "../../types/pub";
+import type { OpeningHoursEntry, OpeningHoursMap } from "../../types/pub";
 
 type OpeningHoursDisplayProps = {
   value?: OpeningHoursMap | string | null;
@@ -64,8 +64,7 @@ function normalizeOpeningHours(
     try {
       const parsed = JSON.parse(value) as OpeningHoursMap;
       return parsed;
-    } catch (error) {
-      console.warn("Invalid openingHours JSON:", error, value);
+    } catch (_error) {
       return null;
     }
   }

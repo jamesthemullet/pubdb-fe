@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { makeFakeJwt } from "../fixtures/auth";
 
 // The detail page fetches from localhost:4000/pubs/42 (the API),

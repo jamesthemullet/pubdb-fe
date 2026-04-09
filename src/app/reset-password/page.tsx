@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
 
 function ResetPasswordForm() {
@@ -55,7 +55,7 @@ function ResetPasswordForm() {
         setPassword("");
         setConfirmPassword("");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("Network error");
     } finally {
       setLoading(false);
@@ -82,9 +82,10 @@ function ResetPasswordForm() {
       <p>Enter your new password below.</p>
 
       <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
-        <label style={{ display: "block", marginBottom: "1rem" }}>
+        <label htmlFor="new-password" style={{ display: "block", marginBottom: "1rem" }}>
           New Password:
           <Input
+            id="new-password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -99,9 +100,10 @@ function ResetPasswordForm() {
           />
         </label>
 
-        <label style={{ display: "block", marginBottom: "1rem" }}>
+        <label htmlFor="confirm-password" style={{ display: "block", marginBottom: "1rem" }}>
           Confirm Password:
           <Input
+            id="confirm-password"
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -179,10 +181,8 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <>
-      <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
         <ResetPasswordForm />
       </Suspense>
-    </>
   );
 }
