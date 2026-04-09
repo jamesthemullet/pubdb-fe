@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/lib/apiUrl";
 import Button from "../button/button";
 import Typography from "../typography/typography";
 import styles from "./edit-button.module.css";
@@ -33,8 +34,7 @@ const EditButton = ({ pubName, onEdit, pubId }: EditButtonProps) => {
       }
 
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const apiUrl = API_BASE_URL;
         const res = await fetch(`${apiUrl}/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -104,7 +104,7 @@ const EditButton = ({ pubName, onEdit, pubId }: EditButtonProps) => {
       return;
     }
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const apiUrl = API_BASE_URL;
       const token = localStorage.getItem("token");
       const res = await fetch(`${apiUrl}/pubs/${pubId}`, {
         method: "DELETE",

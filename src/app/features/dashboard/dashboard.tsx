@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/lib/apiUrl";
 import Button from "../../components/button/button";
 import Typography from "../../components/typography/typography";
 import styles from "./dashboard.module.css";
@@ -107,8 +108,7 @@ const Dashboard: React.FC = () => {
 
       try {
         setError(null);
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const apiUrl = API_BASE_URL;
         const token = localStorage.getItem("token");
 
         const res = await fetch(`${apiUrl}/auth/dashboard`, {
@@ -163,7 +163,7 @@ const Dashboard: React.FC = () => {
       setCancelError(null);
       setCancelMessage(null);
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const apiUrl = API_BASE_URL;
       const token = localStorage.getItem("token");
 
       const res = await fetch(`${apiUrl}/payments/cancel-subscription`, {
@@ -213,7 +213,7 @@ const Dashboard: React.FC = () => {
       setForgotKeyCopyStatus("idle");
       setForgotKeyTarget(keyPrefix);
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const apiUrl = API_BASE_URL;
       const token = localStorage.getItem("token");
 
       const res = await fetch(`${apiUrl}/auth/forgot-api-key`, {

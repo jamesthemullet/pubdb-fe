@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
 type SubscriptionStatus = {
   success: boolean;
@@ -59,8 +60,7 @@ function SuccessContent() {
       }
 
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const apiUrl = API_BASE_URL;
         const token = localStorage.getItem("token");
 
         const response = await fetch(`${apiUrl}/payments/verify-session`, {
