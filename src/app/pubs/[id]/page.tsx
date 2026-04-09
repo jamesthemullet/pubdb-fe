@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
 import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
 import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
-import { type PubAmenityKey } from "@/constants/pubFormFields";
+import type { PubAmenityKey } from "@/constants/pubFormFields";
+import { type BeerType, useBeerTypes } from "@/hooks/useBeerTypes";
 import OpeningHoursEditor from "../../components/OpeningHoursEditor";
 import styles from "./page.module.css";
 
@@ -53,15 +54,6 @@ type Pub = {
 type SunExposure = "FULL_SUN" | "PARTIAL_SUN" | "SHADED";
 
 type BeerColour = "PALE" | "GOLDEN" | "AMBER" | "BROWN" | "DARK" | "BLACK";
-
-type BeerType = {
-  id: string;
-  name: string;
-  description?: string | null;
-  colour?: BeerColour | null;
-  isSystem?: boolean;
-  isActive?: boolean;
-};
 
 type PubBeerType = {
   beerTypeId: string;
@@ -112,9 +104,7 @@ export default function PubPage() {
     const country = countries.find((c) => c.code === code);
     return country?.name || code;
   };
-  const [beerTypeOptions, setBeerTypeOptions] = useState<BeerType[]>([]);
-  const [beerTypesLoading, setBeerTypesLoading] = useState(false);
-  const [beerTypesError, setBeerTypesError] = useState<string | null>(null);
+  const { beerTypeOptions, beerTypesLoading, beerTypesError } = useBeerTypes();
 
   useEffect(() => {
     let ignore = false;
@@ -152,48 +142,7 @@ export default function PubPage() {
     };
   }, []);
 
-  useEffect(() => {
-    let ignore = false;
-    async function fetchBeerTypes() {
-      setBeerTypesLoading(true);
-      setBeerTypesError(null);
-      const token = localStorage.getItem("token");
 
-      try {
-        const res = await fetch("/api/beer-types", {
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-        });
-        if (!res.ok) {
-          throw new Error(`Failed to fetch beer types: ${res.status}`);
-        }
-        const payload = await res.json();
-        const list = normalizeBeerTypes(payload);
-        if (!ignore) {
-          const sorted = list
-            .filter((type) => type && (type.isActive ?? true))
-            .sort((a, b) => a.name.localeCompare(b.name));
-          setBeerTypeOptions(sorted);
-        }
-      } catch (err) {
-        if (!ignore) {
-          setBeerTypesError(
-            err instanceof Error ? err.message : "Unable to load beer types."
-          );
-        }
-      } finally {
-        if (!ignore) {
-          setBeerTypesLoading(false);
-        }
-      }
-    }
-
-    fetchBeerTypes();
-    return () => {
-      ignore = true;
-    };
-  }, []);
 
   useEffect(() => {
     async function fetchPub() {
@@ -1049,22 +998,6 @@ export default function PubPage() {
   );
 }
 
-function normalizeBeerTypes(payload: unknown): BeerType[] {
-  if (!payload) return [];
-  if (Array.isArray(payload)) {
-    return payload as BeerType[];
-  }
-  if (typeof payload === "object") {
-    const record = payload as Record<string, unknown>;
-    if (Array.isArray(record.data)) {
-      return record.data as BeerType[];
-    }
-    if (Array.isArray(record.beerTypes)) {
-      return record.beerTypes as BeerType[];
-    }
-  }
-  return [];
-}
 
 function getBeerTypeIdsFromPub(pub: Pub): string[] {
   if (Array.isArray(pub.beerTypeIds) && pub.beerTypeIds.length > 0) {
