@@ -579,9 +579,9 @@ describe("AddPubPage", () => {
       throw new Error("Expected submit payload to be captured");
     }
 
-    const submitted = submittedBody;
+    const submitted = submittedBody as Record<string, unknown>;
 
-    expect(submitted["chainName"]).toBeUndefined();
+    expect(submitted.chainName).toBeUndefined();
     for (const amenity of PUB_AMENITY_FIELDS) {
       expect(submitted[amenity.key]).toBe(true);
     }

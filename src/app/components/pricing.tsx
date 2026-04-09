@@ -1,7 +1,83 @@
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useState } from "react";
 import styles from "./pricing.module.css";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+type UpcomingBill = {
+  proration?: Array<{
+    id?: string;
+    description?: string;
+    amount?: number;
+    amount_excluding_tax?: number;
+    currency?: string;
+  }>;
+  proration_lines?: Array<{
+    id?: string;
+    description?: string;
+    amount?: number;
+    amount_excluding_tax?: number;
+    currency?: string;
+  }>;
+  lines?: Array<{
+    id?: string;
+    description?: string;
+    amount?: number;
+    amount_excluding_tax?: number;
+    currency?: string;
+  }>;
+  invoice?: {
+    lines?: Array<{
+      id?: string;
+      description?: string;
+      amount?: number;
+      amount_excluding_tax?: number;
+      currency?: string;
+    }>;
+    amount_due?: number;
+    amount_remaining?: number;
+    currency?: string;
+    next_payment_attempt?: number;
+    period_end?: number;
+    current_period_end?: number;
+  };
+  latest_invoice?: {
+    amount_due?: number;
+    amount_remaining?: number;
+    currency?: string;
+    next_payment_attempt?: number;
+    period_end?: number;
+    current_period_end?: number;
+  };
+  amount_due?: number;
+  amount_remaining?: number;
+  estimatedAmount?: number;
+  nextPeriodCharge?: number;
+  prorationOnlyCharge?: number;
+  proratedCharge?: number;
+  nextPaymentAttempt?: number;
+  next_payment_attempt?: number;
+  period_end?: number;
+  current_period_end?: number;
+  currency?: string;
+  needsCheckout?: boolean;
+};
+
+type ApiKey = {
+  name: string;
+  keyPrefix: string;
+  tier: string;
+  keyStatus: string;
+  permissions: string[];
+  key: string;
+};
+
+type ProrationItem = {
+  id?: string;
+  description?: string;
+  amount?: number;
+  amount_excluding_tax?: number;
+  currency?: string;
+};
 
 const pricingTiers = [
   {
@@ -51,16 +127,16 @@ const Pricing: React.FC = () => {
   const setError = (text: string) => setFeedbackMessage({ type: "error", text });
 
   const [userTier, setUserTier] = useState<string | null>(null);
-  const [userHighestTier, setUserHighestTier] = useState<string | null>(null);
+  const [_userHighestTier, _setUserHighestTier] = useState<string | null>(null);
   const [upgradeModal, setUpgradeModal] = useState<null | {
     priceId: string;
-    upcoming: any;
+    upcoming: UpcomingBill | null;
     tierName: string;
   }>(null);
 
-  const [estimateLoading, setEstimateLoading] = useState(false);
+  const [_estimateLoading, setEstimateLoading] = useState(false);
   const [performingUpgrade, setPerformingUpgrade] = useState(false);
-  const [apiKey, setApiKey] = useState<any>(null);
+  const [apiKey, setApiKey] = useState<ApiKey | null>(null);
 
   const formatCurrency = (amount?: number, currency: string = "usd") => {
     if (typeof amount !== "number") return "-";
@@ -80,18 +156,18 @@ const Pricing: React.FC = () => {
     return new Date(timestamp * 1000).toLocaleString();
   };
 
-  function getProrationItems(upcoming: any) {
+  function getProrationItems(upcoming: UpcomingBill | null | undefined): ProrationItem[] {
     if (!upcoming) return [];
     return (
       upcoming.proration ||
       upcoming.proration_lines ||
       upcoming.lines ||
-      (upcoming.invoice && upcoming.invoice.lines) ||
+      upcoming.invoice?.lines ||
       []
     );
   }
 
-  function getInvoiceLike(upcoming: any) {
+  function getInvoiceLike(upcoming: UpcomingBill | null | undefined) {
     if (!upcoming) return null;
     if (typeof upcoming.amount_due === "number") return upcoming;
     if (upcoming.invoice && typeof upcoming.invoice.amount_due === "number")
@@ -157,7 +233,7 @@ const Pricing: React.FC = () => {
   );
   const nextPaymentDisplay = formatDateTime(nextPaymentTimestamp);
 
-  async function fetchUserTier() {
+  const fetchUserTier = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
@@ -168,14 +244,14 @@ const Pricing: React.FC = () => {
       const data = await res.json();
 
       setUserTier(data.apiKeys[0].tier);
-    } catch (err) {
+    } catch (_err) {
       /* ignore */
     }
-  }
+  }, []);
 
   useEffect(() => {
     fetchUserTier();
-  }, []);
+  }, [fetchUserTier]);
 
   const subscribe = async (priceId: string, tierName: string) => {
     if (!priceId) return;
@@ -204,12 +280,13 @@ const Pricing: React.FC = () => {
       const data = await response.json();
       window.location.href = data.url;
     } catch (error) {
-      console.error("Subscription error:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to start checkout process"
-      );
+      setFeedbackMessage({
+        type: "error",
+        text:
+          error instanceof Error
+            ? error.message
+            : "Failed to start checkout process",
+      });
     } finally {
       setLoadingTier(null);
     }
@@ -312,12 +389,13 @@ const Pricing: React.FC = () => {
         });
         setApiKey(data.apiKey);
       } catch (error) {
-        console.error("Hobby subscription error:", error);
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to subscribe to Hobby tier"
-        );
+        setFeedbackMessage({
+          type: "error",
+          text:
+            error instanceof Error
+              ? error.message
+              : "Failed to subscribe to Hobby tier",
+        });
       }
       return;
     }
@@ -339,6 +417,7 @@ const Pricing: React.FC = () => {
         >
           {feedbackMessage.text}
           <button
+            type="button"
             onClick={() => setFeedbackMessage(null)}
             className={styles.feedbackBannerDismiss}
           >
@@ -431,7 +510,7 @@ const Pricing: React.FC = () => {
                   <div>
                     <strong>Breakdown:</strong>
                     <ul style={{ paddingLeft: 16 }}>
-                      {modalProrationItems.map((item: any, index: number) => (
+                      {modalProrationItems.map((item, index) => (
                         <li key={item.id || index}>
                           {(item.description || "Adjustment").trim()} {" - "}
                           {formatCurrency(
@@ -456,6 +535,7 @@ const Pricing: React.FC = () => {
                 }}
               >
                 <button
+                  type="button"
                   onClick={() => performUpgrade(upgradeModal.priceId)}
                   disabled={performingUpgrade}
                 >
@@ -469,6 +549,7 @@ const Pricing: React.FC = () => {
               style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}
             >
               <button
+                type="button"
                 onClick={() => setUpgradeModal(null)}
                 disabled={performingUpgrade}
               >
@@ -527,14 +608,23 @@ const Pricing: React.FC = () => {
                 ))}
               </ul>
               <div style={{ marginTop: 12 }}>
-                <button
-                  onClick={() => handleTierSelection(tier)}
-                  disabled={isCurrentTier || isLowerTier}
-                >
-                  {loadingTier === tier.name
-                    ? "Processing..."
-                    : actionLabel ?? "Subscribe"}
-                </button>
+                {actionLabel ? (
+                  <button
+                    type="button"
+                    onClick={() => handleTierSelection(tier)}
+                    disabled={isCurrentTier || isLowerTier}
+                  >
+                    {loadingTier === tier.name ? "Processing..." : actionLabel}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleTierSelection(tier)}
+                    disabled={isCurrentTier || isLowerTier}
+                  >
+                    Subscribe
+                  </button>
+                )}
               </div>
             </div>
           );

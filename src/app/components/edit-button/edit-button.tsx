@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
-import styles from "./edit-button.module.css";
-import Typography from "../typography/typography";
 import Button from "../button/button";
+import Typography from "../typography/typography";
+import styles from "./edit-button.module.css";
 
 type EditButtonProps = {
   pubName: string;

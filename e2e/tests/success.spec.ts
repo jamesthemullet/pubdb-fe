@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 const VERIFY_API = (url: URL) =>
   url.port === "4000" && url.pathname === "/payments/verify-session";

@@ -39,8 +39,7 @@ export function useCountries() {
             .sort((a, b) => a.name.localeCompare(b.name));
           setCountries(options);
         }
-      } catch (err) {
-        console.error("Error fetching countries", err);
+      } catch (_err) {
       } finally {
         if (!ignore) {
           setCountriesLoading(false);

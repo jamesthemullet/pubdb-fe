@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 type Pub = {
   id: string;
@@ -22,8 +22,7 @@ export default function Pubs() {
         const res = await fetch(`${apiUrl}/pubs?`);
         const data = await res.json();
         setPubs(data);
-      } catch (error) {
-        console.error("Error fetching pubs:", error);
+      } catch (_error) {
       } finally {
         setLoading(false);
       }
