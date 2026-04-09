@@ -124,13 +124,17 @@ const Dashboard: React.FC = () => {
 
         const data = await res.json();
         setDashboardData(data);
-      } catch (error: any) {
-
-        if (error.response && error.data) {
+      } catch (error: unknown) {
+        const err = error as {
+          response?: Response;
+          data?: { message?: string; error?: string };
+          message?: string;
+        };
+        if (err.response && err.data) {
           setError(
-            error.data.message ||
-              error.data.error ||
-              `HTTP error! status: ${error.response.status}`
+            err.data.message ||
+              err.data.error ||
+              `HTTP error! status: ${err.response.status}`
           );
         } else {
           setError(
@@ -183,9 +187,10 @@ const Dashboard: React.FC = () => {
       );
       // refresh dashboard data
       setTimeout(() => window.dispatchEvent(new Event("authChanged")), 800);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const apiErr = err as { message?: string; error?: string };
       setCancelError(
-        err?.message || err?.error || "Failed to cancel subscription"
+        apiErr?.message || apiErr?.error || "Failed to cancel subscription"
       );
     } finally {
       setCancelling(false);
@@ -238,9 +243,10 @@ const Dashboard: React.FC = () => {
         setShowForgotKeyModal(true);
         setForgotKeyCopyStatus("idle");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const apiErr = err as { message?: string; error?: string };
       setForgotKeyError(
-        err?.message || err?.error || "Failed to request API key reminder"
+        apiErr?.message || apiErr?.error || "Failed to request API key reminder"
       );
       setForgotKeyDetails(null);
       setShowForgotKeyModal(false);
@@ -414,7 +420,7 @@ const Dashboard: React.FC = () => {
         {dashboardData?.apiKeys?.length > 0 ? (
           <div>
             <Typography variant="headingSmall">Your API Keys</Typography>
-            {dashboardData.apiKeys.map((apiKey, index) => {
+            {dashboardData.apiKeys.map((apiKey, _index) => {
               const hourlyUsage = formatUsagePercentage(
                 apiKey.limits.requestsPerHour - apiKey.remaining.hour,
                 apiKey.limits.requestsPerHour
@@ -429,7 +435,7 @@ const Dashboard: React.FC = () => {
               );
 
               return (
-                <div key={index} className={styles.apiKeyCard}>
+                <div key={apiKey.keyPrefix} className={styles.apiKeyCard}>
                   <div className={styles.apiHeader}>
                     <div>
                       <Typography variant="headingSmall">

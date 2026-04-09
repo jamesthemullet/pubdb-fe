@@ -1,5 +1,6 @@
 "use client"; // Needed for client-side hooks
 
+import Image from "next/image";
 import { useParams } from "next/navigation";
 
 import { useEffect, useState } from "react";
@@ -52,8 +53,6 @@ type Pub = {
 };
 
 type SunExposure = "FULL_SUN" | "PARTIAL_SUN" | "SHADED";
-
-type BeerColour = "PALE" | "GOLDEN" | "AMBER" | "BROWN" | "DARK" | "BLACK";
 
 type PubBeerType = {
   beerTypeId: string;
@@ -196,13 +195,13 @@ export default function PubPage() {
     }
   }
 
-  function handleFieldChange(field: keyof Pub, value: any) {
+  function handleFieldChange(field: keyof Pub, value: Pub[keyof Pub]) {
     setEditFields((prev) => ({ ...prev, [field]: value }));
     if (["name", "city", "address", "postcode", "country"].includes(field)) {
       setFieldErrors((prev) => ({
         ...prev,
         [`${field}Error`]:
-          !value || value.trim() === "" ? `${field} is required` : "",
+          !value || (typeof value === "string" && value.trim() === "") ? `${field} is required` : "",
       }));
     }
     if (field === "website") {
@@ -303,7 +302,7 @@ export default function PubPage() {
       setSaveError(null);
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const token = localStorage.getItem("token");
-      const body: any = {};
+      const body: Record<string, unknown> = {};
       if (Array.isArray(editFields.beerTypeIds)) {
         body.beerTypes = editFields.beerTypeIds.map((beerTypeId) => ({
           beerTypeId,
@@ -373,18 +372,21 @@ export default function PubPage() {
         <>
           <h2>{pub.name}</h2>
           {pub.imageUrl && (
-            <img
+            <Image
               src={pub.imageUrl}
               alt={pub.name}
-              style={{ maxWidth: "400px", marginBottom: "1rem" }}
+              width={400}
+              height={300}
+              style={{ maxWidth: "400px", height: "auto", marginBottom: "1rem" }}
             />
           )}
           {editing ? (
             <div style={{ marginTop: "1rem" }}>
-              <button onClick={handleSave} disabled={isSaveDisabled}>
+              <button type="button" onClick={handleSave} disabled={isSaveDisabled}>
                 Save
               </button>
               <button
+                type="button"
                 onClick={() => setEditing(false)}
                 style={{ marginLeft: "1rem" }}
               >
@@ -432,25 +434,28 @@ export default function PubPage() {
                 namePrefix="edit-pub"
               />
               <br />
-              <label>
+              <label htmlFor="edit-area">
                 Area:{" "}
                 <Input
+                  id="edit-area"
                   value={editFields.area ?? ""}
                   onChange={(e) => handleFieldChange("area", e.target.value)}
                 />
               </label>
               <br />
-              <label>
+              <label htmlFor="edit-borough">
                 Borough:{" "}
                 <Input
+                  id="edit-borough"
                   value={editFields.borough ?? ""}
                   onChange={(e) => handleFieldChange("borough", e.target.value)}
                 />
               </label>
               <br />
-              <label>
+              <label htmlFor="edit-operator">
                 Operator:{" "}
                 <Input
+                  id="edit-operator"
                   value={editFields.operator ?? ""}
                   onChange={(e) =>
                     handleFieldChange("operator", e.target.value)
@@ -458,9 +463,10 @@ export default function PubPage() {
                 />
               </label>
               <br />
-              <label>
+              <label htmlFor="edit-phone">
                 Phone:{" "}
                 <Input
+                  id="edit-phone"
                   value={editFields.phone ?? ""}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -484,9 +490,10 @@ export default function PubPage() {
                 )}
               </label>
               <br />
-              <label>
+              <label htmlFor="edit-website">
                 Website:{" "}
                 <Input
+                  id="edit-website"
                   value={editFields.website ?? ""}
                   onChange={(e) => handleFieldChange("website", e.target.value)}
                 />
@@ -507,9 +514,10 @@ export default function PubPage() {
                 />
               </label>
               <br />
-              <label>
+              <label htmlFor="edit-chain-name">
                 Chain name:{" "}
                 <Input
+                  id="edit-chain-name"
                   value={editFields.chainName ?? ""}
                   onChange={(e) =>
                     handleFieldChange("chainName", e.target.value)
@@ -524,16 +532,17 @@ export default function PubPage() {
                 }
               />
               <br />
-              <label>
-                Beer Types:{" "}
+              <div>
+                <span>Beer Types: </span>
                 <div style={{ marginTop: "0.35rem", display: "grid" }}>
                   {beerTypesLoading ? (
                     <span>Loading beer types…</span>
                   ) : beerTypeOptions.length > 0 ? (
                     <div style={{ display: "grid", gap: "0.35rem" }}>
                       {beerTypeOptions.map((type) => (
-                        <label key={type.id} style={{ display: "flex" }}>
+                        <label htmlFor={`beer-type-${type.id}`} key={type.id} style={{ display: "flex" }}>
                           <Input
+                            id={`beer-type-${type.id}`}
                             type="checkbox"
                             checked={(editFields.beerTypeIds ?? []).includes(
                               type.id
@@ -553,15 +562,15 @@ export default function PubPage() {
                     </span>
                   )}
                 </div>
-              </label>
+              </div>
               <br />
-              <label>
-                Opening Hours:{" "}
+              <div>
+                <span>Opening Hours: </span>
                 <OpeningHoursEditor
                   value={editFields.openingHours}
                   onChange={(val) => handleFieldChange("openingHours", val)}
                 />
-              </label>
+              </div>
               <br />
               <div style={{ marginTop: "1rem" }}>
                 <h3>Beer Gardens</h3>
@@ -590,9 +599,10 @@ export default function PubPage() {
                         Remove
                       </button>
                     </div>
-                    <label>
+                    <label htmlFor={`garden-${index}-name`}>
                       Name:{" "}
                       <Input
+                        id={`garden-${index}-name`}
                         value={garden.name}
                         onChange={(e) =>
                           updateBeerGarden(index, { name: e.target.value })
@@ -611,9 +621,10 @@ export default function PubPage() {
                         }
                       />
                     </label>
-                    <label>
+                    <label htmlFor={`garden-${index}-seating`}>
                       Seating capacity:{" "}
                       <Input
+                        id={`garden-${index}-seating`}
                         type="number"
                         value={garden.seatingCapacity ?? ""}
                         onChange={(e) =>
@@ -646,9 +657,10 @@ export default function PubPage() {
                         ))}
                       </select>
                     </label>
-                    <label>
+                    <label htmlFor={`garden-${index}-imageUrl`}>
                       Image URL:{" "}
                       <Input
+                        id={`garden-${index}-imageUrl`}
                         value={garden.imageUrl ?? ""}
                         onChange={(e) =>
                           updateBeerGarden(index, {
@@ -669,8 +681,9 @@ export default function PubPage() {
                       />
                     </label>
                     <div style={{ display: "grid", gap: "0.35rem" }}>
-                      <label>
+                      <label htmlFor={`garden-${index}-covered`}>
                         <Input
+                          id={`garden-${index}-covered`}
                           type="checkbox"
                           checked={garden.isCovered ?? false}
                           onChange={(e) =>
@@ -681,8 +694,9 @@ export default function PubPage() {
                         />{" "}
                         Covered
                       </label>
-                      <label>
+                      <label htmlFor={`garden-${index}-heated`}>
                         <Input
+                          id={`garden-${index}-heated`}
                           type="checkbox"
                           checked={garden.isHeated ?? false}
                           onChange={(e) =>
@@ -693,8 +707,9 @@ export default function PubPage() {
                         />{" "}
                         Heated
                       </label>
-                      <label>
+                      <label htmlFor={`garden-${index}-family`}>
                         <Input
+                          id={`garden-${index}-family`}
                           type="checkbox"
                           checked={garden.isFamilyFriendly ?? false}
                           onChange={(e) =>
@@ -705,8 +720,9 @@ export default function PubPage() {
                         />{" "}
                         Family friendly
                       </label>
-                      <label>
+                      <label htmlFor={`garden-${index}-pet`}>
                         <Input
+                          id={`garden-${index}-pet`}
                           type="checkbox"
                           checked={garden.petFriendly ?? false}
                           onChange={(e) =>
@@ -718,15 +734,15 @@ export default function PubPage() {
                         Pet friendly
                       </label>
                     </div>
-                    <label>
-                      Opening Hours:{" "}
+                    <div>
+                      <span>Opening Hours: </span>
                       <OpeningHoursEditor
                         value={garden.openingHours}
                         onChange={(val) =>
                           updateBeerGarden(index, { openingHours: val })
                         }
                       />
-                    </label>
+                    </div>
                   </div>
                 ))}
                 <button type="button" onClick={addBeerGarden}>
@@ -734,13 +750,14 @@ export default function PubPage() {
                 </button>
               </div>
               <br />
-              <button onClick={handleSave} disabled={isSaveDisabled}>
+              <button type="button" onClick={handleSave} disabled={isSaveDisabled}>
                 Save
               </button>
               {saveError && (
                 <p style={{ color: "red", marginTop: "0.5rem" }}>{saveError}</p>
               )}
               <button
+                type="button"
                 onClick={() => setEditing(false)}
                 style={{ marginLeft: "1rem" }}
               >
@@ -1320,13 +1337,13 @@ function EditButton({
           {deleteMessage.text}
         </p>
       )}
-      <button onClick={onEdit}>Edit this pub</button>
-      {user?.admin && <button onClick={handleDelete}>Delete this pub</button>}
+      <button type="button" onClick={onEdit}>Edit this pub</button>
+      {user?.admin && <button type="button" onClick={handleDelete}>Delete this pub</button>}
     </div>
   );
 }
 
-function renderOpeningHours(ohAny: any) {
+function renderOpeningHours(ohAny: unknown) {
   const weekdays = [
     "Monday",
     "Tuesday",
@@ -1347,7 +1364,7 @@ function renderOpeningHours(ohAny: any) {
       oh = null;
     }
   } else if (ohAny && typeof ohAny === "object") {
-    oh = ohAny;
+    oh = ohAny as Record<string, { open?: string; close?: string; closed?: boolean }>;
   }
 
   if (!oh) {
@@ -1363,7 +1380,7 @@ function renderOpeningHours(ohAny: any) {
   }
 
   // Build case-insensitive map for lookup (handles "monday" or "Monday").
-  const map: Record<string, any> = {};
+  const map: Record<string, { open?: string; close?: string; closed?: boolean }> = {};
   Object.entries(oh).forEach(([k, v]) => {
     map[k.toLowerCase()] = v;
   });

@@ -163,7 +163,7 @@ const AddPubPage = () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const token = localStorage.getItem("token");
-      const body: any = {
+      const body: Record<string, unknown> = {
         name,
         city,
         country,
@@ -319,9 +319,9 @@ const AddPubPage = () => {
                 value={website ?? ""}
                 onChange={(e) => setWebsite(e.target.value || undefined)}
               />
-              {fieldErrors.website?.map((fieldError, index) => (
+              {fieldErrors.website?.map((fieldError) => (
                 <Typography
-                  key={`website-error-${index}`}
+                  key={`website-error-${fieldError}`}
                   variant="bodySmall"
                   className={styles.errorText}
                 >
@@ -337,9 +337,9 @@ const AddPubPage = () => {
                 value={description ?? ""}
                 onChange={(e) => setDescription(e.target.value || undefined)}
               />
-              {fieldErrors.description?.map((fieldError, index) => (
+              {fieldErrors.description?.map((fieldError) => (
                 <Typography
-                  key={`description-error-${index}`}
+                  key={`description-error-${fieldError}`}
                   variant="bodySmall"
                   className={styles.errorText}
                 >
@@ -355,9 +355,9 @@ const AddPubPage = () => {
                 value={imageUrl ?? ""}
                 onChange={(e) => setImageUrl(e.target.value || undefined)}
               />
-              {fieldErrors.imageUrl?.map((fieldError, index) => (
+              {fieldErrors.imageUrl?.map((fieldError) => (
                 <Typography
-                  key={`imageUrl-error-${index}`}
+                  key={`imageUrl-error-${fieldError}`}
                   variant="bodySmall"
                   className={styles.errorText}
                 >
@@ -406,9 +406,9 @@ const AddPubPage = () => {
                 value={operator ?? ""}
                 onChange={(e) => setOperator(e.target.value || undefined)}
               />
-              {fieldErrors.operator?.map((fieldError, index) => (
+              {fieldErrors.operator?.map((fieldError) => (
                 <Typography
-                  key={`operator-error-${index}`}
+                  key={`operator-error-${fieldError}`}
                   variant="bodySmall"
                   className={styles.errorText}
                 >
@@ -425,9 +425,9 @@ const AddPubPage = () => {
                 onChange={(e) => setArea(e.target.value || undefined)}
                 autoComplete="pub-area"
               />
-              {fieldErrors.area?.map((fieldError, index) => (
+              {fieldErrors.area?.map((fieldError) => (
                 <Typography
-                  key={`area-error-${index}`}
+                  key={`area-error-${fieldError}`}
                   variant="bodySmall"
                   className={styles.errorText}
                 >
@@ -444,9 +444,9 @@ const AddPubPage = () => {
                 onChange={(e) => setPhone(e.target.value || undefined)}
                 autoComplete="pub-phone"
               />
-              {fieldErrors.phone?.map((fieldError, index) => (
+              {fieldErrors.phone?.map((fieldError) => (
                 <Typography
-                  key={`phone-error-${index}`}
+                  key={`phone-error-${fieldError}`}
                   variant="bodySmall"
                   className={styles.errorText}
                 >
@@ -462,9 +462,9 @@ const AddPubPage = () => {
                 value={borough ?? ""}
                 onChange={(e) => setBorough(e.target.value || undefined)}
               />
-              {fieldErrors.borough?.map((fieldError, index) => (
+              {fieldErrors.borough?.map((fieldError) => (
                 <Typography
-                  key={`borough-error-${index}`}
+                  key={`borough-error-${fieldError}`}
                   variant="bodySmall"
                   className={styles.errorText}
                 >
@@ -480,9 +480,9 @@ const AddPubPage = () => {
                 value={openingHours ?? ""}
                 onChange={(e) => setOpeningHours(e.target.value || undefined)}
               />
-              {fieldErrors.openingHours?.map((fieldError, index) => (
+              {fieldErrors.openingHours?.map((fieldError) => (
                 <Typography
-                  key={`openingHours-error-${index}`}
+                  key={`openingHours-error-${fieldError}`}
                   variant="bodySmall"
                   className={styles.errorText}
                 >
@@ -498,9 +498,9 @@ const AddPubPage = () => {
             {(formErrors.length > 0 || error || editLink) && (
               <div className={styles.feedbackPanel}>
                 {!editLink &&
-                  formErrors.map((formError, index) => (
+                  formErrors.map((formError) => (
                     <Typography
-                      key={`form-error-${index}`}
+                      key={`form-error-${formError}`}
                       variant="bodySmall"
                       className={styles.errorText}
                     >

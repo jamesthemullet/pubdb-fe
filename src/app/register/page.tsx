@@ -109,8 +109,9 @@ export default function RegisterLoginPage() {
         {mode === "register" && (
           <>
             <div>
-              <label>Name:</label>
+              <label htmlFor="reg-name">Name:</label>
               <Input
+                id="reg-name"
                 type="text"
                 name="name"
                 value={name}
@@ -120,8 +121,9 @@ export default function RegisterLoginPage() {
               />
             </div>
             <div>
-              <label>Username:</label>
+              <label htmlFor="reg-username">Username:</label>
               <Input
+                id="reg-username"
                 type="text"
                 name="username"
                 value={username}
@@ -133,8 +135,9 @@ export default function RegisterLoginPage() {
           </>
         )}
         <div>
-          <label>Email:</label>
+          <label htmlFor="reg-email">Email:</label>
           <Input
+            id="reg-email"
             type="email"
             name="email"
             value={email}
@@ -144,8 +147,9 @@ export default function RegisterLoginPage() {
           />
         </div>
         <div>
-          <label>Password:</label>
+          <label htmlFor="reg-password">Password:</label>
           <Input
+            id="reg-password"
             type="password"
             name="password"
             value={password}
@@ -171,6 +175,7 @@ export default function RegisterLoginPage() {
         </div>
       )}
       <button
+        type="button"
         onClick={() => {
           setMode(mode === "register" ? "login" : "register");
           setError(null);

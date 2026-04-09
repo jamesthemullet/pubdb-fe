@@ -82,9 +82,10 @@ function ResetPasswordForm() {
       <p>Enter your new password below.</p>
 
       <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
-        <label style={{ display: "block", marginBottom: "1rem" }}>
+        <label htmlFor="new-password" style={{ display: "block", marginBottom: "1rem" }}>
           New Password:
           <Input
+            id="new-password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -99,9 +100,10 @@ function ResetPasswordForm() {
           />
         </label>
 
-        <label style={{ display: "block", marginBottom: "1rem" }}>
+        <label htmlFor="confirm-password" style={{ display: "block", marginBottom: "1rem" }}>
           Confirm Password:
           <Input
+            id="confirm-password"
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}

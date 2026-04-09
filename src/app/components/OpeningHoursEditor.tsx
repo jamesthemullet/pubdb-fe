@@ -95,8 +95,9 @@ export default function OpeningHoursEditor({
               onChange={(e) => update(day, { close: e.target.value })}
             />
 
-            <label style={{ marginLeft: "0.5rem" }}>
+            <label htmlFor={`${day}-closed`} style={{ marginLeft: "0.5rem" }}>
               <Input
+                id={`${day}-closed`}
                 type="checkbox"
                 checked={d.closed}
                 onChange={(e) =>

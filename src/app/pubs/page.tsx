@@ -55,13 +55,17 @@ export default function Pubs() {
 
         const data = await res.json();
         setPubs(data.data);
-      } catch (error: any) {
-
-        if (error.response && error.data) {
+      } catch (error: unknown) {
+        const err = error as {
+          response?: Response;
+          data?: { message?: string; error?: string };
+          message?: string;
+        };
+        if (err.response && err.data) {
           setError(
-            error.data.message ||
-              error.data.error ||
-              `HTTP error! status: ${error.response.status}`
+            err.data.message ||
+              err.data.error ||
+              `HTTP error! status: ${err.response.status}`
           );
         } else {
           setError(
@@ -99,14 +103,14 @@ export default function Pubs() {
       ) : error ? (
         <div>
           <p className={styles.errorText}>Error loading pubs: {error}</p>
-          <button onClick={() => window.location.reload()}>Try Again</button>
+          <button type="button" onClick={() => window.location.reload()}>Try Again</button>
         </div>
       ) : !pubs || pubs.length === 0 ? (
         <p>No pubs found in the database.</p>
       ) : (
         <div>
           <Link href="/add-pub">
-            <button>Add Pub</button>
+            <button type="button">Add Pub</button>
           </Link>
           {filteredPubs.length && (
             <ul>
