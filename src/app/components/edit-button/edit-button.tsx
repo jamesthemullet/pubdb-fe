@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Button from "../button/button";
 import Typography from "../typography/typography";
 import styles from "./edit-button.module.css";
-import { API_BASE_URL } from "../../../lib/apiUrl";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
 type EditButtonProps = {
   pubName: string;
