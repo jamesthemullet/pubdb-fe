@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: read
-  issues: write
+  issues: read
   pull-requests: read
 
 safe-outputs:
@@ -103,7 +103,7 @@ Create separate issues for each distinct duplication pattern found (maximum 3 pa
 - Only create issues if significant duplication is found (threshold: >10 lines of duplicated code OR 3+ instances of similar patterns)
 - **Create one issue per distinct duplication pattern** - do NOT bundle multiple patterns in a single issue
 - Limit to the top 3 most significant patterns if more are found
-- Use the `create_issue` tool from safe-outputs MCP **once for each pattern**
+- Call the MCP tool `mcp_safe-outputs_create-issue` **once for each pattern** — do NOT use `gh issue create` or any CLI command to create issues
 
 **Issue Contents for Each Pattern**:
 
