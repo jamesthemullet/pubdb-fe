@@ -43,41 +43,6 @@ export default function PubPage() {
   const { beerTypeOptions, beerTypesLoading, beerTypesError } = useBeerTypes();
 
   useEffect(() => {
-    let ignore = false;
-    async function fetchCountries() {
-      setCountriesLoading(true);
-      try {
-        const res = await fetch(
-          "https://restcountries.com/v3.1/all?fields=name,cca2"
-        );
-        if (!res.ok) {
-          throw new Error(`Failed to fetch countries: ${res.status}`);
-        }
-        const data: Array<{ name: { common: string }; cca2: string }> =
-          await res.json();
-        if (!ignore) {
-          const options = data
-            .map((country) => ({
-              name: country.name.common,
-              code: country.cca2,
-            }))
-            .sort((a, b) => a.name.localeCompare(b.name));
-          setCountries(options);
-        }
-      } catch (_err) {
-      } finally {
-        if (!ignore) {
-          setCountriesLoading(false);
-        }
-      }
-    }
-    fetchCountries();
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  useEffect(() => {
     async function fetchPub() {
       try {
         const apiUrl = API_URL;
