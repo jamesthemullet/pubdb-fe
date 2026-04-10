@@ -4,20 +4,18 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 
 import { useEffect, useState } from "react";
+import Button from "@/app/components/button/button";
+import Dropdown from "@/app/components/dropdown/Dropdown";
 import Input from "@/app/components/input/Input";
 import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
 import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
+import Textarea from "@/app/components/textarea/Textarea";
+import Typography from "@/app/components/typography/typography";
 import type { PubAmenityKey } from "@/constants/pubFormFields";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
-import type {
-  BeerGarden,
-  BeerType,
-  Pub,
-  PubBeerType,
-  SunExposure,
-} from "@/types/pub";
+import type { BeerGarden, Pub, SunExposure } from "@/types/pub";
 import OpeningHoursEditor from "../../components/OpeningHoursEditor";
 import styles from "./page.module.css";
 
@@ -81,8 +79,6 @@ export default function PubPage() {
     };
   }, []);
 
-
-
   useEffect(() => {
     async function fetchPub() {
       try {
@@ -104,7 +100,7 @@ export default function PubPage() {
     if (id) fetchPub();
   }, [id]);
 
-  function handleEditClick() {
+  const handleEditClick = () => {
     if (pub) {
       setEditFields({
         ...pub,
@@ -133,15 +129,17 @@ export default function PubPage() {
       setFieldErrors(initialErrors);
       setEditing(true);
     }
-  }
+  };
 
-  function handleFieldChange(field: keyof Pub, value: Pub[keyof Pub]) {
+  const handleFieldChange = (field: keyof Pub, value: Pub[keyof Pub]) => {
     setEditFields((prev) => ({ ...prev, [field]: value }));
     if (["name", "city", "address", "postcode", "country"].includes(field)) {
       setFieldErrors((prev) => ({
         ...prev,
         [`${field}Error`]:
-          !value || (typeof value === "string" && value.trim() === "") ? `${field} is required` : "",
+          !value || (typeof value === "string" && value.trim() === "")
+            ? `${field} is required`
+            : "",
       }));
     }
     if (field === "website") {
@@ -161,9 +159,9 @@ export default function PubPage() {
         phoneError: "",
       }));
     }
-  }
+  };
 
-  function toggleBeerType(beerTypeId: string) {
+  const toggleBeerType = (beerTypeId: string) => {
     setEditFields((prev) => {
       const current = new Set(prev.beerTypeIds ?? []);
       if (current.has(beerTypeId)) {
@@ -173,41 +171,41 @@ export default function PubPage() {
       }
       return { ...prev, beerTypeIds: Array.from(current) };
     });
-  }
+  };
 
-  function updateBeerGarden(index: number, patch: Partial<BeerGarden>) {
+  const updateBeerGarden = (index: number, patch: Partial<BeerGarden>) => {
     setEditFields((prev) => {
       const gardens = [...(prev.beerGardens ?? [])];
       const current = gardens[index] ?? createEmptyBeerGarden();
       gardens[index] = { ...current, ...patch };
       return { ...prev, beerGardens: gardens };
     });
-  }
+  };
 
-  function addBeerGarden() {
+  const addBeerGarden = () => {
     setEditFields((prev) => ({
       ...prev,
       beerGardens: [...(prev.beerGardens ?? []), createEmptyBeerGarden()],
     }));
-  }
+  };
 
-  function removeBeerGarden(index: number) {
+  const removeBeerGarden = (index: number) => {
     setEditFields((prev) => {
       const gardens = [...(prev.beerGardens ?? [])];
       gardens.splice(index, 1);
       return { ...prev, beerGardens: gardens };
     });
-  }
+  };
 
-  function isBeerGarden(item: unknown): item is BeerGarden {
+  const isBeerGarden = (item: unknown): item is BeerGarden => {
     return (
       typeof item === "object" &&
       item !== null &&
       "name" in (item as BeerGarden)
     );
-  }
+  };
 
-  async function handleSave() {
+  const handleSave = async () => {
     if (!pub) return;
 
     const requiredFields: (keyof Pub)[] = [
@@ -294,7 +292,7 @@ export default function PubPage() {
     } catch (_err) {
       setSaveError("Network error");
     }
-  }
+  };
 
   const isSaveDisabled =
     Object.values(fieldErrors).some((err) => !!err) ||
@@ -307,31 +305,33 @@ export default function PubPage() {
   return (
     <>
       {loading ? (
-        <p>Loading pub details…</p>
+        <Typography>Loading pub details…</Typography>
       ) : pub ? (
         <>
-          <h2>{pub.name}</h2>
+          <Typography as="h2" variant="headingMedium">
+            {pub.name}
+          </Typography>
           {pub.imageUrl && (
             <Image
               src={pub.imageUrl}
               alt={pub.name}
               width={400}
               height={300}
-              style={{ maxWidth: "400px", height: "auto", marginBottom: "1rem" }}
+              className={styles.pubImage}
             />
           )}
           {editing ? (
-            <div style={{ marginTop: "1rem" }}>
-              <button type="button" onClick={handleSave} disabled={isSaveDisabled}>
+            <div className={styles.topButtonGroup}>
+              <Button onClick={handleSave} disabled={isSaveDisabled}>
                 Save
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="secondary"
                 onClick={() => setEditing(false)}
-                style={{ marginLeft: "1rem" }}
+                className={styles.cancelButton}
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           ) : (
             <EditButton
@@ -341,7 +341,7 @@ export default function PubPage() {
             />
           )}
           {editing ? (
-            <div style={{ marginTop: "1rem" }}>
+            <div className={styles.editSection}>
               <PubCoreIdentityFields
                 values={{
                   name: editFields.name ?? "",
@@ -426,7 +426,9 @@ export default function PubPage() {
                   }}
                 />
                 {fieldErrors.phoneError && (
-                  <span style={{ color: "red" }}>{fieldErrors.phoneError}</span>
+                  <Typography as="span" className={styles.errorText}>
+                    {fieldErrors.phoneError}
+                  </Typography>
                 )}
               </label>
               <br />
@@ -438,15 +440,16 @@ export default function PubPage() {
                   onChange={(e) => handleFieldChange("website", e.target.value)}
                 />
                 {fieldErrors.websiteError && (
-                  <span style={{ color: "red", marginLeft: "0.5rem" }}>
+                  <Typography as="span" className={styles.errorInline}>
                     {fieldErrors.websiteError}
-                  </span>
+                  </Typography>
                 )}
               </label>
               <br />
-              <label>
+              <label htmlFor="edit-description">
                 Description:{" "}
-                <textarea
+                <Textarea
+                  id="edit-description"
                   value={editFields.description ?? ""}
                   onChange={(e) =>
                     handleFieldChange("description", e.target.value)
@@ -474,13 +477,17 @@ export default function PubPage() {
               <br />
               <div>
                 <span>Beer Types: </span>
-                <div style={{ marginTop: "0.35rem", display: "grid" }}>
+                <div className={styles.beerTypesOuter}>
                   {beerTypesLoading ? (
-                    <span>Loading beer types…</span>
+                    <Typography as="span">Loading beer types…</Typography>
                   ) : beerTypeOptions.length > 0 ? (
-                    <div style={{ display: "grid", gap: "0.35rem" }}>
+                    <div className={styles.beerTypeOptions}>
                       {beerTypeOptions.map((type) => (
-                        <label htmlFor={`beer-type-${type.id}`} key={type.id} style={{ display: "flex" }}>
+                        <label
+                          htmlFor={`beer-type-${type.id}`}
+                          key={type.id}
+                          className={styles.beerTypeLabel}
+                        >
                           <Input
                             id={`beer-type-${type.id}`}
                             type="checkbox"
@@ -489,17 +496,17 @@ export default function PubPage() {
                             )}
                             onChange={() => toggleBeerType(type.id)}
                           />
-                          <span style={{ marginLeft: "0.5rem" }}>
+                          <Typography as="span" className={styles.beerTypeName}>
                             {type.name}
                             {type.colour ? ` (${type.colour})` : ""}
-                          </span>
+                          </Typography>
                         </label>
                       ))}
                     </div>
                   ) : (
-                    <span style={{ color: "#666" }}>
+                    <Typography className={styles.emptyMessage}>
                       {beerTypesError || "No beer types available."}
-                    </span>
+                    </Typography>
                   )}
                 </div>
               </div>
@@ -512,32 +519,31 @@ export default function PubPage() {
                 />
               </div>
               <br />
-              <div style={{ marginTop: "1rem" }}>
-                <h3>Beer Gardens</h3>
+              <div className={styles.beerGardenSection}>
+                <Typography as="h3" variant="headingSmall">
+                  Beer Gardens
+                </Typography>
                 {(editFields.beerGardens || []).length === 0 && (
-                  <p style={{ color: "#666" }}>No beer gardens added yet.</p>
+                  <Typography className={styles.emptyMessage}>
+                    No beer gardens added yet.
+                  </Typography>
                 )}
                 {(editFields.beerGardens || []).map((garden, index) => (
                   <div
                     key={garden.id || `garden-${index}`}
-                    style={{
-                      border: "1px solid #ddd",
-                      padding: "0.75rem",
-                      borderRadius: 6,
-                      marginBottom: "0.75rem",
-                      display: "grid",
-                      gap: "0.5rem",
-                    }}
+                    className={styles.gardenCard}
                   >
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <strong>Garden {index + 1}</strong>
-                      <button
-                        type="button"
+                    <div className={styles.gardenHeader}>
+                      <Typography as="span" isBold>
+                        Garden {index + 1}
+                      </Typography>
+                      <Button
+                        variant="secondary"
+                        size="sm"
                         onClick={() => removeBeerGarden(index)}
-                        className="secondary"
                       >
                         Remove
-                      </button>
+                      </Button>
                     </div>
                     <label htmlFor={`garden-${index}-name`}>
                       Name:{" "}
@@ -550,9 +556,10 @@ export default function PubPage() {
                         required
                       />
                     </label>
-                    <label>
+                    <label htmlFor={`garden-${index}-description`}>
                       Description:{" "}
-                      <textarea
+                      <Textarea
+                        id={`garden-${index}-description`}
                         value={garden.description ?? ""}
                         onChange={(e) =>
                           updateBeerGarden(index, {
@@ -578,9 +585,10 @@ export default function PubPage() {
                         min={0}
                       />
                     </label>
-                    <label>
+                    <label htmlFor={`garden-${index}-sun-exposure`}>
                       Sun exposure:{" "}
-                      <select
+                      <Dropdown
+                        id={`garden-${index}-sun-exposure`}
                         value={garden.sunExposure ?? ""}
                         onChange={(e) =>
                           updateBeerGarden(index, {
@@ -595,7 +603,7 @@ export default function PubPage() {
                             {option.label}
                           </option>
                         ))}
-                      </select>
+                      </Dropdown>
                     </label>
                     <label htmlFor={`garden-${index}-imageUrl`}>
                       Image URL:{" "}
@@ -609,9 +617,10 @@ export default function PubPage() {
                         }
                       />
                     </label>
-                    <label>
+                    <label htmlFor={`garden-${index}-notes`}>
                       Notes:{" "}
-                      <textarea
+                      <Textarea
+                        id={`garden-${index}-notes`}
                         value={garden.notes ?? ""}
                         onChange={(e) =>
                           updateBeerGarden(index, {
@@ -620,7 +629,7 @@ export default function PubPage() {
                         }
                       />
                     </label>
-                    <div style={{ display: "grid", gap: "0.35rem" }}>
+                    <div className={styles.gardenCheckboxes}>
                       <label htmlFor={`garden-${index}-covered`}>
                         <Input
                           id={`garden-${index}-covered`}
@@ -685,53 +694,79 @@ export default function PubPage() {
                     </div>
                   </div>
                 ))}
-                <button type="button" onClick={addBeerGarden}>
-                  Add beer garden
-                </button>
+                <Button onClick={addBeerGarden}>Add beer garden</Button>
               </div>
               <br />
-              <button type="button" onClick={handleSave} disabled={isSaveDisabled}>
+              <Button onClick={handleSave} disabled={isSaveDisabled}>
                 Save
-              </button>
+              </Button>
               {saveError && (
-                <p style={{ color: "red", marginTop: "0.5rem" }}>{saveError}</p>
+                <Typography className={styles.saveError}>
+                  {saveError}
+                </Typography>
               )}
-              <button
-                type="button"
+              <Button
+                variant="secondary"
                 onClick={() => setEditing(false)}
-                style={{ marginLeft: "1rem" }}
+                className={styles.cancelButton}
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           ) : (
             <>
-              <p>
-                <strong>City:</strong> {pub.city}
-              </p>
-              <p>
-                <strong>Country:</strong> {getCountryName(pub.country)}
-              </p>
-              <p>
-                <strong>Address:</strong> {pub.address}
-              </p>
-              <p>
-                <strong>Postcode:</strong> {pub.postcode}
-              </p>
-              <p>
-                <strong>Area:</strong> {pub.area || "-"}
-              </p>
-              <p>
-                <strong>Borough:</strong> {pub.borough || "-"}
-              </p>
-              <p>
-                <strong>Operator:</strong> {pub.operator || "-"}
-              </p>
-              <p>
-                <strong>Phone:</strong> {pub.phone || "-"}
-              </p>
-              <p>
-                <strong>Website:</strong>{" "}
+              <Typography>
+                <Typography as="span" isBold>
+                  City:
+                </Typography>{" "}
+                {pub.city}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Country:
+                </Typography>{" "}
+                {getCountryName(pub.country)}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Address:
+                </Typography>{" "}
+                {pub.address}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Postcode:
+                </Typography>{" "}
+                {pub.postcode}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Area:
+                </Typography>{" "}
+                {pub.area || "-"}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Borough:
+                </Typography>{" "}
+                {pub.borough || "-"}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Operator:
+                </Typography>{" "}
+                {pub.operator || "-"}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Phone:
+                </Typography>{" "}
+                {pub.phone || "-"}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Website:
+                </Typography>{" "}
                 {pub.website ? (
                   <a
                     href={pub.website}
@@ -743,164 +778,214 @@ export default function PubPage() {
                 ) : (
                   "-"
                 )}
-              </p>
-              <p>
-                <strong>Description:</strong> {pub.description || "-"}
-              </p>
-              <p>
-                <strong>Chain name:</strong> {pub.chainName || "-"}
-              </p>
-              <p>
-                <strong>Independent:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Description:
+                </Typography>{" "}
+                {pub.description || "-"}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Chain name:
+                </Typography>{" "}
+                {pub.chainName || "-"}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Independent:
+                </Typography>{" "}
                 {pub.isIndependent == null
                   ? "-"
                   : pub.isIndependent
                   ? "Yes"
                   : "No"}
-              </p>
-              <p>
-                <strong>Food available:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Food available:
+                </Typography>{" "}
                 {pub.hasFood == null ? "-" : pub.hasFood ? "Yes" : "No"}
-              </p>
-              <p>
-                <strong>Sunday roast:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Sunday roast:
+                </Typography>{" "}
                 {pub.hasSundayRoast == null
                   ? "-"
                   : pub.hasSundayRoast
                   ? "Yes"
                   : "No"}
-              </p>
-              <p>
-                <strong>Beer garden:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Beer garden:
+                </Typography>{" "}
                 {pub.hasBeerGarden == null
                   ? "-"
                   : pub.hasBeerGarden
                   ? "Yes"
                   : "No"}
-              </p>
-              <p>
-                <strong>Cask ale:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Cask ale:
+                </Typography>{" "}
                 {pub.hasCaskAle == null ? "-" : pub.hasCaskAle ? "Yes" : "No"}
-              </p>
-              <p>
-                <strong>Beer-focused:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Beer-focused:
+                </Typography>{" "}
                 {pub.isBeerFocused == null
                   ? "-"
                   : pub.isBeerFocused
                   ? "Yes"
                   : "No"}
-              </p>
-              <p>
-                <strong>Dog friendly:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Dog friendly:
+                </Typography>{" "}
                 {pub.isDogFriendly == null
                   ? "-"
                   : pub.isDogFriendly
                   ? "Yes"
                   : "No"}
-              </p>
-              <p>
-                <strong>Family friendly:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Family friendly:
+                </Typography>{" "}
                 {pub.isFamilyFriendly == null
                   ? "-"
                   : pub.isFamilyFriendly
                   ? "Yes"
                   : "No"}
-              </p>
-              <p>
-                <strong>Step-free access:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Step-free access:
+                </Typography>{" "}
                 {pub.hasStepFreeAccess == null
                   ? "-"
                   : pub.hasStepFreeAccess
                   ? "Yes"
                   : "No"}
-              </p>
-              <p>
-                <strong>Accessible toilet:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Accessible toilet:
+                </Typography>{" "}
                 {pub.hasAccessibleToilet == null
                   ? "-"
                   : pub.hasAccessibleToilet
                   ? "Yes"
                   : "No"}
-              </p>
-              <p>
-                <strong>Live sport:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Live sport:
+                </Typography>{" "}
                 {pub.hasLiveSport == null
                   ? "-"
                   : pub.hasLiveSport
                   ? "Yes"
                   : "No"}
-              </p>
-              <p>
-                <strong>Live music:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Live music:
+                </Typography>{" "}
                 {pub.hasLiveMusic == null
                   ? "-"
                   : pub.hasLiveMusic
                   ? "Yes"
                   : "No"}
-              </p>
-              <p>
-                <strong>Beer Types:</strong>{" "}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Beer Types:
+                </Typography>{" "}
                 {getBeerTypeNames(pub).length
                   ? getBeerTypeNames(pub).join(", ")
                   : "-"}
-              </p>
-              <p>
-                <strong>Opening Hours:</strong>
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Opening Hours:
+                </Typography>
                 {pub.openingHours ? (
-                  <div style={{ marginTop: "0.5rem" }}>
+                  <div className={styles.openingHoursDisplay}>
                     {renderOpeningHours(pub.openingHours)}
                   </div>
                 ) : (
                   " -"
                 )}
-              </p>
+              </Typography>
               <div>
-                <strong>Beer Gardens:</strong>
+                <Typography as="span" isBold>
+                  Beer Gardens:
+                </Typography>
                 {pub.beerGardens && pub.beerGardens.length > 0 ? (
-                  <div style={{ marginTop: "0.5rem", display: "grid" }}>
+                  <div className={styles.beerGardensDisplay}>
                     {pub.beerGardens.map((garden, index) => (
                       <div
                         key={garden.id || `garden-${index}`}
-                        style={{
-                          border: "1px solid #ddd",
-                          padding: "0.75rem",
-                          borderRadius: 6,
-                          marginBottom: "0.75rem",
-                        }}
+                        className={styles.gardenDisplayCard}
                       >
-                        <p>
-                          <strong>Name:</strong> {garden.name}
-                        </p>
-                        <p>
-                          <strong>Description:</strong>{" "}
+                        <Typography>
+                          <Typography as="span" isBold>
+                            Name:
+                          </Typography>{" "}
+                          {garden.name}
+                        </Typography>
+                        <Typography>
+                          <Typography as="span" isBold>
+                            Description:
+                          </Typography>{" "}
                           {garden.description || "-"}
-                        </p>
-                        <p>
-                          <strong>Seating capacity:</strong>{" "}
+                        </Typography>
+                        <Typography>
+                          <Typography as="span" isBold>
+                            Seating capacity:
+                          </Typography>{" "}
                           {garden.seatingCapacity ?? "-"}
-                        </p>
-                        <p>
-                          <strong>Sun exposure:</strong>{" "}
+                        </Typography>
+                        <Typography>
+                          <Typography as="span" isBold>
+                            Sun exposure:
+                          </Typography>{" "}
                           {garden.sunExposure || "-"}
-                        </p>
-                        <p>
-                          <strong>Covered:</strong>{" "}
+                        </Typography>
+                        <Typography>
+                          <Typography as="span" isBold>
+                            Covered:
+                          </Typography>{" "}
                           {garden.isCovered ? "Yes" : "No"}
-                        </p>
-                        <p>
-                          <strong>Heated:</strong>{" "}
+                        </Typography>
+                        <Typography>
+                          <Typography as="span" isBold>
+                            Heated:
+                          </Typography>{" "}
                           {garden.isHeated ? "Yes" : "No"}
-                        </p>
-                        <p>
-                          <strong>Family friendly:</strong>{" "}
+                        </Typography>
+                        <Typography>
+                          <Typography as="span" isBold>
+                            Family friendly:
+                          </Typography>{" "}
                           {garden.isFamilyFriendly ? "Yes" : "No"}
-                        </p>
-                        <p>
-                          <strong>Pet friendly:</strong>{" "}
+                        </Typography>
+                        <Typography>
+                          <Typography as="span" isBold>
+                            Pet friendly:
+                          </Typography>{" "}
                           {garden.petFriendly ? "Yes" : "No"}
-                        </p>
-                        <p>
-                          <strong>Image:</strong>{" "}
+                        </Typography>
+                        <Typography>
+                          <Typography as="span" isBold>
+                            Image:
+                          </Typography>{" "}
                           {garden.imageUrl ? (
                             <a
                               href={garden.imageUrl}
@@ -912,20 +997,25 @@ export default function PubPage() {
                           ) : (
                             "-"
                           )}
-                        </p>
-                        <p>
-                          <strong>Notes:</strong> {garden.notes || "-"}
-                        </p>
-                        <p>
-                          <strong>Opening Hours:</strong>
+                        </Typography>
+                        <Typography>
+                          <Typography as="span" isBold>
+                            Notes:
+                          </Typography>{" "}
+                          {garden.notes || "-"}
+                        </Typography>
+                        <Typography>
+                          <Typography as="span" isBold>
+                            Opening Hours:
+                          </Typography>
                           {garden.openingHours ? (
-                            <div style={{ marginTop: "0.5rem" }}>
+                            <div className={styles.openingHoursDisplay}>
                               {renderOpeningHours(garden.openingHours)}
                             </div>
                           ) : (
                             " -"
                           )}
-                        </p>
+                        </Typography>
                       </div>
                     ))}
                   </div>
@@ -933,26 +1023,33 @@ export default function PubPage() {
                   " -"
                 )}
               </div>
-              <p>
-                <strong>Latitude:</strong> {pub.lat}
-              </p>
-              <p>
-                <strong>Longitude:</strong> {pub.lng}
-              </p>
-              <p>
-                <strong>Created At:</strong>{" "}
+              <Typography>
+                <Typography as="span" isBold>
+                  Latitude:
+                </Typography>{" "}
+                {pub.lat}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Longitude:
+                </Typography>{" "}
+                {pub.lng}
+              </Typography>
+              <Typography>
+                <Typography as="span" isBold>
+                  Created At:
+                </Typography>{" "}
                 {new Date(pub.createdAt).toLocaleString()}
-              </p>
+              </Typography>
             </>
           )}
         </>
       ) : (
-        <p>Pub not found</p>
+        <Typography>Pub not found</Typography>
       )}
     </>
   );
 }
-
 
 function getBeerTypeIdsFromPub(pub: Pub): string[] {
   if (Array.isArray(pub.beerTypeIds) && pub.beerTypeIds.length > 0) {
@@ -1213,20 +1310,20 @@ function EditButton({
 
   if (!user) {
     return (
-      <div style={{ marginTop: "1rem" }}>
+      <div className={styles.editButtonMessage}>
         <a href="/register">Log in to edit this pub</a>
       </div>
     );
   }
   if (!user.approved) {
     return (
-      <div style={{ marginTop: "1rem" }}>
-        <p>Your account is not approved for editing.</p>
-        <p>
+      <div className={styles.editButtonMessage}>
+        <Typography>Your account is not approved for editing.</Typography>
+        <Typography>
           Please email{" "}
           <a href="mailto:hello@thepubdb.com">hello@thepubdb.com</a> to request
           approval.
-        </p>
+        </Typography>
       </div>
     );
   }
@@ -1264,7 +1361,7 @@ function EditButton({
   return (
     <div>
       {deleteMessage && (
-        <p
+        <Typography
           className={
             deleteMessage.type === "success"
               ? styles.deleteMessageSuccess
@@ -1272,10 +1369,14 @@ function EditButton({
           }
         >
           {deleteMessage.text}
-        </p>
+        </Typography>
       )}
-      <button type="button" onClick={onEdit}>Edit this pub</button>
-      {user?.admin && <button type="button" onClick={handleDelete}>Delete this pub</button>}
+      <Button onClick={onEdit}>Edit this pub</Button>
+      {user?.admin && (
+        <Button variant="red" onClick={handleDelete}>
+          Delete this pub
+        </Button>
+      )}
     </div>
   );
 }
@@ -1301,23 +1402,32 @@ function renderOpeningHours(ohAny: unknown) {
       oh = null;
     }
   } else if (ohAny && typeof ohAny === "object") {
-    oh = ohAny as Record<string, { open?: string; close?: string; closed?: boolean }>;
+    oh = ohAny as Record<
+      string,
+      { open?: string; close?: string; closed?: boolean }
+    >;
   }
 
   if (!oh) {
     return (
       <div>
         {weekdays.map((day) => (
-          <div key={day}>
-            <strong>{day}:</strong> -
-          </div>
+          <Typography key={day}>
+            <Typography as="span" isBold>
+              {day}:
+            </Typography>{" "}
+            -
+          </Typography>
         ))}
       </div>
     );
   }
 
   // Build case-insensitive map for lookup (handles "monday" or "Monday").
-  const map: Record<string, { open?: string; close?: string; closed?: boolean }> = {};
+  const map: Record<
+    string,
+    { open?: string; close?: string; closed?: boolean }
+  > = {};
   Object.entries(oh).forEach(([k, v]) => {
     map[k.toLowerCase()] = v;
   });
@@ -1328,24 +1438,33 @@ function renderOpeningHours(ohAny: unknown) {
         const entry = map[day.toLowerCase()];
         if (!entry) {
           return (
-            <div key={day}>
-              <strong>{day}:</strong> -
-            </div>
+            <Typography key={day}>
+              <Typography as="span" isBold>
+                {day}:
+              </Typography>{" "}
+              -
+            </Typography>
           );
         }
         if (entry.closed) {
           return (
-            <div key={day}>
-              <strong>{day}:</strong> Closed
-            </div>
+            <Typography key={day}>
+              <Typography as="span" isBold>
+                {day}:
+              </Typography>{" "}
+              Closed
+            </Typography>
           );
         }
         const open = entry.open || "-";
         const close = entry.close || "-";
         return (
-          <div key={day}>
-            <strong>{day}:</strong> {open} – {close}
-          </div>
+          <Typography key={day}>
+            <Typography as="span" isBold>
+              {day}:
+            </Typography>{" "}
+            {open} – {close}
+          </Typography>
         );
       })}
     </div>

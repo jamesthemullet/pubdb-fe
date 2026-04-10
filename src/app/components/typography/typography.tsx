@@ -14,6 +14,7 @@ type TypographyProps = {
   children?: ReactNode;
   as?: ElementType;
   variant?: TypographyVariant;
+  isBold?: boolean;
   className?: string;
 } & ComponentPropsWithoutRef<"p">;
 
@@ -40,11 +41,16 @@ export default function Typography({
   children,
   as,
   variant = "bodyMedium",
+  isBold = false,
   className = "",
   ...props
 }: TypographyProps) {
   const Component = as ?? defaultElementMap[variant];
-  const classes = [variantClassMap[variant], className]
+  const classes = [
+    variantClassMap[variant],
+    isBold ? styles.bold : "",
+    className,
+  ]
     .filter(Boolean)
     .join(" ");
 
