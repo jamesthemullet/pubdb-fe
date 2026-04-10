@@ -7,3 +7,100 @@
   color: red;
   margin-bottom: 0.5rem;
 }
+
+.pubImage {
+  max-width: 400px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+.topButtonGroup {
+  margin-top: 1rem;
+}
+
+.cancelButton {
+  margin-left: 1rem;
+}
+
+.editSection {
+  margin-top: 1rem;
+}
+
+.errorText {
+  color: red;
+}
+
+.errorInline {
+  color: red;
+  margin-left: 0.5rem;
+}
+
+.beerTypesOuter {
+  margin-top: 0.35rem;
+  display: grid;
+}
+
+.beerTypeOptions {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.beerTypeLabel {
+  display: flex;
+}
+
+.beerTypeName {
+  margin-left: 0.5rem;
+}
+
+.beerGardenSection {
+  margin-top: 1rem;
+}
+
+.emptyMessage {
+  color: #666;
+}
+
+.gardenCard {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.gardenHeader {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.gardenCheckboxes {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.saveError {
+  color: red;
+  margin-top: 0.5rem;
+}
+
+.openingHoursDisplay {
+  margin-top: 0.5rem;
+}
+
+.beerGardensDisplay {
+  margin-top: 0.5rem;
+  display: grid;
+}
+
+.gardenDisplayCard {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.editButtonMessage {
+  margin-top: 1rem;
+}
