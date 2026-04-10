@@ -9,6 +9,7 @@ import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
 import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
 import type { PubAmenityKey } from "@/constants/pubFormFields";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
+import { useCountries } from "@/hooks/useCountries";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import type {
@@ -35,52 +36,13 @@ export default function PubPage() {
   const [editFields, setEditFields] = useState<Partial<Pub>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [countries, setCountries] = useState<{ name: string; code: string }[]>(
-    []
-  );
-  const [countriesLoading, setCountriesLoading] = useState(false);
+  const { countries, countriesLoading } = useCountries();
 
   const getCountryName = (code: string) => {
     const country = countries.find((c) => c.code === code);
     return country?.name || code;
   };
   const { beerTypeOptions, beerTypesLoading, beerTypesError } = useBeerTypes();
-
-  useEffect(() => {
-    let ignore = false;
-    async function fetchCountries() {
-      setCountriesLoading(true);
-      try {
-        const res = await fetch(
-          "https://restcountries.com/v3.1/all?fields=name,cca2"
-        );
-        if (!res.ok) {
-          throw new Error(`Failed to fetch countries: ${res.status}`);
-        }
-        const data: Array<{ name: { common: string }; cca2: string }> =
-          await res.json();
-        if (!ignore) {
-          const options = data
-            .map((country) => ({
-              name: country.name.common,
-              code: country.cca2,
-            }))
-            .sort((a, b) => a.name.localeCompare(b.name));
-          setCountries(options);
-        }
-      } catch (_err) {
-      } finally {
-        if (!ignore) {
-          setCountriesLoading(false);
-        }
-      }
-    }
-    fetchCountries();
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
 
 
   useEffect(() => {

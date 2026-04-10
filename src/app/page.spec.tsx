@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import Home from "./page";
 
-vi.mock("./components/pricing", () => ({
+vi.mock("./features/pricing/pricing", () => ({
   default: () => <div data-testid="pricing">Pricing</div>,
 }));
 
