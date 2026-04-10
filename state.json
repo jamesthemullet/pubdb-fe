@@ -1,6 +1,6 @@
 {
-  "last_run": "2026-04-09T06:01:34Z",
-  "run_id": "24175050585",
+  "last_run": "2026-04-10T06:14:16Z",
+  "run_id": "24229274344",
   "commands": {
     "test": "yarn test",
     "test_coverage": "yarn test:coverage",
@@ -11,35 +11,48 @@
     "dev": "yarn dev"
   },
   "commands_status": {
-    "test": "passing (124 tests, 21 files)",
-    "lint": "78 pre-existing errors (not caused by our changes)",
+    "test": "passing (172 tests, 25 files)",
+    "lint": "15 pre-existing warnings, no errors",
     "ts_check": "passing",
     "install": "yarn install required before running commands"
   },
   "tasks_last_run": {
     "task1_commands": "2026-04-08",
     "task2_opportunities": "2026-04-08",
-    "task3_implement": "2026-04-09",
+    "task3_implement": "2026-04-10",
     "task4_maintain_prs": "2026-04-09",
     "task5_comment_issues": null,
     "task6_measurement": null,
-    "task7_summary": "2026-04-09"
+    "task7_summary": "2026-04-10"
   },
-  "work_in_progress": null,
+  "work_in_progress": {
+    "branch": "perf-assist/pubs-api-cache",
+    "status": "committed_locally_push_failed",
+    "note": "safe-output tools unavailable in this run environment; branch exists locally but could not be pushed or PR created"
+  },
   "completed_prs": [
     {
       "branch": "perf-assist/cache-countries-hook-bb30c74c05cefb64",
       "title": "[Perf Improver] Cache countries data in useCountries hook",
-      "description": "Added module-level cache to useCountries hook to avoid re-fetching ~250 countries from restcountries.com on every component mount",
+      "description": "Added module-level cache to useCountries hook",
       "created_at": "2026-04-08",
-      "issue_number": 25
+      "status": "merged (hook now on main)"
     },
     {
       "branch": "perf-assist/useBeerTypes-cache",
       "title": "[Perf Improver] Add useBeerTypes hook with module-level cache",
-      "description": "Created useBeerTypes hook with module-level cache; extracted from pubs/[id]/page.tsx inline useEffect. Eliminates repeated /api/beer-types fetches on component remounts.",
+      "description": "Created useBeerTypes hook with module-level cache",
       "created_at": "2026-04-09",
-      "pr_number": "pending"
+      "status": "merged (hook now on main)"
+    }
+  ],
+  "pending_prs": [
+    {
+      "branch": "perf-assist/pubs-api-cache",
+      "title": "[Perf Improver] Cache /api/pubs response + increase search debounce",
+      "changes": "proxyHandler.ts cacheSeconds option, route.ts revalidate=60, debounce 100ms->300ms",
+      "test_status": "172/172 passing",
+      "note": "Branch committed locally; could not push due to missing safe-output tools"
     }
   ]
 }
