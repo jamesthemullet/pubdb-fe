@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
+import { getServerApiUrl } from "@/lib/serverApiUrl";
 
 export function createApiProxyHandler(
   endpointPath: string,
   options?: { forwardAuth?: boolean; resourceName?: string }
 ) {
   return async (request: Request) => {
-    const apiUrl =
-      process.env.API_URL ||
-      process.env.NEXT_PUBLIC_API_URL ||
-      "http://localhost:4000";
+    const apiUrl = getServerApiUrl();
     const apiKey = process.env.TESTING_API_KEY;
 
     if (!apiKey) {
