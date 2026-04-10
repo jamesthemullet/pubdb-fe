@@ -1,0 +1,103 @@
+.feedbackBanner {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+
+.feedbackBannerSuccess {
+  color: #155724;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.feedbackBannerError {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+}
+
+.feedbackBannerDismiss {
+  float: right;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+}
+
+.modalContent {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 95%;
+  width: 600px;
+}
+
+.modalSection {
+  margin: 1rem 0;
+}
+
+.mutedText {
+  color: #666;
+}
+
+.breakdownList {
+  padding-left: 1rem;
+}
+
+.confirmUpgradeRow {
+  margin: 1.5rem 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.pricingHeading {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.tierCards {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.tierCard {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 2rem;
+  min-width: 220px;
+  text-align: center;
+  position: relative;
+}
+
+.tierPrice {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.tierFeatures {
+  text-align: left;
+  padding-left: 1rem;
+}
+
+.tierAction {
+  margin-top: 0.75rem;
+}

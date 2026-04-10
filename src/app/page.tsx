@@ -1,7 +1,7 @@
 "use client";
 
 import Heading from "./components/heading/heading";
-import Pricing from "./components/pricing";
+import Pricing from "./features/pricing/pricing";
 import Typography from "./components/typography/typography";
 
 export default function Home() {

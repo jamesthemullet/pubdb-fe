@@ -2,53 +2,34 @@ import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
+import Button from "@/app/components/button/button";
+import Typography from "@/app/components/typography/typography";
 import styles from "./pricing.module.css";
 
+type ProrationItem = {
+  id?: string;
+  description?: string;
+  amount?: number;
+  amount_excluding_tax?: number;
+  currency?: string;
+};
+
+type InvoiceLike = {
+  lines?: ProrationItem[];
+  amount_due?: number;
+  amount_remaining?: number;
+  currency?: string;
+  next_payment_attempt?: number;
+  period_end?: number;
+  current_period_end?: number;
+};
+
 type UpcomingBill = {
-  proration?: Array<{
-    id?: string;
-    description?: string;
-    amount?: number;
-    amount_excluding_tax?: number;
-    currency?: string;
-  }>;
-  proration_lines?: Array<{
-    id?: string;
-    description?: string;
-    amount?: number;
-    amount_excluding_tax?: number;
-    currency?: string;
-  }>;
-  lines?: Array<{
-    id?: string;
-    description?: string;
-    amount?: number;
-    amount_excluding_tax?: number;
-    currency?: string;
-  }>;
-  invoice?: {
-    lines?: Array<{
-      id?: string;
-      description?: string;
-      amount?: number;
-      amount_excluding_tax?: number;
-      currency?: string;
-    }>;
-    amount_due?: number;
-    amount_remaining?: number;
-    currency?: string;
-    next_payment_attempt?: number;
-    period_end?: number;
-    current_period_end?: number;
-  };
-  latest_invoice?: {
-    amount_due?: number;
-    amount_remaining?: number;
-    currency?: string;
-    next_payment_attempt?: number;
-    period_end?: number;
-    current_period_end?: number;
-  };
+  proration?: ProrationItem[];
+  proration_lines?: ProrationItem[];
+  lines?: ProrationItem[];
+  invoice?: InvoiceLike;
+  latest_invoice?: Omit<InvoiceLike, "lines">;
   amount_due?: number;
   amount_remaining?: number;
   estimatedAmount?: number;
@@ -70,14 +51,6 @@ type ApiKey = {
   keyStatus: string;
   permissions: string[];
   key: string;
-};
-
-type ProrationItem = {
-  id?: string;
-  description?: string;
-  amount?: number;
-  amount_excluding_tax?: number;
-  currency?: string;
 };
 
 const pricingTiers = [
@@ -125,7 +98,8 @@ const Pricing: React.FC = () => {
     type: "success" | "error";
     text: string;
   } | null>(null);
-  const setError = (text: string) => setFeedbackMessage({ type: "error", text });
+  const setError = (text: string) =>
+    setFeedbackMessage({ type: "error", text });
 
   const [userTier, setUserTier] = useState<string | null>(null);
   const [_userHighestTier, _setUserHighestTier] = useState<string | null>(null);
@@ -157,7 +131,9 @@ const Pricing: React.FC = () => {
     return new Date(timestamp * 1000).toLocaleString();
   };
 
-  function getProrationItems(upcoming: UpcomingBill | null | undefined): ProrationItem[] {
+  const getProrationItems = (
+    upcoming: UpcomingBill | null | undefined
+  ): ProrationItem[] => {
     if (!upcoming) return [];
     return (
       upcoming.proration ||
@@ -166,9 +142,9 @@ const Pricing: React.FC = () => {
       upcoming.invoice?.lines ||
       []
     );
-  }
+  };
 
-  function getInvoiceLike(upcoming: UpcomingBill | null | undefined) {
+  const getInvoiceLike = (upcoming: UpcomingBill | null | undefined) => {
     if (!upcoming) return null;
     if (typeof upcoming.amount_due === "number") return upcoming;
     if (upcoming.invoice && typeof upcoming.invoice.amount_due === "number")
@@ -179,16 +155,16 @@ const Pricing: React.FC = () => {
     )
       return upcoming.latest_invoice;
     return null;
-  }
+  };
 
-  function firstNumber(...values: Array<number | null | undefined>) {
+  const firstNumber = (...values: Array<number | null | undefined>) => {
     for (const value of values) {
       if (typeof value === "number" && Number.isFinite(value)) {
         return value;
       }
     }
     return undefined;
-  }
+  };
 
   const modalUpcoming = upgradeModal?.upcoming;
   const modalProrationItems = modalUpcoming
@@ -223,6 +199,7 @@ const Pricing: React.FC = () => {
     typeof prorationOnlyCharge === "number" &&
     typeof modalUpcoming?.estimatedAmount === "number" &&
     modalUpcoming.estimatedAmount === nextPeriodCharge + prorationOnlyCharge;
+
   const nextPaymentTimestamp = firstNumber(
     modalUpcoming?.nextPaymentAttempt,
     modalInvoice?.next_payment_attempt,
@@ -321,7 +298,9 @@ const Pricing: React.FC = () => {
       });
       setApiKey(data.apiKey);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to estimate upgrade");
+      setError(
+        err instanceof Error ? err.message : "Failed to estimate upgrade"
+      );
     } finally {
       setEstimateLoading(false);
     }
@@ -414,103 +393,94 @@ const Pricing: React.FC = () => {
     <div>
       {feedbackMessage && (
         <div
-          className={`${styles.feedbackBanner} ${feedbackMessage.type === "success" ? styles.feedbackBannerSuccess : styles.feedbackBannerError}`}
+          className={`${styles.feedbackBanner} ${
+            feedbackMessage.type === "success"
+              ? styles.feedbackBannerSuccess
+              : styles.feedbackBannerError
+          }`}
         >
           {feedbackMessage.text}
-          <button
-            type="button"
+          <Button
             onClick={() => setFeedbackMessage(null)}
             className={styles.feedbackBannerDismiss}
+            variant="secondary"
+            size="sm"
           >
             ×
-          </button>
+          </Button>
         </div>
       )}
       {upgradeModal ? (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "rgba(0,0,0,0.4)",
-            zIndex: 9999,
-          }}
-        >
-          <div
-            style={{
-              background: "white",
-              padding: 24,
-              borderRadius: 8,
-              maxWidth: "95%",
-              width: "600px",
-            }}
-          >
-            <h3>{"Subscription details"}</h3>
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <Typography variant="headingSmall">Subscription details</Typography>
             {apiKey && (
-              <div style={{ margin: "1rem 0" }}>
-                <h4>API Key Details</h4>
-                <p>
+              <div className={styles.modalSection}>
+                <Typography variant="headingSmall" as="h4">
+                  API Key Details
+                </Typography>
+                <Typography>
                   <strong>Name:</strong> {apiKey.name}
-                </p>
-                <p>
+                </Typography>
+                <Typography>
                   <strong>Key Prefix:</strong> {apiKey.keyPrefix}
-                </p>
-                <p>
+                </Typography>
+                <Typography>
                   <strong>Tier:</strong> {apiKey.tier}
-                </p>
-                <p>
+                </Typography>
+                <Typography>
                   <strong>Status:</strong> {apiKey.keyStatus}
-                </p>
-                <p>
+                </Typography>
+                <Typography>
                   <strong>Permissions:</strong> {apiKey.permissions.join(", ")}
-                </p>
-                <p>
+                </Typography>
+                <Typography>
                   <strong>API Key:</strong> {apiKey.key}
-                </p>
+                </Typography>
               </div>
             )}
             {modalUpcoming ? (
-              <div style={{ margin: "1rem 0" }}>
-                <h4>Estimated charges</h4>
+              <div className={styles.modalSection}>
+                <Typography variant="headingSmall" as="h4">
+                  Estimated charges
+                </Typography>
                 {typeof estimatedDueNow === "number" ? (
-                  <p>
+                  <Typography>
                     <strong>Due now:</strong>{" "}
                     {formatCurrency(estimatedDueNow, estimateCurrency)}
-                  </p>
+                  </Typography>
                 ) : inferredProrationAddedToNextBill ? (
-                  <p style={{ color: "#666" }}>
+                  <Typography className={styles.mutedText}>
                     No immediate charge. The mid-cycle adjustment will be added
                     to your next bill.
-                  </p>
+                  </Typography>
                 ) : (
-                  <p style={{ color: "#666" }}>
+                  <Typography className={styles.mutedText}>
                     We could not determine your immediate charge. You can
                     continue to checkout to view the final amount.
-                  </p>
+                  </Typography>
                 )}
                 {typeof nextPeriodCharge === "number" ? (
-                  <p>
+                  <Typography>
                     <strong>Normal bill:</strong>{" "}
                     {formatCurrency(nextPeriodCharge, estimateCurrency)}
-                  </p>
+                  </Typography>
                 ) : null}
                 {typeof upcomingBillCharge === "number" ? (
-                  <p>
+                  <Typography>
                     <strong>Upcoming bill (with adjustment):</strong>{" "}
                     {formatCurrency(upcomingBillCharge, estimateCurrency)}
-                  </p>
+                  </Typography>
                 ) : null}
                 {nextPaymentDisplay ? (
-                  <p>
+                  <Typography>
                     <strong>Next payment:</strong> {nextPaymentDisplay}
-                  </p>
+                  </Typography>
                 ) : null}
                 {modalProrationItems.length ? (
                   <div>
                     <strong>Breakdown:</strong>
-                    <ul style={{ paddingLeft: 16 }}>
+                    <ul className={styles.breakdownList}>
                       {modalProrationItems.map((item, index) => (
                         <li key={item.id || index}>
                           {(item.description || "Adjustment").trim()} {" - "}
@@ -528,49 +498,35 @@ const Pricing: React.FC = () => {
               </div>
             ) : null}
             {upgradeModal?.priceId ? (
-              <div
-                style={{
-                  margin: "1.5rem 0",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <button
-                  type="button"
+              <div className={styles.confirmUpgradeRow}>
+                <Button
                   onClick={() => performUpgrade(upgradeModal.priceId)}
                   disabled={performingUpgrade}
                 >
                   {performingUpgrade
                     ? "Upgrading..."
                     : `Confirm upgrade to ${upgradeModal.tierName}`}
-                </button>
+                </Button>
               </div>
             ) : null}
-            <div
-              style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}
-            >
-              <button
-                type="button"
+            <div className={styles.modalActions}>
+              <Button
                 onClick={() => setUpgradeModal(null)}
                 disabled={performingUpgrade}
+                variant="secondary"
               >
                 Close
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       ) : null}
 
-      <h2 style={{ textAlign: "center", marginBottom: "2rem" }}>API Pricing</h2>
+      <Typography variant="headingMedium" className={styles.pricingHeading}>
+        API Pricing
+      </Typography>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "2rem",
-          justifyContent: "center",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className={styles.tierCards}>
         {pricingTiers.map((tier) => {
           const userTierIndex = pricingTiers.find(
             (tier) => tier.name === userTier
@@ -588,43 +544,30 @@ const Pricing: React.FC = () => {
           })();
 
           return (
-            <div
-              key={tier.name}
-              style={{
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-                padding: "2rem",
-                minWidth: "220px",
-                textAlign: "center",
-                position: "relative",
-              }}
-            >
-              <h3>{tier.name}</h3>
-              <p style={{ fontSize: "2rem", fontWeight: "bold", margin: 0 }}>
-                {tier.price}
-              </p>
-              <ul style={{ textAlign: "left", paddingLeft: 16 }}>
+            <div key={tier.name} className={styles.tierCard}>
+              <Typography variant="headingSmall">{tier.name}</Typography>
+              <Typography className={styles.tierPrice}>{tier.price}</Typography>
+              <ul className={styles.tierFeatures}>
                 {tier.features.map((f) => (
                   <li key={f}>{f}</li>
                 ))}
               </ul>
-              <div style={{ marginTop: 12 }}>
+              <div className={styles.tierAction}>
                 {actionLabel ? (
-                  <button
-                    type="button"
+                  <Button
                     onClick={() => handleTierSelection(tier)}
                     disabled={isCurrentTier || isLowerTier}
+                    variant={isLowerTier ? "secondary" : "primary"}
                   >
                     {loadingTier === tier.name ? "Processing..." : actionLabel}
-                  </button>
+                  </Button>
                 ) : (
-                  <button
-                    type="button"
+                  <Button
                     onClick={() => handleTierSelection(tier)}
                     disabled={isCurrentTier || isLowerTier}
                   >
                     Subscribe
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
