@@ -23,10 +23,16 @@
 - setTimeout-based redirects (e.g. window.location.href after 500ms) hard to test without fake timers; test side effects instead (localStorage, dispatchEvent, success message)
 
 ## Last Run Tasks
+- 2026-04-10: Task 3 (implement tests for success/page.tsx), Task 7 (activity summary)
 - 2026-04-09: Task 3 (implement tests for register/login page), Task 7 (activity summary)
 - 2026-04-08: Task 1 (commands), Task 3 (implement tests), Task 7 (activity summary)
 
 ## Completed Work
+- PR: [Test Improver] Add tests for success/page.tsx (payment verification)
+  - Branch: test-assist/success-page-tests
+  - 32 new tests (172 → 204)
+  - success/page.tsx: 0% → ~85%+ stmts, billing day formatting fully covered
+  - Run: https://github.com/jamesthemullet/pubdb-fe/actions/runs/24221130336
 - PR: [Test Improver] Add tests for forgot-password, reset-password, and pubs list pages
   - Branch: test-assist/auth-and-pubs-pages-c6645726406cc200
   - 32 new tests (116 → 148)
@@ -40,7 +46,7 @@
 ## Testing Backlog (prioritised by value)
 1. **`pubs/[id]/page.tsx`** (1469 lines, 0%) — largest untested file, complex pub detail/edit page. High value but high complexity.
 2. **`features/dashboard/dashboard.tsx`** (621 lines, 0%) — API key management dashboard
-3. **`success/page.tsx`** (257 lines, 0%) — payment success flow with session verification
+3. **`success/page.tsx`** — ✅ DONE (branch: test-assist/success-page-tests)
 4. **`register/page.tsx`** — ✅ DONE (89.83% stmts)
 5. **`reset-password/page.tsx`** — ✅ DONE (branch, not merged)
 6. **`forgot-password/page.tsx`** — ✅ DONE (branch, not merged)
@@ -49,4 +55,4 @@
 9. **`profile/page.tsx`** (15 lines) — thin wrapper around Dashboard, low value alone
 
 ## Backlog Cursor
-Next run: start with success/page.tsx or features/dashboard/dashboard.tsx
+Next run: start with features/dashboard/dashboard.tsx or pubs/[id]/page.tsx
