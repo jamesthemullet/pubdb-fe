@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
 import { API_URL } from "@/lib/apiConfig";
+import styles from "./page.module.css";
 
 const getSafeInternalPath = (
   value: string | null | undefined
@@ -166,23 +167,18 @@ export default function RegisterLoginPage() {
         </button>
       </form>
       {mode === "login" && (
-        <div style={{ marginTop: "1rem", textAlign: "center" }}>
-          <a
-            href="/forgot-password"
-            style={{ color: "#007bff", fontSize: "0.9rem" }}
-          >
-            Forgot your password?
-          </a>
+        <div className={styles.forgotPasswordLink}>
+          <a href="/forgot-password">Forgot your password?</a>
         </div>
       )}
       <button
         type="button"
+        className={styles.toggleButton}
         onClick={() => {
           setMode(mode === "register" ? "login" : "register");
           setError(null);
           setSuccess(null);
         }}
-        style={{ marginTop: "1rem" }}
       >
         {mode === "register"
           ? "Already have an account? Login"
@@ -195,17 +191,9 @@ export default function RegisterLoginPage() {
         <div>
           {success}
           {mode === "register" && (
-            <div
-              style={{
-                marginTop: "0.75rem",
-                color: "#555",
-                fontSize: "0.95rem",
-              }}
-            >
-              If you don't receive your verification email, please contact{" "}
-              <a href="mailto:hello@thepubdb.com" style={{ color: "#007bff" }}>
-                hello@thepubdb.com
-              </a>{" "}
+            <div className={styles.verificationNote}>
+              If you don&apos;t receive your verification email, please contact{" "}
+              <a href="mailto:hello@thepubdb.com">hello@thepubdb.com</a>{" "}
               for assistance.
             </div>
           )}

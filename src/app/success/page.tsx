@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
+import styles from "./page.module.css";
 
 type SubscriptionStatus = {
   success: boolean;
@@ -100,7 +101,7 @@ function SuccessContent() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "4rem" }}>
+      <div className={styles.centered}>
         <h2>Verifying your subscription...</h2>
         <p>Please wait while we confirm your payment.</p>
       </div>
@@ -109,10 +110,10 @@ function SuccessContent() {
 
   if (error) {
     return (
-      <div style={{ textAlign: "center", padding: "4rem" }}>
-        <h2 style={{ color: "red" }}>Verification Failed</h2>
+      <div className={styles.centered}>
+        <h2 className={styles.subheading}>Verification Failed</h2>
         <p>{error}</p>
-        <div style={{ marginTop: "2rem" }}>
+        <div className={styles.actionLink}>
           <Link href="/">
             <button type="button">Return to Home</button>
           </Link>
@@ -123,9 +124,9 @@ function SuccessContent() {
 
   if (!status) {
     return (
-      <div style={{ textAlign: "center", padding: "4rem" }}>
+      <div className={styles.centered}>
         <h2>No subscription data found</h2>
-        <div style={{ marginTop: "2rem" }}>
+        <div className={styles.actionLink}>
           <Link href="/">
             <button type="button">Return to Home</button>
           </Link>
@@ -135,36 +136,15 @@ function SuccessContent() {
   }
 
   return (
-    <div
-      style={{
-        textAlign: "center",
-        padding: "4rem",
-        maxWidth: "600px",
-        margin: "0 auto",
-      }}
-    >
+    <div className={styles.container}>
       {status.success ? (
         <>
-          <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>🎉</div>
-          <h2 style={{ color: "green", marginBottom: "1rem" }}>
-            Subscription Successful!
-          </h2>
-          <p style={{ fontSize: "1.2rem", marginBottom: "2rem" }}>
-            {status.message}
-          </p>
+          <div className={styles.icon}>🎉</div>
+          <h2 className={styles.headingSuccess}>Subscription Successful!</h2>
+          <p className={styles.message}>{status.message}</p>
 
           {status.subscription && (
-            <div
-              style={{
-                backgroundColor: "#f9f9f9",
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-                padding: "2rem",
-                marginBottom: "2rem",
-                textAlign: "left",
-                width: "600px",
-              }}
-            >
+            <div className={styles.subscriptionDetails}>
               <h3>Subscription Details</h3>
               <p>
                 <strong>Plan:</strong> {status.subscription.tier}
@@ -188,24 +168,12 @@ function SuccessContent() {
             </div>
           )}
 
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              justifyContent: "center",
-              flexWrap: "wrap",
-            }}
-          >
+          <div className={styles.actions}>
             <Link href="/">
-              <button type="button" style={{ padding: "1rem 2rem", fontSize: "1.1rem" }}>
-                View Dashboard
-              </button>
+              <button type="button">View Dashboard</button>
             </Link>
             {/* <Link href="/api-docs">
-              <button
-                style={{ padding: "1rem 2rem", fontSize: "1.1rem" }}
-                className="secondary"
-              >
+              <button type="button" className="secondary">
                 API Documentation
               </button>
             </Link> */}
@@ -213,22 +181,11 @@ function SuccessContent() {
         </>
       ) : (
         <>
-          <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>❌</div>
-          <h2 style={{ color: "red", marginBottom: "1rem" }}>
-            Subscription Failed
-          </h2>
-          <p style={{ fontSize: "1.2rem", marginBottom: "2rem" }}>
-            {status.message}
-          </p>
+          <div className={styles.icon}>❌</div>
+          <h2 className={styles.headingError}>Subscription Failed</h2>
+          <p className={styles.message}>{status.message}</p>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              justifyContent: "center",
-              flexWrap: "wrap",
-            }}
-          >
+          <div className={styles.actions}>
             <Link href="/">
               <button type="button">Try Again</button>
             </Link>
@@ -245,11 +202,11 @@ function SuccessContent() {
 export default function SuccessPage() {
   return (
     <Suspense
-        fallback={
-          <div style={{ textAlign: "center", padding: "4rem" }}>Loading...</div>
-        }
-      >
-        <SuccessContent />
-      </Suspense>
+      fallback={
+        <div className={styles.centered}>Loading...</div>
+      }
+    >
+      <SuccessContent />
+    </Suspense>
   );
 }

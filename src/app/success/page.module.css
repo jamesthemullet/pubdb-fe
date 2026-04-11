@@ -1,0 +1,56 @@
+.container {
+  text-align: center;
+  padding: 4rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.centered {
+  text-align: center;
+  padding: 4rem;
+}
+
+.icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.headingSuccess {
+  color: green;
+  margin-bottom: 1rem;
+}
+
+.headingError {
+  color: red;
+  margin-bottom: 1rem;
+}
+
+.subheading {
+  color: red;
+}
+
+.message {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.subscriptionDetails {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  text-align: left;
+  width: 600px;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.actionLink {
+  margin-top: 2rem;
+}
