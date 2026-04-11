@@ -63,7 +63,7 @@ repository secrets to be correctly configured:
 
 | Secret | Purpose | Required Permissions |
 |--------|---------|----------------------|
-| `COPILOT_GITHUB_TOKEN` | Authenticates the Copilot CLI with GitHub | Must have access to the GitHub Copilot API (`https://api.github.com/copilot/mcp_registry`). Use a classic PAT with the `copilot` scope, or a token from an account with an active GitHub Copilot subscription. |
+| `COPILOT_GITHUB_TOKEN` | Authenticates the Copilot CLI with GitHub | Must have access to the GitHub Copilot API (`https://api.github.com/copilot/mcp_registry`). Two conditions are both required: (1) the token owner must have an active GitHub Copilot subscription, and (2) for classic PATs the token must include the `copilot` scope; for fine-grained PATs, Copilot-specific permissions must be granted. |
 | `GH_AW_GITHUB_TOKEN` | Token used by the MCP gateway to call GitHub APIs | Needs `repo`, `issues`, `pull_requests` read/write scopes |
 | `GH_AW_CI_TRIGGER_TOKEN` | Triggers CI on created PRs | `workflow` scope |
 
@@ -77,9 +77,12 @@ the CLI blocks *all* non-default MCP servers (including `safeoutputs` and `githu
 measure. Without these servers, the agent cannot call any safe-output tools (`create_pull_request`,
 `create_issue`, `noop`, etc.), resulting in zero safe outputs.
 
-**Fix**: Regenerate the `COPILOT_GITHUB_TOKEN` secret with a valid personal access token from a
-GitHub account that has an active Copilot subscription. For classic PATs, include the `copilot`
-scope. Update the secret in **Settings → Secrets and variables → Actions**.
+**Fix**: Regenerate the `COPILOT_GITHUB_TOKEN` secret using a personal access token from a GitHub
+account that has an active Copilot subscription. Both of the following conditions must be met:
+- **Classic PAT**: include the `copilot` scope when generating the token.
+- **Fine-grained PAT**: grant Copilot-specific read permissions when generating the token.
+
+Update the secret in **Settings → Secrets and variables → Actions**.
 
 ### Performance Notes
 
