@@ -270,32 +270,15 @@ const AddPubPage = () => {
                 lng,
               }}
               onFieldChange={(field, value) => {
-                if (field === "name") {
-                  setName(value as string);
-                  return;
+                switch (field) {
+                  case "name": setName(value as string); break;
+                  case "city": setCity(value as string); break;
+                  case "country": setCountry(value as string); break;
+                  case "address": setAddress(value as string); break;
+                  case "postcode": setPostcode(value as string); break;
+                  case "lat": setLat(value as number | undefined); break;
+                  default: setLng(value as number | undefined);
                 }
-                if (field === "city") {
-                  setCity(value as string);
-                  return;
-                }
-                if (field === "country") {
-                  setCountry(value as string);
-                  return;
-                }
-                if (field === "address") {
-                  setAddress(value as string);
-                  return;
-                }
-                if (field === "postcode") {
-                  setPostcode(value as string);
-                  return;
-                }
-                if (field === "lat") {
-                  setLat(value as number | undefined);
-                  return;
-                }
-
-                setLng(value as number | undefined);
               }}
               countries={countries}
               countriesLoading={countriesLoading}
@@ -320,15 +303,11 @@ const AddPubPage = () => {
                 value={website ?? ""}
                 onChange={(e) => setWebsite(e.target.value || undefined)}
               />
-              {fieldErrors.website?.map((fieldError) => (
-                <Typography
-                  key={`website-error-${fieldError}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
+              <FieldErrorList
+                errors={fieldErrors.website}
+                className={styles.errorText}
+                idPrefix="website"
+              />
             </div>
             <div>
               <label htmlFor="description">Description:</label>
@@ -338,15 +317,11 @@ const AddPubPage = () => {
                 value={description ?? ""}
                 onChange={(e) => setDescription(e.target.value || undefined)}
               />
-              {fieldErrors.description?.map((fieldError) => (
-                <Typography
-                  key={`description-error-${fieldError}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
+              <FieldErrorList
+                errors={fieldErrors.description}
+                className={styles.errorText}
+                idPrefix="description"
+              />
             </div>
             <div>
               <label htmlFor="imageUrl">Image URL:</label>
@@ -356,15 +331,11 @@ const AddPubPage = () => {
                 value={imageUrl ?? ""}
                 onChange={(e) => setImageUrl(e.target.value || undefined)}
               />
-              {fieldErrors.imageUrl?.map((fieldError) => (
-                <Typography
-                  key={`imageUrl-error-${fieldError}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
+              <FieldErrorList
+                errors={fieldErrors.imageUrl}
+                className={styles.errorText}
+                idPrefix="imageUrl"
+              />
             </div>
             <details className={styles.advancedSection}>
               <summary className={styles.advancedSummary}>
@@ -407,15 +378,11 @@ const AddPubPage = () => {
                 value={operator ?? ""}
                 onChange={(e) => setOperator(e.target.value || undefined)}
               />
-              {fieldErrors.operator?.map((fieldError) => (
-                <Typography
-                  key={`operator-error-${fieldError}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
+              <FieldErrorList
+                errors={fieldErrors.operator}
+                className={styles.errorText}
+                idPrefix="operator"
+              />
             </div>
             <div>
               <label htmlFor="area">Area:</label>
@@ -426,15 +393,11 @@ const AddPubPage = () => {
                 onChange={(e) => setArea(e.target.value || undefined)}
                 autoComplete="pub-area"
               />
-              {fieldErrors.area?.map((fieldError) => (
-                <Typography
-                  key={`area-error-${fieldError}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
+              <FieldErrorList
+                errors={fieldErrors.area}
+                className={styles.errorText}
+                idPrefix="area"
+              />
             </div>
             <div>
               <label htmlFor="phone">Phone:</label>
@@ -445,15 +408,11 @@ const AddPubPage = () => {
                 onChange={(e) => setPhone(e.target.value || undefined)}
                 autoComplete="pub-phone"
               />
-              {fieldErrors.phone?.map((fieldError) => (
-                <Typography
-                  key={`phone-error-${fieldError}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
+              <FieldErrorList
+                errors={fieldErrors.phone}
+                className={styles.errorText}
+                idPrefix="phone"
+              />
             </div>
             <div>
               <label htmlFor="borough">Borough:</label>
@@ -463,15 +422,11 @@ const AddPubPage = () => {
                 value={borough ?? ""}
                 onChange={(e) => setBorough(e.target.value || undefined)}
               />
-              {fieldErrors.borough?.map((fieldError) => (
-                <Typography
-                  key={`borough-error-${fieldError}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
+              <FieldErrorList
+                errors={fieldErrors.borough}
+                className={styles.errorText}
+                idPrefix="borough"
+              />
             </div>
             <div>
               <label htmlFor="openingHours">Opening Hours:</label>
@@ -481,15 +436,11 @@ const AddPubPage = () => {
                 value={openingHours ?? ""}
                 onChange={(e) => setOpeningHours(e.target.value || undefined)}
               />
-              {fieldErrors.openingHours?.map((fieldError) => (
-                <Typography
-                  key={`openingHours-error-${fieldError}`}
-                  variant="bodySmall"
-                  className={styles.errorText}
-                >
-                  {fieldError}
-                </Typography>
-              ))}
+              <FieldErrorList
+                errors={fieldErrors.openingHours}
+                className={styles.errorText}
+                idPrefix="openingHours"
+              />
             </div>
             <Button type="submit" disabled={loading}>
               <Typography as="span" variant="bodySmall">

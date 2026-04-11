@@ -84,12 +84,7 @@ const normalizeOpeningHours = (
   return value;
 };
 
-const buildCaseInsensitiveMap = (source: OpeningHoursMap) => {
-  return Object.entries(source).reduce<Record<string, OpeningHoursEntry>>(
-    (acc, [key, entry]) => {
-      acc[key.toLowerCase()] = entry;
-      return acc;
-    },
-    {}
+const buildCaseInsensitiveMap = (source: OpeningHoursMap): Record<string, OpeningHoursEntry> =>
+  Object.fromEntries(
+    Object.entries(source).map(([key, entry]) => [key.toLowerCase(), entry])
   );
-};
