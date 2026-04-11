@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-
-import OpeningHoursDisplay from "./OpeningHoursDisplay";
+import OpeningHoursDisplay from "./opening-hours-display";
 
 const DAYS = [
   "Monday",
@@ -75,11 +74,7 @@ describe("OpeningHoursDisplay", () => {
   });
 
   it("shows 'Closed' for days marked as closed", () => {
-    render(
-      <OpeningHoursDisplay
-        value={{ Tuesday: { closed: true } }}
-      />
-    );
+    render(<OpeningHoursDisplay value={{ Tuesday: { closed: true } }} />);
 
     expect(screen.getByText("Tuesday:").closest("div")).toHaveTextContent(
       "Tuesday: Closed"
@@ -87,11 +82,7 @@ describe("OpeningHoursDisplay", () => {
   });
 
   it("falls back to dash when open or close is missing", () => {
-    render(
-      <OpeningHoursDisplay
-        value={{ Wednesday: { open: "12:00" } }}
-      />
-    );
+    render(<OpeningHoursDisplay value={{ Wednesday: { open: "12:00" } }} />);
 
     expect(screen.getByText("Wednesday:").closest("div")).toHaveTextContent(
       "Wednesday: 12:00 – -"

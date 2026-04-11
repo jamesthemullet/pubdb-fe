@@ -1,6 +1,6 @@
-import { WEEKDAYS } from "../../constants/pub";
-import type { OpeningHoursEntry, OpeningHoursMap } from "../../types/pub";
-import Typography from "./typography/typography";
+import { WEEKDAYS } from "../../../constants/pub";
+import type { OpeningHoursEntry, OpeningHoursMap } from "../../../types/pub";
+import Typography from "../../components/typography/typography";
 
 type OpeningHoursDisplayProps = {
   value?: OpeningHoursMap | string | null;

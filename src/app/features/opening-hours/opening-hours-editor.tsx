@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
-import styles from "./OpeningHoursEditor.module.css";
+import styles from "./opening-hours-editor.module.css";
 
 type DayHours = {
   open: string;

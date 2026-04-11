@@ -1,7 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-
-import OpeningHoursEditor from "./OpeningHoursEditor";
+import OpeningHoursEditor from "./opening-hours-editor";
 
 const DAYS = [
   "Monday",
@@ -26,7 +25,7 @@ describe("OpeningHoursEditor", () => {
     const { container } = render(<OpeningHoursEditor onChange={vi.fn()} />);
 
     const timeInputs = container.querySelectorAll('input[type="time"]');
-    expect(timeInputs).toHaveLength(14);
+    expect(timeInputs).toHaveLength(16); // 7 days × 2 + 2 bulk inputs
 
     const checkboxes = screen.getAllByRole("checkbox");
     expect(checkboxes).toHaveLength(7);
@@ -53,13 +52,16 @@ describe("OpeningHoursEditor", () => {
 
   it("calls onChange when an open time changes", () => {
     const handleChange = vi.fn();
-    const { container } = render(<OpeningHoursEditor onChange={handleChange} />);
-
-    const [firstTimeInput] = container.querySelectorAll<HTMLInputElement>(
-      'input[type="time"]'
+    const { container } = render(
+      <OpeningHoursEditor onChange={handleChange} />
     );
 
-    fireEvent.change(firstTimeInput, { target: { value: "10:00" } });
+    const timeInputs =
+      container.querySelectorAll<HTMLInputElement>('input[type="time"]');
+    // First 2 inputs are the bulk row; Monday open is index 2
+    const mondayOpenInput = timeInputs[2];
+
+    fireEvent.change(mondayOpenInput, { target: { value: "10:00" } });
 
     expect(handleChange).toHaveBeenCalledTimes(1);
     const updated = handleChange.mock.calls[0][0];
@@ -68,7 +70,9 @@ describe("OpeningHoursEditor", () => {
 
   it("disables time inputs and clears times when closed is checked", () => {
     const handleChange = vi.fn();
-    const { container } = render(<OpeningHoursEditor onChange={handleChange} />);
+    const { container } = render(
+      <OpeningHoursEditor onChange={handleChange} />
+    );
 
     const [mondayClosed] = screen.getAllByRole("checkbox");
     fireEvent.click(mondayClosed);
@@ -80,9 +84,10 @@ describe("OpeningHoursEditor", () => {
     expect(updated.Monday.open).toBe("");
     expect(updated.Monday.close).toBe("");
 
-    const [openInput] = container.querySelectorAll<HTMLInputElement>(
-      'input[type="time"]'
-    );
-    expect(openInput).toBeDisabled();
+    const timeInputs =
+      container.querySelectorAll<HTMLInputElement>('input[type="time"]');
+    // First 2 inputs are the bulk row; Monday open is index 2
+    const mondayOpenInput = timeInputs[2];
+    expect(mondayOpenInput).toBeDisabled();
   });
 });

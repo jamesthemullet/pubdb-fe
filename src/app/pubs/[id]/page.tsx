@@ -17,7 +17,7 @@ import { useCountries } from "@/hooks/useCountries";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import type { BeerGarden, Pub, SunExposure } from "@/types/pub";
-import OpeningHoursEditor from "../../components/OpeningHoursEditor";
+import OpeningHoursEditor from "../../features/opening-hours/opening-hours-editor";
 import styles from "./page.module.css";
 
 const SUN_EXPOSURE_OPTIONS: Array<{ label: string; value: SunExposure }> = [
