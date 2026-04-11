@@ -8,8 +8,9 @@
 ## Performance Notes
 - `useCountries` hook: module-level cache (merged to main)
 - `useBeerTypes` hook: module-level cache (merged to main)
-- `/api/pubs`: caching added (60s revalidate + Cache-Control) — committed on branch perf-assist/pubs-api-cache, push pending (safeoutputs unavailable)
+- `/api/pubs`: cacheSeconds=60 + revalidate=60 + Cache-Control header — committed on branch perf-assist/pubs-api-cache; push blocked by missing safeoutputs MCP (3rd consecutive run)
 - `/api/beer-types`: keeps `cache: "no-store"` (forwardAuth=true — per-user)
+- pubs/page.tsx: debounce increased 100ms->300ms (part of pubs-api-cache branch)
 - pubs/page.tsx fetches with `limit=10000` — all pubs client-side, no pagination
 - pubs.tsx (legacy component) only referenced in its own test
 
@@ -20,14 +21,15 @@
 - Key gap: no performance regression detection in CI
 
 ## Optimization Backlog (prioritized)
-1. ~~`useCountries` module-level cache~~ (DONE - merged)
-2. ~~`useBeerTypes` module-level cache~~ (DONE - merged)
-3. ~~Add cache to `/api/pubs` route + 300ms debounce~~ (COMMITTED - branch perf-assist/pubs-api-cache, push pending again due to safeoutputs unavailability)
+1. DONE - `useCountries` module-level cache (merged)
+2. DONE - `useBeerTypes` module-level cache (merged)
+3. COMMITTED - Add cache to `/api/pubs` route + 300ms debounce (branch perf-assist/pubs-api-cache, push BLOCKED - safeoutputs MCP unavailable 3 consecutive runs)
 4. Pubs list: `limit=10000` — server-side filtering/pagination would reduce payload
 5. `pubs.tsx` vs `pubs/page.tsx` consolidation could reduce bundle
 6. No performance benchmarks or Lighthouse CI — consider adding
 
-## Known Limitation
-- safeoutputs MCP tools are unavailable in this run environment
-- perf-assist/pubs-api-cache branch changes are committed locally but CANNOT be pushed
-- NEXT RUN: Must push the branch and create PR (changes will be lost if environment resets)
+## Known Infrastructure Issue
+- safeoutputs MCP tools (create_pull_request, create_issue, noop, etc.) are NOT in this agent's tool list
+- This has happened in 3 consecutive runs — blocking PR creation
+- Branch changes are committed locally but cannot be pushed
+- Environment resets between runs, so local commits are lost each time

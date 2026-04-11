@@ -1,6 +1,6 @@
 {
-  "last_run": "2026-04-11T05:43:37Z",
-  "run_id": "24275910346",
+  "last_run": "2026-04-11T07:27:00Z",
+  "run_id": "24277552293",
   "commands": {
     "test": "yarn test",
     "test_coverage": "yarn test:coverage",
@@ -27,9 +27,9 @@
   },
   "work_in_progress": {
     "branch": "perf-assist/pubs-api-cache",
-    "status": "committed_locally_push_failed_again",
-    "note": "safeoutputs MCP tools still unavailable; branch committed locally with 208/208 tests passing; will be lost on env reset",
-    "changes": "proxyHandler.ts cacheSeconds option, route.ts revalidate=60, debounce 100ms->300ms, route.spec.ts updated"
+    "status": "committed_locally_push_failed_3rd_time",
+    "note": "safeoutputs MCP tools unavailable for 3 consecutive runs; branch committed locally with 208/208 tests passing; changes lost on env reset each time",
+    "changes": "proxyHandler.ts cacheSeconds option, route.ts revalidate=60 + cacheSeconds:60, debounce 100ms->300ms, route.spec.ts expectations updated"
   },
   "completed_prs": [
     {
@@ -50,11 +50,11 @@
   "pending_prs": [
     {
       "branch": "perf-assist/pubs-api-cache",
-      "title": "[Perf Improver] Cache /api/pubs response + increase search debounce",
-      "changes": "proxyHandler.ts cacheSeconds option, route.ts revalidate=60, route.spec.ts updated, pubs/page.tsx debounce 100ms->300ms",
+      "title": "[Perf Improver] Cache /api/pubs response and increase search debounce",
+      "changes": "proxyHandler.ts cacheSeconds option, route.ts revalidate=60, route.spec.ts expectations updated, pubs/page.tsx debounce 100ms->300ms",
       "test_status": "208/208 passing",
-      "note": "Committed locally TWICE but push failed both times — safeoutputs tools not in tool list. Blocking issue."
+      "note": "Committed locally 3 times but push failed all 3 times — safeoutputs MCP tools not in tool list. Persistent blocking issue."
     }
   ],
-  "safeoutputs_issue": "MCP tools (create_pull_request, create_issue, noop etc.) not available in tool list for past 2 runs. Branch changes are lost on env reset."
+  "safeoutputs_issue": "MCP tools (create_pull_request, create_issue, noop etc.) NOT available in tool list for 3 consecutive runs. Branch changes are lost on every env reset. This is a critical infrastructure problem."
 }
