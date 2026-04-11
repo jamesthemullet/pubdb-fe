@@ -177,6 +177,7 @@
 
 .swatch {
   height: 90px;
+  background: var(--swatch-bg);
 }
 
 .swatchMeta {

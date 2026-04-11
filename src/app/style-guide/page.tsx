@@ -76,7 +76,7 @@ const StyleGuidePage = () => {
             <div className={styles.swatchCard} key={item.variable}>
               <div
                 className={styles.swatch}
-                style={{ background: `var(${item.variable})` }}
+                style={{ '--swatch-bg': `var(${item.variable})` } as React.CSSProperties}
               />
               <div className={styles.swatchMeta}>
                 <span className={styles.swatchName}>{item.name}</span>

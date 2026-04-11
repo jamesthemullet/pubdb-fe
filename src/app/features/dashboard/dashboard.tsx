@@ -525,7 +525,7 @@ const Dashboard: React.FC = () => {
                               ? styles.progressDanger
                               : styles.progressSafe
                           }`}
-                          style={{ width: `${hourlyUsage.percentage}%` }}
+                          style={{ '--bar-width': `${hourlyUsage.percentage}%` } as React.CSSProperties}
                         />
                       </div>
                       <Typography variant="bodySmall">
@@ -547,7 +547,7 @@ const Dashboard: React.FC = () => {
                               ? styles.progressDanger
                               : styles.progressSafe
                           }`}
-                          style={{ width: `${dailyUsage.percentage}%` }}
+                          style={{ '--bar-width': `${dailyUsage.percentage}%` } as React.CSSProperties}
                         />
                       </div>
                       <Typography variant="bodySmall">
@@ -569,7 +569,7 @@ const Dashboard: React.FC = () => {
                               ? styles.progressDanger
                               : styles.progressSafe
                           }`}
-                          style={{ width: `${monthlyUsage.percentage}%` }}
+                          style={{ '--bar-width': `${monthlyUsage.percentage}%` } as React.CSSProperties}
                         />
                       </div>
                       <Typography variant="bodySmall">
