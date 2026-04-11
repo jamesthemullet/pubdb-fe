@@ -34,7 +34,7 @@ export default function PubPage() {
   const [editFields, setEditFields] = useState<Partial<Pub>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saveError, setSaveError] = useState<string | null>(null);
-  const { countries, countriesLoading } = useCountries();
+  const { countries, countriesLoading, countriesError } = useCountries();
 
   const getCountryName = (code: string) => {
     const country = countries.find((c) => c.code === code);
@@ -320,6 +320,7 @@ export default function PubPage() {
                 }
                 countries={countries}
                 countriesLoading={countriesLoading}
+                countriesError={countriesError}
                 fieldErrors={{
                   name: fieldErrors.nameError ? [fieldErrors.nameError] : [],
                   city: fieldErrors.cityError ? [fieldErrors.cityError] : [],

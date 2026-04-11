@@ -36,6 +36,7 @@ type PubCoreIdentityFieldsProps = {
   ) => void;
   countries: CountryOption[];
   countriesLoading: boolean;
+  countriesError?: string | null;
   fieldErrors?: CoreFieldErrors;
   requiredAsteriskClassName?: string;
   errorClassName?: string;
@@ -49,6 +50,7 @@ export default function PubCoreIdentityFields({
   onFieldChange,
   countries,
   countriesLoading,
+  countriesError,
   fieldErrors,
   requiredAsteriskClassName,
   errorClassName,
@@ -123,11 +125,14 @@ export default function PubCoreIdentityFields({
           value={values.country}
           onChange={(e) => onFieldChange("country", e.target.value)}
           required
+          disabled={!!countriesError}
         >
           <option value="">
             {countriesLoading && countries.length === 0
               ? "Loading countries..."
-              : "Select a country"}
+              : countriesError
+                ? "Failed to load countries"
+                : "Select a country"}
           </option>
           {countries.map((countryOption) => (
             <option key={countryOption.code} value={countryOption.code}>
@@ -135,6 +140,11 @@ export default function PubCoreIdentityFields({
             </option>
           ))}
         </Dropdown>
+        {countriesError && (
+          <p role="alert" style={{ color: "red" }}>
+            {countriesError}
+          </p>
+        )}
         <FieldErrorList
           errors={fieldErrors?.country}
           className={errorClassName}

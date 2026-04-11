@@ -112,7 +112,7 @@ const AddPubPage = () => {
     email: string;
     approved?: boolean;
   } | null>(null);
-  const { countries, countriesLoading } = useCountries();
+  const { countries, countriesLoading, countriesError } = useCountries();
 
   const approvalRequestMailto = `mailto:hello@thepubdb.com?subject=${encodeURIComponent(
     "Approval request for PubDB editor access"
@@ -282,6 +282,7 @@ const AddPubPage = () => {
               }}
               countries={countries}
               countriesLoading={countriesLoading}
+              countriesError={countriesError}
               fieldErrors={{
                 name: fieldErrors.name,
                 city: fieldErrors.city,

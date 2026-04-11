@@ -28,6 +28,7 @@ export function useCountries() {
   const [countriesLoading, setCountriesLoading] = useState(
     countriesCache === null
   );
+  const [countriesError, setCountriesError] = useState<string | null>(null);
 
   useEffect(() => {
     if (countriesCache !== null) {
@@ -59,7 +60,12 @@ export function useCountries() {
           countriesCache = options;
           setCountries(options);
         }
-      } catch (_err) {
+      } catch (err) {
+        if (!ignore) {
+          setCountriesError(
+            err instanceof Error ? err.message : "Failed to load countries"
+          );
+        }
       } finally {
         if (!ignore) {
           setCountriesLoading(false);
@@ -74,5 +80,5 @@ export function useCountries() {
     };
   }, []);
 
-  return { countries, countriesLoading };
+  return { countries, countriesLoading, countriesError };
 }
