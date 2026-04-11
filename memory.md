@@ -21,13 +21,22 @@
 - Labels in forms often lack for/id association — use container.querySelector('input[name="x"]')
 - HTML5 required validation runs in jsdom — fill ALL required fields before clicking submit
 - setTimeout-based redirects (e.g. window.location.href after 500ms) hard to test without fake timers; test side effects instead (localStorage, dispatchEvent, success message)
+- Dashboard: loading state not reliably testable — useEffect([isAuthenticated]) fires with isAuthenticated=false on mount, calls setLoading(false) early; by the time authenticated fetch runs, loading=false
+- Dashboard: forgotKeyError bug — error set but only rendered when forgotKeyTarget matches keyPrefix; early return (empty email) sets error but not target, so error never shown
 
 ## Last Run Tasks
+- 2026-04-11: Task 3 (implement tests for dashboard.tsx), Task 7 (activity summary)
 - 2026-04-10: Task 3 (implement tests for success/page.tsx), Task 7 (activity summary)
 - 2026-04-09: Task 3 (implement tests for register/login page), Task 7 (activity summary)
 - 2026-04-08: Task 1 (commands), Task 3 (implement tests), Task 7 (activity summary)
 
 ## Completed Work
+- PR: [Test Improver] Add tests for Dashboard component
+  - Branch: test-assist/dashboard-tests
+  - 25 new tests (208 → 233)
+  - dashboard.tsx: 0% → ~80%+ coverage
+  - Bug found: forgotKeyError not rendered when email missing (forgotKeyTarget not set on early return)
+  - Run: https://github.com/jamesthemullet/pubdb-fe/actions/runs/24270960530
 - PR: [Test Improver] Add tests for success/page.tsx (payment verification)
   - Branch: test-assist/success-page-tests
   - 32 new tests (172 → 204)
@@ -44,15 +53,16 @@
   - NOTE: same permissions issue may apply
 
 ## Testing Backlog (prioritised by value)
-1. **`pubs/[id]/page.tsx`** (1469 lines, 0%) — largest untested file, complex pub detail/edit page. High value but high complexity.
-2. **`features/dashboard/dashboard.tsx`** (621 lines, 0%) — API key management dashboard
-3. **`success/page.tsx`** — ✅ DONE (branch: test-assist/success-page-tests)
-4. **`register/page.tsx`** — ✅ DONE (89.83% stmts)
-5. **`reset-password/page.tsx`** — ✅ DONE (branch, not merged)
-6. **`forgot-password/page.tsx`** — ✅ DONE (branch, not merged)
-7. **`pubs/page.tsx`** — ✅ DONE (branch, not merged)
+1. **`pubs/[id]/page.tsx`** (1435 lines, 0%) — largest untested file, complex pub detail/edit page. High value but high complexity.
+2. **`features/dashboard/dashboard.tsx`** — DONE (25 tests, branch: test-assist/dashboard-tests)
+3. **`success/page.tsx`** — DONE (branch: test-assist/success-page-tests)
+4. **`register/page.tsx`** — DONE (89.83% stmts)
+5. **`reset-password/page.tsx`** — DONE (branch, not merged)
+6. **`forgot-password/page.tsx`** — DONE (branch, not merged)
+7. **`pubs/page.tsx`** — DONE (branch, not merged)
 8. **`pricing.tsx`** (574 lines, 0%) — pricing tiers display (lower value, mostly static)
 9. **`profile/page.tsx`** (15 lines) — thin wrapper around Dashboard, low value alone
 
 ## Backlog Cursor
-Next run: start with features/dashboard/dashboard.tsx or pubs/[id]/page.tsx
+Next run: pubs/[id]/page.tsx (complex, worth careful approach - may need multiple runs)
+Or: features/pricing/pricing.tsx if [id]/page.tsx is too complex for one run
