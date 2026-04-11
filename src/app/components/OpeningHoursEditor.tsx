@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
+import Typography from "@/app/components/typography/typography";
+import styles from "./OpeningHoursEditor.module.css";
 
 type DayHours = {
   open: string;
@@ -57,7 +60,7 @@ export default function OpeningHoursEditor({
     );
   }, [value]);
 
-  function update(day: string, next: Partial<DayHours>) {
+  const update = (day: string, next: Partial<DayHours>) => {
     setHours((prev) => {
       const updated = {
         ...prev,
@@ -66,36 +69,78 @@ export default function OpeningHoursEditor({
       onChange(updated);
       return updated;
     });
-  }
+  };
+
+  const [bulkOpen, setBulkOpen] = useState("");
+  const [bulkClose, setBulkClose] = useState("");
+
+  const applyToAll = () => {
+    setHours((prev) => {
+      const updated = Object.fromEntries(
+        DAYS.map((day) => [
+          day,
+          prev[day].closed
+            ? prev[day]
+            : { ...prev[day], open: bulkOpen, close: bulkClose },
+        ])
+      );
+      onChange(updated);
+      return updated;
+    });
+  };
 
   return (
-    <div style={{ display: "grid", gap: "0.5rem" }}>
+    <div className={styles.grid}>
+      <div className={styles.bulkRow}>
+        <Typography className={styles.dayLabel}>Apply to all</Typography>
+        <Input
+          type="time"
+          value={bulkOpen}
+          onChange={(e) => setBulkOpen(e.target.value)}
+          className={styles.timeInput}
+        />
+        <Typography as="span">-</Typography>
+        <Input
+          type="time"
+          value={bulkClose}
+          onChange={(e) => setBulkClose(e.target.value)}
+          className={styles.timeInput}
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={applyToAll}
+          className={styles.applyButton}
+        >
+          Apply
+        </Button>
+      </div>
       {DAYS.map((day) => {
         const d = hours[day];
         return (
-          <div
-            key={day}
-            style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-          >
-            <div style={{ width: 90 }}>{day}</div>
+          <div key={day} className={styles.row}>
+            <div className={styles.dayLabel}>{day}</div>
 
             <Input
               type="time"
               value={d.open}
               disabled={d.closed}
               onChange={(e) => update(day, { open: e.target.value })}
+              className={styles.timeInput}
             />
 
-            <span>-</span>
+            <Typography as="span">-</Typography>
 
             <Input
               type="time"
               value={d.close}
               disabled={d.closed}
               onChange={(e) => update(day, { close: e.target.value })}
+              className={styles.timeInput}
             />
 
-            <label htmlFor={`${day}-closed`} style={{ marginLeft: "0.5rem" }}>
+            <label htmlFor={`${day}-closed`} className={styles.closedLabel}>
               <Input
                 id={`${day}-closed`}
                 type="checkbox"

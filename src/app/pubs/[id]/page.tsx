@@ -475,7 +475,7 @@ export default function PubPage() {
               </div>
               <br />
               <div>
-                <span>Opening Hours: </span>
+                <Typography as="span">Opening Hours: </Typography>
                 <OpeningHoursEditor
                   value={editFields.openingHours}
                   onChange={(val) => handleFieldChange("openingHours", val)}
@@ -647,7 +647,7 @@ export default function PubPage() {
                       </label>
                     </div>
                     <div>
-                      <span>Opening Hours: </span>
+                      <Typography as="span">Opening Hours: </Typography>
                       <OpeningHoursEditor
                         value={garden.openingHours}
                         onChange={(val) =>

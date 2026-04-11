@@ -1,5 +1,6 @@
 import { WEEKDAYS } from "../../constants/pub";
 import type { OpeningHoursEntry, OpeningHoursMap } from "../../types/pub";
+import Typography from "./typography/typography";
 
 type OpeningHoursDisplayProps = {
   value?: OpeningHoursMap | string | null;
@@ -15,7 +16,10 @@ export default function OpeningHoursDisplay({
       <div>
         {WEEKDAYS.map((day) => (
           <div key={day}>
-            <strong>{day}:</strong> -
+            <Typography as="span" isBold>
+              {day}:
+            </Typography>{" "}
+            -
           </div>
         ))}
       </div>
@@ -31,14 +35,20 @@ export default function OpeningHoursDisplay({
         if (!entry) {
           return (
             <div key={day}>
-              <strong>{day}:</strong> -
+              <Typography as="span" isBold>
+                {day}:
+              </Typography>{" "}
+              -
             </div>
           );
         }
         if (entry.closed) {
           return (
             <div key={day}>
-              <strong>{day}:</strong> Closed
+              <Typography as="span" isBold>
+                {day}:
+              </Typography>{" "}
+              Closed
             </div>
           );
         }
@@ -46,7 +56,10 @@ export default function OpeningHoursDisplay({
         const close = entry.close || "-";
         return (
           <div key={day}>
-            <strong>{day}:</strong> {open} – {close}
+            <Typography as="span" isBold>
+              {day}:
+            </Typography>{" "}
+            {open} – {close}
           </div>
         );
       })}
@@ -54,9 +67,9 @@ export default function OpeningHoursDisplay({
   );
 }
 
-function normalizeOpeningHours(
+const normalizeOpeningHours = (
   value?: OpeningHoursMap | string | null
-): OpeningHoursMap | null {
+): OpeningHoursMap | null => {
   if (!value) {
     return null;
   }
@@ -69,9 +82,9 @@ function normalizeOpeningHours(
     }
   }
   return value;
-}
+};
 
-function buildCaseInsensitiveMap(source: OpeningHoursMap) {
+const buildCaseInsensitiveMap = (source: OpeningHoursMap) => {
   return Object.entries(source).reduce<Record<string, OpeningHoursEntry>>(
     (acc, [key, entry]) => {
       acc[key.toLowerCase()] = entry;
@@ -79,4 +92,4 @@ function buildCaseInsensitiveMap(source: OpeningHoursMap) {
     },
     {}
   );
-}
+};
