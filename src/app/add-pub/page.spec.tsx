@@ -476,7 +476,7 @@ describe("AddPubPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("keeps country selector usable when country fetch fails", async () => {
+  it("shows an error message and disables the country selector when country fetch fails", async () => {
     localStorage.setItem("token", "test-token");
 
     vi.spyOn(console, "error").mockImplementation(() => undefined);
@@ -499,8 +499,11 @@ describe("AddPubPage", () => {
 
     await screen.findByText(/please fill out the form below/i);
     expect(
-      screen.getByRole("option", { name: "Select a country" })
+      screen.getByRole("option", { name: "Failed to load countries" })
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("alert")
+    ).toHaveTextContent("Failed to fetch countries: 500");
   });
 
   it("shows Loading countries placeholder while countries are still fetching", async () => {

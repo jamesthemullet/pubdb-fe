@@ -60,6 +60,7 @@ describe("useCountries", () => {
     await waitFor(() => expect(result.current.countriesLoading).toBe(false));
 
     expect(result.current.countries).toEqual([]);
+    expect(result.current.countriesError).toBe("Failed to fetch countries: 500");
   });
 
   it("sets loading to false and leaves countries empty when fetch throws", async () => {
@@ -70,6 +71,19 @@ describe("useCountries", () => {
     await waitFor(() => expect(result.current.countriesLoading).toBe(false));
 
     expect(result.current.countries).toEqual([]);
+    expect(result.current.countriesError).toBe("Network error");
+  });
+
+  it("returns null error after a successful fetch", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse([{ name: { common: "France" }, cca2: "FR" }])
+    );
+
+    const { result } = renderHook(() => useCountries());
+
+    await waitFor(() => expect(result.current.countriesLoading).toBe(false));
+
+    expect(result.current.countriesError).toBeNull();
   });
 
   it("returns cached countries immediately on subsequent mounts without fetching", async () => {
