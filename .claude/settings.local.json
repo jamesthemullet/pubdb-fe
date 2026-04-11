@@ -5,7 +5,12 @@
       "Bash(yarn e2e:*)",
       "Bash(yarn lint:*)",
       "Bash(yarn lint:fix)",
-      "Bash(yarn test:e2e:*)"
+      "Bash(yarn test:e2e:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create --title 'Surface countries fetch errors to users' --body ':*)"
     ]
   }
 }
