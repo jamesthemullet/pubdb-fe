@@ -1,7 +1,10 @@
 "use client";
 import { useState } from "react";
+import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
+import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
+import styles from "./page.module.css";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -41,80 +44,47 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div style={{ maxWidth: "400px", margin: "0 auto", padding: "2rem" }}>
-        <h2>Forgot Password</h2>
-        <p>
-          Enter your email address and we'll send you a link to reset your
-          password.
-        </p>
+    <div className={styles.container}>
+      <Typography variant="headingMedium">Forgot Password</Typography>
+      <Typography className={styles.description}>
+        Enter your email address and we&apos;ll send you a link to reset your
+        password.
+      </Typography>
 
-        <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
-          <label htmlFor="forgot-email" style={{ display: "block", marginBottom: "1rem" }}>
-            Email:
-            <Input
-              id="forgot-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{
-                display: "block",
-                width: "100%",
-                padding: "0.5rem",
-                marginTop: "0.25rem",
-              }}
-            />
-          </label>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <label htmlFor="forgot-email" className={styles.label}>
+          Email:
+          <Input
+            id="forgot-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </label>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              padding: "0.75rem 1.5rem",
-              backgroundColor: loading ? "#ccc" : "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: loading ? "not-allowed" : "pointer",
-            }}
-          >
-            {loading ? "Sending..." : "Send Reset Link"}
-          </button>
-        </form>
+        <Button type="submit" disabled={loading}>
+          {loading ? "Sending..." : "Send Reset Link"}
+        </Button>
+      </form>
 
-        {message && (
-          <div
-            style={{
-              marginTop: "1rem",
-              padding: "1rem",
-              backgroundColor: "#d4edda",
-              color: "#155724",
-              borderRadius: "4px",
-            }}
-          >
-            {message}
-          </div>
-        )}
-
-        {error && (
-          <div
-            style={{
-              marginTop: "1rem",
-              padding: "1rem",
-              backgroundColor: "#f8d7da",
-              color: "#721c24",
-              borderRadius: "4px",
-            }}
-          >
-            {typeof error === "string" ? error : JSON.stringify(error)}
-          </div>
-        )}
-
-        <div style={{ marginTop: "2rem", textAlign: "center" }}>
-          <a href="/register" style={{ color: "#007bff" }}>
-            Back to Login
-          </a>
+      {message && (
+        <div className={styles.success}>
+          <Typography>{message}</Typography>
         </div>
+      )}
+
+      {error && (
+        <div className={styles.error}>
+          <Typography>
+            {typeof error === "string" ? error : JSON.stringify(error)}
+          </Typography>
+        </div>
+      )}
+
+      <div className={styles.backLink}>
+        <a href="/register">Back to Login</a>
       </div>
+    </div>
   );
 }
