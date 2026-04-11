@@ -177,8 +177,21 @@
 
 .swatch {
   height: 90px;
-  background: var(--swatch-bg);
 }
+
+.swatchBackground      { background: var(--background); }
+.swatchSurface         { background: var(--surface); }
+.swatchSurfaceAlt      { background: var(--surface-alt); }
+.swatchTextColor       { background: var(--text-color); }
+.swatchTextMuted       { background: var(--text-muted); }
+.swatchBrand           { background: var(--brand); }
+.swatchBrandHover      { background: var(--brand-hover); }
+.swatchAccent          { background: var(--accent); }
+.swatchAccentHover     { background: var(--accent-hover); }
+.swatchActionBlue      { background: var(--action-blue); }
+.swatchActionRed       { background: var(--action-red); }
+.swatchBorderColor     { background: var(--border-color); }
+.swatchInputBackground { background: var(--input-background); }
 
 .swatchMeta {
   display: flex;
