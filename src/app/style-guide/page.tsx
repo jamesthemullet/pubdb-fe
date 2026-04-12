@@ -1,3 +1,4 @@
+import Typography from "@/app/components/typography/typography";
 import styles from "./style-guide.module.css";
 
 const palette = [
@@ -20,21 +21,21 @@ const StyleGuidePage = () => {
   return (
     <section className={styles.page}>
       <header className={styles.hero}>
-        <p className={styles.kicker}>Pub DB Style Guide</p>
-        <h1 className={styles.title}>Warm, pub-inspired color system</h1>
-        <p className={styles.subtitle}>
+        <Typography className={styles.kicker}>Pub DB Style Guide</Typography>
+        <Typography variant="headingLarge" className={styles.title}>Warm, pub-inspired color system</Typography>
+        <Typography className={styles.subtitle}>
           Designed for cozy interiors, aged wood, and warm brass accents. Use
           the brand and accent colors for calls to action and key highlights.
-        </p>
+        </Typography>
       </header>
 
       <div className={styles.preview}>
         <div className={styles.previewCard}>
-          <h2 className={styles.cardTitle}>Sample UI</h2>
-          <p className={styles.cardCopy}>
+          <Typography variant="headingMedium" className={styles.cardTitle}>Sample UI</Typography>
+          <Typography className={styles.cardCopy}>
             Book a table, save your favorites, and explore the best pours around
             town.
-          </p>
+          </Typography>
           <div className={styles.buttonRow}>
             <button type="button">Primary Action</button>
             <button type="button" className="secondary">
@@ -58,7 +59,7 @@ const StyleGuidePage = () => {
 
         <div className={styles.previewPanel}>
           <div className={styles.panelHeader}>
-            <h3 className={styles.panelTitle}>Tonight's Specials</h3>
+            <Typography variant="headingSmall" className={styles.panelTitle}>Tonight's Specials</Typography>
             <span className={styles.panelTag}>New</span>
           </div>
           <ul className={styles.panelList}>
@@ -70,7 +71,7 @@ const StyleGuidePage = () => {
       </div>
 
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Palette</h2>
+        <Typography variant="headingMedium" className={styles.sectionTitle}>Palette</Typography>
         <div className={styles.grid}>
           {palette.map((item) => (
             <div className={styles.swatchCard} key={item.variable}>

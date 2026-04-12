@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
+import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
 import styles from "./page.module.css";
 
@@ -106,7 +107,7 @@ export default function RegisterLoginPage() {
 
   return (
     <>
-      <h2>{mode === "register" ? "Register" : "Login"}</h2>
+      <Typography variant="headingMedium">{mode === "register" ? "Register" : "Login"}</Typography>
       <form onSubmit={handleSubmit}>
         {mode === "register" && (
           <>

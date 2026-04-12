@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import Input from "@/app/components/input/Input";
+import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
 import type { Pub } from "@/types/pub";
 import styles from "./page.module.css";
@@ -76,7 +77,7 @@ export default function Pubs() {
 
   return (
     <>
-      <h2>Pub DB</h2>
+      <Typography variant="headingMedium">Pub DB</Typography>
 
       <div>
         <Input
@@ -86,21 +87,21 @@ export default function Pubs() {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         {debouncedSearchTerm && (
-          <p>
+          <Typography>
             Showing {filteredPubs.length} of {pubs.length} pubs
-          </p>
+          </Typography>
         )}
       </div>
 
       {loading ? (
-        <p>Loading pubs…</p>
+        <Typography>Loading pubs…</Typography>
       ) : error ? (
         <div>
-          <p className={styles.errorText}>Error loading pubs: {error}</p>
+          <Typography className={styles.errorText}>Error loading pubs: {error}</Typography>
           <button type="button" onClick={() => window.location.reload()}>Try Again</button>
         </div>
       ) : !pubs || pubs.length === 0 ? (
-        <p>No pubs found in the database.</p>
+        <Typography>No pubs found in the database.</Typography>
       ) : (
         <div>
           <Link href="/add-pub">
