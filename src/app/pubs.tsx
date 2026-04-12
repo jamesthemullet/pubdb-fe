@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Typography from "@/app/components/typography/typography";
 import type { Pub } from "@/types/pub";
 
 export default function Pubs() {
@@ -25,9 +26,9 @@ export default function Pubs() {
 
   return (
     <>
-      <h2>Pub DB</h2>
+      <Typography variant="headingMedium">Pub DB</Typography>
       {loading ? (
-        <p>Loading pubs…</p>
+        <Typography>Loading pubs…</Typography>
       ) : (
         <ul>
           {pubs.map((pub) => (

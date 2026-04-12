@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
@@ -102,8 +103,8 @@ function SuccessContent() {
   if (loading) {
     return (
       <div className={styles.centered}>
-        <h2>Verifying your subscription...</h2>
-        <p>Please wait while we confirm your payment.</p>
+        <Typography variant="headingMedium">Verifying your subscription...</Typography>
+        <Typography>Please wait while we confirm your payment.</Typography>
       </div>
     );
   }
@@ -111,8 +112,8 @@ function SuccessContent() {
   if (error) {
     return (
       <div className={styles.centered}>
-        <h2 className={styles.subheading}>Verification Failed</h2>
-        <p>{error}</p>
+        <Typography variant="headingMedium" className={styles.subheading}>Verification Failed</Typography>
+        <Typography>{error}</Typography>
         <div className={styles.actionLink}>
           <Link href="/">
             <button type="button">Return to Home</button>
@@ -125,7 +126,7 @@ function SuccessContent() {
   if (!status) {
     return (
       <div className={styles.centered}>
-        <h2>No subscription data found</h2>
+        <Typography variant="headingMedium">No subscription data found</Typography>
         <div className={styles.actionLink}>
           <Link href="/">
             <button type="button">Return to Home</button>
@@ -140,31 +141,31 @@ function SuccessContent() {
       {status.success ? (
         <>
           <div className={styles.icon}>🎉</div>
-          <h2 className={styles.headingSuccess}>Subscription Successful!</h2>
-          <p className={styles.message}>{status.message}</p>
+          <Typography variant="headingMedium" className={styles.headingSuccess}>Subscription Successful!</Typography>
+          <Typography className={styles.message}>{status.message}</Typography>
 
           {status.subscription && (
             <div className={styles.subscriptionDetails}>
-              <h3>Subscription Details</h3>
-              <p>
+              <Typography variant="headingSmall">Subscription Details</Typography>
+              <Typography>
                 <strong>Plan:</strong> {status.subscription.tier}
-              </p>
-              <p>
+              </Typography>
+              <Typography>
                 <strong>Status:</strong> {status.subscription.status}
-              </p>
-              <p>
+              </Typography>
+              <Typography>
                 <strong>Billing Date:</strong>{" "}
                 {formatBillingDay(status.subscription.billingDay)} of each month
-              </p>
-              <p>
+              </Typography>
+              <Typography>
                 <strong>Subscription ID:</strong>{" "}
                 {status.subscription.subscriptionId}
-              </p>
-              <p>
+              </Typography>
+              <Typography>
                 <strong>API key:</strong>{" "}
                 {status.apiKey.key ||
                   `Api key remains unchanged - ${status.apiKey.keyPrefix}`}
-              </p>
+              </Typography>
             </div>
           )}
 
@@ -182,8 +183,8 @@ function SuccessContent() {
       ) : (
         <>
           <div className={styles.icon}>❌</div>
-          <h2 className={styles.headingError}>Subscription Failed</h2>
-          <p className={styles.message}>{status.message}</p>
+          <Typography variant="headingMedium" className={styles.headingError}>Subscription Failed</Typography>
+          <Typography className={styles.message}>{status.message}</Typography>
 
           <div className={styles.actions}>
             <Link href="/">

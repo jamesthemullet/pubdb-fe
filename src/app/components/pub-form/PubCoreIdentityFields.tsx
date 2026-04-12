@@ -1,5 +1,6 @@
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import Input from "@/app/components/input/Input";
+import Typography from "@/app/components/typography/typography";
 import FieldErrorList from "./FieldErrorList";
 import styles from "./PubCoreIdentityFields.module.css";
 
@@ -142,9 +143,9 @@ export default function PubCoreIdentityFields({
           ))}
         </Dropdown>
         {countriesError && (
-          <p role="alert" className={styles.countriesError}>
+          <Typography role="alert" className={styles.countriesError}>
             {countriesError}
-          </p>
+          </Typography>
         )}
         <FieldErrorList
           errors={fieldErrors?.country}
