@@ -1,0 +1,56 @@
+.container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.form {
+  margin-top: 1rem;
+}
+
+.label {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.success {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #d4edda;
+  color: #155724;
+  border-radius: 4px;
+}
+
+.successLink {
+  margin-top: 1rem;
+}
+
+.successLink a {
+  color: #155724;
+  text-decoration: underline;
+}
+
+.error {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f8d7da;
+  color: #721c24;
+  border-radius: 4px;
+}
+
+.backLink {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.backLink a {
+  color: #007bff;
+}
+
+.invalidLink {
+  margin-top: 2rem;
+}
+
+.invalidLink a {
+  color: #007bff;
+}

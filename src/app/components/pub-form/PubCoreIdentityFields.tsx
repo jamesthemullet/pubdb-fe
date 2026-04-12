@@ -1,6 +1,7 @@
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import Input from "@/app/components/input/Input";
 import FieldErrorList from "./FieldErrorList";
+import styles from "./PubCoreIdentityFields.module.css";
 
 type CoreFieldKey =
   | "name"
@@ -141,7 +142,7 @@ export default function PubCoreIdentityFields({
           ))}
         </Dropdown>
         {countriesError && (
-          <p role="alert" style={{ color: "red" }}>
+          <p role="alert" className={styles.countriesError}>
             {countriesError}
           </p>
         )}

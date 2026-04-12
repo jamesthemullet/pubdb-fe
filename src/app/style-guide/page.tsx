@@ -1,19 +1,19 @@
 import styles from "./style-guide.module.css";
 
 const palette = [
-  { name: "Background", variable: "--background" },
-  { name: "Surface", variable: "--surface" },
-  { name: "Surface Alt", variable: "--surface-alt" },
-  { name: "Text", variable: "--text-color" },
-  { name: "Text Muted", variable: "--text-muted" },
-  { name: "Brand", variable: "--brand" },
-  { name: "Brand Hover", variable: "--brand-hover" },
-  { name: "Accent", variable: "--accent" },
-  { name: "Accent Hover", variable: "--accent-hover" },
-  { name: "Action Blue", variable: "--action-blue" },
-  { name: "Action Red", variable: "--action-red" },
-  { name: "Border", variable: "--border-color" },
-  { name: "Input Background", variable: "--input-background" },
+  { name: "Background",       variable: "--background",       swatchClass: styles.swatchBackground },
+  { name: "Surface",          variable: "--surface",          swatchClass: styles.swatchSurface },
+  { name: "Surface Alt",      variable: "--surface-alt",      swatchClass: styles.swatchSurfaceAlt },
+  { name: "Text",             variable: "--text-color",       swatchClass: styles.swatchTextColor },
+  { name: "Text Muted",       variable: "--text-muted",       swatchClass: styles.swatchTextMuted },
+  { name: "Brand",            variable: "--brand",            swatchClass: styles.swatchBrand },
+  { name: "Brand Hover",      variable: "--brand-hover",      swatchClass: styles.swatchBrandHover },
+  { name: "Accent",           variable: "--accent",           swatchClass: styles.swatchAccent },
+  { name: "Accent Hover",     variable: "--accent-hover",     swatchClass: styles.swatchAccentHover },
+  { name: "Action Blue",      variable: "--action-blue",      swatchClass: styles.swatchActionBlue },
+  { name: "Action Red",       variable: "--action-red",       swatchClass: styles.swatchActionRed },
+  { name: "Border",           variable: "--border-color",     swatchClass: styles.swatchBorderColor },
+  { name: "Input Background", variable: "--input-background", swatchClass: styles.swatchInputBackground },
 ];
 
 const StyleGuidePage = () => {
@@ -74,10 +74,7 @@ const StyleGuidePage = () => {
         <div className={styles.grid}>
           {palette.map((item) => (
             <div className={styles.swatchCard} key={item.variable}>
-              <div
-                className={styles.swatch}
-                style={{ background: `var(${item.variable})` }}
-              />
+              <div className={`${styles.swatch} ${item.swatchClass}`} />
               <div className={styles.swatchMeta}>
                 <span className={styles.swatchName}>{item.name}</span>
                 <code className={styles.swatchVar}>{item.variable}</code>

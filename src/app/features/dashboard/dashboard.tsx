@@ -518,16 +518,12 @@ const Dashboard: React.FC = () => {
                         {apiKey.limits.requestsPerHour.toLocaleString()}{" "}
                         remaining
                       </Typography>
-                      <div className={styles.progressTrack}>
-                        <div
-                          className={`${styles.progressBar} ${
-                            parseFloat(hourlyUsage.percentage) > 80
-                              ? styles.progressDanger
-                              : styles.progressSafe
-                          }`}
-                          style={{ width: `${hourlyUsage.percentage}%` }}
-                        />
-                      </div>
+                      <progress
+                        className={styles.progressBar}
+                        value={parseFloat(hourlyUsage.percentage)}
+                        max={100}
+                        data-danger={parseFloat(hourlyUsage.percentage) > 80}
+                      />
                       <Typography variant="bodySmall">
                         {hourlyUsage.percentage}% used
                       </Typography>
@@ -540,16 +536,12 @@ const Dashboard: React.FC = () => {
                         {apiKey.limits.requestsPerDay.toLocaleString()}{" "}
                         remaining
                       </Typography>
-                      <div className={styles.progressTrack}>
-                        <div
-                          className={`${styles.progressBar} ${
-                            parseFloat(dailyUsage.percentage) > 80
-                              ? styles.progressDanger
-                              : styles.progressSafe
-                          }`}
-                          style={{ width: `${dailyUsage.percentage}%` }}
-                        />
-                      </div>
+                      <progress
+                        className={styles.progressBar}
+                        value={parseFloat(dailyUsage.percentage)}
+                        max={100}
+                        data-danger={parseFloat(dailyUsage.percentage) > 80}
+                      />
                       <Typography variant="bodySmall">
                         {dailyUsage.percentage}% used
                       </Typography>
@@ -562,16 +554,12 @@ const Dashboard: React.FC = () => {
                         {apiKey.limits.requestsPerMonth.toLocaleString()}{" "}
                         remaining
                       </Typography>
-                      <div className={styles.progressTrack}>
-                        <div
-                          className={`${styles.progressBar} ${
-                            parseFloat(monthlyUsage.percentage) > 80
-                              ? styles.progressDanger
-                              : styles.progressSafe
-                          }`}
-                          style={{ width: `${monthlyUsage.percentage}%` }}
-                        />
-                      </div>
+                      <progress
+                        className={styles.progressBar}
+                        value={parseFloat(monthlyUsage.percentage)}
+                        max={100}
+                        data-danger={parseFloat(monthlyUsage.percentage) > 80}
+                      />
                       <Typography variant="bodySmall">
                         {monthlyUsage.percentage}% used
                       </Typography>

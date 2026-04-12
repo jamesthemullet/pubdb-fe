@@ -1,8 +1,11 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
+import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
+import styles from "./page.module.css";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -65,25 +68,23 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div style={{ maxWidth: "400px", margin: "0 auto", padding: "2rem" }}>
-        <h2>Invalid Reset Link</h2>
-        <p>This password reset link is invalid or has expired.</p>
-        <div style={{ marginTop: "2rem" }}>
-          <a href="/forgot-password" style={{ color: "#007bff" }}>
-            Request a new password reset
-          </a>
+      <div className={styles.container}>
+        <Typography variant="headingMedium">Invalid Reset Link</Typography>
+        <Typography>This password reset link is invalid or has expired.</Typography>
+        <div className={styles.invalidLink}>
+          <a href="/forgot-password">Request a new password reset</a>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: "400px", margin: "0 auto", padding: "2rem" }}>
-      <h2>Reset Password</h2>
-      <p>Enter your new password below.</p>
+    <div className={styles.container}>
+      <Typography variant="headingMedium">Reset Password</Typography>
+      <Typography>Enter your new password below.</Typography>
 
-      <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
-        <label htmlFor="new-password" style={{ display: "block", marginBottom: "1rem" }}>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <label htmlFor="new-password" className={styles.label}>
           New Password:
           <Input
             id="new-password"
@@ -92,16 +93,10 @@ function ResetPasswordForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={6}
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "0.5rem",
-              marginTop: "0.25rem",
-            }}
           />
         </label>
 
-        <label htmlFor="confirm-password" style={{ display: "block", marginBottom: "1rem" }}>
+        <label htmlFor="confirm-password" className={styles.label}>
           Confirm Password:
           <Input
             id="confirm-password"
@@ -110,71 +105,33 @@ function ResetPasswordForm() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             minLength={6}
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "0.5rem",
-              marginTop: "0.25rem",
-            }}
           />
         </label>
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            padding: "0.75rem 1.5rem",
-            backgroundColor: loading ? "#ccc" : "#007bff",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: loading ? "not-allowed" : "pointer",
-          }}
-        >
+        <Button type="submit" disabled={loading}>
           {loading ? "Resetting..." : "Reset Password"}
-        </button>
+        </Button>
       </form>
 
       {message && (
-        <div
-          style={{
-            marginTop: "1rem",
-            padding: "1rem",
-            backgroundColor: "#d4edda",
-            color: "#155724",
-            borderRadius: "4px",
-          }}
-        >
-          {message}
-          <div style={{ marginTop: "1rem" }}>
-            <a
-              href="/register"
-              style={{ color: "#155724", textDecoration: "underline" }}
-            >
-              Go to Login
-            </a>
+        <div className={styles.success}>
+          <Typography>{message}</Typography>
+          <div className={styles.successLink}>
+            <a href="/register">Go to Login</a>
           </div>
         </div>
       )}
 
       {error && (
-        <div
-          style={{
-            marginTop: "1rem",
-            padding: "1rem",
-            backgroundColor: "#f8d7da",
-            color: "#721c24",
-            borderRadius: "4px",
-          }}
-        >
-          {typeof error === "string" ? error : JSON.stringify(error)}
+        <div className={styles.error}>
+          <Typography>
+            {typeof error === "string" ? error : JSON.stringify(error)}
+          </Typography>
         </div>
       )}
 
-      <div style={{ marginTop: "2rem", textAlign: "center" }}>
-        <a href="/register" style={{ color: "#007bff" }}>
-          Back to Login
-        </a>
+      <div className={styles.backLink}>
+        <a href="/register">Back to Login</a>
       </div>
     </div>
   );
@@ -183,7 +140,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-        <ResetPasswordForm />
-      </Suspense>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
