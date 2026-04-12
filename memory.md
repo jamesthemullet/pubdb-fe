@@ -25,12 +25,20 @@
 - Dashboard: forgotKeyError bug — error set but only rendered when forgotKeyTarget matches keyPrefix; early return (empty email) sets error but not target, so error never shown
 
 ## Last Run Tasks
+- 2026-04-12: Task 3 (implement tests for pubs/[id]/page.tsx), Task 7 (activity summary — safeoutputs unavailable)
 - 2026-04-11: Task 3 (implement tests for dashboard.tsx), Task 7 (activity summary)
 - 2026-04-10: Task 3 (implement tests for success/page.tsx), Task 7 (activity summary)
 - 2026-04-09: Task 3 (implement tests for register/login page), Task 7 (activity summary)
 - 2026-04-08: Task 1 (commands), Task 3 (implement tests), Task 7 (activity summary)
 
 ## Completed Work
+- BRANCH READY (PR not yet created): [Test Improver] Add tests for pubs/[id]/page.tsx
+  - Branch: test-assist/pub-detail-page-tests
+  - 37 new tests (212 → 249 total)
+  - pubs/[id]/page.tsx: 0% → 78.43% stmts, 63.67% branch, 48.88% funcs
+  - All files: ~72% → 78.84% stmts
+  - NOTE: safeoutputs tools unavailable; next run should push + create PR
+  - Run: https://github.com/jamesthemullet/pubdb-fe/actions/runs/24295569062
 - PR: [Test Improver] Add tests for Dashboard component
   - Branch: test-assist/dashboard-tests
   - 25 new tests (208 → 233)
@@ -52,17 +60,24 @@
   - register/page.tsx: 0% → 89.83% stmts, 78.72% branch, 100% funcs
   - NOTE: same permissions issue may apply
 
+## Testing Notes (additions)
+- pubs/[id]/page.tsx: next/image must be mocked (`vi.mock("next/image", ...)`) → biome lint/performance/noImgElement — suppress with biome-ignore
+- pubs/[id]/page.tsx: Two "Cancel" and two "Save" buttons exist in edit mode (top and bottom groups) — use getAllByRole
+- pubs/[id]/page.tsx: Save button is disabled (not just hidden) when required fields are empty — isSaveDisabled computed
+- pubs/[id]/page.tsx: phone input handles validation in onChange directly (not via handleFieldChange) — invalid chars set error but don't update field value
+- pubs/[id]/page.tsx: delete success redirects via window.location.href — not easily testable; test error path instead
+
 ## Testing Backlog (prioritised by value)
-1. **`pubs/[id]/page.tsx`** (1435 lines, 0%) — largest untested file, complex pub detail/edit page. High value but high complexity.
+1. **`pubs/[id]/page.tsx`** — DONE (branch: test-assist/pub-detail-page-tests, 78.43% stmts)
 2. **`features/dashboard/dashboard.tsx`** — DONE (25 tests, branch: test-assist/dashboard-tests)
 3. **`success/page.tsx`** — DONE (branch: test-assist/success-page-tests)
 4. **`register/page.tsx`** — DONE (89.83% stmts)
 5. **`reset-password/page.tsx`** — DONE (branch, not merged)
 6. **`forgot-password/page.tsx`** — DONE (branch, not merged)
 7. **`pubs/page.tsx`** — DONE (branch, not merged)
-8. **`pricing.tsx`** (574 lines, 0%) — pricing tiers display (lower value, mostly static)
+8. **`pricing.tsx`** (574 lines) — pricing tiers display (lower value, mostly static). Some spec exists already.
 9. **`profile/page.tsx`** (15 lines) — thin wrapper around Dashboard, low value alone
 
 ## Backlog Cursor
-Next run: pubs/[id]/page.tsx (complex, worth careful approach - may need multiple runs)
-Or: features/pricing/pricing.tsx if [id]/page.tsx is too complex for one run
+Next run: Task 4 (maintain PRs — push test-assist/pub-detail-page-tests branch, create PR)
+Then: Consider Task 2 (identify any remaining high-value opportunities) or Task 4 maintenance
