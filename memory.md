@@ -25,6 +25,7 @@
 - Dashboard: forgotKeyError bug — error set but only rendered when forgotKeyTarget matches keyPrefix; early return (empty email) sets error but not target, so error never shown
 
 ## Last Run Tasks
+- 2026-04-13: Task 3 (implement tests for pubs/[id]/page.tsx — recreated, 34 tests, 209→243 total), Task 7 (activity summary)
 - 2026-04-12: Task 3 (implement tests for pubs/[id]/page.tsx), Task 7 (activity summary — safeoutputs unavailable)
 - 2026-04-11: Task 3 (implement tests for dashboard.tsx), Task 7 (activity summary)
 - 2026-04-10: Task 3 (implement tests for success/page.tsx), Task 7 (activity summary)
@@ -32,13 +33,11 @@
 - 2026-04-08: Task 1 (commands), Task 3 (implement tests), Task 7 (activity summary)
 
 ## Completed Work
-- BRANCH READY (PR not yet created): [Test Improver] Add tests for pubs/[id]/page.tsx
+- PR: [Test Improver] Add tests for pubs/[id]/page.tsx (pub detail page)
   - Branch: test-assist/pub-detail-page-tests
-  - 37 new tests (212 → 249 total)
-  - pubs/[id]/page.tsx: 0% → 78.43% stmts, 63.67% branch, 48.88% funcs
-  - All files: ~72% → 78.84% stmts
-  - NOTE: safeoutputs tools unavailable; next run should push + create PR
-  - Run: https://github.com/jamesthemullet/pubdb-fe/actions/runs/24295569062
+  - 34 new tests (209 → 243 total)
+  - Covers: loading states, pub display, EditButton auth states, edit mode, save success/error, validation, beer garden CRUD, opening hours rendering
+  - Run: https://github.com/jamesthemullet/pubdb-fe/actions/runs/24321089345
 - PR: [Test Improver] Add tests for Dashboard component
   - Branch: test-assist/dashboard-tests
   - 25 new tests (208 → 233)
@@ -79,5 +78,6 @@
 9. **`profile/page.tsx`** (15 lines) — thin wrapper around Dashboard, low value alone
 
 ## Backlog Cursor
-Next run: Task 4 (maintain PRs — push test-assist/pub-detail-page-tests branch, create PR)
-Then: Consider Task 2 (identify any remaining high-value opportunities) or Task 4 maintenance
+Next run: Task 4 (check if any open Test Improver PRs have CI failures to fix)
+Then: Consider new targets — add-pub/page.tsx (form-heavy, high value), or Task 6 (test infrastructure)
+No remaining high-value untested pages identified; most coverage done
