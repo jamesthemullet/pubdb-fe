@@ -10,7 +10,22 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(gh pr create --title 'Surface countries fetch errors to users' --body ':*)"
+      "Bash(gh pr create --title 'Surface countries fetch errors to users' --body ':*)",
+      "Bash(yarn tsc:*)",
+      "Bash(gh pr create --title 'Replace raw heading and paragraph tags with Typography component' --body ':*)",
+      "Bash(yarn vitest:*)",
+      "Bash(sed -n '12,30p' src/app/register/page.tsx)",
+      "Bash(sed -n '45,55p' src/app/register/page.tsx)",
+      "Bash(sed -n '94,100p' src/app/register/page.tsx)",
+      "Bash(sed -n '53,58p' src/app/reset-password/page.tsx)",
+      "Bash(sed -n '125,130p' src/app/reset-password/page.tsx)",
+      "Bash(sed -n '20,30p' src/hooks/useBeerTypes.ts)",
+      "Bash(sed -n '52,57p' src/hooks/useBeerTypes.ts)",
+      "Bash(sed -n '63,67p' src/hooks/useCountries.ts)",
+      "Bash(sed -n '58,68p' src/app/pubs/page.tsx)",
+      "Bash(sed -n '125,170p' src/app/success/page.tsx)",
+      "Bash(sed -n '15,18p' src/app/components/nav-bar/nav-bar.tsx)",
+      "Bash(gh pr create --title 'security: migrate JWT auth from localStorage to httpOnly cookies' --body ':*)"
     ]
   }
 }
