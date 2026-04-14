@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { mockDashboardEndpoint, setAuthToken } from "../fixtures/auth";
+import { setAuthToken } from "../fixtures/auth";
 
 test.describe("NavBar navigation", () => {
   test("All Pubs link navigates to /pubs", async ({ page }) => {
@@ -22,8 +22,21 @@ test.describe("NavBar navigation", () => {
   });
 
   test("Logout redirects to home and shows Register link", async ({ page }) => {
-    await mockDashboardEndpoint(page);
     await setAuthToken(page, "tester@example.com");
+    let isLoggedOut = false;
+    await page.route("**/api/auth/me", (route) =>
+      route.fulfill({
+        status: isLoggedOut ? 401 : 200,
+        contentType: "application/json",
+        body: JSON.stringify(
+          isLoggedOut ? { error: "Unauthorized" } : { email: "tester@example.com" }
+        ),
+      })
+    );
+    await page.route("**/api/auth/logout", (route) => {
+      isLoggedOut = true;
+      route.continue();
+    });
     await page.goto("/");
     await page.locator("nav").getByRole("button", { name: "Logout" }).click();
     await expect(page.locator("nav").getByRole("link", { name: "Register" })).toBeVisible();
