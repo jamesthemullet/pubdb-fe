@@ -76,8 +76,8 @@ vi.mock("../../features/opening-hours/opening-hours-editor", () => ({
 // ---------------------------------------------------------------------------
 
 import { useParams } from "next/navigation";
-import { useCountries } from "@/hooks/useCountries";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
+import { useCountries } from "@/hooks/useCountries";
 
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
