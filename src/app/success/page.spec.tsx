@@ -54,7 +54,6 @@ describe("SuccessPage", () => {
 		vi.restoreAllMocks();
 		process.env = { ...originalEnv };
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
-		localStorage.clear();
 	});
 
 	afterEach(() => {
@@ -172,31 +171,10 @@ describe("SuccessPage", () => {
 
 			await waitFor(() => {
 				expect(fetchSpy).toHaveBeenCalledWith(
-					"http://localhost:4000/payments/verify-session",
+					"/api/payments/verify-session",
 					expect.objectContaining({
 						method: "POST",
 						body: JSON.stringify({ sessionId: "cs_test_abc123" }),
-					}),
-				);
-			});
-		});
-
-		it("sends an auth header when a token is present in localStorage", async () => {
-			localStorage.setItem("token", "mytoken123");
-
-			const fetchSpy = vi
-				.spyOn(globalThis, "fetch")
-				.mockResolvedValue(jsonResponse(SAMPLE_STATUS));
-
-			render(<SuccessPage />);
-
-			await waitFor(() => {
-				expect(fetchSpy).toHaveBeenCalledWith(
-					expect.any(String),
-					expect.objectContaining({
-						headers: expect.objectContaining({
-							Authorization: "Bearer mytoken123",
-						}),
 					}),
 				);
 			});

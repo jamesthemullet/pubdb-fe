@@ -28,8 +28,6 @@ vi.mock("next/navigation", () => ({
 
 describe("EditButton", () => {
   const renderAsApprovedAdmin = async () => {
-    localStorage.setItem("token", "header.payload.signature");
-
     const fetchSpy = vi.spyOn(global, "fetch").mockResolvedValueOnce({
       ok: true,
       json: async () => ({
@@ -49,24 +47,24 @@ describe("EditButton", () => {
   };
 
   beforeEach(() => {
-    localStorage.clear();
     vi.restoreAllMocks();
     pushMock.mockReset();
   });
 
-  it("shows a register link when there is no token", () => {
-    const fetchSpy = vi.spyOn(global, "fetch");
+  it("shows a register link when /api/auth/me returns non-ok", async () => {
+    vi.spyOn(global, "fetch").mockResolvedValue({
+      ok: false,
+      json: async () => ({}),
+    } as Response);
 
     render(<EditButton pubName="The King" pubId="pub-1" onEdit={vi.fn()} />);
 
     expect(
-      screen.getByRole("link", { name: "Log in to edit this pub" })
+      await screen.findByRole("link", { name: "Log in to edit this pub" })
     ).toHaveAttribute("href", "/register");
-    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it("shows the approval message for unapproved users", async () => {
-    localStorage.setItem("token", "header.payload.signature");
     vi.spyOn(global, "fetch").mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -86,37 +84,29 @@ describe("EditButton", () => {
     ).toHaveAttribute("href", "mailto:hello@thepubdb.com");
   });
 
-  it("falls back to decoding the token and allows approved admins to edit", async () => {
+  it("shows edit and delete buttons for approved admins", async () => {
     const onEdit = vi.fn();
-    const payload = btoa(
-      JSON.stringify({
+
+    vi.spyOn(global, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
         email: "admin@example.com",
         approved: true,
         admin: true,
-      })
-    );
-
-    localStorage.setItem("token", `header.${payload}.signature`);
-    vi.spyOn(global, "fetch").mockRejectedValue(new Error("API unavailable"));
+      }),
+    } as Response);
 
     render(<EditButton pubName="The King" pubId="pub-1" onEdit={onEdit} />);
 
-    const editButton = await screen.findByRole("button", {
-      name: "Edit this pub",
-    });
-
-    expect(
-      screen.getByRole("button", { name: "Delete this pub" })
-    ).toBeInTheDocument();
+    const editButton = await screen.findByRole("button", { name: "Edit this pub" });
+    expect(screen.getByRole("button", { name: "Delete this pub" })).toBeInTheDocument();
 
     fireEvent.click(editButton);
-
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
-  it("shows the register link when token decoding fails", async () => {
-    localStorage.setItem("token", "header.invalid-json.signature");
-    vi.spyOn(global, "fetch").mockRejectedValue(new Error("API unavailable"));
+  it("shows the register link when /api/auth/me throws", async () => {
+    vi.spyOn(global, "fetch").mockRejectedValue(new Error("Network error"));
 
     render(<EditButton pubName="The King" pubId="pub-1" onEdit={vi.fn()} />);
 
@@ -156,14 +146,9 @@ describe("EditButton", () => {
     fireEvent.click(deleteButton);
 
     await waitFor(() => {
-      expect(fetchSpy).toHaveBeenNthCalledWith(
-        2,
-        "http://localhost:4000/pubs/pub-1",
-        {
-          method: "DELETE",
-          headers: { Authorization: "Bearer header.payload.signature" },
-        }
-      );
+      expect(fetchSpy).toHaveBeenNthCalledWith(2, "/api/pubs/pub-1", {
+        method: "DELETE",
+      });
     });
     expect(pushMock).toHaveBeenCalledWith("/pubs");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -181,9 +166,7 @@ describe("EditButton", () => {
 
     fireEvent.click(deleteButton);
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Deletion failed"
-    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("Deletion failed");
   });
 
   it("shows the fallback API error message when delete fails without an error payload", async () => {
@@ -198,9 +181,7 @@ describe("EditButton", () => {
 
     fireEvent.click(deleteButton);
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Failed to delete pub"
-    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("Failed to delete pub");
   });
 
   it("shows a network error on the page when delete throws", async () => {

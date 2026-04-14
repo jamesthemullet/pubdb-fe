@@ -33,8 +33,6 @@ function jsonResponse(data: unknown, status = 200): Response {
 async function renderApprovedPageWithSubmitResult(
   submitResponse: Response | Error
 ): Promise<void> {
-  localStorage.setItem("token", "test-token");
-
   vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
     const url = toUrl(input);
 
@@ -153,7 +151,6 @@ describe("AddPubPage", () => {
     clearCountriesCache();
     vi.restoreAllMocks();
     pushMock.mockReset();
-    localStorage.clear();
     process.env = { ...originalEnv };
     process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
   });
@@ -186,8 +183,6 @@ describe("AddPubPage", () => {
   });
 
   it("shows approval guidance and includes the user email in the mailto link", async () => {
-    localStorage.setItem("token", "test-token");
-
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
       const url = toUrl(input);
 
@@ -229,11 +224,10 @@ describe("AddPubPage", () => {
 
     await waitFor(() => {
       expect(fetchSpy).toHaveBeenCalledWith(
-        "http://localhost:4000/pubs",
+        "/api/pubs",
         expect.objectContaining({
           method: "POST",
           headers: expect.objectContaining({
-            Authorization: "Bearer test-token",
             "Content-Type": "application/json",
           }),
         })
@@ -250,50 +244,6 @@ describe("AddPubPage", () => {
       },
       { timeout: 2000 }
     );
-  });
-
-  it("submits without Authorization header when token is missing at submit time", async () => {
-    localStorage.setItem("token", "test-token");
-
-    const fetchSpy = vi
-      .spyOn(globalThis, "fetch")
-      .mockImplementation(async (input, init) => {
-        const url = toUrl(input);
-
-        if (url.endsWith("/auth/me")) {
-          return jsonResponse({ email: "editor@example.com", approved: true });
-        }
-
-        if (url.includes("restcountries.com")) {
-          return jsonResponse([
-            { name: { common: "United Kingdom" }, cca2: "GB" },
-          ]);
-        }
-
-        if (url.endsWith("/pubs") && init?.method === "POST") {
-          return jsonResponse({ id: "pub-no-auth" }, 201);
-        }
-
-        throw new Error(`Unexpected fetch URL: ${url}`);
-      });
-
-    render(<AddPubPage />);
-    await screen.findByText(/please fill out the form below/i);
-
-    localStorage.removeItem("token");
-    submitCurrentForm();
-
-    await waitFor(() => {
-      expect(fetchSpy).toHaveBeenCalledWith(
-        "http://localhost:4000/pubs",
-        expect.objectContaining({
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-      );
-    });
   });
 
   it("shows existing-pub action and routes to edit page on conflict", async () => {
@@ -425,8 +375,6 @@ describe("AddPubPage", () => {
   });
 
   it("shows login prompt when auth check returns non-OK status", async () => {
-    localStorage.setItem("token", "test-token");
-
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
       const url = toUrl(input);
 
@@ -451,8 +399,6 @@ describe("AddPubPage", () => {
   });
 
   it("shows login prompt when auth check throws", async () => {
-    localStorage.setItem("token", "test-token");
-
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
       const url = toUrl(input);
 
@@ -477,8 +423,6 @@ describe("AddPubPage", () => {
   });
 
   it("shows an error message and disables the country selector when country fetch fails", async () => {
-    localStorage.setItem("token", "test-token");
-
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
@@ -507,8 +451,6 @@ describe("AddPubPage", () => {
   });
 
   it("shows Loading countries placeholder while countries are still fetching", async () => {
-    localStorage.setItem("token", "test-token");
-
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
       const url = toUrl(input);
 
@@ -534,8 +476,6 @@ describe("AddPubPage", () => {
   });
 
   it("submits cleared chainName as undefined and includes amenity selections", async () => {
-    localStorage.setItem("token", "test-token");
-
     let submittedBody: Record<string, unknown> | null = null;
 
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {

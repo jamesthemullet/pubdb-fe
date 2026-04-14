@@ -3,8 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { API_URL } from "@/lib/apiConfig";
-import { buildAuthHeaders } from "@/lib/auth";
 import Button from "../button/button";
 import Typography from "../typography/typography";
 import styles from "./edit-button.module.css";
@@ -28,17 +26,8 @@ const EditButton = ({ pubName, onEdit, pubId }: EditButtonProps) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setUser(null);
-        return;
-      }
-
       try {
-        const apiUrl = API_URL;
-        const res = await fetch(`${apiUrl}/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch("/api/auth/me");
         if (res.ok) {
           const data = await res.json();
           setUser({
@@ -46,19 +35,9 @@ const EditButton = ({ pubName, onEdit, pubId }: EditButtonProps) => {
             approved: data.approved,
             admin: data.admin,
           });
-          return;
+        } else {
+          setUser(null);
         }
-      } catch {
-        // Fall back to token decoding below when API check fails.
-      }
-
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setUser({
-          email: payload.email,
-          approved: payload.approved,
-          admin: payload.admin,
-        });
       } catch {
         setUser(null);
       }
@@ -66,10 +45,8 @@ const EditButton = ({ pubName, onEdit, pubId }: EditButtonProps) => {
 
     void checkAuth();
     window.addEventListener("authChanged", checkAuth);
-    window.addEventListener("storage", checkAuth);
     return () => {
       window.removeEventListener("authChanged", checkAuth);
-      window.removeEventListener("storage", checkAuth);
     };
   }, []);
 
@@ -105,11 +82,8 @@ const EditButton = ({ pubName, onEdit, pubId }: EditButtonProps) => {
       return;
     }
     try {
-      const apiUrl = API_URL;
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${apiUrl}/pubs/${pubId}`, {
+      const res = await fetch(`/api/pubs/${pubId}`, {
         method: "DELETE",
-        headers: buildAuthHeaders(token),
       });
       if (!res.ok) {
         const data = await res.json();

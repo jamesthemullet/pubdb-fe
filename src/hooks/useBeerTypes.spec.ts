@@ -13,7 +13,6 @@ function jsonResponse(data: unknown, status = 200): Response {
 describe("useBeerTypes", () => {
 	beforeEach(() => {
 		clearBeerTypesCache();
-		localStorage.clear();
 	});
 
 	afterEach(() => {
@@ -109,28 +108,13 @@ describe("useBeerTypes", () => {
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 	});
 
-	it("sends Authorization header when token is in localStorage", async () => {
-		localStorage.setItem("token", "test-token");
+	it("fetches beer types from the proxy route without an auth header", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse([]));
 
 		const { result } = renderHook(() => useBeerTypes());
 
 		await waitFor(() => expect(result.current.beerTypesLoading).toBe(false));
 
-		expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith("/api/beer-types", {
-			headers: { Authorization: "Bearer test-token" },
-		});
-	});
-
-	it("omits Authorization header when no token in localStorage", async () => {
-		vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse([]));
-
-		const { result } = renderHook(() => useBeerTypes());
-
-		await waitFor(() => expect(result.current.beerTypesLoading).toBe(false));
-
-		expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith("/api/beer-types", {
-			headers: {},
-		});
+		expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith("/api/beer-types");
 	});
 });

@@ -1,51 +1,93 @@
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
 
-export function createApiProxyHandler(
+type ProxyOptions = {
+  forwardAuth?: boolean;
+  resourceName?: string;
+};
+
+async function proxyRequest(
+  request: NextRequest,
+  method: string,
   endpointPath: string,
-  options?: { forwardAuth?: boolean; resourceName?: string }
+  options?: ProxyOptions
 ) {
-  return async (request: Request) => {
-    const apiUrl = getServerApiUrl();
-    const apiKey = process.env.TESTING_API_KEY;
+  const apiUrl = getServerApiUrl();
+  const apiKey = process.env.TESTING_API_KEY;
 
-    if (!apiKey) {
-      return NextResponse.json({ error: "Missing API key" }, { status: 500 });
+  if (!apiKey) {
+    return NextResponse.json({ error: "Missing API key" }, { status: 500 });
+  }
+
+  const headers: Record<string, string> = { "X-API-Key": apiKey };
+
+  if (options?.forwardAuth) {
+    const authToken = request.cookies.get("auth-token")?.value;
+    if (authToken) {
+      headers.Authorization = `Bearer ${authToken}`;
     }
+  }
 
-    const headers: HeadersInit = { "X-API-Key": apiKey };
-    if (options?.forwardAuth) {
-      const authHeader = request.headers.get("authorization");
-      if (authHeader) {
-        headers.Authorization = authHeader;
-      }
+  const fetchOptions: RequestInit = {
+    method,
+    headers,
+    cache: "no-store",
+  };
+
+  if (method !== "GET" && method !== "HEAD") {
+    const contentType = request.headers.get("content-type");
+    if (contentType) {
+      headers["Content-Type"] = contentType;
     }
-
     try {
-      const response = await fetch(`${apiUrl}${endpointPath}`, {
-        headers,
-        cache: "no-store",
-      });
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        return NextResponse.json(
-          data || { error: `Failed to fetch ${options?.resourceName}` },
-          { status: response.status }
-        );
+      const body = await request.text();
+      if (body) {
+        fetchOptions.body = body;
       }
+    } catch {
+      // no body
+    }
+  }
 
-      return NextResponse.json(data, { status: response.status });
-    } catch (error) {
+  try {
+    const response = await fetch(`${apiUrl}${endpointPath}`, fetchOptions);
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
       return NextResponse.json(
-        {
-          error:
-            error instanceof Error
-              ? error.message
-              : `Failed to fetch ${options?.resourceName}`,
-        },
-        { status: 500 }
+        data || { error: `Failed to fetch ${options?.resourceName ?? "resource"}` },
+        { status: response.status }
       );
     }
-  };
+
+    return NextResponse.json(data, { status: response.status });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : `Failed to fetch ${options?.resourceName ?? "resource"}`,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export function createApiProxyHandler(
+  endpointPath: string,
+  options?: ProxyOptions
+) {
+  return (request: NextRequest) =>
+    proxyRequest(request, "GET", endpointPath, options);
+}
+
+export function createApiMutationHandler(
+  method: "POST" | "PATCH" | "PUT" | "DELETE",
+  endpointPath: string,
+  options?: ProxyOptions
+) {
+  return (request: NextRequest) =>
+    proxyRequest(request, method, endpointPath, options);
 }

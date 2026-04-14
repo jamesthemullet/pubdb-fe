@@ -2,8 +2,6 @@
 
 import type React from "react";
 import { useEffect, useState } from "react";
-import { API_URL } from "@/lib/apiConfig";
-import { buildAuthHeaders } from "@/lib/auth";
 import Button from "../../components/button/button";
 import Typography from "../../components/typography/typography";
 import styles from "./dashboard.module.css";
@@ -85,18 +83,20 @@ const Dashboard: React.FC = () => {
   >("idle");
 
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      setIsAuthenticated(!!token);
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        setIsAuthenticated(res.ok);
+      } catch {
+        setIsAuthenticated(false);
+      }
     };
 
-    checkAuth();
+    void checkAuth();
     window.addEventListener("authChanged", checkAuth);
-    window.addEventListener("storage", checkAuth);
 
     return () => {
       window.removeEventListener("authChanged", checkAuth);
-      window.removeEventListener("storage", checkAuth);
     };
   }, []);
 
@@ -109,12 +109,8 @@ const Dashboard: React.FC = () => {
 
       try {
         setError(null);
-        const apiUrl = API_URL;
-        const token = localStorage.getItem("token");
 
-        const res = await fetch(`${apiUrl}/auth/dashboard`, {
-          headers: buildAuthHeaders(token),
-        });
+        const res = await fetch("/api/auth/dashboard");
 
         if (!res.ok) {
           const errorData = await res.json();
@@ -162,15 +158,9 @@ const Dashboard: React.FC = () => {
       setCancelError(null);
       setCancelMessage(null);
 
-      const apiUrl = API_URL;
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(`${apiUrl}/payments/cancel-subscription`, {
+      const res = await fetch("/api/payments/cancel-subscription", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
       });
 
@@ -212,15 +202,9 @@ const Dashboard: React.FC = () => {
       setForgotKeyCopyStatus("idle");
       setForgotKeyTarget(keyPrefix);
 
-      const apiUrl = API_URL;
-      const token = localStorage.getItem("token");
-
-      const res = await fetch(`${apiUrl}/auth/forgot-api-key`, {
+      const res = await fetch("/api/auth/forgot-api-key", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ keyPrefix, email: userEmail }),
       });
 

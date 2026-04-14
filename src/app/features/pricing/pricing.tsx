@@ -2,8 +2,6 @@ import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
-import { API_URL } from "@/lib/apiConfig";
-import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./pricing.module.css";
 
 type ProrationItem = {
@@ -101,6 +99,7 @@ const Pricing: React.FC = () => {
   const setError = (text: string) =>
     setFeedbackMessage({ type: "error", text });
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userTier, setUserTier] = useState<string | null>(null);
   const [_userHighestTier, _setUserHighestTier] = useState<string | null>(null);
   const [upgradeModal, setUpgradeModal] = useState<null | {
@@ -212,18 +211,17 @@ const Pricing: React.FC = () => {
   const nextPaymentDisplay = formatDateTime(nextPaymentTimestamp);
 
   const fetchUserTier = useCallback(async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
     try {
-      const res = await fetch(`${API_URL}/auth/dashboard`, {
-        headers: buildAuthHeaders(token),
-      });
-      if (!res.ok) return;
+      const res = await fetch("/api/auth/dashboard");
+      if (!res.ok) {
+        setIsAuthenticated(false);
+        return;
+      }
+      setIsAuthenticated(true);
       const data = await res.json();
-
-      setUserTier(data.apiKeys[0].tier);
+      setUserTier(data.apiKeys?.[0]?.tier ?? null);
     } catch (_err) {
-      /* ignore */
+      setIsAuthenticated(false);
     }
   }, []);
 
@@ -235,18 +233,11 @@ const Pricing: React.FC = () => {
     if (!priceId) return;
     setLoadingTier(tierName);
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        `${API_URL}/payments/create-checkout-session`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...buildAuthHeaders(token),
-          },
-          body: JSON.stringify({ priceId }),
-        }
-      );
+      const response = await fetch("/api/payments/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceId }),
+      });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
@@ -273,13 +264,9 @@ const Pricing: React.FC = () => {
   const requestUpgradeEstimate = async (priceId: string, tierName: string) => {
     setEstimateLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/payments/upgrade-estimate`, {
+      const res = await fetch("/api/payments/upgrade-estimate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ priceId }),
       });
       if (!res.ok) {
@@ -309,13 +296,9 @@ const Pricing: React.FC = () => {
   const performUpgrade = async (priceId: string) => {
     setPerformingUpgrade(true);
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/payments/perform-upgrade`, {
+      const res = await fetch("/api/payments/perform-upgrade", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ priceId }),
       });
       if (!res.ok) {
@@ -333,24 +316,20 @@ const Pricing: React.FC = () => {
   };
 
   const handleTierSelection = async (tier: (typeof pricingTiers)[0]) => {
-    const token = localStorage.getItem("token");
     if (tier.name === userTier) {
       window.location.href = "/";
       return;
     }
     if (tier.name === "HOBBY") {
-      if (!token) {
+      if (!isAuthenticated) {
         setError("Please log in to manage subscriptions");
         window.location.href = "/register";
         return;
       }
       try {
-        const response = await fetch(`${API_URL}/payments/subscribe-to-hobby`, {
+        const response = await fetch("/api/payments/subscribe-to-hobby", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...buildAuthHeaders(token),
-          },
+          headers: { "Content-Type": "application/json" },
         });
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
@@ -379,7 +358,7 @@ const Pricing: React.FC = () => {
       }
       return;
     }
-    if (!token) {
+    if (!isAuthenticated) {
       setError("Please log in to manage subscriptions");
       window.location.href = "/register";
       return;

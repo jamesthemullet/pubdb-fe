@@ -188,11 +188,10 @@ describe("RegisterLoginPage", () => {
       ).toBeInTheDocument();
     });
 
-    it("calls login API, stores token, dispatches authChanged, and shows success", async () => {
-      vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        jsonResponse({ token: "jwt-abc" })
+    it("calls /api/auth/login, dispatches authChanged, and shows success", async () => {
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        jsonResponse({})
       );
-      const localStorageSpy = vi.spyOn(Storage.prototype, "setItem");
       const dispatchSpy = vi.spyOn(window, "dispatchEvent");
 
       const { container } = switchToLogin();
@@ -205,7 +204,10 @@ describe("RegisterLoginPage", () => {
         expect(screen.getByText("Login successful!")).toBeInTheDocument()
       );
 
-      expect(localStorageSpy).toHaveBeenCalledWith("token", "jwt-abc");
+      expect(fetchSpy).toHaveBeenCalledWith(
+        "/api/auth/login",
+        expect.objectContaining({ method: "POST" })
+      );
       expect(dispatchSpy).toHaveBeenCalledWith(expect.any(Event));
     });
 
@@ -253,7 +255,7 @@ describe("RegisterLoginPage", () => {
       await waitFor(() => expect(fetchSpy).toHaveBeenCalled());
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        "http://localhost:4000/auth/login",
+        "/api/auth/login",
         expect.objectContaining({
           body: JSON.stringify({ email: "me@example.com", password: "pass" }),
         })
