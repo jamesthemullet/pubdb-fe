@@ -6,9 +6,8 @@ import {
   within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-import PubPage from "./page";
 import type { Pub } from "@/types/pub";
+import PubPage from "./page";
 
 // ---------------------------------------------------------------------------
 // Module mocks
