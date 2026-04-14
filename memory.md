@@ -25,6 +25,7 @@
 - Dashboard: forgotKeyError bug — error set but only rendered when forgotKeyTarget matches keyPrefix; early return (empty email) sets error but not target, so error never shown
 
 ## Last Run Tasks
+- 2026-04-14: Task 3 (implement tests for dashboard.tsx — 33 tests, 209→242 total, 96.98% stmts), Task 7 (activity summary)
 - 2026-04-13: Task 3 (implement tests for pubs/[id]/page.tsx — recreated, 34 tests, 209→243 total), Task 7 (activity summary)
 - 2026-04-12: Task 3 (implement tests for pubs/[id]/page.tsx), Task 7 (activity summary — safeoutputs unavailable)
 - 2026-04-11: Task 3 (implement tests for dashboard.tsx), Task 7 (activity summary)
@@ -33,6 +34,13 @@
 - 2026-04-08: Task 1 (commands), Task 3 (implement tests), Task 7 (activity summary)
 
 ## Completed Work
+- PR: [Test Improver] Add tests for Dashboard component (v2)
+  - Branch: test-assist/dashboard-tests-v2
+  - 33 new tests (209 → 242 total)
+  - dashboard.tsx: 0% → 96.98% stmts, 79.56% branches, 90% funcs
+  - Covers: auth state, data display, error states, cancel subscription, forgot API key, copy clipboard, modal
+  - Monthly Activity issue #28 updated with this run
+  - Run: https://github.com/jamesthemullet/pubdb-fe/actions/runs/24375423232
 - PR: [Test Improver] Add tests for pubs/[id]/page.tsx (pub detail page)
   - Branch: test-assist/pub-detail-page-tests
   - 34 new tests (209 → 243 total)
@@ -67,17 +75,23 @@
 - pubs/[id]/page.tsx: delete success redirects via window.location.href — not easily testable; test error path instead
 
 ## Testing Backlog (prioritised by value)
-1. **`pubs/[id]/page.tsx`** — DONE (branch: test-assist/pub-detail-page-tests, 78.43% stmts)
-2. **`features/dashboard/dashboard.tsx`** — DONE (25 tests, branch: test-assist/dashboard-tests)
-3. **`success/page.tsx`** — DONE (branch: test-assist/success-page-tests)
-4. **`register/page.tsx`** — DONE (89.83% stmts)
-5. **`reset-password/page.tsx`** — DONE (branch, not merged)
-6. **`forgot-password/page.tsx`** — DONE (branch, not merged)
-7. **`pubs/page.tsx`** — DONE (branch, not merged)
+1. **`pubs/[id]/page.tsx`** — untested on main (PR on test-assist/pub-detail-page-tests branch, 34 tests)
+2. **`features/dashboard/dashboard.tsx`** — untested on main (PR on test-assist/dashboard-tests-v2, 33 tests, 96.98% stmts)
+3. **`success/page.tsx`** — MERGED (branch: test-assist/success-page-tests)
+4. **`register/page.tsx`** — MERGED (89.83% stmts)
+5. **`reset-password/page.tsx`** — MERGED
+6. **`forgot-password/page.tsx`** — MERGED
+7. **`pubs/page.tsx`** — MERGED
 8. **`pricing.tsx`** (574 lines) — pricing tiers display (lower value, mostly static). Some spec exists already.
 9. **`profile/page.tsx`** (15 lines) — thin wrapper around Dashboard, low value alone
+10. **`api/utils/proxyHandler.ts`** — utility, medium value
 
 ## Backlog Cursor
-Next run: Task 4 (check if any open Test Improver PRs have CI failures to fix)
-Then: Consider new targets — add-pub/page.tsx (form-heavy, high value), or Task 6 (test infrastructure)
-No remaining high-value untested pages identified; most coverage done
+Next run: Task 4 (check if any open Test Improver PRs have CI failures to fix — esp. dashboard-tests-v2 and pub-detail-page-tests)
+Then: Consider pubs/[id]/page.tsx tests (1436 lines, untested on main)
+Note: safeoutputs tools were unavailable in runs on 2026-04-12, 2026-04-14 — task agent was used instead
+
+## Dashboard Testing Notes
+- act() needed when calling window.dispatchEvent() for authChanged in tests
+- navigator.clipboard can be mocked via Object.defineProperty(navigator, 'clipboard', {value: ..., writable:true, configurable:true})
+- When all 3 usage periods have same %, use distinct data to avoid getAllByText conflicts
