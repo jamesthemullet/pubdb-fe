@@ -8,6 +8,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import PubPage from "./page";
+import type { Pub } from "@/types/pub";
 
 // ---------------------------------------------------------------------------
 // Module mocks
@@ -117,7 +118,7 @@ const SAMPLE_PUB = {
   hasLiveMusic: true,
 };
 
-function makePubFetch(pub = SAMPLE_PUB, status = 200) {
+function makePubFetch(pub: Pub = SAMPLE_PUB as Pub, status = 200) {
   return vi
     .spyOn(globalThis, "fetch")
     .mockResolvedValue(jsonResponse(pub, status));

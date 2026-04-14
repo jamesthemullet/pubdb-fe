@@ -142,6 +142,13 @@ test.describe("Register / Login page", () => {
 				route.fulfill(jsonResponse({ token: fakeToken })),
 			);
 
+			// After login the NavBar calls /api/auth/me to display the user email.
+			// Mock it here because the Playwright-intercepted login response doesn't
+			// set a real cookie, so the server-side proxy would fail.
+			await page.route("**/api/auth/me", (route) =>
+				route.fulfill(jsonResponse({ email: "user@example.com" })),
+			);
+
 			await page.locator(field.email).fill("user@example.com");
 			await page.locator(field.password).fill("password123");
 			await page.getByRole("button", { name: "Login" }).click();

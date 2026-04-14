@@ -15,14 +15,22 @@ export function makeFakeJwt(email: string): string {
 }
 
 /**
- * Seed localStorage with a JWT before the page makes any requests.
- * Call this inside page.addInitScript so it runs before React hydrates.
+ * Seed the auth-token httpOnly cookie before the page navigates.
+ * Call this before page.goto() so the cookie is present on the first request.
  */
 export async function setAuthToken(page: Page, email: string): Promise<void> {
   const token = makeFakeJwt(email);
-  await page.addInitScript((t) => {
-    localStorage.setItem("token", t);
-  }, token);
+  await page.context().addCookies([
+    {
+      name: "auth-token",
+      value: token,
+      domain: "localhost",
+      path: "/",
+      httpOnly: true,
+      secure: false,
+      sameSite: "Strict",
+    },
+  ]);
 }
 
 /**
