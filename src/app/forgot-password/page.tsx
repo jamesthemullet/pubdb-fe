@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
@@ -83,7 +84,7 @@ export default function ForgotPasswordPage() {
       )}
 
       <div className={styles.backLink}>
-        <a href="/register">Back to Login</a>
+        <Link href="/register">Back to Login</Link>
       </div>
     </div>
   );

@@ -1,5 +1,3 @@
-"use client";
-
 import Heading from "./components/heading/heading";
 import Typography from "./components/typography/typography";
 import Pricing from "./features/pricing/pricing";
