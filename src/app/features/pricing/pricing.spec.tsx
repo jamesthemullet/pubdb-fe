@@ -65,7 +65,6 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  localStorage.clear();
 });
 
 describe("Pricing component", () => {
@@ -137,7 +136,6 @@ describe("Pricing component", () => {
 
   describe("with authenticated user on HOBBY tier", () => {
     beforeEach(() => {
-      localStorage.setItem("token", "test-token");
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
         const url = toUrl(input);
         if (url.endsWith("/auth/dashboard")) {
@@ -173,7 +171,6 @@ describe("Pricing component", () => {
 
   describe("with authenticated user on DEVELOPER tier", () => {
     beforeEach(() => {
-      localStorage.setItem("token", "test-token");
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
         const url = toUrl(input);
         if (url.endsWith("/auth/dashboard")) {
@@ -200,9 +197,6 @@ describe("Pricing component", () => {
   });
 
   describe("upgrade flow", () => {
-    beforeEach(() => {
-      localStorage.setItem("token", "test-token");
-    });
 
     it("opens the upgrade modal with estimated charges", async () => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
@@ -412,36 +406,12 @@ describe("Pricing component", () => {
   });
 
   describe("HOBBY subscription flow", () => {
-    beforeEach(() => {
-      localStorage.setItem("token", "test-token");
-    });
-
-    it("subscribes to hobby and shows the modal with API key", async () => {
+    it("shows error when hobby subscription fails for authenticated user", async () => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
         const url = toUrl(input);
+        // User is authenticated but has no tier yet
         if (url.endsWith("/auth/dashboard"))
-          return mockDashboardResponse("DEVELOPER");
-        if (
-          url.endsWith("/payments/subscribe-to-hobby") &&
-          init?.method === "POST"
-        ) {
-          return jsonResponse({ apiKey: mockApiKey });
-        }
-        throw new Error(`Unexpected fetch: ${url}`);
-      });
-
-      render(<Pricing />);
-      // Wait for tier data to load — the contact support button appears for HOBBY when user is on DEVELOPER
-      // But HOBBY subscription is triggered when current tier is higher or user has no tier
-      // Actually the handleTierSelection for HOBBY calls subscribe-to-hobby directly
-      // We need a user who sees an active HOBBY tier button — when userTier is null initially
-      // Re-render with no tier
-    });
-
-    it("shows error when hobby subscription fails", async () => {
-      vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
-        const url = toUrl(input);
-        if (url.endsWith("/auth/dashboard")) return jsonResponse({}, 401);
+          return jsonResponse({ apiKeys: [] }, 200);
         if (
           url.endsWith("/payments/subscribe-to-hobby") &&
           init?.method === "POST"
@@ -453,7 +423,7 @@ describe("Pricing component", () => {
 
       render(<Pricing />);
 
-      // User has no tier, clicks Subscribe on HOBBY
+      // Authenticated user with no tier sees Subscribe buttons
       const subscribeButtons = await screen.findAllByRole("button", {
         name: /subscribe/i,
       });
@@ -479,7 +449,6 @@ describe("Pricing component", () => {
         throw new Error(`Unexpected fetch: ${url}`);
       });
 
-      localStorage.setItem("token", "test-token");
       render(<Pricing />);
 
       fireEvent.click(

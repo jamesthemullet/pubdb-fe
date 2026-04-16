@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const VERIFY_API = (url: URL) =>
-  url.port === "4000" && url.pathname === "/payments/verify-session";
+const VERIFY_API = "**/api/payments/verify-session";
 
 function verifyResponse(body: unknown, status = 200) {
   return {

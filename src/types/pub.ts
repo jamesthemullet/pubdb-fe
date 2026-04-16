@@ -60,7 +60,7 @@ export type Pub = {
   hasCaskAle?: boolean;
   isBeerFocused?: boolean;
   isDogFriendly?: boolean;
-  isFamilyFriendly?: boolean;
+  isFamilyFriendly?: boolean | null;
   hasStepFreeAccess?: boolean;
   hasAccessibleToilet?: boolean;
   hasLiveSport?: boolean;

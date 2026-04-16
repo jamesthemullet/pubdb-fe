@@ -1,3 +1,4 @@
+import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET } from "./route";
@@ -18,7 +19,7 @@ describe("GET /api/beer-types", () => {
   });
 
   it("returns 500 when TESTING_API_KEY is missing", async () => {
-    const request = new Request("http://localhost/api/beer-types");
+    const request = new NextRequest("http://localhost/api/beer-types");
 
     const response = await GET(request);
 
@@ -32,7 +33,7 @@ describe("GET /api/beer-types", () => {
     process.env.API_URL = "https://api.example.com";
     process.env.TESTING_API_KEY = "test-key";
 
-    const request = new Request("http://localhost/api/beer-types");
+    const request = new NextRequest("http://localhost/api/beer-types");
     const payload = [{ id: 1, name: "IPA" }];
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify(payload), {
@@ -46,6 +47,7 @@ describe("GET /api/beer-types", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.example.com/api/v1/beer-types",
       {
+        method: "GET",
         headers: { "X-API-Key": "test-key" },
         cache: "no-store",
       }
@@ -54,11 +56,11 @@ describe("GET /api/beer-types", () => {
     await expect(response.json()).resolves.toEqual(payload);
   });
 
-  it("forwards Authorization header when present", async () => {
+  it("forwards auth-token cookie as Authorization header when present", async () => {
     process.env.TESTING_API_KEY = "test-key";
 
-    const request = new Request("http://localhost/api/beer-types", {
-      headers: { authorization: "Bearer token-123" },
+    const request = new NextRequest("http://localhost/api/beer-types", {
+      headers: { Cookie: "auth-token=my-cookie-token" },
     });
 
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
@@ -73,10 +75,35 @@ describe("GET /api/beer-types", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:4000/api/v1/beer-types",
       {
+        method: "GET",
         headers: {
           "X-API-Key": "test-key",
-          Authorization: "Bearer token-123",
+          Authorization: "Bearer my-cookie-token",
         },
+        cache: "no-store",
+      }
+    );
+  });
+
+  it("omits Authorization header when no auth-token cookie is present", async () => {
+    process.env.TESTING_API_KEY = "test-key";
+
+    const request = new NextRequest("http://localhost/api/beer-types");
+
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify([]), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })
+    );
+
+    await GET(request);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:4000/api/v1/beer-types",
+      {
+        method: "GET",
+        headers: { "X-API-Key": "test-key" },
         cache: "no-store",
       }
     );
@@ -86,7 +113,7 @@ describe("GET /api/beer-types", () => {
     process.env.NEXT_PUBLIC_API_URL = "https://public-api.example.com";
     process.env.TESTING_API_KEY = "public-key";
 
-    const request = new Request("http://localhost/api/beer-types");
+    const request = new NextRequest("http://localhost/api/beer-types");
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify([]), {
         status: 200,
@@ -99,6 +126,7 @@ describe("GET /api/beer-types", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "https://public-api.example.com/api/v1/beer-types",
       {
+        method: "GET",
         headers: { "X-API-Key": "public-key" },
         cache: "no-store",
       }
@@ -108,7 +136,7 @@ describe("GET /api/beer-types", () => {
   it("returns upstream error payload and status for non-OK responses", async () => {
     process.env.TESTING_API_KEY = "test-key";
 
-    const request = new Request("http://localhost/api/beer-types");
+    const request = new NextRequest("http://localhost/api/beer-types");
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -125,7 +153,7 @@ describe("GET /api/beer-types", () => {
   it("uses default error payload when upstream error body is not JSON", async () => {
     process.env.TESTING_API_KEY = "test-key";
 
-    const request = new Request("http://localhost/api/beer-types");
+    const request = new NextRequest("http://localhost/api/beer-types");
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("not-json", {
         status: 502,
@@ -143,7 +171,7 @@ describe("GET /api/beer-types", () => {
   it("returns 500 with thrown error message when fetch throws", async () => {
     process.env.TESTING_API_KEY = "test-key";
 
-    const request = new Request("http://localhost/api/beer-types");
+    const request = new NextRequest("http://localhost/api/beer-types");
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network down"));
 
     const response = await GET(request);
@@ -155,7 +183,7 @@ describe("GET /api/beer-types", () => {
   it("returns default error message when fetch throws a non-Error", async () => {
     process.env.TESTING_API_KEY = "test-key";
 
-    const request = new Request("http://localhost/api/beer-types");
+    const request = new NextRequest("http://localhost/api/beer-types");
     vi.spyOn(globalThis, "fetch").mockRejectedValue("boom");
 
     const response = await GET(request);

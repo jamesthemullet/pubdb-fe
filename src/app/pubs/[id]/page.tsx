@@ -15,7 +15,6 @@ import type { PubAmenityKey } from "@/constants/pubFormFields";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
 import { API_URL } from "@/lib/apiConfig";
-import { buildAuthHeaders } from "@/lib/auth";
 import type { BeerGarden, Pub, SunExposure } from "@/types/pub";
 import OpeningHoursEditor from "../../features/opening-hours/opening-hours-editor";
 import styles from "./page.module.css";
@@ -201,8 +200,6 @@ export default function PubPage() {
 
     try {
       setSaveError(null);
-      const apiUrl = API_URL;
-      const token = localStorage.getItem("token");
       const body: Record<string, unknown> = {};
       if (Array.isArray(editFields.beerTypeIds)) {
         body.beerTypes = editFields.beerTypeIds.map((beerTypeId) => ({
@@ -236,12 +233,9 @@ export default function PubPage() {
         body.createdAt = pub.createdAt;
       }
 
-      const res = await fetch(`${apiUrl}/pubs/${pub.id}`, {
+      const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       const data = await res.json();
@@ -1225,18 +1219,8 @@ function EditButton({
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setUser(null);
-        return;
-      }
-
       try {
-        const apiUrl = API_URL;
-        const res = await fetch(`${apiUrl}/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
+        const res = await fetch("/api/auth/me");
         if (res.ok) {
           const data = await res.json();
           setUser({
@@ -1244,31 +1228,18 @@ function EditButton({
             approved: data.approved,
             admin: data.admin,
           });
-          return;
+        } else {
+          setUser(null);
         }
-      } catch {
-        // Fall through to token decoding fallback.
-      }
-
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setUser({
-          email: payload.email,
-          approved: payload.approved,
-          admin: payload.admin,
-        });
       } catch {
         setUser(null);
       }
     };
 
     void checkAuth();
-    // Listen for auth changes
     window.addEventListener("authChanged", checkAuth);
-    window.addEventListener("storage", checkAuth);
     return () => {
       window.removeEventListener("authChanged", checkAuth);
-      window.removeEventListener("storage", checkAuth);
     };
   }, []);
 
@@ -1301,11 +1272,8 @@ function EditButton({
       return;
     }
     try {
-      const apiUrl = API_URL;
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${apiUrl}/pubs/${pubId}`, {
+      const res = await fetch(`/api/pubs/${pubId}`, {
         method: "DELETE",
-        headers: buildAuthHeaders(token),
       });
       if (!res.ok) {
         const data = await res.json();

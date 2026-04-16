@@ -10,8 +10,6 @@ import Textarea from "@/app/components/textarea/Textarea";
 import Typography from "@/app/components/typography/typography";
 import type { PubAmenityKey } from "@/constants/pubFormFields";
 import { useCountries } from "@/hooks/useCountries";
-import { API_URL } from "@/lib/apiConfig";
-import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
 
 type FieldErrors = Record<string, string[]>;
@@ -124,32 +122,22 @@ const AddPubPage = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const apiUrl = API_URL;
-          const res = await fetch(`${apiUrl}/auth/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setUser({ email: data.email, approved: data.approved });
-          } else {
-            setUser(null);
-          }
-        } catch {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          setUser({ email: data.email, approved: data.approved });
+        } else {
           setUser(null);
         }
-      } else {
+      } catch {
         setUser(null);
       }
     };
-    checkAuth();
+    void checkAuth();
     window.addEventListener("authChanged", checkAuth);
-    window.addEventListener("storage", checkAuth);
     return () => {
       window.removeEventListener("authChanged", checkAuth);
-      window.removeEventListener("storage", checkAuth);
     };
   }, []);
 
@@ -162,8 +150,6 @@ const AddPubPage = () => {
     setSuccess(null);
     setEditLink(null);
     try {
-      const apiUrl = API_URL;
-      const token = localStorage.getItem("token");
       const body: Record<string, unknown> = {
         name,
         city,
@@ -183,12 +169,9 @@ const AddPubPage = () => {
         openingHours,
         ...amenities,
       };
-      const res = await fetch(`${apiUrl}/pubs`, {
+      const res = await fetch("/api/pubs", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 

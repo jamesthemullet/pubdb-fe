@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Typography from "@/app/components/typography/typography";
-import { API_URL } from "@/lib/apiConfig";
-import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
 
 type SubscriptionStatus = {
@@ -63,15 +61,9 @@ function SuccessContent() {
       }
 
       try {
-        const apiUrl = API_URL;
-        const token = localStorage.getItem("token");
-
-        const response = await fetch(`${apiUrl}/payments/verify-session`, {
+        const response = await fetch("/api/payments/verify-session", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...buildAuthHeaders(token),
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ sessionId }),
         });
 

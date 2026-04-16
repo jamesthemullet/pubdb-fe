@@ -71,14 +71,16 @@ export default function RegisterLoginPage() {
     try {
       const apiUrl = API_URL;
       const endpoint = mode === "register" ? "/register" : "/login";
-      const body =
+      const requestBody =
         mode === "register"
           ? { name, username, email, password }
           : { email, password };
-      const res = await fetch(`${apiUrl}/auth${endpoint}`, {
+      const url =
+        mode === "login" ? "/api/auth/login" : `${apiUrl}/auth${endpoint}`;
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(requestBody),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -89,8 +91,7 @@ export default function RegisterLoginPage() {
             ? "Registration successful! Please follow the link in your email to verify your account."
             : "Login successful!"
         );
-        if (mode === "login" && data.token) {
-          localStorage.setItem("token", data.token);
+        if (mode === "login") {
           window.dispatchEvent(new Event("authChanged"));
           // Manually refresh the page after login
           setTimeout(() => {

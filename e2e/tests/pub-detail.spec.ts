@@ -5,7 +5,7 @@ import { makeFakeJwt } from "../fixtures/auth";
 // while the browser navigates to localhost:3000/pubs/42 (Next.js).
 // Matching on port 4000 prevents us from intercepting the page navigation.
 const PUB_API = (url: URL) => url.port === "4000" && url.pathname === "/pubs/42";
-const AUTH_ME_API = (url: URL) => url.port === "4000" && url.pathname === "/auth/me";
+const AUTH_ME_API = "**/api/auth/me";
 const COUNTRIES_API = (url: URL) => url.href.includes("restcountries.com");
 const BEER_TYPES_API = (url: URL) => url.pathname === "/api/beer-types";
 
@@ -65,11 +65,17 @@ test.describe("Pub detail (/pubs/[id])", () => {
 
   test.describe("with an authenticated approved user", () => {
     test.beforeEach(async ({ page }) => {
-      // Seed a token so EditButton can read it from localStorage
+      // Seed the auth-token cookie so the server-side proxy can authenticate
       const token = makeFakeJwt("editor@example.com");
-      await page.addInitScript((t) => {
-        localStorage.setItem("token", t);
-      }, token);
+      await page.context().addCookies([{
+        name: "auth-token",
+        value: token,
+        domain: "localhost",
+        path: "/",
+        httpOnly: true,
+        secure: false,
+        sameSite: "Strict",
+      }]);
 
       await page.route(AUTH_ME_API, (route) =>
         route.fulfill({

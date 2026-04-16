@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import NavBar from "./nav-bar";
@@ -13,14 +13,16 @@ vi.mock("next/link", () => ({
   }) => <a href={href}>{children}</a>,
 }));
 
-function makeToken(payload: Record<string, unknown>) {
-  const encoded = btoa(JSON.stringify(payload));
-  return `header.${encoded}.signature`;
+function jsonResponse(data: unknown, status = 200): Response {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
 }
 
 describe("NavBar", () => {
   beforeEach(() => {
-    localStorage.clear();
+    vi.restoreAllMocks();
   });
 
   afterEach(() => {
@@ -28,129 +30,113 @@ describe("NavBar", () => {
   });
 
   describe("when unauthenticated", () => {
-    it("renders navigation links", () => {
-      render(<NavBar />);
-
-      expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute(
-        "href",
-        "/"
-      );
-      expect(screen.getByRole("link", { name: "All Pubs" })).toHaveAttribute(
-        "href",
-        "/pubs"
-      );
-      expect(screen.getByRole("link", { name: "Profile" })).toHaveAttribute(
-        "href",
-        "/profile"
-      );
-      expect(screen.getByRole("link", { name: "Add Pub" })).toHaveAttribute(
-        "href",
-        "/add-pub"
-      );
+    beforeEach(() => {
+      vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({}, 401));
     });
 
-    it("shows the Register link", () => {
+    it("renders navigation links", async () => {
       render(<NavBar />);
 
-      expect(screen.getByRole("link", { name: "Register" })).toHaveAttribute(
-        "href",
-        "/register"
+      await waitFor(() =>
+        expect(screen.getByRole("link", { name: "Register" })).toBeInTheDocument()
       );
+
+      expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("href", "/");
+      expect(screen.getByRole("link", { name: "All Pubs" })).toHaveAttribute("href", "/pubs");
+      expect(screen.getByRole("link", { name: "Profile" })).toHaveAttribute("href", "/profile");
+      expect(screen.getByRole("link", { name: "Add Pub" })).toHaveAttribute("href", "/add-pub");
     });
 
-    it("does not show user email or logout button", () => {
+    it("shows the Register link", async () => {
       render(<NavBar />);
 
-      expect(screen.queryByRole("button", { name: "Logout" })).toBeNull();
+      expect(
+        await screen.findByRole("link", { name: "Register" })
+      ).toHaveAttribute("href", "/register");
+    });
+
+    it("does not show user email or logout button", async () => {
+      render(<NavBar />);
+
+      await waitFor(() =>
+        expect(screen.queryByRole("button", { name: "Logout" })).toBeNull()
+      );
     });
   });
 
   describe("when authenticated", () => {
     beforeEach(() => {
-      localStorage.setItem("token", makeToken({ email: "user@example.com" }));
+      vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        jsonResponse({ email: "user@example.com" })
+      );
     });
 
-    it("shows the user email", () => {
+    it("shows the user email", async () => {
       render(<NavBar />);
 
-      expect(screen.getByText("user@example.com")).toBeInTheDocument();
+      expect(await screen.findByText("user@example.com")).toBeInTheDocument();
     });
 
-    it("hides the Register link", () => {
+    it("hides the Register link", async () => {
       render(<NavBar />);
+
+      await screen.findByText("user@example.com");
 
       expect(screen.queryByRole("link", { name: "Register" })).toBeNull();
     });
 
-    it("shows the Logout button", () => {
+    it("shows the Logout button", async () => {
       render(<NavBar />);
 
       expect(
-        screen.getByRole("button", { name: "Logout" })
+        await screen.findByRole("button", { name: "Logout" })
       ).toBeInTheDocument();
     });
 
-    it("clicking Logout removes token and dispatches authChanged", () => {
+    it("clicking Logout calls /api/auth/logout, dispatches authChanged, and hides user info", async () => {
+      const fetchSpy = vi.spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(jsonResponse({ email: "user@example.com" }))
+        .mockResolvedValue(jsonResponse({ success: true }));
+
       const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+
       render(<NavBar />);
 
-      fireEvent.click(screen.getByRole("button", { name: "Logout" }));
+      const logoutButton = await screen.findByRole("button", { name: "Logout" });
+      fireEvent.click(logoutButton);
 
-      expect(localStorage.getItem("token")).toBeNull();
+      await waitFor(() =>
+        expect(screen.queryByText("user@example.com")).toBeNull()
+      );
+
+      expect(fetchSpy).toHaveBeenCalledWith("/api/auth/logout", { method: "POST" });
       expect(dispatchSpy).toHaveBeenCalledWith(
         expect.objectContaining({ type: "authChanged" })
       );
-    });
-
-    it("hides user email and logout button after logout", async () => {
-      render(<NavBar />);
-
-      fireEvent.click(screen.getByRole("button", { name: "Logout" }));
-
-      expect(screen.queryByText("user@example.com")).toBeNull();
-      expect(screen.queryByRole("button", { name: "Logout" })).toBeNull();
-    });
-  });
-
-  describe("when token is malformed", () => {
-    it("treats user as unauthenticated", () => {
-      localStorage.setItem("token", "not.a.valid.jwt");
-      render(<NavBar />);
-
-      expect(
-        screen.getByRole("link", { name: "Register" })
-      ).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Logout" })).toBeNull();
     });
   });
 
   describe("event listeners", () => {
-    it("updates auth state when storage event fires", () => {
+    it("updates auth state when authChanged event fires", async () => {
+      const fetchSpy = vi.spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(jsonResponse({ email: "user@example.com" }))
+        .mockResolvedValueOnce(jsonResponse({}, 401));
+
       render(<NavBar />);
 
-      expect(
-        screen.getByRole("link", { name: "Register" })
-      ).toBeInTheDocument();
+      await screen.findByText("user@example.com");
 
-      localStorage.setItem("token", makeToken({ email: "other@example.com" }));
-      fireEvent(window, new Event("storage"));
-
-      expect(screen.getByText("other@example.com")).toBeInTheDocument();
-    });
-
-    it("updates auth state when authChanged event fires", () => {
-      localStorage.setItem("token", makeToken({ email: "user@example.com" }));
-      render(<NavBar />);
-
-      expect(screen.getByText("user@example.com")).toBeInTheDocument();
-
-      localStorage.removeItem("token");
       fireEvent(window, new Event("authChanged"));
 
-      expect(screen.queryByText("user@example.com")).toBeNull();
+      await waitFor(() =>
+        expect(screen.queryByText("user@example.com")).toBeNull()
+      );
       expect(
         screen.getByRole("link", { name: "Register" })
       ).toBeInTheDocument();
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
     });
   });
 });

@@ -10,32 +10,29 @@ const NavBar = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const payload = JSON.parse(atob(token.split(".")[1]));
-          setUserEmail(payload.email || null);
-        } catch {
+    const fetchAuthState = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          setUserEmail(data.email || null);
+        } else {
           setUserEmail(null);
         }
-      } else {
+      } catch {
         setUserEmail(null);
       }
     };
-    checkAuth();
-    // Listen for storage changes (cross-tab and same tab)
-    window.addEventListener("storage", checkAuth);
-    // Listen for custom authChanged event
-    window.addEventListener("authChanged", checkAuth);
+
+    void fetchAuthState();
+    window.addEventListener("authChanged", fetchAuthState);
     return () => {
-      window.removeEventListener("storage", checkAuth);
-      window.removeEventListener("authChanged", checkAuth);
+      window.removeEventListener("authChanged", fetchAuthState);
     };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
     setUserEmail(null);
     window.dispatchEvent(new Event("authChanged"));
   };
