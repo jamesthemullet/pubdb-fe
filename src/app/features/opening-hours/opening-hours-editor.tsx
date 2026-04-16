@@ -5,6 +5,7 @@ import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
 import styles from "./opening-hours-editor.module.css";
+import { parseGoogleHours } from "./parse-google-hours";
 
 type DayHours = {
   open: string;
@@ -71,6 +72,21 @@ export default function OpeningHoursEditor({
     });
   };
 
+  const [googlePaste, setGooglePaste] = useState("");
+  const [googlePasteError, setGooglePasteError] = useState(false);
+
+  const applyGooglePaste = () => {
+    const parsed = parseGoogleHours(googlePaste);
+    if (!parsed) {
+      setGooglePasteError(true);
+      return;
+    }
+    setGooglePasteError(false);
+    setHours(parsed);
+    onChange(parsed);
+    setGooglePaste("");
+  };
+
   const [bulkOpen, setBulkOpen] = useState("");
   const [bulkClose, setBulkClose] = useState("");
 
@@ -91,6 +107,34 @@ export default function OpeningHoursEditor({
 
   return (
     <div className={styles.grid}>
+      <div className={styles.pasteRow}>
+        <Typography className={styles.pasteLabel}>Paste from Google</Typography>
+        <textarea
+          className={styles.pasteTextarea}
+          value={googlePaste}
+          onChange={(e) => {
+            setGooglePaste(e.target.value);
+            setGooglePasteError(false);
+          }}
+          placeholder={"Monday\n9 am–11 pm\n\nTuesday\n9 am–11 pm"}
+          rows={4}
+          aria-label="Paste opening hours from Google"
+        />
+        {googlePasteError && (
+          <Typography className={styles.pasteError}>
+            Could not parse the pasted text. Please check the format and try again.
+          </Typography>
+        )}
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={applyGooglePaste}
+          className={styles.applyButton}
+        >
+          Apply from Google
+        </Button>
+      </div>
       <div className={styles.bulkRow}>
         <Typography className={styles.dayLabel}>Apply to all</Typography>
         <Input
