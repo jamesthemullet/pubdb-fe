@@ -1,5 +1,4 @@
-"use client";
-
+import { Suspense } from "react";
 import Heading from "./components/heading/heading";
 import Typography from "./components/typography/typography";
 import Pricing from "./features/pricing/pricing";
@@ -11,7 +10,9 @@ export default function Home() {
       <Typography>
         Welcome to Pub DB - probably the best database of pubs in the world.
       </Typography>
-      <Pricing />
+      <Suspense fallback={<Typography>Loading pricing…</Typography>}>
+        <Pricing />
+      </Suspense>
     </>
   );
 }

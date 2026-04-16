@@ -1,3 +1,5 @@
+"use client";
+
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
