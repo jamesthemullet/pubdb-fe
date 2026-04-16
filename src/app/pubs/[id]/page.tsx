@@ -280,6 +280,8 @@ export default function PubPage() {
               alt={pub.name}
               width={400}
               height={300}
+              priority
+              sizes="(max-width: 480px) 100vw, 400px"
               className={styles.pubImage}
             />
           )}

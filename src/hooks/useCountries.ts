@@ -12,13 +12,55 @@ type RestCountryResponse = {
   cca2: string;
 };
 
-// Module-level cache: countries are static data that never change within a session.
-// Populated on first successful fetch; subsequent hook mounts return instantly.
+const STORAGE_KEY = "pubdb_countries_cache";
+const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const FETCH_TIMEOUT_MS = 5000;
+
+// Module-level memory cache: avoids re-parsing localStorage on every mount
+// within the same session.
 let countriesCache: CountryOption[] | null = null;
 
-/** Reset the module-level cache. Exposed for testing only. */
+/** Reset both the in-memory and localStorage caches. Exposed for testing only. */
 export function clearCountriesCache(): void {
   countriesCache = null;
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // localStorage unavailable — ignore
+    }
+  }
+}
+
+function readStorageCache(): CountryOption[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as {
+      data: CountryOption[];
+      timestamp: number;
+    };
+    if (Date.now() - parsed.timestamp > CACHE_TTL_MS) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return parsed.data;
+  } catch {
+    return null;
+  }
+}
+
+function writeStorageCache(data: CountryOption[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ data, timestamp: Date.now() })
+    );
+  } catch {
+    // localStorage full or unavailable — silently ignore
+  }
 }
 
 export function useCountries() {
@@ -31,33 +73,50 @@ export function useCountries() {
   const [countriesError, setCountriesError] = useState<string | null>(null);
 
   useEffect(() => {
+    // 1. Memory cache hit (same session, already fetched)
     if (countriesCache !== null) {
       setCountries(countriesCache);
       setCountriesLoading(false);
       return;
     }
 
+    // 2. localStorage cache hit (persisted from a previous session)
+    const stored = readStorageCache();
+    if (stored !== null) {
+      countriesCache = stored;
+      setCountries(stored);
+      setCountriesLoading(false);
+      return;
+    }
+
+    // 3. Network fetch with 5 s timeout
     let ignore = false;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
     async function fetchCountries() {
       setCountriesLoading(true);
       try {
         const res = await fetch(
-          "https://restcountries.com/v3.1/all?fields=name,cca2"
+          "https://restcountries.com/v3.1/all?fields=name,cca2",
+          { signal: controller.signal }
         );
         if (!res.ok) {
           throw new Error(`Failed to fetch countries: ${res.status}`);
         }
 
         const data: RestCountryResponse[] = await res.json();
+        const options = data
+          .map((country) => ({
+            name: country.name.common,
+            code: country.cca2,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        countriesCache = options;
+        writeStorageCache(options);
+
         if (!ignore) {
-          const options = data
-            .map((country) => ({
-              name: country.name.common,
-              code: country.cca2,
-            }))
-            .sort((a, b) => a.name.localeCompare(b.name));
-          countriesCache = options;
           setCountries(options);
         }
       } catch (err) {
@@ -67,6 +126,7 @@ export function useCountries() {
           );
         }
       } finally {
+        clearTimeout(timeoutId);
         if (!ignore) {
           setCountriesLoading(false);
         }
@@ -77,6 +137,8 @@ export function useCountries() {
 
     return () => {
       ignore = true;
+      controller.abort();
+      clearTimeout(timeoutId);
     };
   }, []);
 

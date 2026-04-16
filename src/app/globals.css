@@ -33,7 +33,7 @@
 html,
 body {
   overflow-x: hidden;
-  min-height: 105vh;
+  min-height: 100vh;
 }
 
 body {
