@@ -1,15 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
 import type { Pub } from "@/types/pub";
 import styles from "./page.module.css";
 
+const PAGE_SIZE = 50;
+
 export default function Pubs() {
   const [pubs, setPubs] = useState<Pub[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,31 +21,25 @@ export default function Pubs() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      setPage(0);
       setDebouncedSearchTerm(searchTerm);
-    }, 100);
-
+    }, 300);
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const filteredPubs = useMemo(() => {
-    if (!debouncedSearchTerm) return pubs;
-
-    const searchLower = debouncedSearchTerm.toLowerCase();
-
-    return pubs.filter(
-      (pub) =>
-        pub.name.toLowerCase().includes(searchLower) ||
-        pub.city.toLowerCase().includes(searchLower) ||
-        pub.address.toLowerCase().includes(searchLower)
-    );
-  }, [pubs, debouncedSearchTerm]);
-
   useEffect(() => {
     async function fetchPubs() {
-      const apiUrl = API_URL;
+      setLoading(true);
+      setError(null);
       try {
-        setError(null);
-        const res = await fetch(`${apiUrl}/pubs?limit=10000`);
+        const params = new URLSearchParams({
+          limit: String(PAGE_SIZE),
+          offset: String(page * PAGE_SIZE),
+        });
+        if (debouncedSearchTerm) {
+          params.set("search", debouncedSearchTerm);
+        }
+        const res = await fetch(`${API_URL}/pubs?${params}`);
 
         if (!res.ok) {
           const errorData = await res.json();
@@ -50,6 +48,11 @@ export default function Pubs() {
 
         const data = await res.json();
         setPubs(data.data);
+        if (typeof data.total === "number") {
+          setTotal(data.total);
+        } else {
+          setTotal(null);
+        }
       } catch (error: unknown) {
         const err = error as {
           response?: Response;
@@ -73,7 +76,12 @@ export default function Pubs() {
     }
 
     fetchPubs();
-  }, []);
+  }, [page, debouncedSearchTerm]);
+
+  const hasNextPage = pubs.length === PAGE_SIZE;
+  const hasPrevPage = page > 0;
+  const start = page * PAGE_SIZE + 1;
+  const end = page * PAGE_SIZE + pubs.length;
 
   return (
     <>
@@ -86,9 +94,11 @@ export default function Pubs() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {debouncedSearchTerm && (
+        {pubs.length > 0 && (
           <Typography>
-            Showing {filteredPubs.length} of {pubs.length} pubs
+            {total !== null
+              ? `Showing ${start}–${end} of ${total} pubs`
+              : `Showing ${start}–${end}`}
           </Typography>
         )}
       </div>
@@ -97,28 +107,50 @@ export default function Pubs() {
         <Typography>Loading pubs…</Typography>
       ) : error ? (
         <div>
-          <Typography className={styles.errorText}>Error loading pubs: {error}</Typography>
-          <button type="button" onClick={() => window.location.reload()}>Try Again</button>
+          <Typography className={styles.errorText}>
+            Error loading pubs: {error}
+          </Typography>
+          <button type="button" onClick={() => window.location.reload()}>
+            Try Again
+          </button>
         </div>
-      ) : !pubs || pubs.length === 0 ? (
-        <Typography>No pubs found in the database.</Typography>
+      ) : pubs.length === 0 ? (
+        <Typography>
+          No pubs found
+          {debouncedSearchTerm ? " matching your search" : " in the database"}.
+        </Typography>
       ) : (
         <div>
           <Link href="/add-pub">
             <button type="button">Add Pub</button>
           </Link>
-          {filteredPubs.length && (
-            <ul>
-              {filteredPubs.map((pub) => (
-                <li key={pub.id}>
-                  <Link href={`/pubs/${pub.id}`} prefetch={false}>
-                    <strong>{pub.name}</strong>
-                  </Link>{" "}
-                  – {pub.city}
-                </li>
-              ))}
-            </ul>
-          )}
+          <ul>
+            {pubs.map((pub) => (
+              <li key={pub.id}>
+                <Link href={`/pubs/${pub.id}`} prefetch={false}>
+                  <strong>{pub.name}</strong>
+                </Link>{" "}
+                – {pub.city}
+              </li>
+            ))}
+          </ul>
+          <div>
+            <button
+              type="button"
+              onClick={() => setPage((p) => p - 1)}
+              disabled={!hasPrevPage}
+            >
+              Previous
+            </button>
+            <span>Page {page + 1}</span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={!hasNextPage}
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </>
