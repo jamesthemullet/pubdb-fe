@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
@@ -227,6 +227,28 @@ const AddPubPage = () => {
     }
   };
 
+  const handleCoreFieldChange = useCallback(
+    (field: string, value: unknown) => {
+      switch (field) {
+        case "name": setName(value as string); break;
+        case "city": setCity(value as string); break;
+        case "country": setCountry(value as string); break;
+        case "address": setAddress(value as string); break;
+        case "postcode": setPostcode(value as string); break;
+        case "lat": setLat(value as number | undefined); break;
+        default: setLng(value as number | undefined);
+      }
+    },
+    []
+  );
+
+  const handleAmenityChange = useCallback(
+    (key: PubAmenityKey, checked: boolean) => {
+      setAmenities((prev) => ({ ...prev, [key]: checked }));
+    },
+    []
+  );
+
   return (
     <>
       <Typography variant="headingMedium">Add a Pub</Typography>
@@ -269,17 +291,7 @@ const AddPubPage = () => {
                 lat,
                 lng,
               }}
-              onFieldChange={(field, value) => {
-                switch (field) {
-                  case "name": setName(value as string); break;
-                  case "city": setCity(value as string); break;
-                  case "country": setCountry(value as string); break;
-                  case "address": setAddress(value as string); break;
-                  case "postcode": setPostcode(value as string); break;
-                  case "lat": setLat(value as number | undefined); break;
-                  default: setLng(value as number | undefined);
-                }
-              }}
+              onFieldChange={handleCoreFieldChange}
               countries={countries}
               countriesLoading={countriesLoading}
               countriesError={countriesError}
@@ -359,12 +371,7 @@ const AddPubPage = () => {
                 </div>
                 <PubAmenitiesFields
                   values={amenities}
-                  onChange={(key, checked) =>
-                    setAmenities((prev) => ({
-                      ...prev,
-                      [key]: checked,
-                    }))
-                  }
+                  onChange={handleAmenityChange}
                   containerClassName={styles.amenitiesGrid}
                   labelClassName={styles.amenityLabel}
                   idPrefix="amenity"

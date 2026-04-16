@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useParams } from "next/navigation";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import Input from "@/app/components/input/Input";
@@ -36,10 +36,10 @@ export default function PubPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const { countries, countriesLoading, countriesError } = useCountries();
 
-  const getCountryName = (code: string) => {
+  const getCountryName = useCallback((code: string) => {
     const country = countries.find((c) => c.code === code);
     return country?.name || code;
-  };
+  }, [countries]);
   const { beerTypeOptions, beerTypesLoading, beerTypesError } = useBeerTypes();
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function PubPage() {
     if (id) fetchPub();
   }, [id]);
 
-  const handleEditClick = () => {
+  const handleEditClick = useCallback(() => {
     if (pub) {
       setEditFields({
         ...pub,
@@ -92,9 +92,9 @@ export default function PubPage() {
       setFieldErrors(initialErrors);
       setEditing(true);
     }
-  };
+  }, [pub]);
 
-  const handleFieldChange = (field: keyof Pub, value: Pub[keyof Pub]) => {
+  const handleFieldChange = useCallback((field: keyof Pub, value: Pub[keyof Pub]) => {
     setEditFields((prev) => ({ ...prev, [field]: value }));
     if (["name", "city", "address", "postcode", "country"].includes(field)) {
       setFieldErrors((prev) => ({
@@ -122,9 +122,9 @@ export default function PubPage() {
         phoneError: "",
       }));
     }
-  };
+  }, []);
 
-  const toggleBeerType = (beerTypeId: string) => {
+  const toggleBeerType = useCallback((beerTypeId: string) => {
     setEditFields((prev) => {
       const current = new Set(prev.beerTypeIds ?? []);
       if (current.has(beerTypeId)) {
@@ -134,31 +134,31 @@ export default function PubPage() {
       }
       return { ...prev, beerTypeIds: Array.from(current) };
     });
-  };
+  }, []);
 
-  const updateBeerGarden = (index: number, patch: Partial<BeerGarden>) => {
+  const updateBeerGarden = useCallback((index: number, patch: Partial<BeerGarden>) => {
     setEditFields((prev) => {
       const gardens = [...(prev.beerGardens ?? [])];
       const current = gardens[index] ?? createEmptyBeerGarden();
       gardens[index] = { ...current, ...patch };
       return { ...prev, beerGardens: gardens };
     });
-  };
+  }, []);
 
-  const addBeerGarden = () => {
+  const addBeerGarden = useCallback(() => {
     setEditFields((prev) => ({
       ...prev,
       beerGardens: [...(prev.beerGardens ?? []), createEmptyBeerGarden()],
     }));
-  };
+  }, []);
 
-  const removeBeerGarden = (index: number) => {
+  const removeBeerGarden = useCallback((index: number) => {
     setEditFields((prev) => {
       const gardens = [...(prev.beerGardens ?? [])];
       gardens.splice(index, 1);
       return { ...prev, beerGardens: gardens };
     });
-  };
+  }, []);
 
   const isBeerGarden = (item: unknown): item is BeerGarden => {
     return (
@@ -168,7 +168,7 @@ export default function PubPage() {
     );
   };
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!pub) return;
 
     const requiredFields: (keyof Pub)[] = [
@@ -255,7 +255,7 @@ export default function PubPage() {
     } catch (_err) {
       setSaveError("Network error");
     }
-  };
+  }, [pub, editFields, fieldErrors]);
 
   const isSaveDisabled =
     Object.values(fieldErrors).some((err) => !!err) ||

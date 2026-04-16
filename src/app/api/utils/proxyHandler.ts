@@ -3,7 +3,7 @@ import { getServerApiUrl } from "@/lib/serverApiUrl";
 
 export function createApiProxyHandler(
   endpointPath: string,
-  options?: { forwardAuth?: boolean; resourceName?: string }
+  options?: { forwardAuth?: boolean; resourceName?: string; cache?: RequestCache }
 ) {
   return async (request: Request) => {
     const apiUrl = getServerApiUrl();
@@ -24,7 +24,7 @@ export function createApiProxyHandler(
     try {
       const response = await fetch(`${apiUrl}${endpointPath}`, {
         headers,
-        cache: "no-store",
+        cache: options?.cache ?? "no-store",
       });
       const data = await response.json().catch(() => null);
 

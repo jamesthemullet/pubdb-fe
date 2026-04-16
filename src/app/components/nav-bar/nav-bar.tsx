@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Button from "../button/button";
 import Typography from "../typography/typography";
 import styles from "./nav-bar.module.css";
@@ -34,11 +34,11 @@ const NavBar = () => {
     };
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
     setUserEmail(null);
     window.dispatchEvent(new Event("authChanged"));
-  };
+  }, []);
 
   return (
     <nav className={styles.nav}>
