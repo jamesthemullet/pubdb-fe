@@ -82,6 +82,7 @@ export default function Pubs() {
       <div>
         <Input
           type="text"
+          aria-label="Search pubs"
           placeholder="Search pubs by name, city, country, or address..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -96,7 +97,7 @@ export default function Pubs() {
       {loading ? (
         <Typography>Loading pubs…</Typography>
       ) : error ? (
-        <div>
+        <div role="alert">
           <Typography className={styles.errorText}>Error loading pubs: {error}</Typography>
           <button type="button" onClick={() => window.location.reload()}>Try Again</button>
         </div>

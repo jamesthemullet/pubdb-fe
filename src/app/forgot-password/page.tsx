@@ -69,13 +69,13 @@ export default function ForgotPasswordPage() {
       </form>
 
       {message && (
-        <div className={styles.success}>
+        <div className={styles.success} role="status">
           <Typography>{message}</Typography>
         </div>
       )}
 
       {error && (
-        <div className={styles.error}>
+        <div className={styles.error} role="alert">
           <Typography>
             {typeof error === "string" ? error : JSON.stringify(error)}
           </Typography>
