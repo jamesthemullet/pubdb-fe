@@ -70,7 +70,9 @@ function ResetPasswordForm() {
     return (
       <div className={styles.container}>
         <Typography variant="headingMedium">Invalid Reset Link</Typography>
-        <Typography>This password reset link is invalid or has expired.</Typography>
+        <Typography>
+          This password reset link is invalid or has expired.
+        </Typography>
         <div className={styles.invalidLink}>
           <a href="/forgot-password">Request a new password reset</a>
         </div>
@@ -114,7 +116,7 @@ function ResetPasswordForm() {
       </form>
 
       {message && (
-        <div className={styles.success} role="status">
+        <div className={styles.success}>
           <Typography>{message}</Typography>
           <div className={styles.successLink}>
             <a href="/register">Go to Login</a>
