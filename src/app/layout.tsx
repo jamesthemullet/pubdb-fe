@@ -20,13 +20,13 @@ export const metadata: Metadata = {
     default: "Pub DB",
   },
   description:
-    "Browse and contribute to the world's best database of pubs. Search pubs by name, city, or address.",
+    "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
   openGraph: {
     type: "website",
     siteName: "Pub DB",
     title: "Pub DB",
     description:
-      "Browse and contribute to the world's best database of pubs. Search pubs by name, city, or address.",
+      "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
   },
 };
 
