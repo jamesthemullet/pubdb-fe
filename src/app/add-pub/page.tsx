@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
@@ -236,7 +237,7 @@ const AddPubPage = () => {
           <Typography variant="bodyMedium">
             You must be logged in to add a pub.
           </Typography>
-          <a href="/register">Register or Login</a>
+          <Link href="/register">Register or Login</Link>
         </div>
       ) : !user.approved ? (
         <div>
