@@ -71,7 +71,9 @@ function ResetPasswordForm() {
     return (
       <div className={styles.container}>
         <Typography variant="headingMedium">Invalid Reset Link</Typography>
-        <Typography>This password reset link is invalid or has expired.</Typography>
+        <Typography>
+          This password reset link is invalid or has expired.
+        </Typography>
         <div className={styles.invalidLink}>
           <Link href="/forgot-password">Request a new password reset</Link>
         </div>
@@ -124,7 +126,7 @@ function ResetPasswordForm() {
       )}
 
       {error && (
-        <div className={styles.error}>
+        <div className={styles.error} role="alert">
           <Typography>
             {typeof error === "string" ? error : JSON.stringify(error)}
           </Typography>

@@ -487,7 +487,7 @@ describe("Pricing component", () => {
       );
       await screen.findByText(/network error/i);
 
-      fireEvent.click(screen.getByRole("button", { name: /×/i }));
+      fireEvent.click(screen.getByRole("button", { name: /dismiss/i }));
 
       await waitFor(() => {
         expect(screen.queryByText(/network error/i)).not.toBeInTheDocument();

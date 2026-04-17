@@ -407,6 +407,7 @@ const Pricing: React.FC = () => {
             className={styles.feedbackBannerDismiss}
             variant="secondary"
             size="sm"
+            aria-label="Dismiss"
           >
             ×
           </Button>

@@ -187,7 +187,7 @@ export default function RegisterLoginPage() {
           : "Need an account? Register"}
       </button>
       {error && (
-        <div>{typeof error === "string" ? error : JSON.stringify(error)}</div>
+        <div role="alert">{typeof error === "string" ? error : JSON.stringify(error)}</div>
       )}
       {success && (
         <div>
