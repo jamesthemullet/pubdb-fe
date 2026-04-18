@@ -12,7 +12,6 @@ const PAGE_SIZE = 50;
 
 export default function Pubs() {
   const [pubs, setPubs] = useState<Pub[]>([]);
-  const [total, setTotal] = useState<number | null>(null);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +33,7 @@ export default function Pubs() {
       try {
         const params = new URLSearchParams({
           limit: String(PAGE_SIZE),
-          offset: String(page * PAGE_SIZE),
+          page: String(page + 1),
         });
         if (debouncedSearchTerm) {
           params.set("search", debouncedSearchTerm);
@@ -48,11 +47,6 @@ export default function Pubs() {
 
         const data = await res.json();
         setPubs(data.data);
-        if (typeof data.total === "number") {
-          setTotal(data.total);
-        } else {
-          setTotal(null);
-        }
       } catch (error: unknown) {
         const err = error as {
           response?: Response;
@@ -80,8 +74,6 @@ export default function Pubs() {
 
   const hasNextPage = pubs.length === PAGE_SIZE;
   const hasPrevPage = page > 0;
-  const start = page * PAGE_SIZE + 1;
-  const end = page * PAGE_SIZE + pubs.length;
 
   return (
     <>
@@ -95,12 +87,8 @@ export default function Pubs() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {pubs.length > 0 && (
-          <Typography>
-            {total !== null
-              ? `Showing ${start}–${end} of ${total} pubs`
-              : `Showing ${start}–${end}`}
-          </Typography>
+        {debouncedSearchTerm && pubs.length > 0 && (
+          <Typography>{`Showing ${pubs.length} pubs`}</Typography>
         )}
       </div>
 
@@ -108,8 +96,12 @@ export default function Pubs() {
         <Typography>Loading pubs…</Typography>
       ) : error ? (
         <div role="alert">
-          <Typography className={styles.errorText}>Error loading pubs: {error}</Typography>
-          <button type="button" onClick={() => window.location.reload()}>Try Again</button>
+          <Typography className={styles.errorText}>
+            Error loading pubs: {error}
+          </Typography>
+          <button type="button" onClick={() => window.location.reload()}>
+            Try Again
+          </button>
         </div>
       ) : pubs.length === 0 ? (
         <Typography>
