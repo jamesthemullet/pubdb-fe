@@ -127,9 +127,13 @@ describe("Pubs page", () => {
 
 	describe("search filtering", () => {
 		it("filters pubs by name after debounce", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ data: SAMPLE_PUBS }),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+				const search = new URL(url as string).searchParams.get("search") ?? "";
+				const filtered = SAMPLE_PUBS.filter((p) =>
+					p.name.toLowerCase().includes(search.toLowerCase()),
+				);
+				return Promise.resolve(jsonResponse({ data: filtered }));
+			});
 
 			render(<Pubs />);
 
@@ -148,9 +152,13 @@ describe("Pubs page", () => {
 		});
 
 		it("filters pubs by city", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ data: SAMPLE_PUBS }),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+				const search = new URL(url as string).searchParams.get("search") ?? "";
+				const filtered = SAMPLE_PUBS.filter((p) =>
+					p.city.toLowerCase().includes(search.toLowerCase()),
+				);
+				return Promise.resolve(jsonResponse({ data: filtered }));
+			});
 
 			render(<Pubs />);
 
@@ -169,9 +177,13 @@ describe("Pubs page", () => {
 		});
 
 		it("filters pubs by address", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ data: SAMPLE_PUBS }),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+				const search = new URL(url as string).searchParams.get("search") ?? "";
+				const filtered = SAMPLE_PUBS.filter((p) =>
+					p.address.toLowerCase().includes(search.toLowerCase()),
+				);
+				return Promise.resolve(jsonResponse({ data: filtered }));
+			});
 
 			render(<Pubs />);
 
@@ -190,9 +202,13 @@ describe("Pubs page", () => {
 		});
 
 		it("shows match count when search term is active", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ data: SAMPLE_PUBS }),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+				const search = new URL(url as string).searchParams.get("search") ?? "";
+				const filtered = SAMPLE_PUBS.filter((p) =>
+					p.city.toLowerCase().includes(search.toLowerCase()),
+				);
+				return Promise.resolve(jsonResponse({ data: search ? filtered : SAMPLE_PUBS }));
+			});
 
 			render(<Pubs />);
 
@@ -204,7 +220,7 @@ describe("Pubs page", () => {
 			fireEvent.change(searchInput, { target: { value: "london" } });
 
 			await waitFor(() => {
-				expect(screen.getByText(/Showing 2 of 3 pubs/i)).toBeInTheDocument();
+				expect(screen.getByText(/Showing 2 pubs/i)).toBeInTheDocument();
 			});
 		});
 

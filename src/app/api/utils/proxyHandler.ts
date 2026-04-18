@@ -22,7 +22,8 @@ export function createApiProxyHandler(
     }
 
     try {
-      const response = await fetch(`${apiUrl}${endpointPath}`, {
+      const { search } = new URL(request.url);
+      const response = await fetch(`${apiUrl}${endpointPath}${search}`, {
         headers,
         cache: "no-store",
       });
