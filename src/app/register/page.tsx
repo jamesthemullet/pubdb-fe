@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
@@ -169,7 +170,7 @@ export default function RegisterLoginPage() {
       </form>
       {mode === "login" && (
         <div className={styles.forgotPasswordLink}>
-          <a href="/forgot-password">Forgot your password?</a>
+          <Link href="/forgot-password">Forgot your password?</Link>
         </div>
       )}
       <button
@@ -186,7 +187,7 @@ export default function RegisterLoginPage() {
           : "Need an account? Register"}
       </button>
       {error && (
-        <div>{typeof error === "string" ? error : JSON.stringify(error)}</div>
+        <div role="alert">{typeof error === "string" ? error : JSON.stringify(error)}</div>
       )}
       {success && (
         <div>

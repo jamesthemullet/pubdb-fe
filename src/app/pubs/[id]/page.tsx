@@ -1,6 +1,7 @@
 "use client"; // Needed for client-side hooks
 
 import Image from "next/image";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 
 import { useEffect, useState } from "react";
@@ -1275,7 +1276,7 @@ function EditButton({
   if (!user) {
     return (
       <div className={styles.editButtonMessage}>
-        <a href="/register">Log in to edit this pub</a>
+        <Link href="/register">Log in to edit this pub</Link>
       </div>
     );
   }

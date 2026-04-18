@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
@@ -70,9 +71,11 @@ function ResetPasswordForm() {
     return (
       <div className={styles.container}>
         <Typography variant="headingMedium">Invalid Reset Link</Typography>
-        <Typography>This password reset link is invalid or has expired.</Typography>
+        <Typography>
+          This password reset link is invalid or has expired.
+        </Typography>
         <div className={styles.invalidLink}>
-          <a href="/forgot-password">Request a new password reset</a>
+          <Link href="/forgot-password">Request a new password reset</Link>
         </div>
       </div>
     );
@@ -117,13 +120,13 @@ function ResetPasswordForm() {
         <div className={styles.success}>
           <Typography>{message}</Typography>
           <div className={styles.successLink}>
-            <a href="/register">Go to Login</a>
+            <Link href="/register">Go to Login</Link>
           </div>
         </div>
       )}
 
       {error && (
-        <div className={styles.error}>
+        <div className={styles.error} role="alert">
           <Typography>
             {typeof error === "string" ? error : JSON.stringify(error)}
           </Typography>
@@ -131,7 +134,7 @@ function ResetPasswordForm() {
       )}
 
       <div className={styles.backLink}>
-        <a href="/register">Back to Login</a>
+        <Link href="/register">Back to Login</Link>
       </div>
     </div>
   );

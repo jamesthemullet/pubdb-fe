@@ -1,3 +1,5 @@
+"use client";
+
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
@@ -405,6 +407,7 @@ const Pricing: React.FC = () => {
             className={styles.feedbackBannerDismiss}
             variant="secondary"
             size="sm"
+            aria-label="Dismiss"
           >
             ×
           </Button>
