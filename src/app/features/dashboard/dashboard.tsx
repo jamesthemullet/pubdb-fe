@@ -395,12 +395,12 @@ const Dashboard: React.FC = () => {
           </Typography>
           {!dashboardData.user.approved && (
             <Typography variant="bodySmall" className={styles.warningText}>
-              ⚠️ Account pending approval
+              <span aria-label="Warning">⚠️</span> Account pending approval
             </Typography>
           )}
           {!dashboardData.user.emailVerified && (
             <Typography variant="bodySmall" className={styles.warningText}>
-              ⚠️ Email not verified
+              <span aria-label="Warning">⚠️</span> Email not verified
             </Typography>
           )}
         </div>

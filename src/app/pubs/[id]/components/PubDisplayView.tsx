@@ -63,7 +63,7 @@ export default function PubDisplayView({ pub, getCountryName }: Props) {
           Website:
         </Typography>{" "}
         {pub.website ? (
-          <a href={pub.website} target="_blank" rel="noopener noreferrer">
+          <a href={pub.website} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${pub.name} website (opens in new tab)`}>
             {pub.website}
           </a>
         ) : (
@@ -283,6 +283,7 @@ function BeerGardenDisplayCard({ garden }: { garden: BeerGarden }) {
             href={garden.imageUrl}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label={`View ${garden.name || "beer garden"} image (opens in new tab)`}
           >
             {garden.imageUrl}
           </a>

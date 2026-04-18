@@ -93,7 +93,7 @@ export default function Pubs() {
       </div>
 
       {loading ? (
-        <Typography>Loading pubs…</Typography>
+        <Typography role="status" aria-live="polite">Loading pubs…</Typography>
       ) : error ? (
         <div role="alert">
           <Typography className={styles.errorText}>
