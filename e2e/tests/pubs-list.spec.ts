@@ -89,7 +89,19 @@ test.describe("Pubs list (/pubs)", () => {
 
   test.describe("search", () => {
     test.beforeEach(async ({ page }) => {
-      await page.route(PUBS_API, (route) => route.fulfill(pubsResponse()));
+      await page.route(PUBS_API, (route, request) => {
+        const url = new URL(request.url());
+        const search = (url.searchParams.get("search") ?? "").toLowerCase();
+        const filtered = search
+          ? fakePubs.filter(
+              (p) =>
+                p.name.toLowerCase().includes(search) ||
+                p.city.toLowerCase().includes(search) ||
+                p.address.toLowerCase().includes(search),
+            )
+          : fakePubs;
+        return route.fulfill(pubsResponse(filtered));
+      });
       await page.goto("/pubs");
       await page.getByRole("link", { name: "The Harp" }).waitFor();
     });
@@ -119,7 +131,7 @@ test.describe("Pubs list (/pubs)", () => {
     test("shows result count while searching", async ({ page }) => {
       await page.getByPlaceholder(/search pubs/i).fill("Harp");
 
-      await expect(page.getByText(/Showing 1 of 3 pubs/)).toBeVisible();
+      await expect(page.getByText(/Showing 1 pubs/)).toBeVisible();
     });
 
     test("hides result count when search is cleared", async ({ page }) => {
