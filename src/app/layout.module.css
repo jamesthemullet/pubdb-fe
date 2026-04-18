@@ -1,3 +1,20 @@
+.skipLink {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--foreground);
+  color: var(--background);
+  padding: 8px 16px;
+  z-index: 9999;
+  text-decoration: none;
+  font-weight: 600;
+  transition: top 0.1s;
+}
+
+.skipLink:focus {
+  top: 0;
+}
+
 .page {
   display: flex;
   justify-content: center;

@@ -272,7 +272,7 @@ export default function PubPage() {
         <Typography>Loading pub details…</Typography>
       ) : pub ? (
         <>
-          <Typography as="h2" variant="headingMedium">
+          <Typography as="h1" variant="headingMedium">
             {pub.name}
           </Typography>
           {pub.imageUrl && (

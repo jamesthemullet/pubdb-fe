@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import Button from "../../components/button/button";
@@ -83,6 +83,8 @@ const Dashboard: React.FC = () => {
   const [forgotKeyCopyStatus, setForgotKeyCopyStatus] = useState<
     "idle" | "copied" | "error"
   >("idle");
+  const forgotKeyModalRef = useRef<HTMLDivElement>(null);
+  const forgotKeyModalTriggerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -277,6 +279,39 @@ const Dashboard: React.FC = () => {
     setShowForgotKeyModal(false);
     setForgotKeyDetails(null);
     setForgotKeyCopyStatus("idle");
+    forgotKeyModalTriggerRef.current?.focus();
+  }
+
+  useEffect(() => {
+    if (showForgotKeyModal && forgotKeyDetails) {
+      forgotKeyModalTriggerRef.current = document.activeElement as HTMLElement;
+      const focusable = forgotKeyModalRef.current?.querySelector<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      focusable?.focus();
+    }
+  }, [showForgotKeyModal, forgotKeyDetails]);
+
+  function handleForgotKeyModalKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === "Escape") {
+      handleCloseForgotKeyModal();
+      return;
+    }
+    if (e.key !== "Tab" || !forgotKeyModalRef.current) return;
+    const focusableElements = Array.from(
+      forgotKeyModalRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    );
+    const first = focusableElements[0];
+    const last = focusableElements[focusableElements.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last?.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first?.focus();
+    }
   }
 
   if (!isAuthenticated) {
@@ -320,8 +355,15 @@ const Dashboard: React.FC = () => {
     <>
       {forgotKeyDetails && showForgotKeyModal && (
         <div className={styles.modalOverlay}>
-          <div className={styles.modalCard}>
-            <Typography variant="headingSmall">
+          <div
+            ref={forgotKeyModalRef}
+            className={styles.modalCard}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="forgot-key-modal-title"
+            onKeyDown={handleForgotKeyModalKeyDown}
+          >
+            <Typography variant="headingSmall" id="forgot-key-modal-title">
               New API key generated
             </Typography>
             <Typography variant="bodySmall" className={styles.modalDescription}>
@@ -384,7 +426,7 @@ const Dashboard: React.FC = () => {
         </div>
       )}
       <div className={styles.mainCard}>
-        <Typography variant="headingMedium">Dashboard</Typography>
+        <Typography variant="headingMedium" as="h1">Dashboard</Typography>
 
         <div className={styles.userInfo}>
           <Typography variant="bodyMedium">
@@ -523,6 +565,7 @@ const Dashboard: React.FC = () => {
                         value={parseFloat(hourlyUsage.percentage)}
                         max={100}
                         data-danger={parseFloat(hourlyUsage.percentage) > 80}
+                        aria-label={`Hourly usage: ${hourlyUsage.percentage}% used`}
                       />
                       <Typography variant="bodySmall">
                         {hourlyUsage.percentage}% used
@@ -541,6 +584,7 @@ const Dashboard: React.FC = () => {
                         value={parseFloat(dailyUsage.percentage)}
                         max={100}
                         data-danger={parseFloat(dailyUsage.percentage) > 80}
+                        aria-label={`Daily usage: ${dailyUsage.percentage}% used`}
                       />
                       <Typography variant="bodySmall">
                         {dailyUsage.percentage}% used
@@ -559,6 +603,7 @@ const Dashboard: React.FC = () => {
                         value={parseFloat(monthlyUsage.percentage)}
                         max={100}
                         data-danger={parseFloat(monthlyUsage.percentage) > 80}
+                        aria-label={`Monthly usage: ${monthlyUsage.percentage}% used`}
                       />
                       <Typography variant="bodySmall">
                         {monthlyUsage.percentage}% used
