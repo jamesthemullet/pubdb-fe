@@ -108,7 +108,9 @@ export default function OpeningHoursEditor({
   return (
     <div className={styles.grid}>
       <div className={styles.pasteRow}>
-        <Typography className={styles.pasteLabel}>Paste from Google</Typography>
+        <Typography className={styles.pasteLabel}>
+          Paste from Google Maps
+        </Typography>
         <textarea
           className={styles.pasteTextarea}
           value={googlePaste}
@@ -122,7 +124,8 @@ export default function OpeningHoursEditor({
         />
         {googlePasteError && (
           <Typography className={styles.pasteError}>
-            Could not parse the pasted text. Please check the format and try again.
+            Could not parse the pasted text. Please check the format (copy the
+            block directly from Google Maps) and try again.
           </Typography>
         )}
         <Button
