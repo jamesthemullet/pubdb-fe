@@ -287,7 +287,7 @@ function getBeerTypeIdsFromPub(pub: Pub): string[] {
         if ("beerTypeId" in entry) return entry.beerTypeId;
         return entry.id;
       })
-      .filter(Boolean) as string[];
+      .filter((s): s is string => typeof s === "string" && s.length > 0);
   }
   if (pub.beerType) {
     if (typeof pub.beerType === "string") return [pub.beerType];
@@ -351,7 +351,7 @@ function createEmptyBeerGarden(): BeerGarden {
 }
 
 function isBeerGarden(item: unknown): item is BeerGarden {
-  return typeof item === "object" && item !== null && "name" in (item as BeerGarden);
+  return typeof item === "object" && item !== null && "name" in item;
 }
 
 function sanitizeBeerGarden(garden: BeerGarden): BeerGarden {
