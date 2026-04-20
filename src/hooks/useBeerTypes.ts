@@ -10,18 +10,24 @@ export function clearBeerTypesCache() {
 	beerTypesCache = null;
 }
 
+function isBeerType(item: unknown): item is BeerType {
+	if (typeof item !== "object" || item === null) return false;
+	const obj = item as Record<string, unknown>;
+	return typeof obj.id === "string" && typeof obj.name === "string";
+}
+
 function normalizeBeerTypes(payload: unknown): BeerType[] {
 	if (!payload) return [];
 	if (Array.isArray(payload)) {
-		return payload as BeerType[];
+		return payload.filter(isBeerType);
 	}
 	if (typeof payload === "object") {
 		const record = payload as Record<string, unknown>;
 		if (Array.isArray(record.data)) {
-			return record.data as BeerType[];
+			return record.data.filter(isBeerType);
 		}
 		if (Array.isArray(record.beerTypes)) {
-			return record.beerTypes as BeerType[];
+			return record.beerTypes.filter(isBeerType);
 		}
 	}
 	return [];

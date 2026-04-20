@@ -1,5 +1,5 @@
 import Typography from "@/app/components/typography/typography";
-import type { BeerGarden, Pub } from "@/types/pub";
+import type { BeerGarden, OpeningHoursMap, Pub } from "@/types/pub";
 import styles from "../page.module.css";
 
 type Props = {
@@ -339,7 +339,7 @@ function getBeerTypeNames(pub: Pub): string[] {
   return [];
 }
 
-function renderOpeningHours(ohAny: unknown) {
+function renderOpeningHours(ohAny: OpeningHoursMap | string | null | undefined) {
   const weekdays = [
     "Monday",
     "Tuesday",
@@ -349,21 +349,15 @@ function renderOpeningHours(ohAny: unknown) {
     "Saturday",
     "Sunday",
   ];
-  let oh: Record<
-    string,
-    { open?: string; close?: string; closed?: boolean }
-  > | null = null;
+  let oh: OpeningHoursMap | null = null;
   if (typeof ohAny === "string") {
     try {
-      oh = JSON.parse(ohAny);
-    } catch (_e) {
+      oh = JSON.parse(ohAny) as OpeningHoursMap;
+    } catch {
       oh = null;
     }
-  } else if (ohAny && typeof ohAny === "object") {
-    oh = ohAny as Record<
-      string,
-      { open?: string; close?: string; closed?: boolean }
-    >;
+  } else if (ohAny != null) {
+    oh = ohAny;
   }
 
   if (!oh) {
@@ -381,10 +375,7 @@ function renderOpeningHours(ohAny: unknown) {
     );
   }
 
-  const map: Record<
-    string,
-    { open?: string; close?: string; closed?: boolean }
-  > = {};
+  const map: OpeningHoursMap = {};
   Object.entries(oh).forEach(([k, v]) => {
     map[k.toLowerCase()] = v;
   });
