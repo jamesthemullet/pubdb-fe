@@ -63,7 +63,29 @@ describe("Pubs (homepage component)", () => {
     );
   });
 
-  it("shows an error when the city is missing from the pub data", async () => {
+  it("renders city alongside the pub name", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse([
+        { id: "1", name: "The Harp", city: "London", address: "47 Chandos Place" },
+      ])
+    );
+
+    render(<Pubs />);
+
+    await screen.findByText("The Harp");
+    expect(screen.getByText(/London/)).toBeInTheDocument();
+  });
+
+  it("renders an empty list when the API returns no pubs", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse([]));
+
+    render(<Pubs />);
+
+    await screen.findByRole("list");
+    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+  });
+
+  it("renders an empty list when fetch throws a network error", async () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network down"));
 
     render(<Pubs />);
@@ -71,5 +93,18 @@ describe("Pubs (homepage component)", () => {
     await waitFor(() =>
       expect(screen.queryByText("Loading pubs…")).not.toBeInTheDocument()
     );
+    expect(screen.getByRole("list")).toBeInTheDocument();
+    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+  });
+
+  it("fetches from /api/pubs", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(jsonResponse([]));
+
+    render(<Pubs />);
+
+    await screen.findByRole("list");
+    expect(fetchSpy).toHaveBeenCalledWith("/api/pubs");
   });
 });
