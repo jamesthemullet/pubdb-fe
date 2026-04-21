@@ -70,8 +70,7 @@ function parseTimeRange(
   const openPart = timeStr.substring(0, splitIdx).trim();
   const closePart = timeStr.substring(splitIdx + 1).trim();
 
-  const closeAmPm =
-    closePart.match(/\s*(am|pm)$/i)?.[1]?.toLowerCase() ?? null;
+  const closeAmPm = closePart.match(/\s*(am|pm)$/i)?.[1]?.toLowerCase() ?? null;
 
   const closeTime = parseTimePart(closePart, closeAmPm);
   const openTime = parseTimePart(openPart, closeAmPm);
@@ -93,7 +92,7 @@ function parseTimePart(
   const hours = parseInt(parts[0], 10);
   const minutes = parts[1] ? parseInt(parts[1], 10) : 0;
 
-  if (isNaN(hours) || isNaN(minutes)) return null;
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
 
   let h = hours;
   if (ampm === "pm" && h !== 12) h += 12;

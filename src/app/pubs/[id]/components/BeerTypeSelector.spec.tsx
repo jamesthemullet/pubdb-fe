@@ -10,7 +10,9 @@ const BEER_TYPES: BeerType[] = [
   { id: "bt3", name: "Lager" },
 ];
 
-function renderSelector(overrides: Partial<React.ComponentProps<typeof BeerTypeSelector>> = {}) {
+function renderSelector(
+  overrides: Partial<React.ComponentProps<typeof BeerTypeSelector>> = {}
+) {
   const props = {
     selectedIds: [],
     options: BEER_TYPES,
@@ -97,9 +99,9 @@ describe("BeerTypeSelector", () => {
 
     it("checks all checkboxes when all ids are selected", () => {
       renderSelector({ selectedIds: ["bt1", "bt2", "bt3"] });
-      screen
-        .getAllByRole("checkbox")
-        .forEach((cb) => expect(cb).toBeChecked());
+      screen.getAllByRole("checkbox").forEach((cb) => {
+        expect(cb).toBeChecked();
+      });
     });
   });
 
