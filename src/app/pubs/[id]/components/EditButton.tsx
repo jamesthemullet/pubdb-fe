@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
+import type { AuthUser } from "@/hooks/useAuth";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "../page.module.css";
@@ -8,62 +9,15 @@ import styles from "../page.module.css";
 type Props = {
   pubName: string;
   pubId: string;
+  user: AuthUser;
   onEdit: () => void;
 };
 
-export default function EditButton({ pubName, pubId, onEdit }: Props) {
-  const [user, setUser] = useState<{
-    email: string;
-    approved?: boolean;
-    admin?: boolean;
-  } | null>(null);
+export default function EditButton({ pubName, pubId, user, onEdit }: Props) {
   const [deleteMessage, setDeleteMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setUser(null);
-        return;
-      }
-
-      try {
-        const res = await fetch(`${API_URL}/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setUser({ email: data.email, approved: data.approved, admin: data.admin });
-          return;
-        }
-      } catch {
-        // Fall through to token decoding fallback.
-      }
-
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setUser({
-          email: payload.email,
-          approved: payload.approved,
-          admin: payload.admin,
-        });
-      } catch {
-        setUser(null);
-      }
-    };
-
-    void checkAuth();
-    window.addEventListener("authChanged", checkAuth);
-    window.addEventListener("storage", checkAuth);
-    return () => {
-      window.removeEventListener("authChanged", checkAuth);
-      window.removeEventListener("storage", checkAuth);
-    };
-  }, []);
 
   if (!user) {
     return (

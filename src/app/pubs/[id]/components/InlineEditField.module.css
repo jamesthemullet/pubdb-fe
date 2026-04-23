@@ -1,0 +1,50 @@
+.field {
+  /* used as className on Typography — enables the hover selector below */
+}
+
+.field:hover .editLink {
+  opacity: 1;
+}
+
+.editLink {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.valueWrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.editWrapper {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.inlineInput {
+  min-width: 14rem;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.9em;
+}
+
+.inlineTextarea {
+  min-width: 20rem;
+  min-height: 4rem;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.9em;
+  resize: vertical;
+  vertical-align: top;
+}
+
+.boolOptions {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.inlineError {
+  color: var(--action-red);
+  font-size: 0.8em;
+}

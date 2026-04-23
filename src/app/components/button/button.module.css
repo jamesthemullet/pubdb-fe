@@ -56,6 +56,29 @@
   background-color: var(--action-red-hover);
 }
 
+.ghost {
+  background-color: transparent;
+  color: var(--text-muted);
+  border-color: transparent;
+  min-width: 0;
+  font-weight: 400;
+  font-style: italic;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0.05rem 0.2rem;
+}
+
+.ghost:hover {
+  background-color: transparent;
+  color: var(--brand);
+}
+
+.xs {
+  padding: 0.15rem 0.45rem;
+  font-size: 0.8rem;
+  min-width: 0;
+}
+
 .sm {
   padding: 0.4rem 0.85rem;
   font-size: 0.85rem;
