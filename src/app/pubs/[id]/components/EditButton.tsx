@@ -1,10 +1,10 @@
+import { useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
+import type { AuthUser } from "@/hooks/useAuth";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
-import type { AuthUser } from "@/hooks/useAuth";
 import styles from "../page.module.css";
-import { useState } from "react";
 
 type Props = {
   pubName: string;
