@@ -1,171 +1,207 @@
 import Typography from "@/app/components/typography/typography";
 import type { BeerGarden, OpeningHoursMap, Pub } from "@/types/pub";
 import styles from "../page.module.css";
+import InlineEditBooleanField from "./InlineEditBooleanField";
+import InlineEditField from "./InlineEditField";
 
 type Props = {
   pub: Pub;
   getCountryName: (code: string) => string;
+  canEdit?: boolean;
+  onInlineSave?: (field: keyof Pub, value: unknown) => Promise<string | null>;
 };
 
-export default function PubDisplayView({ pub, getCountryName }: Props) {
+export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineSave }: Props) {
+  const ce = !!(canEdit && onInlineSave);
+
+  const save =
+    (field: keyof Pub) =>
+    (val: string): Promise<string | null> =>
+      onInlineSave?.(field, val) ?? Promise.resolve(null);
+
+  const saveBool =
+    (field: keyof Pub) =>
+    (val: boolean | null): Promise<string | null> =>
+      onInlineSave?.(field, val) ?? Promise.resolve(null);
+
   return (
     <>
-      <Typography>
-        <Typography as="span" isBold>
-          City:
-        </Typography>{" "}
-        {pub.city}
-      </Typography>
+      <InlineEditField
+        label="City"
+        displayValue={pub.city}
+        initialValue={pub.city ?? ""}
+        onSave={save("city")}
+        validate={(val) => (!val.trim() ? "City is required" : null)}
+        canEdit={ce}
+      />
       <Typography>
         <Typography as="span" isBold>
           Country:
         </Typography>{" "}
         {getCountryName(pub.country)}
       </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Address:
-        </Typography>{" "}
-        {pub.address}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Postcode:
-        </Typography>{" "}
-        {pub.postcode}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Area:
-        </Typography>{" "}
-        {pub.area || "-"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Borough:
-        </Typography>{" "}
-        {pub.borough || "-"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Operator:
-        </Typography>{" "}
-        {pub.operator || "-"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Phone:
-        </Typography>{" "}
-        {pub.phone || "-"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Website:
-        </Typography>{" "}
-        {pub.website ? (
-          <a href={pub.website} target="_blank" rel="noopener noreferrer">
-            {pub.website}
-          </a>
-        ) : (
-          "-"
-        )}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Description:
-        </Typography>{" "}
-        {pub.description || "-"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Chain name:
-        </Typography>{" "}
-        {pub.chainName || "-"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Independent:
-        </Typography>{" "}
-        {pub.isIndependent == null ? "-" : pub.isIndependent ? "Yes" : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Food available:
-        </Typography>{" "}
-        {pub.hasFood == null ? "-" : pub.hasFood ? "Yes" : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Sunday roast:
-        </Typography>{" "}
-        {pub.hasSundayRoast == null ? "-" : pub.hasSundayRoast ? "Yes" : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Beer garden:
-        </Typography>{" "}
-        {pub.hasBeerGarden == null ? "-" : pub.hasBeerGarden ? "Yes" : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Cask ale:
-        </Typography>{" "}
-        {pub.hasCaskAle == null ? "-" : pub.hasCaskAle ? "Yes" : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Beer-focused:
-        </Typography>{" "}
-        {pub.isBeerFocused == null ? "-" : pub.isBeerFocused ? "Yes" : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Dog friendly:
-        </Typography>{" "}
-        {pub.isDogFriendly == null ? "-" : pub.isDogFriendly ? "Yes" : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Family friendly:
-        </Typography>{" "}
-        {pub.isFamilyFriendly == null
-          ? "-"
-          : pub.isFamilyFriendly
-          ? "Yes"
-          : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Step-free access:
-        </Typography>{" "}
-        {pub.hasStepFreeAccess == null
-          ? "-"
-          : pub.hasStepFreeAccess
-          ? "Yes"
-          : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Accessible toilet:
-        </Typography>{" "}
-        {pub.hasAccessibleToilet == null
-          ? "-"
-          : pub.hasAccessibleToilet
-          ? "Yes"
-          : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Live sport:
-        </Typography>{" "}
-        {pub.hasLiveSport == null ? "-" : pub.hasLiveSport ? "Yes" : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Live music:
-        </Typography>{" "}
-        {pub.hasLiveMusic == null ? "-" : pub.hasLiveMusic ? "Yes" : "No"}
-      </Typography>
+      <InlineEditField
+        label="Address"
+        displayValue={pub.address}
+        initialValue={pub.address ?? ""}
+        onSave={save("address")}
+        validate={(val) => (!val.trim() ? "Address is required" : null)}
+        canEdit={ce}
+      />
+      <InlineEditField
+        label="Postcode"
+        displayValue={pub.postcode}
+        initialValue={pub.postcode ?? ""}
+        onSave={save("postcode")}
+        validate={(val) => (!val.trim() ? "Postcode is required" : null)}
+        canEdit={ce}
+      />
+      <InlineEditField
+        label="Area"
+        displayValue={pub.area || "-"}
+        initialValue={pub.area ?? ""}
+        onSave={save("area")}
+        canEdit={ce}
+      />
+      <InlineEditField
+        label="Borough"
+        displayValue={pub.borough || "-"}
+        initialValue={pub.borough ?? ""}
+        onSave={save("borough")}
+        canEdit={ce}
+      />
+      <InlineEditField
+        label="Operator"
+        displayValue={pub.operator || "-"}
+        initialValue={pub.operator ?? ""}
+        onSave={save("operator")}
+        canEdit={ce}
+      />
+      <InlineEditField
+        label="Phone"
+        displayValue={pub.phone || "-"}
+        initialValue={pub.phone ?? ""}
+        onSave={save("phone")}
+        validate={(val) =>
+          val && !/^\+?[0-9\-\s]*$/.test(val)
+            ? "Invalid phone number format. Only numbers, spaces, and dashes are allowed."
+            : null
+        }
+        canEdit={ce}
+      />
+      <InlineEditField
+        label="Website"
+        displayValue={
+          pub.website ? (
+            <a href={pub.website} target="_blank" rel="noopener noreferrer">
+              {pub.website}
+            </a>
+          ) : (
+            "-"
+          )
+        }
+        initialValue={pub.website ?? ""}
+        onSave={save("website")}
+        validate={(val) => {
+          if (!val) return null;
+          try {
+            const { protocol } = new URL(val);
+            return protocol === "http:" || protocol === "https:"
+              ? null
+              : "Please enter a valid URL (include http:// or https://)";
+          } catch {
+            return "Please enter a valid URL (include http:// or https://)";
+          }
+        }}
+        canEdit={ce}
+      />
+      <InlineEditField
+        label="Description"
+        displayValue={pub.description || "-"}
+        initialValue={pub.description ?? ""}
+        onSave={save("description")}
+        type="textarea"
+        canEdit={ce}
+      />
+      <InlineEditField
+        label="Chain name"
+        displayValue={pub.chainName || "-"}
+        initialValue={pub.chainName ?? ""}
+        onSave={save("chainName")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Independent"
+        value={pub.isIndependent}
+        onSave={saveBool("isIndependent")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Food available"
+        value={pub.hasFood}
+        onSave={saveBool("hasFood")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Sunday roast"
+        value={pub.hasSundayRoast}
+        onSave={saveBool("hasSundayRoast")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Beer garden"
+        value={pub.hasBeerGarden}
+        onSave={saveBool("hasBeerGarden")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Cask ale"
+        value={pub.hasCaskAle}
+        onSave={saveBool("hasCaskAle")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Beer-focused"
+        value={pub.isBeerFocused}
+        onSave={saveBool("isBeerFocused")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Dog friendly"
+        value={pub.isDogFriendly}
+        onSave={saveBool("isDogFriendly")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Family friendly"
+        value={pub.isFamilyFriendly}
+        onSave={saveBool("isFamilyFriendly")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Step-free access"
+        value={pub.hasStepFreeAccess}
+        onSave={saveBool("hasStepFreeAccess")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Accessible toilet"
+        value={pub.hasAccessibleToilet}
+        onSave={saveBool("hasAccessibleToilet")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Live sport"
+        value={pub.hasLiveSport}
+        onSave={saveBool("hasLiveSport")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Live music"
+        value={pub.hasLiveMusic}
+        onSave={saveBool("hasLiveMusic")}
+        canEdit={ce}
+      />
       <Typography>
         <Typography as="span" isBold>
           Beer Types:
@@ -201,18 +237,22 @@ export default function PubDisplayView({ pub, getCountryName }: Props) {
           " -"
         )}
       </div>
-      <Typography>
-        <Typography as="span" isBold>
-          Latitude:
-        </Typography>{" "}
-        {pub.lat}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Longitude:
-        </Typography>{" "}
-        {pub.lng}
-      </Typography>
+      <InlineEditField
+        label="Latitude"
+        displayValue={pub.lat}
+        initialValue={String(pub.lat ?? "")}
+        onSave={save("lat")}
+        type="number"
+        canEdit={ce}
+      />
+      <InlineEditField
+        label="Longitude"
+        displayValue={pub.lng}
+        initialValue={String(pub.lng ?? "")}
+        onSave={save("lng")}
+        type="number"
+        canEdit={ce}
+      />
       <Typography>
         <Typography as="span" isBold>
           Created At:

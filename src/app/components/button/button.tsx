@@ -1,8 +1,8 @@
 import type { ButtonHTMLAttributes } from "react";
 import styles from "./button.module.css";
 
-type ButtonVariant = "primary" | "secondary" | "blue" | "red";
-type ButtonSize = "sm" | "md" | "lg";
+type ButtonVariant = "primary" | "secondary" | "blue" | "red" | "ghost";
+type ButtonSize = "sm" | "md" | "lg" | "xs";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
@@ -15,9 +15,11 @@ const variantClassMap: Record<ButtonVariant, string> = {
   secondary: styles.secondary,
   blue: styles.blue,
   red: styles.red,
+  ghost: styles.ghost,
 };
 
 const sizeClassMap: Record<ButtonSize, string> = {
+  xs: styles.xs,
   sm: styles.sm,
   md: styles.md,
   lg: styles.lg,

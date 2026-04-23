@@ -13,7 +13,9 @@
       "Bash(gh pr create --title 'Surface countries fetch errors to users' --body ':*)",
       "Bash(yarn tsc *)",
       "Bash(gh pr *)",
-      "Bash(git pull *)"
+      "Bash(git pull *)",
+      "Bash(xargs grep *)",
+      "Bash(yarn vitest *)"
     ]
   }
 }
