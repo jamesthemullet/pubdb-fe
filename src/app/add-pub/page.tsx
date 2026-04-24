@@ -9,10 +9,12 @@ import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
 import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
 import Textarea from "@/app/components/textarea/Textarea";
 import Typography from "@/app/components/typography/typography";
+import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-editor";
 import type { PubAmenityKey } from "@/constants/pubFormFields";
 import { useCountries } from "@/hooks/useCountries";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
+import type { OpeningHoursMap } from "@/types/pub";
 import styles from "./page.module.css";
 
 type FieldErrors = Record<string, string[]>;
@@ -99,7 +101,7 @@ const AddPubPage = () => {
   const [amenities, setAmenities] = useState<
     Partial<Record<PubAmenityKey, boolean>>
   >({});
-  const [openingHours, setOpeningHours] = useState<string | undefined>(
+  const [openingHours, setOpeningHours] = useState<OpeningHoursMap | undefined>(
     undefined
   );
   const [loading, setLoading] = useState(false);
@@ -272,13 +274,26 @@ const AddPubPage = () => {
               }}
               onFieldChange={(field, value) => {
                 switch (field) {
-                  case "name": setName(value as string); break;
-                  case "city": setCity(value as string); break;
-                  case "country": setCountry(value as string); break;
-                  case "address": setAddress(value as string); break;
-                  case "postcode": setPostcode(value as string); break;
-                  case "lat": setLat(value as number | undefined); break;
-                  default: setLng(value as number | undefined);
+                  case "name":
+                    setName(value as string);
+                    break;
+                  case "city":
+                    setCity(value as string);
+                    break;
+                  case "country":
+                    setCountry(value as string);
+                    break;
+                  case "address":
+                    setAddress(value as string);
+                    break;
+                  case "postcode":
+                    setPostcode(value as string);
+                    break;
+                  case "lat":
+                    setLat(value as number | undefined);
+                    break;
+                  default:
+                    setLng(value as number | undefined);
                 }
               }}
               countries={countries}
@@ -430,20 +445,18 @@ const AddPubPage = () => {
                 idPrefix="borough"
               />
             </div>
-            <div>
-              <label htmlFor="openingHours">Opening Hours:</label>
-              <Input
-                id="openingHours"
-                name="openingHours"
-                value={openingHours ?? ""}
-                onChange={(e) => setOpeningHours(e.target.value || undefined)}
+            <fieldset className={styles.openingHoursFieldset}>
+              <legend>Opening Hours</legend>
+              <OpeningHoursEditor
+                value={openingHours}
+                onChange={(val) => setOpeningHours(val)}
               />
               <FieldErrorList
                 errors={fieldErrors.openingHours}
                 className={styles.errorText}
                 idPrefix="openingHours"
               />
-            </div>
+            </fieldset>
             <Button type="submit" disabled={loading}>
               <Typography as="span" variant="bodySmall">
                 {loading ? "Submitting..." : "Add Pub"}
