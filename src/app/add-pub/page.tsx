@@ -9,7 +9,9 @@ import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
 import PubCoreIdentityFields from "@/app/components/pub-form/PubCoreIdentityFields";
 import Textarea from "@/app/components/textarea/Textarea";
 import Typography from "@/app/components/typography/typography";
+import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-editor";
 import type { PubAmenityKey } from "@/constants/pubFormFields";
+import type { OpeningHoursMap } from "@/types/pub";
 import { useCountries } from "@/hooks/useCountries";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
@@ -99,7 +101,7 @@ const AddPubPage = () => {
   const [amenities, setAmenities] = useState<
     Partial<Record<PubAmenityKey, boolean>>
   >({});
-  const [openingHours, setOpeningHours] = useState<string | undefined>(
+  const [openingHours, setOpeningHours] = useState<OpeningHoursMap | undefined>(
     undefined
   );
   const [loading, setLoading] = useState(false);
@@ -431,12 +433,10 @@ const AddPubPage = () => {
               />
             </div>
             <div>
-              <label htmlFor="openingHours">Opening Hours:</label>
-              <Input
-                id="openingHours"
-                name="openingHours"
-                value={openingHours ?? ""}
-                onChange={(e) => setOpeningHours(e.target.value || undefined)}
+              <label>Opening Hours:</label>
+              <OpeningHoursEditor
+                value={openingHours}
+                onChange={(val) => setOpeningHours(val)}
               />
               <FieldErrorList
                 errors={fieldErrors.openingHours}
