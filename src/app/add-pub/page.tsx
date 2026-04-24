@@ -11,10 +11,10 @@ import Textarea from "@/app/components/textarea/Textarea";
 import Typography from "@/app/components/typography/typography";
 import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-editor";
 import type { PubAmenityKey } from "@/constants/pubFormFields";
-import type { OpeningHoursMap } from "@/types/pub";
 import { useCountries } from "@/hooks/useCountries";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
+import type { OpeningHoursMap } from "@/types/pub";
 import styles from "./page.module.css";
 
 type FieldErrors = Record<string, string[]>;
@@ -274,13 +274,26 @@ const AddPubPage = () => {
               }}
               onFieldChange={(field, value) => {
                 switch (field) {
-                  case "name": setName(value as string); break;
-                  case "city": setCity(value as string); break;
-                  case "country": setCountry(value as string); break;
-                  case "address": setAddress(value as string); break;
-                  case "postcode": setPostcode(value as string); break;
-                  case "lat": setLat(value as number | undefined); break;
-                  default: setLng(value as number | undefined);
+                  case "name":
+                    setName(value as string);
+                    break;
+                  case "city":
+                    setCity(value as string);
+                    break;
+                  case "country":
+                    setCountry(value as string);
+                    break;
+                  case "address":
+                    setAddress(value as string);
+                    break;
+                  case "postcode":
+                    setPostcode(value as string);
+                    break;
+                  case "lat":
+                    setLat(value as number | undefined);
+                    break;
+                  default:
+                    setLng(value as number | undefined);
                 }
               }}
               countries={countries}
@@ -432,8 +445,8 @@ const AddPubPage = () => {
                 idPrefix="borough"
               />
             </div>
-            <div>
-              <label>Opening Hours:</label>
+            <fieldset className={styles.openingHoursFieldset}>
+              <legend>Opening Hours</legend>
               <OpeningHoursEditor
                 value={openingHours}
                 onChange={(val) => setOpeningHours(val)}
@@ -443,7 +456,7 @@ const AddPubPage = () => {
                 className={styles.errorText}
                 idPrefix="openingHours"
               />
-            </div>
+            </fieldset>
             <Button type="submit" disabled={loading}>
               <Typography as="span" variant="bodySmall">
                 {loading ? "Submitting..." : "Add Pub"}
