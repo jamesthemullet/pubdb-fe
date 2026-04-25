@@ -51,7 +51,7 @@ export function useBeerTypes() {
 
 		let ignore = false;
 
-		async function fetchBeerTypes() {
+		async function fetchBeerTypes(): Promise<void> {
 			setBeerTypesLoading(true);
 			setBeerTypesError(null);
 
@@ -67,7 +67,7 @@ export function useBeerTypes() {
 				if (!res.ok) {
 					throw new Error(`Failed to fetch beer types: ${res.status}`);
 				}
-				const payload = await res.json();
+				const payload: unknown = await res.json();
 				const list = normalizeBeerTypes(payload);
 				const sorted = list
 					.filter((type) => type && (type.isActive ?? true))

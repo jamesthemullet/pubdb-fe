@@ -415,7 +415,12 @@ function createEmptyBeerGarden(): BeerGarden {
 }
 
 function isBeerGarden(item: unknown): item is BeerGarden {
-  return typeof item === "object" && item !== null && "name" in item;
+  return (
+    typeof item === "object" &&
+    item !== null &&
+    "name" in item &&
+    typeof (item as Record<string, unknown>).name === "string"
+  );
 }
 
 function sanitizeBeerGarden(garden: BeerGarden): BeerGarden {

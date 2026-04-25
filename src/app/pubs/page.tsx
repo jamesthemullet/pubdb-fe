@@ -42,11 +42,11 @@ export default function Pubs() {
         const res = await fetch(`${API_URL}/pubs?${params}`);
 
         if (!res.ok) {
-          const errorData = await res.json();
+          const errorData = await res.json() as { message?: string; error?: string };
           throw { response: res, data: errorData };
         }
 
-        const data = await res.json();
+        const data = await res.json() as { data: Pub[] };
         setPubs(data.data);
       } catch (error: unknown) {
         if (isHttpErrorObject(error)) {
