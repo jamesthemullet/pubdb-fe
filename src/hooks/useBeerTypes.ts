@@ -6,7 +6,7 @@ export type { BeerType };
 
 let beerTypesCache: BeerType[] | null = null;
 
-export function clearBeerTypesCache() {
+export function clearBeerTypesCache(): void {
 	beerTypesCache = null;
 }
 
@@ -33,7 +33,11 @@ function normalizeBeerTypes(payload: unknown): BeerType[] {
 	return [];
 }
 
-export function useBeerTypes() {
+export function useBeerTypes(): {
+	beerTypeOptions: BeerType[];
+	beerTypesLoading: boolean;
+	beerTypesError: string | null;
+} {
 	const [beerTypeOptions, setBeerTypeOptions] = useState<BeerType[]>(
 		beerTypesCache ?? [],
 	);
