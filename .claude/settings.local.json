@@ -15,7 +15,8 @@
       "Bash(gh pr *)",
       "Bash(git pull *)",
       "Bash(xargs grep *)",
-      "Bash(yarn vitest *)"
+      "Bash(yarn vitest *)",
+      "Bash(yarn ts-check)"
     ]
   }
 }
