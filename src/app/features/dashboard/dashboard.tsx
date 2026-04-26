@@ -300,7 +300,10 @@ const Dashboard: React.FC = () => {
     return null;
   }
 
-  const formatUsagePercentage = (used: number, limit: number) => {
+  const formatUsagePercentage = (
+    used: number,
+    limit: number
+  ): { remaining: number; percentage: string; used: number } => {
     const remaining = limit - used;
     const percentage = ((used / limit) * 100).toFixed(1);
     return { remaining, percentage, used };
