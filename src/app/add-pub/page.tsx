@@ -457,7 +457,7 @@ const AddPubPage = () => {
                 idPrefix="openingHours"
               />
             </fieldset>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} aria-busy={loading}>
               <Typography as="span" variant="bodySmall">
                 {loading ? "Submitting..." : "Add Pub"}
               </Typography>

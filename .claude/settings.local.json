@@ -16,7 +16,11 @@
       "Bash(git pull *)",
       "Bash(xargs grep *)",
       "Bash(yarn vitest *)",
-      "Bash(yarn ts-check)"
+      "Bash(yarn ts-check)",
+      "Bash(git fetch *)",
+      "Bash(git merge *)",
+      "Bash(git stash *)",
+      "Bash(yarn test:ci *)"
     ]
   }
 }

@@ -263,7 +263,7 @@ export default function PubPage() {
   return (
     <>
       {loading ? (
-        <Typography>Loading pub details…</Typography>
+        <Typography role="status" aria-live="polite">Loading pub details…</Typography>
       ) : pub ? (
         <>
           <Typography as="h2" variant="headingMedium">

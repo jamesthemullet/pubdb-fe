@@ -140,7 +140,7 @@ function SuccessContent() {
     <div className={styles.container}>
       {status.success ? (
         <>
-          <div className={styles.icon}>🎉</div>
+          <div className={styles.icon} aria-hidden="true">🎉</div>
           <Typography variant="headingMedium" className={styles.headingSuccess}>Subscription Successful!</Typography>
           <Typography className={styles.message}>{status.message}</Typography>
 
@@ -182,7 +182,7 @@ function SuccessContent() {
         </>
       ) : (
         <>
-          <div className={styles.icon}>❌</div>
+          <div className={styles.icon} aria-hidden="true">❌</div>
           <Typography variant="headingMedium" className={styles.headingError}>Subscription Failed</Typography>
           <Typography className={styles.message}>{status.message}</Typography>
 

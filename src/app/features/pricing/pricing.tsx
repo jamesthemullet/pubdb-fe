@@ -395,6 +395,7 @@ const Pricing: React.FC = () => {
     <div>
       {feedbackMessage && (
         <div
+          aria-live="polite"
           className={`${styles.feedbackBanner} ${
             feedbackMessage.type === "success"
               ? styles.feedbackBannerSuccess

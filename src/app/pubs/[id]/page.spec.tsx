@@ -203,7 +203,7 @@ describe("PubPage", () => {
 			setupFetchMock();
 			render(<PubPage />);
 			await screen.findByRole("heading", { name: "The Harp" });
-			const link = screen.getByRole("link", { name: "https://theharp.co.uk" });
+			const link = screen.getByRole("link", { name: "Visit The Harp website (opens in new tab)" });
 			expect(link).toHaveAttribute("href", "https://theharp.co.uk");
 			expect(link).toHaveAttribute("target", "_blank");
 			expect(link).toHaveAttribute("rel", "noopener noreferrer");
