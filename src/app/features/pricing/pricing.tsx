@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
@@ -114,6 +114,8 @@ const Pricing: React.FC = () => {
   const [_estimateLoading, setEstimateLoading] = useState(false);
   const [performingUpgrade, setPerformingUpgrade] = useState(false);
   const [apiKey, setApiKey] = useState<ApiKey | null>(null);
+  const upgradeModalRef = useRef<HTMLDivElement>(null);
+  const upgradeModalTriggerRef = useRef<HTMLElement | null>(null);
 
   const formatCurrency = (amount?: number, currency: string = "usd") => {
     if (typeof amount !== "number") return "-";
@@ -308,6 +310,43 @@ const Pricing: React.FC = () => {
     }
   };
 
+  const closeUpgradeModal = useCallback(() => {
+    setUpgradeModal(null);
+    upgradeModalTriggerRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (upgradeModal) {
+      upgradeModalTriggerRef.current = document.activeElement as HTMLElement;
+      const focusable = upgradeModalRef.current?.querySelector<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      focusable?.focus();
+    }
+  }, [upgradeModal]);
+
+  function handleUpgradeModalKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === "Escape") {
+      closeUpgradeModal();
+      return;
+    }
+    if (e.key !== "Tab" || !upgradeModalRef.current) return;
+    const focusableElements = Array.from(
+      upgradeModalRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    );
+    const first = focusableElements[0];
+    const last = focusableElements[focusableElements.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last?.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first?.focus();
+    }
+  }
+
   const performUpgrade = async (priceId: string) => {
     setPerformingUpgrade(true);
     try {
@@ -325,7 +364,7 @@ const Pricing: React.FC = () => {
         throw new Error(err.message || "Failed to perform upgrade");
       }
       await fetchUserTier();
-      setUpgradeModal(null);
+      closeUpgradeModal();
       setFeedbackMessage({ type: "success", text: "Upgrade successful" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upgrade failed");
@@ -416,8 +455,15 @@ const Pricing: React.FC = () => {
       )}
       {upgradeModal ? (
         <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <Typography variant="headingSmall">Subscription details</Typography>
+          <div
+            ref={upgradeModalRef}
+            className={styles.modalContent}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="upgrade-modal-title"
+            onKeyDown={handleUpgradeModalKeyDown}
+          >
+            <Typography variant="headingSmall" id="upgrade-modal-title">Subscription details</Typography>
             {apiKey && (
               <div className={styles.modalSection}>
                 <Typography variant="headingSmall" as="h4">
@@ -515,7 +561,7 @@ const Pricing: React.FC = () => {
             ) : null}
             <div className={styles.modalActions}>
               <Button
-                onClick={() => setUpgradeModal(null)}
+                onClick={closeUpgradeModal}
                 disabled={performingUpgrade}
                 variant="secondary"
               >
@@ -526,7 +572,7 @@ const Pricing: React.FC = () => {
         </div>
       ) : null}
 
-      <Typography variant="headingMedium" className={styles.pricingHeading}>
+      <Typography variant="headingMedium" as="h1" className={styles.pricingHeading}>
         API Pricing
       </Typography>
 

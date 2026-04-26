@@ -41,9 +41,12 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable}`}
       >
+        <a href="#main-content" className={styles.skipLink}>
+          Skip to main content
+        </a>
         <NavBar />
         <div className={styles.page}>
-          <main className={styles.main}>{children}</main>
+          <main id="main-content" className={styles.main}>{children}</main>
         </div>
       </body>
     </html>

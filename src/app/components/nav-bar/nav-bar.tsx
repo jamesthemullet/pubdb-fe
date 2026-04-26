@@ -43,17 +43,19 @@ const NavBar = () => {
   return (
     <nav className={styles.nav}>
       <ul>
-        <Link href="/">Home</Link>
-        <Link href="/pubs">All Pubs</Link>
-        <Link href="/profile">Profile</Link>
-        <Link href="/add-pub">Add Pub</Link>
-        {!userEmail && <Link href="/register">Register</Link>}
+        <li><Link href="/">Home</Link></li>
+        <li><Link href="/pubs">All Pubs</Link></li>
+        <li><Link href="/profile">Profile</Link></li>
+        <li><Link href="/add-pub">Add Pub</Link></li>
+        {!userEmail && <li><Link href="/register">Register</Link></li>}
         {userEmail && (
           <>
-            <Typography>{userEmail}</Typography>
-            <Button onClick={handleLogout} className={styles.logoutButton}>
-              Logout
-            </Button>
+            <li><Typography>{userEmail}</Typography></li>
+            <li>
+              <Button onClick={handleLogout} className={styles.logoutButton}>
+                Logout
+              </Button>
+            </li>
           </>
         )}
       </ul>
