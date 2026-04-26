@@ -1,11 +1,44 @@
 .grid {
   display: grid;
   gap: 0.5rem;
+  width: 100%;
+}
+
+.pasteRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 0.25rem;
+}
+
+.pasteLabel {
+  font-size: inherit;
+  font-weight: 600;
+}
+
+.pasteTextarea {
+  width: 100%;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 0.875rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.pasteError {
+  font-size: 0.8rem;
+  color: #c00;
 }
 
 .bulkRow {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #ccc;
@@ -19,7 +52,9 @@
 
 .row {
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.5rem;
 }
 

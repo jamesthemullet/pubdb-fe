@@ -4,6 +4,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
+import { getErrorMessage, isHttpErrorObject } from "@/lib/errors";
 import Button from "../../components/button/button";
 import Typography from "../../components/typography/typography";
 import styles from "./dashboard.module.css";
@@ -124,16 +125,11 @@ const Dashboard: React.FC = () => {
         const data = await res.json();
         setDashboardData(data);
       } catch (error: unknown) {
-        const err = error as {
-          response?: Response;
-          data?: { message?: string; error?: string };
-          message?: string;
-        };
-        if (err.response && err.data) {
+        if (isHttpErrorObject(error)) {
           setError(
-            err.data.message ||
-              err.data.error ||
-              `HTTP error! status: ${err.response.status}`
+            error.data.message ||
+              error.data.error ||
+              `HTTP error! status: ${error.response.status}`
           );
         } else {
           setError(
@@ -187,10 +183,7 @@ const Dashboard: React.FC = () => {
       // refresh dashboard data
       setTimeout(() => window.dispatchEvent(new Event("authChanged")), 800);
     } catch (err: unknown) {
-      const apiErr = err as { message?: string; error?: string };
-      setCancelError(
-        apiErr?.message || apiErr?.error || "Failed to cancel subscription"
-      );
+      setCancelError(getErrorMessage(err, "Failed to cancel subscription"));
     } finally {
       setCancelling(false);
     }
@@ -243,10 +236,7 @@ const Dashboard: React.FC = () => {
         setForgotKeyCopyStatus("idle");
       }
     } catch (err: unknown) {
-      const apiErr = err as { message?: string; error?: string };
-      setForgotKeyError(
-        apiErr?.message || apiErr?.error || "Failed to request API key reminder"
-      );
+      setForgotKeyError(getErrorMessage(err, "Failed to request API key reminder"));
       setForgotKeyDetails(null);
       setShowForgotKeyModal(false);
       setForgotKeyCopyStatus("idle");

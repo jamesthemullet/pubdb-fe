@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
+import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
 import { API_URL } from "@/lib/apiConfig";
@@ -25,6 +26,7 @@ export default function PubPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  const { user, isApproved } = useAuth();
   const { countries, countriesLoading, countriesError } = useCountries();
   const { beerTypeOptions, beerTypesLoading, beerTypesError } = useBeerTypes();
 
@@ -196,6 +198,62 @@ export default function PubPage() {
     }
   }, [pub, editFields, fieldErrors]);
 
+  const handleInlineSave = useCallback(async (
+    field: keyof Pub,
+    value: unknown
+  ): Promise<string | null> => {
+    if (!pub) return "No pub loaded";
+    try {
+      const token = localStorage.getItem("token");
+
+      // Build the same full body as handleSave, using current pub data as the
+      // base, then override the one field being edited.
+      const merged: Partial<Pub> = {
+        ...pub,
+        beerGardens: pub.beerGardens ? [...pub.beerGardens] : [],
+        beerTypeIds: getBeerTypeIdsFromPub(pub),
+        [field]: value,
+      };
+
+      if ((field === "lat" || field === "lng") && typeof value === "string") {
+        (merged as Record<string, unknown>)[field] =
+          value === "" ? null : isNaN(parseFloat(value)) ? null : parseFloat(value);
+      }
+
+      const body: Record<string, unknown> = {};
+      if (Array.isArray(merged.beerTypeIds)) {
+        body.beerTypes = merged.beerTypeIds.map((beerTypeId) => ({ beerTypeId }));
+      }
+      for (const [key, val] of Object.entries(merged)) {
+        if (val === undefined || val === null) continue;
+        if (key === "beerType") continue;
+        if (Array.isArray(val)) {
+          if (key === "beerGardens") {
+            body[key] = val.filter(isBeerGarden).map((g) => sanitizeBeerGarden(g));
+          } else if (key !== "beerTypes" && key !== "beerTypeIds" && val.length > 0) {
+            body[key] = val;
+          }
+          continue;
+        }
+        if (val !== "") body[key] = val;
+      }
+      body.id = pub.id;
+      if (pub.createdAt) body.createdAt = pub.createdAt;
+
+      const res = await fetch(`${API_URL}/pubs/${pub.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) return extractErrorMessage(data);
+      setPub(data);
+      return null;
+    } catch {
+      return "Network error";
+    }
+  }, [pub]);
+
   const isSaveDisabled =
     Object.values(fieldErrors).some(Boolean) ||
     (["name", "city", "address", "postcode", "country"] as (keyof Pub)[]).some(
@@ -217,6 +275,8 @@ export default function PubPage() {
               alt={pub.name}
               width={400}
               height={300}
+              priority
+              sizes="(max-width: 480px) 100vw, 400px"
               className={styles.pubImage}
             />
           )}
@@ -237,6 +297,7 @@ export default function PubPage() {
             <EditButton
               pubName={pub.name}
               pubId={pub.id}
+              user={user}
               onEdit={handleEditClick}
             />
           )}
@@ -262,7 +323,12 @@ export default function PubPage() {
               setFieldErrors={setFieldErrors}
             />
           ) : (
-            <PubDisplayView pub={pub} getCountryName={getCountryName} />
+            <PubDisplayView
+              pub={pub}
+              getCountryName={getCountryName}
+              canEdit={isApproved}
+              onInlineSave={handleInlineSave}
+            />
           )}
         </>
       ) : (
@@ -285,7 +351,7 @@ function getBeerTypeIdsFromPub(pub: Pub): string[] {
         if ("beerTypeId" in entry) return entry.beerTypeId;
         return entry.id;
       })
-      .filter(Boolean) as string[];
+      .filter((s): s is string => typeof s === "string" && s.length > 0);
   }
   if (pub.beerType) {
     if (typeof pub.beerType === "string") return [pub.beerType];
@@ -349,7 +415,7 @@ function createEmptyBeerGarden(): BeerGarden {
 }
 
 function isBeerGarden(item: unknown): item is BeerGarden {
-  return typeof item === "object" && item !== null && "name" in (item as BeerGarden);
+  return typeof item === "object" && item !== null && "name" in item;
 }
 
 function sanitizeBeerGarden(garden: BeerGarden): BeerGarden {

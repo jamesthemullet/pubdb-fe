@@ -138,12 +138,11 @@ function fillAllInputs() {
   fireEvent.change(screen.getByLabelText(/^Borough:/i), {
     target: { value: "" },
   });
-  fireEvent.change(screen.getByLabelText(/^Opening Hours:/i), {
-    target: { value: "Mon-Fri 12:00-23:00" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Opening Hours:/i), {
-    target: { value: "" },
-  });
+  fireEvent.change(
+    screen.getByLabelText(/Paste opening hours from Google/i),
+    { target: { value: "Monday\n9 am–11 pm\nTuesday\n9 am–11 pm" } }
+  );
+  fireEvent.click(screen.getByRole("button", { name: /Apply from Google/i }));
 }
 
 describe("AddPubPage", () => {

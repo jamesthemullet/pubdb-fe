@@ -104,5 +104,32 @@ test.describe("Pub detail (/pubs/[id])", () => {
         page.getByRole("button", { name: "Edit this pub" })
       ).toBeVisible();
     });
+
+    test("saving edits PATCHes the API and updates the displayed pub name", async ({ page }) => {
+      const updatedPub = { ...fakePub, name: "The Crown" };
+
+      await page.route(PUB_API, (route) => {
+        if (route.request().method() === "PATCH") {
+          route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify(updatedPub),
+          });
+        } else {
+          route.fallback();
+        }
+      });
+
+      await page.getByRole("button", { name: "Edit this pub" }).click();
+      await page.getByRole("button", { name: "Save" }).first().waitFor();
+
+      const nameInput = page.locator("#name");
+      await nameInput.fill("The Crown");
+
+      await page.getByRole("button", { name: "Save" }).first().click();
+
+      await expect(page.getByRole("heading", { name: "The Crown" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Edit this pub" })).toBeVisible();
+    });
   });
 });

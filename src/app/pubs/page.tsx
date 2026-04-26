@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
+import { isHttpErrorObject } from "@/lib/errors";
 import type { Pub } from "@/types/pub";
 import styles from "./page.module.css";
 
@@ -48,16 +49,11 @@ export default function Pubs() {
         const data = await res.json();
         setPubs(data.data);
       } catch (error: unknown) {
-        const err = error as {
-          response?: Response;
-          data?: { message?: string; error?: string };
-          message?: string;
-        };
-        if (err.response && err.data) {
+        if (isHttpErrorObject(error)) {
           setError(
-            err.data.message ||
-              err.data.error ||
-              `HTTP error! status: ${err.response.status}`
+            error.data.message ||
+              error.data.error ||
+              `HTTP error! status: ${error.response.status}`
           );
         } else {
           setError(

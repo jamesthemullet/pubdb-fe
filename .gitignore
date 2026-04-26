@@ -44,3 +44,5 @@ next-env.d.ts
 playwright-report/index.html
 .claude/settings.local.json
 /playwright-report
+.claude/settings.local.json
+.claude/settings.local.json
