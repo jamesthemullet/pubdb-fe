@@ -19,7 +19,8 @@
       "Bash(yarn ts-check)",
       "Bash(git fetch *)",
       "Bash(git merge *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(yarn test:ci *)"
     ]
   }
 }

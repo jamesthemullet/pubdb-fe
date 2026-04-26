@@ -14,7 +14,10 @@ const BASE_PUB: Pub = {
   createdAt: "2023-01-15T10:00:00Z",
 };
 
-function renderView(overrides: Partial<Pub> = {}, getCountryName = vi.fn((code: string) => code)) {
+function renderView(
+  overrides: Partial<Pub> = {},
+  getCountryName = vi.fn((code: string) => code)
+) {
   const pub = { ...BASE_PUB, ...overrides };
   render(<PubDisplayView pub={pub} getCountryName={getCountryName} />);
   return { pub, getCountryName };
@@ -56,7 +59,7 @@ describe("PubDisplayView", () => {
 
     it("renders the website as an external link", () => {
       renderView({ website: "https://theharp.co.uk" });
-      const link = screen.getByRole("link", { name: "https://theharp.co.uk" });
+      const link = screen.getByRole("link", { name: "Visit The Harp website (opens in new tab)" });
       expect(link).toHaveAttribute("href", "https://theharp.co.uk");
       expect(link).toHaveAttribute("target", "_blank");
       expect(link).toHaveAttribute("rel", "noopener noreferrer");
@@ -76,7 +79,9 @@ describe("PubDisplayView", () => {
     it("renders the createdAt date", () => {
       renderView();
       expect(
-        screen.getByText(new RegExp(new Date("2023-01-15T10:00:00Z").toLocaleString(), "i")),
+        screen.getByText(
+          new RegExp(new Date("2023-01-15T10:00:00Z").toLocaleString(), "i")
+        )
       ).toBeInTheDocument();
     });
   });
@@ -150,12 +155,19 @@ describe("PubDisplayView", () => {
     });
 
     it("renders a single beer type from the beerType object field", () => {
-      renderView({ beerTypes: undefined, beerType: { id: "bt1", name: "Porter" } });
+      renderView({
+        beerTypes: undefined,
+        beerType: { id: "bt1", name: "Porter" },
+      });
       expect(screen.getByText(/Porter/)).toBeInTheDocument();
     });
 
     it("renders beer types from the beerTypeIds array", () => {
-      renderView({ beerTypes: undefined, beerType: undefined, beerTypeIds: ["id-a", "id-b"] });
+      renderView({
+        beerTypes: undefined,
+        beerType: undefined,
+        beerTypeIds: ["id-a", "id-b"],
+      });
       expect(screen.getByText(/id-a, id-b/)).toBeInTheDocument();
     });
   });
@@ -207,7 +219,9 @@ describe("PubDisplayView", () => {
     });
 
     it("handles upper-case keys in the opening hours map", () => {
-      const oh = { MONDAY: { open: "09:00", close: "17:00" } } as unknown as OpeningHoursMap;
+      const oh = {
+        MONDAY: { open: "09:00", close: "17:00" },
+      } as unknown as OpeningHoursMap;
       renderView({ openingHours: oh });
       expect(screen.getByText(/09:00 – 17:00/)).toBeInTheDocument();
     });
@@ -249,8 +263,8 @@ describe("PubDisplayView", () => {
           (_, el) =>
             el?.tagName === "P" &&
             (el.textContent ?? "").includes("Seating capacity") &&
-            (el.textContent ?? "").includes("20"),
-        ),
+            (el.textContent ?? "").includes("20")
+        )
       ).toBeInTheDocument();
     });
 
@@ -268,10 +282,12 @@ describe("PubDisplayView", () => {
 
     it("renders the garden image as a link when imageUrl is set", () => {
       renderView({
-        beerGardens: [{ ...SAMPLE_GARDEN, imageUrl: "https://example.com/g.jpg" }],
+        beerGardens: [
+          { ...SAMPLE_GARDEN, imageUrl: "https://example.com/g.jpg" },
+        ],
       });
       const link = screen.getByRole("link", {
-        name: "https://example.com/g.jpg",
+        name: "View Back Terrace image (opens in new tab)",
       });
       expect(link).toHaveAttribute("href", "https://example.com/g.jpg");
     });
