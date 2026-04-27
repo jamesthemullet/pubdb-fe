@@ -158,8 +158,9 @@ export default function Pubs() {
           <legend className={styles.filtersLegend}>Filter by amenity</legend>
           <div className={styles.filterGrid}>
             {PUB_AMENITY_FIELDS.map(({ key, label }) => (
-              <label key={key} className={styles.filterLabel}>
+              <label key={key} htmlFor={key} className={styles.filterLabel}>
                 <Input
+                  id={key}
                   type="checkbox"
                   checked={activeAmenities.has(key)}
                   onChange={() => toggleAmenity(key)}
