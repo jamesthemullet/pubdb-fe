@@ -35,15 +35,7 @@ export default function Pubs() {
   }, [searchTerm]);
 
   const filteredPubs = useMemo(() => {
-    let result = pubs;
-
-    if (activeAmenities.size > 0) {
-      result = result.filter((pub) =>
-        [...activeAmenities].every((amenity) => pub[amenity] === true)
-      );
-    }
-
-    const sorted = [...result];
+    const sorted = [...pubs];
     switch (sortBy) {
       case "name-desc":
         sorted.sort((a, b) => b.name.localeCompare(a.name));
@@ -59,7 +51,7 @@ export default function Pubs() {
     }
 
     return sorted;
-  }, [pubs, activeAmenities, sortBy]);
+  }, [pubs, sortBy]);
 
   useEffect(() => {
     async function fetchPubs() {
@@ -72,6 +64,9 @@ export default function Pubs() {
         });
         if (debouncedSearchTerm) {
           params.set("search", debouncedSearchTerm);
+        }
+        for (const amenity of activeAmenities) {
+          params.append(`amenities[${amenity}]`, "true");
         }
         const res = await fetch(`${API_URL}/pubs?${params}`);
 
@@ -100,12 +95,13 @@ export default function Pubs() {
     }
 
     fetchPubs();
-  }, [page, debouncedSearchTerm]);
+  }, [page, debouncedSearchTerm, activeAmenities]);
 
   const hasNextPage = pubs.length === PAGE_SIZE;
   const hasPrevPage = page > 0;
 
   function toggleAmenity(key: PubAmenityKey) {
+    setPage(0);
     setActiveAmenities((prev) => {
       const next = new Set(prev);
       if (next.has(key)) {
@@ -118,6 +114,7 @@ export default function Pubs() {
   }
 
   function clearAllFilters() {
+    setPage(0);
     setSearchTerm("");
     setActiveAmenities(new Set());
     setSortBy("name-asc");
@@ -177,9 +174,7 @@ export default function Pubs() {
         {hasActiveFilters && (
           <div className={styles.filterMeta}>
             {isFiltered && (
-              <Typography>
-                Showing {filteredPubs.length} of {pubs.length} pubs
-              </Typography>
+              <Typography>Showing {pubs.length} pubs</Typography>
             )}
             <Button variant="secondary" size="sm" onClick={clearAllFilters}>
               Clear all filters
