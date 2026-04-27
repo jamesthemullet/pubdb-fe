@@ -117,7 +117,7 @@ const Pricing: React.FC = () => {
   const upgradeModalRef = useRef<HTMLDivElement>(null);
   const upgradeModalTriggerRef = useRef<HTMLElement | null>(null);
 
-  const formatCurrency = (amount?: number, currency: string = "usd") => {
+  const formatCurrency = (amount?: number, currency: string = "usd"): string => {
     if (typeof amount !== "number") return "-";
     const normalizedCurrency = currency?.toUpperCase() || "USD";
     try {
@@ -130,7 +130,7 @@ const Pricing: React.FC = () => {
     }
   };
 
-  const formatDateTime = (timestamp?: number) => {
+  const formatDateTime = (timestamp?: number): string | null => {
     if (!timestamp) return null;
     return new Date(timestamp * 1000).toLocaleString();
   };
@@ -148,7 +148,9 @@ const Pricing: React.FC = () => {
     );
   };
 
-  const getInvoiceLike = (upcoming: UpcomingBill | null | undefined) => {
+  const getInvoiceLike = (
+    upcoming: UpcomingBill | null | undefined
+  ): UpcomingBill | InvoiceLike | Omit<InvoiceLike, "lines"> | null => {
     if (!upcoming) return null;
     if (typeof upcoming.amount_due === "number") return upcoming;
     if (upcoming.invoice && typeof upcoming.invoice.amount_due === "number")
@@ -161,7 +163,7 @@ const Pricing: React.FC = () => {
     return null;
   };
 
-  const firstNumber = (...values: Array<number | null | undefined>) => {
+  const firstNumber = (...values: Array<number | null | undefined>): number | undefined => {
     for (const value of values) {
       if (typeof value === "number" && Number.isFinite(value)) {
         return value;
