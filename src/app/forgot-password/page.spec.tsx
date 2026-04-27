@@ -13,6 +13,13 @@ function jsonResponse(data: unknown, status = 200): Response {
 describe("ForgotPasswordPage", () => {
 	const originalEnv = process.env;
 
+	function submitForm() {
+		const form = screen.getByRole("button", { name: "Send Reset Link" }).closest("form");
+		if (form) {
+			fireEvent.submit(form);
+		}
+	}
+
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		process.env = { ...originalEnv };
