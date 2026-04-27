@@ -8,13 +8,17 @@ import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
 import { PUB_AMENITY_FIELDS, type PubAmenityKey } from "@/constants/pubFormFields";
 import { API_URL } from "@/lib/apiConfig";
+import { isHttpErrorObject } from "@/lib/errors";
 import type { Pub } from "@/types/pub";
 import styles from "./page.module.css";
 
 type SortOption = "name-asc" | "name-desc" | "newest" | "oldest";
 
+const PAGE_SIZE = 50;
+
 export default function Pubs() {
   const [pubs, setPubs] = useState<Pub[]>([]);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,23 +28,14 @@ export default function Pubs() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      setPage(0);
       setDebouncedSearchTerm(searchTerm);
-    }, 100);
+    }, 300);
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
   const filteredPubs = useMemo(() => {
     let result = pubs;
-
-    if (debouncedSearchTerm) {
-      const searchLower = debouncedSearchTerm.toLowerCase();
-      result = result.filter(
-        (pub) =>
-          pub.name.toLowerCase().includes(searchLower) ||
-          pub.city.toLowerCase().includes(searchLower) ||
-          pub.address.toLowerCase().includes(searchLower)
-      );
-    }
 
     if (activeAmenities.size > 0) {
       result = result.filter((pub) =>
@@ -64,14 +59,21 @@ export default function Pubs() {
     }
 
     return sorted;
-  }, [pubs, debouncedSearchTerm, activeAmenities, sortBy]);
+  }, [pubs, activeAmenities, sortBy]);
 
   useEffect(() => {
     async function fetchPubs() {
-      const apiUrl = API_URL;
+      setLoading(true);
+      setError(null);
       try {
-        setError(null);
-        const res = await fetch(`${apiUrl}/pubs?limit=10000`);
+        const params = new URLSearchParams({
+          limit: String(PAGE_SIZE),
+          page: String(page + 1),
+        });
+        if (debouncedSearchTerm) {
+          params.set("search", debouncedSearchTerm);
+        }
+        const res = await fetch(`${API_URL}/pubs?${params}`);
 
         if (!res.ok) {
           const errorData = await res.json();
@@ -81,16 +83,11 @@ export default function Pubs() {
         const data = await res.json();
         setPubs(data.data);
       } catch (error: unknown) {
-        const err = error as {
-          response?: Response;
-          data?: { message?: string; error?: string };
-          message?: string;
-        };
-        if (err.response && err.data) {
+        if (isHttpErrorObject(error)) {
           setError(
-            err.data.message ||
-              err.data.error ||
-              `HTTP error! status: ${err.response.status}`
+            error.data.message ||
+              error.data.error ||
+              `HTTP error! status: ${error.response.status}`
           );
         } else {
           setError(
@@ -103,7 +100,10 @@ export default function Pubs() {
     }
 
     fetchPubs();
-  }, []);
+  }, [page, debouncedSearchTerm]);
+
+  const hasNextPage = pubs.length === PAGE_SIZE;
+  const hasPrevPage = page > 0;
 
   function toggleAmenity(key: PubAmenityKey) {
     setActiveAmenities((prev) => {
@@ -134,6 +134,7 @@ export default function Pubs() {
         <div className={styles.searchRow}>
           <Input
             type="text"
+            aria-label="Search pubs"
             placeholder="Search pubs by name, city, or address..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -188,14 +189,21 @@ export default function Pubs() {
       </div>
 
       {loading ? (
-        <Typography>Loading pubs…</Typography>
+        <Typography role="status" aria-live="polite">Loading pubs…</Typography>
       ) : error ? (
-        <div>
-          <Typography className={styles.errorText}>Error loading pubs: {error}</Typography>
-          <button type="button" onClick={() => window.location.reload()}>Try Again</button>
+        <div role="alert">
+          <Typography className={styles.errorText}>
+            Error loading pubs: {error}
+          </Typography>
+          <button type="button" onClick={() => window.location.reload()}>
+            Try Again
+          </button>
         </div>
-      ) : !pubs || pubs.length === 0 ? (
-        <Typography>No pubs found in the database.</Typography>
+      ) : pubs.length === 0 ? (
+        <Typography>
+          No pubs found
+          {debouncedSearchTerm ? " matching your search" : " in the database"}.
+        </Typography>
       ) : (
         <div>
           <Link href="/add-pub">
@@ -215,6 +223,23 @@ export default function Pubs() {
           ) : (
             <Typography>No pubs match your current filters.</Typography>
           )}
+          <div>
+            <button
+              type="button"
+              onClick={() => setPage((p) => p - 1)}
+              disabled={!hasPrevPage}
+            >
+              Previous
+            </button>
+            <span>Page {page + 1}</span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={!hasNextPage}
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </>

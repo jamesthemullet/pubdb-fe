@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
       )}
 
       {error && (
-        <div className={styles.error}>
+        <div className={styles.error} role="alert">
           <Typography>
             {typeof error === "string" ? error : JSON.stringify(error)}
           </Typography>

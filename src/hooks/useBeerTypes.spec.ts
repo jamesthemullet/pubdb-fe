@@ -117,9 +117,10 @@ describe("useBeerTypes", () => {
 
 		await waitFor(() => expect(result.current.beerTypesLoading).toBe(false));
 
-		expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith("/api/beer-types", {
-			headers: { Authorization: "Bearer test-token" },
-		});
+		expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
+			"/api/beer-types",
+			expect.objectContaining({ headers: { Authorization: "Bearer test-token" } }),
+		);
 	});
 
 	it("omits Authorization header when no token in localStorage", async () => {
@@ -129,8 +130,9 @@ describe("useBeerTypes", () => {
 
 		await waitFor(() => expect(result.current.beerTypesLoading).toBe(false));
 
-		expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith("/api/beer-types", {
-			headers: {},
-		});
+		expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
+			"/api/beer-types",
+			expect.objectContaining({ headers: {} }),
+		);
 	});
 });

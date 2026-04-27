@@ -6,28 +6,38 @@ export type { BeerType };
 
 let beerTypesCache: BeerType[] | null = null;
 
-export function clearBeerTypesCache() {
+export function clearBeerTypesCache(): void {
 	beerTypesCache = null;
+}
+
+function isBeerType(item: unknown): item is BeerType {
+	if (typeof item !== "object" || item === null) return false;
+	const obj = item as Record<string, unknown>;
+	return typeof obj.id === "string" && typeof obj.name === "string";
 }
 
 function normalizeBeerTypes(payload: unknown): BeerType[] {
 	if (!payload) return [];
 	if (Array.isArray(payload)) {
-		return payload as BeerType[];
+		return payload.filter(isBeerType);
 	}
 	if (typeof payload === "object") {
 		const record = payload as Record<string, unknown>;
 		if (Array.isArray(record.data)) {
-			return record.data as BeerType[];
+			return record.data.filter(isBeerType);
 		}
 		if (Array.isArray(record.beerTypes)) {
-			return record.beerTypes as BeerType[];
+			return record.beerTypes.filter(isBeerType);
 		}
 	}
 	return [];
 }
 
-export function useBeerTypes() {
+export function useBeerTypes(): {
+	beerTypeOptions: BeerType[];
+	beerTypesLoading: boolean;
+	beerTypesError: string | null;
+} {
 	const [beerTypeOptions, setBeerTypeOptions] = useState<BeerType[]>(
 		beerTypesCache ?? [],
 	);
@@ -38,12 +48,11 @@ export function useBeerTypes() {
 
 	useEffect(() => {
 		if (beerTypesCache !== null) {
-			setBeerTypeOptions(beerTypesCache);
-			setBeerTypesLoading(false);
 			return;
 		}
 
 		let ignore = false;
+		const controller = new AbortController();
 
 		async function fetchBeerTypes() {
 			setBeerTypesLoading(true);
@@ -57,6 +66,7 @@ export function useBeerTypes() {
 			try {
 				const res = await fetch("/api/beer-types", {
 					headers: buildAuthHeaders(token),
+					signal: controller.signal,
 				});
 				if (!res.ok) {
 					throw new Error(`Failed to fetch beer types: ${res.status}`);
@@ -64,7 +74,7 @@ export function useBeerTypes() {
 				const payload = await res.json();
 				const list = normalizeBeerTypes(payload);
 				const sorted = list
-					.filter((type) => type && (type.isActive ?? true))
+					.filter((type) => type.isActive ?? true)
 					.sort((a, b) => a.name.localeCompare(b.name));
 
 				beerTypesCache = sorted;
@@ -88,6 +98,7 @@ export function useBeerTypes() {
 		fetchBeerTypes();
 		return () => {
 			ignore = true;
+			controller.abort();
 		};
 	}, []);
 

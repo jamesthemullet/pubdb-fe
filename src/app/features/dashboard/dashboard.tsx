@@ -1,9 +1,10 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
+import { getErrorMessage, isHttpErrorObject } from "@/lib/errors";
 import Button from "../../components/button/button";
 import Typography from "../../components/typography/typography";
 import styles from "./dashboard.module.css";
@@ -83,6 +84,8 @@ const Dashboard: React.FC = () => {
   const [forgotKeyCopyStatus, setForgotKeyCopyStatus] = useState<
     "idle" | "copied" | "error"
   >("idle");
+  const forgotKeyModalRef = useRef<HTMLDivElement>(null);
+  const forgotKeyModalTriggerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -124,16 +127,11 @@ const Dashboard: React.FC = () => {
         const data = await res.json();
         setDashboardData(data);
       } catch (error: unknown) {
-        const err = error as {
-          response?: Response;
-          data?: { message?: string; error?: string };
-          message?: string;
-        };
-        if (err.response && err.data) {
+        if (isHttpErrorObject(error)) {
           setError(
-            err.data.message ||
-              err.data.error ||
-              `HTTP error! status: ${err.response.status}`
+            error.data.message ||
+              error.data.error ||
+              `HTTP error! status: ${error.response.status}`
           );
         } else {
           setError(
@@ -187,10 +185,7 @@ const Dashboard: React.FC = () => {
       // refresh dashboard data
       setTimeout(() => window.dispatchEvent(new Event("authChanged")), 800);
     } catch (err: unknown) {
-      const apiErr = err as { message?: string; error?: string };
-      setCancelError(
-        apiErr?.message || apiErr?.error || "Failed to cancel subscription"
-      );
+      setCancelError(getErrorMessage(err, "Failed to cancel subscription"));
     } finally {
       setCancelling(false);
     }
@@ -243,10 +238,7 @@ const Dashboard: React.FC = () => {
         setForgotKeyCopyStatus("idle");
       }
     } catch (err: unknown) {
-      const apiErr = err as { message?: string; error?: string };
-      setForgotKeyError(
-        apiErr?.message || apiErr?.error || "Failed to request API key reminder"
-      );
+      setForgotKeyError(getErrorMessage(err, "Failed to request API key reminder"));
       setForgotKeyDetails(null);
       setShowForgotKeyModal(false);
       setForgotKeyCopyStatus("idle");
@@ -277,6 +269,39 @@ const Dashboard: React.FC = () => {
     setShowForgotKeyModal(false);
     setForgotKeyDetails(null);
     setForgotKeyCopyStatus("idle");
+    forgotKeyModalTriggerRef.current?.focus();
+  }
+
+  useEffect(() => {
+    if (showForgotKeyModal && forgotKeyDetails) {
+      forgotKeyModalTriggerRef.current = document.activeElement as HTMLElement;
+      const focusable = forgotKeyModalRef.current?.querySelector<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      focusable?.focus();
+    }
+  }, [showForgotKeyModal, forgotKeyDetails]);
+
+  function handleForgotKeyModalKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === "Escape") {
+      handleCloseForgotKeyModal();
+      return;
+    }
+    if (e.key !== "Tab" || !forgotKeyModalRef.current) return;
+    const focusableElements = Array.from(
+      forgotKeyModalRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    );
+    const first = focusableElements[0];
+    const last = focusableElements[focusableElements.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last?.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first?.focus();
+    }
   }
 
   if (!isAuthenticated) {
@@ -310,7 +335,10 @@ const Dashboard: React.FC = () => {
     return null;
   }
 
-  const formatUsagePercentage = (used: number, limit: number) => {
+  const formatUsagePercentage = (
+    used: number,
+    limit: number
+  ): { remaining: number; percentage: string; used: number } => {
     const remaining = limit - used;
     const percentage = ((used / limit) * 100).toFixed(1);
     return { remaining, percentage, used };
@@ -320,8 +348,15 @@ const Dashboard: React.FC = () => {
     <>
       {forgotKeyDetails && showForgotKeyModal && (
         <div className={styles.modalOverlay}>
-          <div className={styles.modalCard}>
-            <Typography variant="headingSmall">
+          <div
+            ref={forgotKeyModalRef}
+            className={styles.modalCard}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="forgot-key-modal-title"
+            onKeyDown={handleForgotKeyModalKeyDown}
+          >
+            <Typography variant="headingSmall" id="forgot-key-modal-title">
               New API key generated
             </Typography>
             <Typography variant="bodySmall" className={styles.modalDescription}>
@@ -384,7 +419,7 @@ const Dashboard: React.FC = () => {
         </div>
       )}
       <div className={styles.mainCard}>
-        <Typography variant="headingMedium">Dashboard</Typography>
+        <Typography variant="headingMedium" as="h1">Dashboard</Typography>
 
         <div className={styles.userInfo}>
           <Typography variant="bodyMedium">
@@ -395,12 +430,12 @@ const Dashboard: React.FC = () => {
           </Typography>
           {!dashboardData.user.approved && (
             <Typography variant="bodySmall" className={styles.warningText}>
-              ⚠️ Account pending approval
+              <span>⚠️</span> Account pending approval
             </Typography>
           )}
           {!dashboardData.user.emailVerified && (
             <Typography variant="bodySmall" className={styles.warningText}>
-              ⚠️ Email not verified
+              <span>⚠️</span> Email not verified
             </Typography>
           )}
         </div>
@@ -523,6 +558,7 @@ const Dashboard: React.FC = () => {
                         value={parseFloat(hourlyUsage.percentage)}
                         max={100}
                         data-danger={parseFloat(hourlyUsage.percentage) > 80}
+                        aria-label={`Hourly usage: ${hourlyUsage.percentage}% used`}
                       />
                       <Typography variant="bodySmall">
                         {hourlyUsage.percentage}% used
@@ -541,6 +577,7 @@ const Dashboard: React.FC = () => {
                         value={parseFloat(dailyUsage.percentage)}
                         max={100}
                         data-danger={parseFloat(dailyUsage.percentage) > 80}
+                        aria-label={`Daily usage: ${dailyUsage.percentage}% used`}
                       />
                       <Typography variant="bodySmall">
                         {dailyUsage.percentage}% used
@@ -559,6 +596,7 @@ const Dashboard: React.FC = () => {
                         value={parseFloat(monthlyUsage.percentage)}
                         max={100}
                         data-danger={parseFloat(monthlyUsage.percentage) > 80}
+                        aria-label={`Monthly usage: ${monthlyUsage.percentage}% used`}
                       />
                       <Typography variant="bodySmall">
                         {monthlyUsage.percentage}% used

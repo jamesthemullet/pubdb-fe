@@ -148,7 +148,7 @@ describe("Dashboard", () => {
 
 			await waitFor(() => {
 				expect(
-					screen.getByText("⚠️ Account pending approval"),
+					screen.getByText(/Account pending approval/),
 				).toBeInTheDocument();
 			});
 		});
@@ -163,7 +163,7 @@ describe("Dashboard", () => {
 			render(<Dashboard />);
 
 			await waitFor(() => {
-				expect(screen.getByText("⚠️ Email not verified")).toBeInTheDocument();
+				expect(screen.getByText(/Email not verified/)).toBeInTheDocument();
 			});
 		});
 
