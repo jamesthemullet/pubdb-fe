@@ -1,3 +1,4 @@
+import type { Dispatch, SetStateAction } from "react";
 import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
 import PubAmenitiesFields from "@/app/components/pub-form/PubAmenitiesFields";
@@ -31,7 +32,7 @@ type Props = {
   beerTypeOptions: BeerType[];
   beerTypesLoading: boolean;
   beerTypesError: string | null;
-  setFieldErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  setFieldErrors: Dispatch<SetStateAction<Record<string, string>>>;
 };
 
 export default function PubEditView({

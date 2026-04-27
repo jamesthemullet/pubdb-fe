@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import Typography from "@/app/components/typography/typography";
 import type { BeerGarden, OpeningHoursMap, Pub } from "@/types/pub";
 import styles from "../page.module.css";
@@ -380,7 +381,7 @@ function getBeerTypeNames(pub: Pub): string[] {
   return [];
 }
 
-function renderOpeningHours(ohAny: OpeningHoursMap | string | null | undefined) {
+function renderOpeningHours(ohAny: OpeningHoursMap | string | null | undefined): JSX.Element {
   const weekdays = [
     "Monday",
     "Tuesday",

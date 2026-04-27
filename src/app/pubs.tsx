@@ -13,7 +13,7 @@ export default function Pubs() {
     async function fetchPubs() {
       try {
         const res = await fetch("/api/pubs");
-        const data = await res.json();
+        const data = await res.json() as Pub[];
         setPubs(data);
       } catch (_error) {
       } finally {

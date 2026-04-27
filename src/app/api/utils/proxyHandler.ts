@@ -4,7 +4,7 @@ import { getServerApiUrl } from "@/lib/serverApiUrl";
 export function createApiProxyHandler(
   endpointPath: string,
   options?: { forwardAuth?: boolean; resourceName?: string }
-) {
+): (request: Request) => Promise<NextResponse> {
   return async (request: Request) => {
     const apiUrl = getServerApiUrl();
     const apiKey = process.env.TESTING_API_KEY;
@@ -13,7 +13,7 @@ export function createApiProxyHandler(
       return NextResponse.json({ error: "Missing API key" }, { status: 500 });
     }
 
-    const headers: HeadersInit = { "X-API-Key": apiKey };
+    const headers: Record<string, string> = { "X-API-Key": apiKey };
     if (options?.forwardAuth) {
       const authHeader = request.headers.get("authorization");
       if (authHeader) {
@@ -27,7 +27,7 @@ export function createApiProxyHandler(
         headers,
         cache: "no-store",
       });
-      const data = await response.json().catch(() => null);
+      const data: unknown = await response.json().catch(() => null);
 
       if (!response.ok) {
         return NextResponse.json(

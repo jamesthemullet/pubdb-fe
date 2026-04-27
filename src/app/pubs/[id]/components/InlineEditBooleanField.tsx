@@ -32,7 +32,7 @@ export default function InlineEditBooleanField({ label, value, onSave, canEdit }
     setError(null);
   }
 
-  async function save() {
+  async function save(): Promise<void> {
     setSaving(true);
     const err = await onSave(draft);
     setSaving(false);

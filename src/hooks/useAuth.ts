@@ -8,11 +8,13 @@ export type AuthUser = {
   admin?: boolean;
 } | null;
 
+type AuthPayload = { email: string; approved?: boolean; admin?: boolean };
+
 export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boolean } {
   const [user, setUser] = useState<AuthUser>(null);
 
   useEffect(() => {
-    async function checkAuth() {
+    async function checkAuth(): Promise<void> {
       const token = localStorage.getItem("token");
       if (!token) {
         setUser(null);
@@ -23,13 +25,13 @@ export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boole
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
-          const data = await res.json();
+          const data = await res.json() as AuthPayload;
           setUser({ email: data.email, approved: data.approved, admin: data.admin });
           return;
         }
       } catch { /* fall through to JWT decode */ }
       try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
+        const payload = JSON.parse(atob(token.split(".")[1])) as AuthPayload;
         setUser({ email: payload.email, approved: payload.approved, admin: payload.admin });
       } catch {
         setUser(null);

@@ -94,7 +94,7 @@ export function useCountries() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
-    async function fetchCountries() {
+    async function fetchCountries(): Promise<void> {
       setCountriesLoading(true);
       try {
         const res = await fetch(

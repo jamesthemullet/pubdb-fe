@@ -42,7 +42,7 @@ export default function InlineEditField({
     setError(null);
   }
 
-  async function save() {
+  async function save(): Promise<void> {
     if (validate) {
       const err = validate(draft);
       if (err) {
