@@ -7,6 +7,7 @@ import { buildAuthHeaders } from "@/lib/auth";
 import { getErrorMessage, isHttpErrorObject } from "@/lib/errors";
 import Button from "../../components/button/button";
 import Typography from "../../components/typography/typography";
+import ApiKeyQuickStart from "../../components/api-key-quickstart/api-key-quickstart";
 import styles from "./dashboard.module.css";
 
 type ApiKey = {
@@ -406,6 +407,7 @@ const Dashboard: React.FC = () => {
                       : "Copy API key"}
                   </Typography>
                 </Button>
+                <ApiKeyQuickStart apiKey={forgotKeyDetails.key} />
               </div>
             )}
             <div className={styles.modalActions}>

@@ -1,0 +1,43 @@
+.container {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.5rem;
+}
+
+.heading {
+  margin-bottom: 0.75rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: -1px;
+}
+
+.tabActive {
+  border-bottom-color: var(--action-green);
+  color: var(--text-primary, inherit);
+  font-weight: 600;
+}
+
+.codeBlock {
+  background: var(--input-background);
+  border-radius: 4px;
+  padding: 1rem;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0 0 0.75rem 0;
+}

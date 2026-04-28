@@ -4,6 +4,7 @@ import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
+import ApiKeyQuickStart from "@/app/components/api-key-quickstart/api-key-quickstart";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./pricing.module.css";
@@ -489,6 +490,7 @@ const Pricing: React.FC = () => {
                 <Typography>
                   <strong>API Key:</strong> {apiKey.key}
                 </Typography>
+                <ApiKeyQuickStart apiKey={apiKey.key} />
               </div>
             )}
             {modalUpcoming ? (
