@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import { useContributions } from "@/hooks/useContributions";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import { getErrorMessage, isHttpErrorObject } from "@/lib/errors";
@@ -68,6 +69,7 @@ const Dashboard: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
   );
+  const { contributions, contributionsLoading, contributionsError } = useContributions();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -639,6 +641,45 @@ const Dashboard: React.FC = () => {
               No API keys found. You may need to create an API key to get
               started.
             </Typography>
+          </div>
+        )}
+
+        {dashboardData.user.approved && (
+          <div className={styles.contributionsSection}>
+            <Typography variant="headingSmall">Your Contributions</Typography>
+            {contributionsLoading && (
+              <Typography variant="bodySmall">Loading contributions...</Typography>
+            )}
+            {contributionsError && (
+              <Typography variant="bodySmall" className={styles.inlineError}>
+                {contributionsError}
+              </Typography>
+            )}
+            {!contributionsLoading && !contributionsError && contributions && (
+              <>
+                <Typography variant="bodyMedium" className={styles.contributionStat}>
+                  {contributions.totalAdded} pub{contributions.totalAdded !== 1 ? "s" : ""} added
+                </Typography>
+                {contributions.recentPubs.length > 0 ? (
+                  <ul className={styles.recentPubList}>
+                    {contributions.recentPubs.map((pub) => (
+                      <li key={pub.id}>
+                        <a href={`/pubs/${pub.id}`} className={styles.recentPubLink}>
+                          <Typography as="span" variant="bodySmall">
+                            {pub.name}
+                          </Typography>
+                        </a>
+                        <Typography as="span" variant="bodySmall" className={styles.recentPubMeta}>
+                          {" — "}{pub.city}
+                        </Typography>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <Typography variant="bodySmall">No pubs added yet.</Typography>
+                )}
+              </>
+            )}
           </div>
         )}
       </div>

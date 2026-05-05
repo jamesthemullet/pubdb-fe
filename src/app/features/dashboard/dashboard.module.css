@@ -170,6 +170,34 @@
   border-radius: 4px;
 }
 
+.contributionsSection {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.contributionStat {
+  margin-bottom: 1rem;
+}
+
+.recentPubList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.recentPubLink {
+  color: var(--link-color, inherit);
+  text-decoration: underline;
+}
+
+.recentPubMeta {
+  color: var(--text-secondary);
+}
+
 @media (max-width: 900px) {
   .rateLimitsGrid {
     grid-template-columns: 1fr;
