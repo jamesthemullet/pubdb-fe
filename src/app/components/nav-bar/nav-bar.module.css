@@ -40,7 +40,7 @@
   justify-content: space-between;
   width: 28px;
   height: 20px;
-  background: none !important;
+  background: none;
   border: none;
   cursor: pointer;
   padding: 0;
@@ -48,8 +48,9 @@
   right: 1rem;
 }
 
-.burger:hover {
-  background: none !important;
+.nav .burger,
+.nav .burger:hover {
+  background: none;
 }
 
 .burgerLine {
