@@ -85,7 +85,6 @@ export default function PubEditView({
         showRequiredMarkers={false}
         namePrefix="edit-pub"
       />
-      <br />
       <label htmlFor="edit-area">
         Area:{" "}
         <Input

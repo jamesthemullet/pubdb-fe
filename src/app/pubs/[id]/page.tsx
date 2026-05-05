@@ -265,7 +265,7 @@ export default function PubPage() {
       {loading ? (
         <Typography role="status" aria-live="polite">Loading pub details…</Typography>
       ) : pub ? (
-        <>
+        <div className={styles.pubContent}>
           <Typography as="h1" variant="headingMedium">
             {pub.name}
           </Typography>
@@ -330,7 +330,7 @@ export default function PubPage() {
               onInlineSave={handleInlineSave}
             />
           )}
-        </>
+        </div>
       ) : (
         <Typography>Pub not found</Typography>
       )}
