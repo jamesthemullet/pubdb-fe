@@ -2,13 +2,13 @@
 
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import { useContributions } from "@/hooks/useContributions";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import { getErrorMessage, isHttpErrorObject } from "@/lib/errors";
 import Button from "../../components/button/button";
 import Typography from "../../components/typography/typography";
 import styles from "./dashboard.module.css";
-import { useContributions } from "@/hooks/useContributions";
 
 type ApiKey = {
   name: string;
