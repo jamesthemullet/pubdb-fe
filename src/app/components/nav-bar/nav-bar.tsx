@@ -47,6 +47,7 @@ const NavBar = () => {
         <li><Link href="/pubs">All Pubs</Link></li>
         <li><Link href="/profile">Profile</Link></li>
         <li><Link href="/add-pub">Add Pub</Link></li>
+        <li><Link href="/leaderboard">Leaderboard</Link></li>
         {!userEmail && <li><Link href="/register">Register</Link></li>}
         {userEmail && (
           <>
