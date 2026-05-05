@@ -1,6 +1,14 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/hooks/useContributions", () => ({
+	useContributions: () => ({
+		contributions: { totalAdded: 0, recentPubs: [] },
+		contributionsLoading: false,
+		contributionsError: null,
+	}),
+}));
+
 import Dashboard from "./dashboard";
 
 function jsonResponse(data: unknown, status = 200): Response {
