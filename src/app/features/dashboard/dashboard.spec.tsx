@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/hooks/useContributions", () => ({
 	useContributions: () => ({
-		contributions: { totalAdded: 0, recentPubs: [] },
+		contributions: { totalAdded: 0, recentPubs: [], editsByPub: [] },
 		contributionsLoading: false,
 		contributionsError: null,
 	}),

@@ -70,6 +70,15 @@ const Dashboard: React.FC = () => {
     null
   );
   const { contributions, contributionsLoading, contributionsError } = useContributions();
+  const [expandedEdits, setExpandedEdits] = useState<Set<string>>(new Set());
+
+  function toggleEditTypes(pubId: string) {
+    setExpandedEdits((prev) => {
+      const next = new Set(prev);
+      next.has(pubId) ? next.delete(pubId) : next.add(pubId);
+      return next;
+    });
+  }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -677,6 +686,56 @@ const Dashboard: React.FC = () => {
                   </ul>
                 ) : (
                   <Typography variant="bodySmall">No pubs added yet.</Typography>
+                )}
+
+                {contributions.editsByPub.length > 0 && (
+                  <div className={styles.editsSection}>
+                    <Typography variant="headingSmall">Recent Edits</Typography>
+                    <ul className={styles.recentPubList}>
+                      {contributions.editsByPub.map((entry) => (
+                        <li key={entry.pubId} className={styles.editEntry}>
+                          <div className={styles.editEntryRow}>
+                            <div>
+                              <a href={`/pubs/${entry.pubId}`} className={styles.recentPubLink}>
+                                <Typography as="span" variant="bodySmall">
+                                  {entry.pubName}
+                                </Typography>
+                              </a>
+                              <Typography as="span" variant="bodySmall" className={styles.recentPubMeta}>
+                                {" — "}{entry.city}
+                              </Typography>
+                              <Typography as="span" variant="bodySmall" className={styles.editCount}>
+                                {" "}({entry.editCount} edit{entry.editCount !== 1 ? "s" : ""})
+                              </Typography>
+                            </div>
+                            {entry.editTypes.length > 0 && (
+                              <button
+                                type="button"
+                                className={styles.toggleButton}
+                                onClick={() => toggleEditTypes(entry.pubId)}
+                                aria-expanded={expandedEdits.has(entry.pubId)}
+                              >
+                                <Typography as="span" variant="bodySmall">
+                                  {expandedEdits.has(entry.pubId) ? "Hide fields" : "Show fields"}
+                                </Typography>
+                              </button>
+                            )}
+                          </div>
+                          {expandedEdits.has(entry.pubId) && entry.editTypes.length > 0 && (
+                            <ul className={styles.editTypeList}>
+                              {entry.editTypes.map((type) => (
+                                <li key={type} className={styles.editTypePill}>
+                                  <Typography as="span" variant="bodySmall">
+                                    {type}
+                                  </Typography>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </>
             )}
