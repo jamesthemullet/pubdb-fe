@@ -47,6 +47,7 @@ const NavBar = () => {
   return (
     <nav className={styles.nav}>
       <button
+        type="button"
         className={styles.burger}
         onClick={() => setMenuOpen((o) => !o)}
         aria-label={menuOpen ? "Close menu" : "Open menu"}
