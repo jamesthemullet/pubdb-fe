@@ -8,9 +8,26 @@ export type RecentPub = {
   createdAt: string;
 };
 
+export type RecentEdit = {
+  pubId: string;
+  pubName: string;
+  city: string;
+  editTypes: string[];
+  timestamp: string;
+};
+
+export type EditsByPub = {
+  pubId: string;
+  pubName: string;
+  city: string;
+  editCount: number;
+  editTypes: string[];
+};
+
 export type ContributionsData = {
   totalAdded: number;
   recentPubs: RecentPub[];
+  editsByPub: EditsByPub[];
 };
 
 function isRecentPub(item: unknown): item is RecentPub {
@@ -24,16 +41,54 @@ function isRecentPub(item: unknown): item is RecentPub {
   );
 }
 
+function isRecentEdit(item: unknown): item is RecentEdit {
+  if (typeof item !== "object" || item === null) return false;
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.pubId === "string" &&
+    typeof obj.pubName === "string" &&
+    typeof obj.city === "string" &&
+    Array.isArray(obj.editTypes)
+  );
+}
+
+function groupEditsByPub(edits: RecentEdit[]): EditsByPub[] {
+  const map = new Map<string, EditsByPub>();
+  for (const edit of edits) {
+    const existing = map.get(edit.pubId);
+    if (existing) {
+      existing.editCount += 1;
+      for (const t of edit.editTypes) {
+        if (!existing.editTypes.includes(t)) {
+          existing.editTypes.push(t);
+        }
+      }
+    } else {
+      map.set(edit.pubId, {
+        pubId: edit.pubId,
+        pubName: edit.pubName,
+        city: edit.city,
+        editCount: 1,
+        editTypes: [...edit.editTypes],
+      });
+    }
+  }
+  return Array.from(map.values());
+}
+
 function normalizeContributions(payload: unknown): ContributionsData {
   if (typeof payload !== "object" || payload === null) {
-    return { totalAdded: 0, recentPubs: [] };
+    return { totalAdded: 0, recentPubs: [], editsByPub: [] };
   }
   const obj = payload as Record<string, unknown>;
   const totalAdded = typeof obj.totalAdded === "number" ? obj.totalAdded : 0;
   const recentPubs = Array.isArray(obj.recentPubs)
     ? obj.recentPubs.filter(isRecentPub)
     : [];
-  return { totalAdded, recentPubs };
+  const recentEdits = Array.isArray(obj.recentEdits)
+    ? obj.recentEdits.filter(isRecentEdit)
+    : [];
+  return { totalAdded, recentPubs, editsByPub: groupEditsByPub(recentEdits) };
 }
 
 export function useContributions(): {
