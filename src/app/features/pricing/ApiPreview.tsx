@@ -77,12 +77,7 @@ export default function ApiPreview() {
         </div>
 
         {loading ? (
-          <div
-            className={styles.skeleton}
-            aria-busy="true"
-            role="status"
-            aria-label="Loading API response"
-          />
+          <div className={styles.skeleton} aria-hidden="true" />
         ) : json ? (
           <pre className={styles.pre}>{json}</pre>
         ) : (
