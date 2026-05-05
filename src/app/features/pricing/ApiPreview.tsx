@@ -68,16 +68,27 @@ export default function ApiPreview() {
             onClick={handleCopy}
             disabled={!json || copyStatus !== "idle"}
           >
-            {copyStatus === "copied" ? "Copied!" : copyStatus === "error" ? "Copy failed" : "Copy"}
+            {copyStatus === "copied"
+              ? "Copied!"
+              : copyStatus === "error"
+              ? "Copy failed"
+              : "Copy"}
           </Button>
         </div>
 
         {loading ? (
-          <div className={styles.skeleton} aria-busy="true" aria-label="Loading API response" />
+          <div
+            className={styles.skeleton}
+            aria-busy="true"
+            role="status"
+            aria-label="Loading API response"
+          />
         ) : json ? (
           <pre className={styles.pre}>{json}</pre>
         ) : (
-          <p className={styles.fallback}>Could not load a sample response right now.</p>
+          <p className={styles.fallback}>
+            Could not load a sample response right now.
+          </p>
         )}
       </div>
     </section>
