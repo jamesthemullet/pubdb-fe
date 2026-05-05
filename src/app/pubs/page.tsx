@@ -201,12 +201,12 @@ export default function Pubs() {
           {debouncedSearchTerm ? " matching your search" : " in the database"}.
         </Typography>
       ) : (
-        <div>
-          <Link href="/add-pub">
+        <div className={styles.pubResults}>
+          <Link href="/add-pub" className={styles.addPubLink}>
             <button type="button">Add Pub</button>
           </Link>
           {filteredPubs.length > 0 ? (
-            <ul>
+            <ul className={styles.pubList}>
               {filteredPubs.map((pub) => (
                 <li key={pub.id}>
                   <Link href={`/pubs/${pub.id}`} prefetch={false}>
@@ -219,7 +219,7 @@ export default function Pubs() {
           ) : (
             <Typography>No pubs match your current filters.</Typography>
           )}
-          <div>
+          <div className={styles.pagination}>
             <button
               type="button"
               onClick={() => setPage((p) => p - 1)}

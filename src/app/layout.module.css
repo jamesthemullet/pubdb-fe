@@ -27,6 +27,7 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
+  width: min(1000px, 100vw - 4rem);
 }
 
 .main ol {
@@ -120,10 +121,6 @@ a.secondary {
   .page {
     padding: 32px;
     padding-bottom: 80px;
-  }
-
-  .main {
-    align-items: center;
   }
 
   .main ol {

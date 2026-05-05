@@ -209,7 +209,7 @@ export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineS
         </Typography>{" "}
         {getBeerTypeNames(pub).length ? getBeerTypeNames(pub).join(", ") : "-"}
       </Typography>
-      <Typography>
+      <Typography as="div">
         <Typography as="span" isBold>
           Opening Hours:
         </Typography>
@@ -338,7 +338,7 @@ function BeerGardenDisplayCard({ garden }: { garden: BeerGarden }) {
         </Typography>{" "}
         {garden.notes || "-"}
       </Typography>
-      <Typography>
+      <Typography as="div">
         <Typography as="span" isBold>
           Opening Hours:
         </Typography>

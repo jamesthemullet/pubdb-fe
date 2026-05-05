@@ -20,6 +20,8 @@
 
 .pasteTextarea {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   resize: vertical;
   font-family: inherit;
   font-size: 0.875rem;

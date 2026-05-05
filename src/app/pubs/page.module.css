@@ -83,3 +83,25 @@
   gap: 1rem;
   flex-wrap: wrap;
 }
+
+.addPubLink {
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.pubResults {
+  width: 100%;
+}
+
+.pubList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}

@@ -21,7 +21,11 @@
 }
 
 .toggle {
-  width: auto;
+  width: 1.25rem;
+  height: 1.25rem;
   padding: 0;
   accent-color: var(--brand);
+  cursor: pointer;
+  flex-shrink: 0;
+  vertical-align: middle;
 }

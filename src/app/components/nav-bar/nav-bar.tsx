@@ -8,6 +8,7 @@ import styles from "./nav-bar.module.css";
 
 const NavBar = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -38,17 +39,31 @@ const NavBar = () => {
     localStorage.removeItem("token");
     setUserEmail(null);
     window.dispatchEvent(new Event("authChanged"));
+    setMenuOpen(false);
   };
+
+  const closeMenu = () => setMenuOpen(false);
 
   return (
     <nav className={styles.nav}>
-      <ul>
-        <li><Link href="/">Home</Link></li>
-        <li><Link href="/pubs">All Pubs</Link></li>
-        <li><Link href="/profile">Profile</Link></li>
-        <li><Link href="/add-pub">Add Pub</Link></li>
-        <li><Link href="/leaderboard">Leaderboard</Link></li>
-        {!userEmail && <li><Link href="/register">Register</Link></li>}
+      <button
+        type="button"
+        className={styles.burger}
+        onClick={() => setMenuOpen((o) => !o)}
+        aria-label={menuOpen ? "Close menu" : "Open menu"}
+        aria-expanded={menuOpen}
+      >
+        <span className={`${styles.burgerLine} ${menuOpen ? styles.burgerLineTopOpen : ""}`} />
+        <span className={`${styles.burgerLine} ${menuOpen ? styles.burgerLineMidOpen : ""}`} />
+        <span className={`${styles.burgerLine} ${menuOpen ? styles.burgerLineBottomOpen : ""}`} />
+      </button>
+      <ul className={menuOpen ? styles.menuOpen : ""}>
+        <li><Link href="/" onClick={closeMenu}>Home</Link></li>
+        <li><Link href="/pubs" onClick={closeMenu}>All Pubs</Link></li>
+        <li><Link href="/profile" onClick={closeMenu}>Profile</Link></li>
+        <li><Link href="/add-pub" onClick={closeMenu}>Add Pub</Link></li>
+        <li><Link href="/leaderboard" onClick={closeMenu}>Leaderboard</Link></li>
+        {!userEmail && <li><Link href="/register" onClick={closeMenu}>Register</Link></li>}
         {userEmail && (
           <>
             <li><Typography>{userEmail}</Typography></li>
