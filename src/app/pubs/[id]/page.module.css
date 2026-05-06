@@ -47,12 +47,21 @@
 }
 
 .beerTypeOptions {
-  display: grid;
-  gap: 0.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .beerTypeLabel {
   display: flex;
+  align-items: center;
+  min-width: 10rem;
+}
+
+@media (max-width: 768px) {
+  .beerTypeOptions {
+    flex-direction: column;
+  }
 }
 
 .beerTypeName {

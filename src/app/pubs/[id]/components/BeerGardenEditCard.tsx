@@ -159,7 +159,7 @@ export default function BeerGardenEditCard({
         </label>
       </div>
       <div>
-        <Typography as="span">Opening Hours: </Typography>
+        <Typography as="span">Beer garden opening hours: </Typography>
         <OpeningHoursEditor
           value={garden.openingHours}
           onChange={(val) => onUpdate(index, { openingHours: val })}
