@@ -11,6 +11,9 @@
   padding-bottom: 0.75rem;
   border-bottom: 1px solid #ccc;
   margin-bottom: 0.25rem;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .pasteLabel {
@@ -74,4 +77,22 @@
 
 .timeInput {
   width: 7.5rem;
+}
+
+@media (max-width: 480px) {
+  .row {
+    flex-wrap: wrap;
+  }
+
+  .timeInput {
+    width: 6rem;
+  }
+
+  .bulkRow {
+    flex-wrap: wrap;
+  }
+
+  .applyButton {
+    width: 100%;
+  }
 }

@@ -3,6 +3,7 @@ import {
   PUB_AMENITY_FIELDS,
   type PubAmenityKey,
 } from "@/constants/pubFormFields";
+import styles from "./PubAmenitiesFields.module.css";
 
 type AmenityValues = Partial<Record<PubAmenityKey, boolean>>;
 
@@ -22,14 +23,14 @@ export default function PubAmenitiesFields({
   idPrefix = "amenity",
 }: PubAmenitiesFieldsProps) {
   return (
-    <div className={containerClassName}>
+    <div className={`${styles.container} ${containerClassName ?? ""}`}>
       {PUB_AMENITY_FIELDS.map((amenityField) => {
         const amenityId = `${idPrefix}-${amenityField.key}`;
 
         return (
           <label
             key={amenityField.key}
-            className={labelClassName}
+            className={`${styles.label} ${labelClassName ?? ""}`}
             htmlFor={amenityId}
           >
             <Input

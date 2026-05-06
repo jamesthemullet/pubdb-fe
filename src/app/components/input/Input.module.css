@@ -24,6 +24,7 @@
   width: 1.25rem;
   height: 1.25rem;
   padding: 0;
+  margin-right: 0.4rem;
   accent-color: var(--brand);
   cursor: pointer;
   flex-shrink: 0;
