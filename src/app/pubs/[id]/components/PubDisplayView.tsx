@@ -132,6 +132,12 @@ export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineS
         canEdit={ce}
       />
       <InlineEditBooleanField
+        label="Closed down"
+        value={pub.closedDown}
+        onSave={saveBool("closedDown")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
         label="Independent"
         value={pub.isIndependent}
         onSave={saveBool("isIndependent")}

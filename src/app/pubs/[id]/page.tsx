@@ -269,6 +269,11 @@ export default function PubPage() {
           <Typography as="h1" variant="headingMedium">
             {pub.name}
           </Typography>
+          {pub.closedDown && (
+            <div className={styles.closedBanner} role="alert">
+              This pub has permanently closed
+            </div>
+          )}
           {pub.imageUrl && (
             <Image
               src={pub.imageUrl}
