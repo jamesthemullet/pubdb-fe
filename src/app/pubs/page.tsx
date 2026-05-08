@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import Button from "@/app/components/button/button";
 import Dropdown from "@/app/components/dropdown/Dropdown";
@@ -17,6 +18,7 @@ type SortOption = "name-asc" | "name-desc" | "newest" | "oldest";
 const PAGE_SIZE = 50;
 
 export default function Pubs() {
+  const router = useRouter();
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -25,6 +27,7 @@ export default function Pubs() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [activeAmenities, setActiveAmenities] = useState<Set<PubAmenityKey>>(new Set());
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const [randomLoading, setRandomLoading] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -120,6 +123,18 @@ export default function Pubs() {
     setSortBy("name-asc");
   }
 
+  async function goToRandomPub() {
+    setRandomLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/pubs/random`);
+      if (!res.ok) throw new Error("Failed to fetch random pub");
+      const data = await res.json() as { data: Pub };
+      router.push(`/pubs/${data.data.id}`);
+    } catch {
+      setRandomLoading(false);
+    }
+  }
+
   const isFiltered = debouncedSearchTerm || activeAmenities.size > 0;
   const hasActiveFilters = isFiltered || sortBy !== "name-asc";
 
@@ -182,6 +197,12 @@ export default function Pubs() {
             </Button>
           </div>
         )}
+
+        <div>
+          <Button variant="secondary" size="sm" onClick={goToRandomPub} disabled={randomLoading}>
+            {randomLoading ? "Finding a pub…" : "Random pub"}
+          </Button>
+        </div>
       </div>
 
       {loading ? (
