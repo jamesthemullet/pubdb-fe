@@ -100,6 +100,8 @@ describe("PubDisplayView", () => {
       ["hasAccessibleToilet", "Accessible toilet:"],
       ["hasLiveSport", "Live sport:"],
       ["hasLiveMusic", "Live music:"],
+      ["hasPoolTable", "Pool table:"],
+      ["hasDartsBoard", "Darts board:"],
     ] as const)('renders "%s" label', (_field, label) => {
       renderView();
       expect(screen.getByText(label)).toBeInTheDocument();

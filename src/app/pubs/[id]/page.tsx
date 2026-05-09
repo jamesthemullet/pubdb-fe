@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
+import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
@@ -51,8 +52,13 @@ export default function PubPage() {
 
   const handleEditClick = useCallback(() => {
     if (!pub) return;
+    const base: Record<string, unknown> = { ...pub };
+    for (const { key } of PUB_AMENITY_FIELDS) {
+      if (base[key] === null) base[key] = false;
+    }
+    if (base.closedDown === null) base.closedDown = false;
     setEditFields({
-      ...pub,
+      ...(base as Partial<Pub>),
       beerGardens: pub.beerGardens ? [...pub.beerGardens] : [],
       beerTypeIds: getBeerTypeIdsFromPub(pub),
     });

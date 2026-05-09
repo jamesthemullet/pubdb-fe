@@ -65,6 +65,8 @@ export type Pub = {
   hasAccessibleToilet?: boolean;
   hasLiveSport?: boolean;
   hasLiveMusic?: boolean;
+  hasPoolTable?: boolean;
+  hasDartsBoard?: boolean;
   closedDown?: boolean;
   createdAt: string;
   operator?: string;

@@ -209,6 +209,18 @@ export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineS
         onSave={saveBool("hasLiveMusic")}
         canEdit={ce}
       />
+      <InlineEditBooleanField
+        label="Pool table"
+        value={pub.hasPoolTable}
+        onSave={saveBool("hasPoolTable")}
+        canEdit={ce}
+      />
+      <InlineEditBooleanField
+        label="Darts board"
+        value={pub.hasDartsBoard}
+        onSave={saveBool("hasDartsBoard")}
+        canEdit={ce}
+      />
       <Typography>
         <Typography as="span" isBold>
           Beer Types:
