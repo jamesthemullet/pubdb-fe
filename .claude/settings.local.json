@@ -21,7 +21,8 @@
       "Bash(git merge *)",
       "Bash(git stash *)",
       "Bash(yarn test:ci *)",
-      "Bash(gh issue *)"
+      "Bash(gh issue *)",
+      "Bash(yarn biome *)"
     ]
   }
 }

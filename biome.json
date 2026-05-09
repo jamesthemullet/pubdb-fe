@@ -8,6 +8,12 @@
 			"recommended": true,
 			"suspicious": {
 				"noConsole": "warn"
+			},
+			"a11y": {
+				"recommended": true
+			},
+			"performance": {
+				"recommended": true
 			}
 		}
 	},

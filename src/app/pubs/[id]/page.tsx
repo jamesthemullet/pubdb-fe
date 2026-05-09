@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
@@ -223,7 +222,7 @@ export default function PubPage() {
 
       if ((field === "lat" || field === "lng") && typeof value === "string") {
         (merged as Record<string, unknown>)[field] =
-          value === "" ? null : isNaN(parseFloat(value)) ? null : parseFloat(value);
+          value === "" ? null : Number.isNaN(parseFloat(value)) ? null : parseFloat(value);
       }
 
       const body: Record<string, unknown> = {};

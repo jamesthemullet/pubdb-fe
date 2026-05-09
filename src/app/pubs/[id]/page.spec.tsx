@@ -35,6 +35,7 @@ vi.mock("next/image", () => ({
 		width?: number;
 		height?: number;
 		className?: string;
+	// biome-ignore lint/performance/noImgElement: mock intentionally uses <img>
 	}) => <img src={src} alt={alt} {...props} />,
 }));
 
@@ -328,7 +329,7 @@ describe("PubPage", () => {
 			);
 			localStorage.setItem("token", `header.${payload}.signature`);
 			vi.spyOn(globalThis, "fetch").mockImplementation(
-				async (input, init?) => {
+				async (input, _init?) => {
 					const url =
 						typeof input === "string" ? input : (input as Request).url;
 					if (url.endsWith("/auth/me")) {
@@ -409,7 +410,7 @@ describe("PubPage", () => {
 						(init as RequestInit | undefined)?.method === "PATCH",
 				);
 				expect(patchCall).toBeDefined();
-				const url = patchCall![0] as string;
+				const url = patchCall?.[0] as string;
 				expect(url).toContain("/pubs/pub-123");
 			});
 		});
