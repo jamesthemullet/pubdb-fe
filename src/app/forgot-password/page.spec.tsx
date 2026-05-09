@@ -13,13 +13,6 @@ function jsonResponse(data: unknown, status = 200): Response {
 describe("ForgotPasswordPage", () => {
 	const originalEnv = process.env;
 
-	function submitForm() {
-		const form = screen.getByRole("button", { name: "Send Reset Link" }).closest("form");
-		if (form) {
-			fireEvent.submit(form);
-		}
-	}
-
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		process.env = { ...originalEnv };
@@ -61,6 +54,7 @@ describe("ForgotPasswordPage", () => {
 		fireEvent.change(screen.getByLabelText(/email:/i), {
 			target: { value: "user@example.com" },
 		});
+		// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 		fireEvent.submit(screen.getByRole("button", { name: "Send Reset Link" }).closest("form")!);
 
 		await waitFor(() => {
@@ -84,6 +78,7 @@ describe("ForgotPasswordPage", () => {
 		fireEvent.change(screen.getByLabelText(/email:/i), {
 			target: { value: "test@example.com" },
 		});
+		// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 		fireEvent.submit(screen.getByRole("button", { name: "Send Reset Link" }).closest("form")!);
 
 		await waitFor(() => {
@@ -108,6 +103,7 @@ describe("ForgotPasswordPage", () => {
 		fireEvent.change(screen.getByLabelText(/email:/i), {
 			target: { value: "unknown@example.com" },
 		});
+		// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 		fireEvent.submit(screen.getByRole("button", { name: "Send Reset Link" }).closest("form")!);
 
 		await waitFor(() => {
@@ -123,6 +119,7 @@ describe("ForgotPasswordPage", () => {
 		fireEvent.change(screen.getByLabelText(/email:/i), {
 			target: { value: "user@example.com" },
 		});
+		// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 		fireEvent.submit(screen.getByRole("button", { name: "Send Reset Link" }).closest("form")!);
 
 		await waitFor(() => {
@@ -143,6 +140,7 @@ describe("ForgotPasswordPage", () => {
 		fireEvent.change(screen.getByLabelText(/email:/i), {
 			target: { value: "user@example.com" },
 		});
+		// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 		fireEvent.submit(screen.getByRole("button", { name: "Send Reset Link" }).closest("form")!);
 
 		await waitFor(() => {
@@ -169,6 +167,7 @@ describe("ForgotPasswordPage", () => {
 		fireEvent.change(screen.getByLabelText(/email:/i), {
 			target: { value: "user@example.com" },
 		});
+		// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 		fireEvent.submit(screen.getByRole("button", { name: "Send Reset Link" }).closest("form")!);
 
 		await waitFor(() => {

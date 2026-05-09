@@ -91,6 +91,7 @@ describe("ResetPasswordPage", () => {
 				target: { value: "different456" },
 			});
 			fireEvent.submit(
+				// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 				screen.getByRole("button", { name: "Reset Password" }).closest("form")!,
 			);
 
@@ -109,6 +110,7 @@ describe("ResetPasswordPage", () => {
 				target: { value: "abc" },
 			});
 			fireEvent.submit(
+				// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 				screen.getByRole("button", { name: "Reset Password" }).closest("form")!,
 			);
 
@@ -131,6 +133,7 @@ describe("ResetPasswordPage", () => {
 				target: { value: "abc" },
 			});
 			fireEvent.submit(
+				// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 				screen.getByRole("button", { name: "Reset Password" }).closest("form")!,
 			);
 
@@ -153,6 +156,7 @@ describe("ResetPasswordPage", () => {
 				target: { value: "newpassword" },
 			});
 			fireEvent.submit(
+				// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 				screen.getByRole("button", { name: "Reset Password" }).closest("form")!,
 			);
 
@@ -186,6 +190,7 @@ describe("ResetPasswordPage", () => {
 				target: { value: "mysecretpassword" },
 			});
 			fireEvent.submit(
+				// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 				screen.getByRole("button", { name: "Reset Password" }).closest("form")!,
 			);
 
@@ -220,6 +225,7 @@ describe("ResetPasswordPage", () => {
 				target: { value: "password123" },
 			});
 			fireEvent.submit(
+				// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 				screen.getByRole("button", { name: "Reset Password" }).closest("form")!,
 			);
 
@@ -244,6 +250,7 @@ describe("ResetPasswordPage", () => {
 				target: { value: "password123" },
 			});
 			fireEvent.submit(
+				// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 				screen.getByRole("button", { name: "Reset Password" }).closest("form")!,
 			);
 
@@ -268,6 +275,7 @@ describe("ResetPasswordPage", () => {
 				target: { value: "newpassword" },
 			});
 			fireEvent.submit(
+				// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
 				screen.getByRole("button", { name: "Reset Password" }).closest("form")!,
 			);
 
