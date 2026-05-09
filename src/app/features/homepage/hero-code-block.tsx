@@ -88,7 +88,9 @@ export default function HeroCodeBlock() {
           <button
             key={lang}
             type="button"
-            className={`${styles.tab} ${activeTab === lang ? styles.tabActive : ""}`}
+            className={`${styles.tab} ${
+              activeTab === lang ? styles.tabActive : ""
+            }`}
             onClick={() => setActiveTab(lang)}
           >
             {lang}
@@ -103,7 +105,7 @@ export default function HeroCodeBlock() {
       <div className={styles.separator} />
 
       {loading ? (
-        <div className={styles.skeleton} aria-label="Loading response..." />
+        <div className={styles.skeleton} />
       ) : json ? (
         <pre className={styles.responseCode}>
           <code>{json}</code>
