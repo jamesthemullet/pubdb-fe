@@ -170,6 +170,17 @@ export default function PubEditView({
         />
       </label>
       <br />
+      <label htmlFor="edit-closed-down">
+        <Input
+          id="edit-closed-down"
+          name="closedDown"
+          type="checkbox"
+          checked={editFields.closedDown ?? false}
+          onChange={(e) => onFieldChange("closedDown", e.target.checked)}
+        />
+        {" "}Closed down
+      </label>
+      <br />
       <PubAmenitiesFields
         values={editFields as Partial<Record<PubAmenityKey, boolean>>}
         onChange={(key, checked) => onFieldChange(key as keyof Pub, checked)}
