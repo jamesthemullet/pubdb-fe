@@ -1,3 +1,4 @@
+/* Feedback banner */
 .feedbackBanner {
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
@@ -24,6 +25,7 @@
   font-weight: bold;
 }
 
+/* Modal */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -47,7 +49,7 @@
 }
 
 .mutedText {
-  color: #666;
+  color: var(--text-muted);
 }
 
 .breakdownList {
@@ -66,55 +68,166 @@
   justify-content: flex-end;
 }
 
+/* Pricing section header */
+.pricingHeader {
+  margin-bottom: 40px;
+}
+
 .pricingHeading {
-  text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 10px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-color);
 }
 
+.pricingSubtitle {
+  color: var(--text-muted);
+  font-size: 15px;
+  max-width: 520px;
+}
+
+/* Tier cards grid */
 .tierCards {
-  display: flex;
-  gap: 2rem;
-  justify-content: center;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 48px;
 }
 
+/* Base tier card */
 .tierCard {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 2rem;
-  flex: 1;
-  max-width: 300px;
-  text-align: center;
-  position: relative;
-  box-sizing: border-box;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 28px 24px;
+  background: var(--surface);
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+/* Popular (Developer) card — dark */
+.tierCardPopular {
+  background: #111111;
+  border-color: #111111;
+  color: #f0f0f0;
+}
+
+.popularBadge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f0f0f0;
+  color: #111111;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.tierName {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.tierNamePopular {
+  color: #888888;
+}
+
+/* Price */
+.tierPriceRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  margin-bottom: 20px;
 }
 
 .tierPrice {
-  font-size: 2rem;
-  font-weight: bold;
-  margin: 0;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-family: var(--font-inter), sans-serif;
+  color: var(--text-color);
 }
 
+.tierCardPopular .tierPrice {
+  color: #ffffff;
+}
+
+.tierPriceSuffix {
+  font-size: 14px;
+  color: var(--text-muted);
+  padding-bottom: 5px;
+}
+
+.tierPriceSuffixPopular {
+  color: #888888;
+}
+
+/* Feature list */
 .tierFeatures {
-  text-align: left;
-  padding-left: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
 }
 
+.tierFeatureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.tierCardPopular .tierFeatureItem {
+  color: #c0c0c0;
+}
+
+.featureCheck {
+  color: #22c55e;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Overrides for text inside the popular (dark) card */
+.tierCardPopular .tierPrice {
+  color: #ffffff;
+}
+
+/* CTA */
 .tierAction {
   margin-top: auto;
-  padding-top: 0.75rem;
 }
 
-@media (max-width: 768px) {
-  .tierCards {
-    flex-direction: column;
-    align-items: center;
-  }
+.tierAction button {
+  width: 100%;
+}
 
-  .tierCard {
-    max-width: 340px;
-    width: 100%;
+.tierBtnPopular {
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+.tierBtnPopular:hover {
+  background: #e8e8e8 !important;
+}
+
+@media (max-width: 900px) {
+  .tierCards {
+    grid-template-columns: 1fr;
+    max-width: 420px;
   }
 }

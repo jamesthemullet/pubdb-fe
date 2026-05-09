@@ -60,8 +60,10 @@ const pricingTiers = [
   {
     index: 0,
     name: "HOBBY",
-    price: "Free",
+    price: "£0",
+    priceSuffix: "/forever",
     priceId: null,
+    popular: false,
     features: [
       "20 requests/hour",
       "200 requests/day",
@@ -72,8 +74,10 @@ const pricingTiers = [
   {
     index: 1,
     name: "DEVELOPER",
-    price: "$9/mo",
+    price: "£9",
+    priceSuffix: "/month",
     priceId: "price_1S6cBZ0k31jD9MVaQH1JSrAl",
+    popular: true,
     features: [
       "1,000 requests/hour",
       "10,000 requests/day",
@@ -84,8 +88,10 @@ const pricingTiers = [
   {
     index: 2,
     name: "BUSINESS",
-    price: "$19/mo",
+    price: "£19",
+    priceSuffix: "/month",
     priceId: "price_1S6cBq0k31jD9MVaRYKvxRek",
+    popular: false,
     features: [
       "5,000 requests/hour",
       "50,000 requests/day",
@@ -575,14 +581,20 @@ const Pricing: React.FC = () => {
         </div>
       ) : null}
 
-      <Typography variant="headingMedium" as="h1" className={styles.pricingHeading}>
-        API Pricing
-      </Typography>
+      <div className={styles.pricingHeader}>
+        <Typography variant="headingMedium" as="h2" className={styles.pricingHeading}>
+          Plans that scale with your project
+        </Typography>
+        <Typography className={styles.pricingSubtitle}>
+          Start free, upgrade when you ship. All tiers include the full pub
+          dataset — only rate limits change.
+        </Typography>
+      </div>
 
       <div className={styles.tierCards}>
         {pricingTiers.map((tier) => {
           const userTierIndex = pricingTiers.find(
-            (tier) => tier.name === userTier
+            (t) => t.name === userTier
           )?.index;
           const isCurrentTier = userTierIndex === tier.index;
           const isLowerTier =
@@ -597,12 +609,28 @@ const Pricing: React.FC = () => {
           })();
 
           return (
-            <div key={tier.name} className={styles.tierCard}>
-              <Typography variant="headingSmall">{tier.name}</Typography>
-              <Typography className={styles.tierPrice}>{tier.price}</Typography>
+            <div
+              key={tier.name}
+              className={`${styles.tierCard} ${tier.popular ? styles.tierCardPopular : ""}`}
+            >
+              {tier.popular && (
+                <span className={styles.popularBadge}>MOST POPULAR</span>
+              )}
+              <p className={`${styles.tierName} ${tier.popular ? styles.tierNamePopular : ""}`}>
+                {tier.name}
+              </p>
+              <div className={styles.tierPriceRow}>
+                <span className={styles.tierPrice}>{tier.price}</span>
+                <span className={`${styles.tierPriceSuffix} ${tier.popular ? styles.tierPriceSuffixPopular : ""}`}>
+                  {tier.priceSuffix}
+                </span>
+              </div>
               <ul className={styles.tierFeatures}>
                 {tier.features.map((f) => (
-                  <li key={f}>{f}</li>
+                  <li key={f} className={styles.tierFeatureItem}>
+                    <span className={styles.featureCheck} aria-hidden="true">✓</span>
+                    {f}
+                  </li>
                 ))}
               </ul>
               <div className={styles.tierAction}>
@@ -611,13 +639,14 @@ const Pricing: React.FC = () => {
                     onClick={() => handleTierSelection(tier)}
                     disabled={isCurrentTier || isLowerTier}
                     variant={isLowerTier ? "secondary" : "primary"}
+                    className={tier.popular ? styles.tierBtnPopular : ""}
                   >
                     {loadingTier === tier.name ? "Processing..." : actionLabel}
                   </Button>
                 ) : (
                   <Button
                     onClick={() => handleTierSelection(tier)}
-                    disabled={isCurrentTier || isLowerTier}
+                    className={tier.popular ? styles.tierBtnPopular : ""}
                   >
                     Subscribe
                   </Button>

@@ -107,7 +107,7 @@ test.describe("Pubs list (/pubs)", () => {
     });
 
     test("filters pubs by name", async ({ page }) => {
-      await page.getByPlaceholder(/search pubs/i).fill("Harp");
+      await page.getByRole("textbox", { name: "Search pubs" }).fill("Harp");
 
       await expect(page.getByRole("link", { name: "The Harp" })).toBeVisible();
       await expect(page.getByRole("link", { name: "The Crown" })).not.toBeVisible();
@@ -115,30 +115,30 @@ test.describe("Pubs list (/pubs)", () => {
     });
 
     test("filters pubs by city", async ({ page }) => {
-      await page.getByPlaceholder(/search pubs/i).fill("Brighton");
+      await page.getByRole("textbox", { name: "Search pubs" }).fill("Brighton");
 
       await expect(page.getByRole("link", { name: "The Crown" })).toBeVisible();
       await expect(page.getByRole("link", { name: "The Harp" })).not.toBeVisible();
     });
 
     test("filters pubs by address", async ({ page }) => {
-      await page.getByPlaceholder(/search pubs/i).fill("Bene't");
+      await page.getByRole("textbox", { name: "Search pubs" }).fill("Bene't");
 
       await expect(page.getByRole("link", { name: "The Eagle" })).toBeVisible();
       await expect(page.getByRole("link", { name: "The Harp" })).not.toBeVisible();
     });
 
     test("shows result count while searching", async ({ page }) => {
-      await page.getByPlaceholder(/search pubs/i).fill("Harp");
+      await page.getByRole("textbox", { name: "Search pubs" }).fill("Harp");
 
       await expect(page.getByText(/Showing 1 pubs/)).toBeVisible();
     });
 
     test("hides result count when search is cleared", async ({ page }) => {
-      await page.getByPlaceholder(/search pubs/i).fill("Harp");
+      await page.getByRole("textbox", { name: "Search pubs" }).fill("Harp");
       await expect(page.getByText(/Showing/)).toBeVisible();
 
-      await page.getByPlaceholder(/search pubs/i).clear();
+      await page.getByRole("textbox", { name: "Search pubs" }).clear();
       await expect(page.getByText(/Showing/)).not.toBeVisible();
     });
   });

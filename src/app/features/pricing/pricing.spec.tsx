@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import Pricing from "./pricing";
 
+vi.mock("./ApiPreview", () => ({ default: () => null }));
+
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
@@ -73,28 +75,22 @@ describe("Pricing component", () => {
     it("renders the heading", async () => {
       render(<Pricing />);
       expect(
-        screen.getByRole("heading", { name: /api pricing/i })
+        screen.getByRole("heading", { name: /plans that scale with your project/i })
       ).toBeInTheDocument();
     });
 
     it("renders all three pricing tiers", async () => {
       render(<Pricing />);
-      expect(
-        screen.getByRole("heading", { name: /hobby/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("heading", { name: /developer/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("heading", { name: /business/i })
-      ).toBeInTheDocument();
+      expect(screen.getByText("HOBBY")).toBeInTheDocument();
+      expect(screen.getByText("DEVELOPER")).toBeInTheDocument();
+      expect(screen.getByText("BUSINESS")).toBeInTheDocument();
     });
 
     it("renders tier prices", async () => {
       render(<Pricing />);
-      expect(screen.getByText("Free")).toBeInTheDocument();
-      expect(screen.getByText("$9/mo")).toBeInTheDocument();
-      expect(screen.getByText("$19/mo")).toBeInTheDocument();
+      expect(screen.getByText("£0")).toBeInTheDocument();
+      expect(screen.getByText("£9")).toBeInTheDocument();
+      expect(screen.getByText("£19")).toBeInTheDocument();
     });
 
     it("renders feature lists for each tier", () => {
