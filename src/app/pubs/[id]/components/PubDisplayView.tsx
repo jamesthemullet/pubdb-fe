@@ -278,6 +278,14 @@ export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineS
         </Typography>{" "}
         {new Date(pub.createdAt).toLocaleString()}
       </Typography>
+      {pub.updatedAt && (
+        <Typography>
+          <Typography as="span" isBold>
+            Last Edited:
+          </Typography>{" "}
+          {new Date(pub.updatedAt).toLocaleString()}
+        </Typography>
+      )}
     </>
   );
 }
