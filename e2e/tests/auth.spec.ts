@@ -150,7 +150,7 @@ test.describe("Register / Login page", () => {
 
 			// Component does window.location.href redirect after 500ms
 			await page.waitForURL("/");
-			await expect(page.locator("nav")).toContainText("user@example.com");
+			await expect(page.locator("aside")).toContainText("user@example.com");
 		});
 
 		test("API error is shown on failed login", async ({ page }) => {

@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { mockDashboardEndpoint, setAuthToken } from "../fixtures/auth";
 
-test.describe("NavBar navigation", () => {
-  test("All Pubs link navigates to /pubs", async ({ page }) => {
+test.describe("Sidebar navigation", () => {
+  test("Browse pubs link navigates to /pubs", async ({ page }) => {
     await page.route("**/pubs**", (route) =>
       route.fulfill({
         status: 200,
@@ -11,13 +11,13 @@ test.describe("NavBar navigation", () => {
       })
     );
     await page.goto("/");
-    await page.locator("nav").getByRole("link", { name: "All Pubs" }).click();
+    await page.locator("aside").getByRole("link", { name: "Browse pubs" }).click();
     await expect(page).toHaveURL("/pubs");
   });
 
   test("Register link navigates to /register", async ({ page }) => {
     await page.goto("/");
-    await page.locator("nav").getByRole("link", { name: "Register" }).click();
+    await page.locator("aside").getByRole("link", { name: /register/i }).click();
     await expect(page).toHaveURL("/register");
   });
 
@@ -25,7 +25,7 @@ test.describe("NavBar navigation", () => {
     await mockDashboardEndpoint(page);
     await setAuthToken(page, "tester@example.com");
     await page.goto("/");
-    await page.locator("nav").getByRole("button", { name: "Logout" }).click();
-    await expect(page.locator("nav").getByRole("link", { name: "Register" })).toBeVisible();
+    await page.locator("aside").getByRole("button", { name: "Log out" }).click();
+    await expect(page.locator("aside").getByRole("link", { name: /register/i })).toBeVisible();
   });
 });

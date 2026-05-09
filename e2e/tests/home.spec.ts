@@ -2,10 +2,10 @@ import { expect, test } from "@playwright/test";
 import { mockDashboardEndpoint, setAuthToken } from "../fixtures/auth";
 
 test.describe("Home page", () => {
-  test("renders heading and welcome copy", async ({ page }) => {
+  test("renders heading and hero description", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Pub DB", level: 1 })).toBeVisible();
-    await expect(page.getByText(/welcome to pub db/i)).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("The pub database");
+    await expect(page.getByText(/a clean rest api/i)).toBeVisible();
   });
 
   test.describe("Pricing — unauthenticated", () => {
@@ -14,13 +14,13 @@ test.describe("Home page", () => {
     });
 
     test("shows all three tier names and prices", async ({ page }) => {
-      await expect(page.getByRole("heading", { name: "HOBBY" })).toBeVisible();
-      await expect(page.getByRole("heading", { name: "DEVELOPER" })).toBeVisible();
-      await expect(page.getByRole("heading", { name: "BUSINESS" })).toBeVisible();
+      await expect(page.getByText("HOBBY", { exact: true })).toBeVisible();
+      await expect(page.getByText("DEVELOPER", { exact: true })).toBeVisible();
+      await expect(page.getByText("BUSINESS", { exact: true })).toBeVisible();
 
-      await expect(page.getByText("Free")).toBeVisible();
-      await expect(page.getByText("$9/mo")).toBeVisible();
-      await expect(page.getByText("$19/mo")).toBeVisible();
+      await expect(page.getByText("£0")).toBeVisible();
+      await expect(page.getByText("£9")).toBeVisible();
+      await expect(page.getByText("£19")).toBeVisible();
     });
 
     test("shows feature lists for each tier", async ({ page }) => {
