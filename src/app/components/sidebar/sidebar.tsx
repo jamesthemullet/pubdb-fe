@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import styles from "./sidebar.module.css";
 
 const WORKSPACE_LINKS = [
@@ -21,42 +22,16 @@ const ACCOUNT_LINKS = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const payload = JSON.parse(atob(token.split(".")[1]));
-          setUserEmail(payload.email || null);
-        } catch {
-          setUserEmail(null);
-        }
-      } else {
-        setUserEmail(null);
-      }
-    };
-    checkAuth();
-    window.addEventListener("storage", checkAuth);
-    window.addEventListener("authChanged", checkAuth);
-    return () => {
-      window.removeEventListener("storage", checkAuth);
-      window.removeEventListener("authChanged", checkAuth);
-    };
-  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setUserEmail(null);
     window.dispatchEvent(new Event("authChanged"));
     setMenuOpen(false);
   };
 
-  const userInitials = userEmail
-    ? userEmail.slice(0, 2).toUpperCase()
-    : null;
+  const userInitials = user?.email.slice(0, 2).toUpperCase() ?? null;
 
   return (
     <>
@@ -136,7 +111,7 @@ export default function Sidebar() {
                 </Link>
               </li>
             ))}
-            {!userEmail ? (
+            {!user ? (
               <li>
                 <Link
                   href="/register"
@@ -185,7 +160,7 @@ export default function Sidebar() {
         {userInitials && (
           <div className={styles.userRow}>
             <span className={styles.userAvatar}>{userInitials}</span>
-            <span className={styles.userEmail}>{userEmail}</span>
+            <span className={styles.userEmail}>{user?.email}</span>
           </div>
         )}
       </aside>

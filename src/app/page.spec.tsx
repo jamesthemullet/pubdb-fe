@@ -7,14 +7,30 @@ vi.mock("./features/pricing/pricing", () => ({
   default: () => <div data-testid="pricing">Pricing</div>,
 }));
 
+vi.mock("./features/homepage/hero-code-block", () => ({
+  default: () => <div data-testid="hero-code-block" />,
+}));
+
 describe("Home page", () => {
-  it("renders the heading and welcome copy", () => {
+  it("renders the hero heading", () => {
     render(<Home />);
 
-    expect(
-      screen.getByRole("heading", { name: "Pub DB", level: 1 })
-    ).toBeInTheDocument();
-    expect(screen.getByText(/welcome to pub db/i)).toBeInTheDocument();
+    const heading = screen.getByRole("heading", { level: 1 });
+    expect(heading).toHaveTextContent(/the pub database/i);
+  });
+
+  it("renders the hero CTA buttons", () => {
+    render(<Home />);
+
+    expect(screen.getByRole("link", { name: /get an api key/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /browse pubs/i })).toBeInTheDocument();
+  });
+
+  it("renders the stats bar", () => {
+    render(<Home />);
+
+    expect(screen.getByText("12,418")).toBeInTheDocument();
+    expect(screen.getByText(/pubs in production/i)).toBeInTheDocument();
   });
 
   it("renders the pricing section", () => {
