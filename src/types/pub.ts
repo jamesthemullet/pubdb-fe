@@ -69,6 +69,7 @@ export type Pub = {
   hasDartsBoard?: boolean;
   closedDown?: boolean;
   createdAt: string;
+  updatedAt?: string;
   operator?: string;
   area?: string;
   phone?: string;
