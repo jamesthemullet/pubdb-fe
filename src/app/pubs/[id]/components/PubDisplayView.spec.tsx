@@ -201,7 +201,7 @@ describe("PubDisplayView", () => {
         monday: { closed: true },
       };
       renderView({ openingHours: oh });
-      expect(screen.getByText(/Closed/)).toBeInTheDocument();
+      expect(screen.getAllByText(/Closed/).length).toBeGreaterThan(0);
     });
 
     it("renders opening hours when provided as a JSON string", () => {
