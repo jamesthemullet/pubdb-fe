@@ -15,6 +15,16 @@ import styles from "./page.module.css";
 
 type SortOption = "name-asc" | "name-desc" | "newest" | "oldest";
 
+const SORT_OPTIONS: SortOption[] = ["name-asc", "name-desc", "newest", "oldest"];
+
+function isSortOption(value: string): value is SortOption {
+  return (SORT_OPTIONS as string[]).includes(value);
+}
+
+type PubsApiResponse = { data: Pub[] };
+type PubApiResponse = { data: Pub };
+type ApiErrorResponse = { message?: string; error?: string };
+
 const PAGE_SIZE = 50;
 
 export default function Pubs() {
@@ -74,11 +84,11 @@ export default function Pubs() {
         const res = await fetch(`${API_URL}/pubs?${params}`);
 
         if (!res.ok) {
-          const errorData = await res.json() as { message?: string; error?: string };
+          const errorData = await res.json() as ApiErrorResponse;
           throw { response: res, data: errorData };
         }
 
-        const data = await res.json() as { data: Pub[] };
+        const data = await res.json() as PubsApiResponse;
         setPubs(data.data);
       } catch (error: unknown) {
         if (isHttpErrorObject(error)) {
@@ -128,7 +138,7 @@ export default function Pubs() {
     try {
       const res = await fetch(`${API_URL}/pubs/random`);
       if (!res.ok) throw new Error("Failed to fetch random pub");
-      const data = await res.json() as { data: Pub };
+      const data = await res.json() as PubApiResponse;
       router.push(`/pubs/${data.data.id}`);
     } catch {
       setRandomLoading(false);
@@ -158,7 +168,10 @@ export default function Pubs() {
             <Dropdown
               id="sort-select"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (isSortOption(val)) setSortBy(val);
+              }}
               fullWidth={false}
             >
               <option value="name-asc">Name (A–Z)</option>
