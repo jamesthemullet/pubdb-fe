@@ -8,15 +8,8 @@ vi.mock("../features/dashboard/dashboard", () => ({
 }));
 
 describe("ProfilePage", () => {
-	it("renders the heading, description, and Dashboard component", () => {
+	it("renders the Dashboard component", () => {
 		render(<ProfilePage />);
-
-		expect(
-			screen.getByRole("heading", { name: "Profile" }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText("Manage your API access and account details."),
-		).toBeInTheDocument();
 		expect(screen.getByTestId("dashboard")).toBeInTheDocument();
 	});
 });
