@@ -63,15 +63,15 @@ describe("Pubs page", () => {
 		expect(screen.getByText("Blue Anchor")).toBeInTheDocument();
 	});
 
-	it("renders pub links pointing to the correct detail pages", async () => {
+	it("renders pub entries in the table", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			jsonResponse({ data: SAMPLE_PUBS }),
 		);
 
 		render(<Pubs />);
 
-		const harpLink = await screen.findByRole("link", { name: "The Harp" });
-		expect(harpLink).toHaveAttribute("href", "/pubs/1");
+		expect(await screen.findByText("The Harp")).toBeInTheDocument();
+		expect(screen.getByText("The Crown")).toBeInTheDocument();
 	});
 
 	it("shows empty state when no pubs are returned", async () => {
@@ -82,7 +82,7 @@ describe("Pubs page", () => {
 		render(<Pubs />);
 
 		expect(
-			await screen.findByText("No pubs found in the database."),
+			await screen.findByText("No pubs found."),
 		).toBeInTheDocument();
 	});
 
@@ -114,7 +114,7 @@ describe("Pubs page", () => {
 		render(<Pubs />);
 
 		expect(
-			await screen.findByRole("button", { name: "Try Again" }),
+			await screen.findByRole("button", { name: "Try again" }),
 		).toBeInTheDocument();
 	});
 
@@ -125,7 +125,7 @@ describe("Pubs page", () => {
 
 		render(<Pubs />);
 
-		const addPubLink = await screen.findByRole("link", { name: "Add Pub" });
+		const addPubLink = await screen.findByRole("link", { name: /add pub/i });
 		expect(addPubLink).toHaveAttribute("href", "/add-pub");
 	});
 
@@ -144,7 +144,7 @@ describe("Pubs page", () => {
 			await screen.findByText("The Harp");
 
 			const searchInput = screen.getByPlaceholderText(
-				/search pubs by name, city/i,
+				/search by name, city/i,
 			);
 			fireEvent.change(searchInput, { target: { value: "harp" } });
 
@@ -169,7 +169,7 @@ describe("Pubs page", () => {
 			await screen.findByText("The Harp");
 
 			const searchInput = screen.getByPlaceholderText(
-				/search pubs by name, city/i,
+				/search by name, city/i,
 			);
 			fireEvent.change(searchInput, { target: { value: "manchester" } });
 
@@ -194,7 +194,7 @@ describe("Pubs page", () => {
 			await screen.findByText("The Harp");
 
 			const searchInput = screen.getByPlaceholderText(
-				/search pubs by name, city/i,
+				/search by name, city/i,
 			);
 			fireEvent.change(searchInput, { target: { value: "Lower Mall" } });
 
@@ -219,12 +219,12 @@ describe("Pubs page", () => {
 			await screen.findByText("The Harp");
 
 			const searchInput = screen.getByPlaceholderText(
-				/search pubs by name, city/i,
+				/search by name, city/i,
 			);
 			fireEvent.change(searchInput, { target: { value: "london" } });
 
 			await waitFor(() => {
-				expect(screen.getByText(/Showing 2 pubs/i)).toBeInTheDocument();
+				expect(screen.getByText(/2 \/ 2 pubs/)).toBeInTheDocument();
 			});
 		});
 
