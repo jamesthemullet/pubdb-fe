@@ -56,11 +56,13 @@ function AmenityIconCell({ pub }: { pub: Pub }) {
         return (
           <span
             key={key}
+            role="img"
             className={`${styles.amenityDot} ${isActive ? styles.amenityDotActive : ""}`}
             title={isActive ? icon.title : ""}
             aria-label={isActive ? icon.title : undefined}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+              {/* biome-ignore lint/security/noDangerouslySetInnerHtml: trusted internal SVG icon data */}
               <g dangerouslySetInnerHTML={{ __html: icon.svg }} />
             </svg>
           </span>
@@ -275,7 +277,7 @@ export default function Pubs() {
               <option value="oldest">Oldest first</option>
             </Dropdown>
 
-            <div className={styles.viewToggle} role="group" aria-label="View mode">
+            <fieldset className={styles.viewToggle} aria-label="View mode">
               <button type="button" className={`${styles.viewBtn} ${styles.viewBtnActive}`} aria-pressed="true">
                 <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
                   <rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" fill="none"/>
@@ -300,7 +302,7 @@ export default function Pubs() {
                 </svg>
                 Map
               </button>
-            </div>
+            </fieldset>
           </div>
         </div>
 
@@ -331,9 +333,9 @@ export default function Pubs() {
 
       {/* Table */}
       {loading ? (
-        <div className={styles.stateMsg} role="status" aria-live="polite">
+        <output className={styles.stateMsg} aria-live="polite">
           Loading pubs…
-        </div>
+        </output>
       ) : error ? (
         <div className={styles.stateMsg} role="alert">
           <span className={styles.errorText}>Error loading pubs: {error}</span>

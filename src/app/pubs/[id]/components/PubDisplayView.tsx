@@ -1,8 +1,8 @@
-import type { Pub } from "@/types/pub";
 import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
-import styles from "./PubDisplayView.module.css";
+import type { Pub } from "@/types/pub";
 import InlineEditBooleanField from "./InlineEditBooleanField";
 import InlineEditField from "./InlineEditField";
+import styles from "./PubDisplayView.module.css";
 
 type Props = {
   pub: Pub;
