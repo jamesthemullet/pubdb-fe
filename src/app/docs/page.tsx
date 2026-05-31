@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import type { Metadata } from "next";
+import { useState } from "react";
 import styles from "./page.module.css";
 
 const CURL_QUICK_START = `curl https://api.pubdb.io/v1/pubs \\
@@ -149,7 +149,7 @@ export default function DocsPage() {
         <div className={styles.needHelp}>
           <p className={styles.needHelpTitle}>Need help?</p>
           <p className={styles.needHelpText}>
-            Check the <a href="#" className={styles.needHelpLink}>changelog</a> for
+            Check the <a href="/changelog" className={styles.needHelpLink}>changelog</a> for
             recent updates or reach us at{" "}
             <a href="mailto:support@pubdb.io" className={styles.needHelpLink}>
               support@pubdb.io
@@ -171,13 +171,13 @@ export default function DocsPage() {
             </p>
           </div>
           <div className={styles.headerActions}>
-            <a href="#" className={styles.headerBtn}>
+            <a href="/api/openapi.json" className={styles.headerBtn}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                 <path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               OpenAPI spec
             </a>
-            <a href="#" className={styles.headerBtn}>
+            <a href="/playground" className={styles.headerBtn}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                 <polygon points="3,2 11,7 3,12" fill="currentColor" />
               </svg>
