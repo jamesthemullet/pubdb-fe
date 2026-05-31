@@ -2,6 +2,45 @@
   /* used as className on Typography — enables the hover selector below */
 }
 
+/* Row layout (two-column detail row) */
+.row {
+  display: flex;
+  align-items: baseline;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border-color);
+  gap: 1rem;
+  font-size: 0.9375rem;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.rowLabel {
+  min-width: 110px;
+  width: 110px;
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.rowValue {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-color);
+}
+
+.rowValueInner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.rowValueInner:hover .editLink {
+  opacity: 1;
+}
+
 .field:hover .editLink {
   opacity: 1;
 }

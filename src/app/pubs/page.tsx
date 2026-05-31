@@ -3,10 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import Button from "@/app/components/button/button";
 import Dropdown from "@/app/components/dropdown/Dropdown";
-import Input from "@/app/components/input/Input";
-import Typography from "@/app/components/typography/typography";
 import { PUB_AMENITY_FIELDS, type PubAmenityKey } from "@/constants/pubFormFields";
 import { API_URL } from "@/lib/apiConfig";
 import { isHttpErrorObject } from "@/lib/errors";
@@ -16,6 +13,63 @@ import styles from "./page.module.css";
 type SortOption = "name-asc" | "name-desc" | "newest" | "oldest";
 
 const PAGE_SIZE = 50;
+
+const VISIBLE_FILTER_COUNT = 6;
+
+const AMENITY_ICONS: Partial<Record<PubAmenityKey, { svg: string; title: string }>> = {
+  isIndependent: {
+    title: "Independent",
+    svg: '<circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/>',
+  },
+  hasFood: {
+    title: "Food",
+    svg: '<path d="M6 3v4a2 2 0 0 0 2 2 2 2 0 0 0 2-2V3M8 9v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
+  },
+  hasBeerGarden: {
+    title: "Beer garden",
+    svg: '<path d="M8 13V9m0 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM5 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
+  },
+  hasCaskAle: {
+    title: "Cask ale",
+    svg: '<rect x="5" y="3" width="6" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 7h6" stroke="currentColor" stroke-width="1.5"/>',
+  },
+  isBeerFocused: {
+    title: "Beer-focused",
+    svg: '<path d="M6 3h4l1 4H5L6 3z" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="5" y="7" width="6" height="5" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>',
+  },
+  hasSundayRoast: {
+    title: "Sunday roast",
+    svg: '<circle cx="8" cy="9" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M3 9h10" stroke="currentColor" stroke-width="1.5"/>',
+  },
+};
+
+const TABLE_AMENITY_KEYS = Object.keys(AMENITY_ICONS) as PubAmenityKey[];
+
+function AmenityIconCell({ pub }: { pub: Pub }) {
+  const active = TABLE_AMENITY_KEYS.filter((k) => pub[k]);
+  return (
+    <div className={styles.amenityGrid}>
+      {TABLE_AMENITY_KEYS.map((key) => {
+        const icon = AMENITY_ICONS[key];
+        if (!icon) return null;
+        const isActive = Boolean(pub[key]);
+        return (
+          <span
+            key={key}
+            className={`${styles.amenityDot} ${isActive ? styles.amenityDotActive : ""}`}
+            title={isActive ? icon.title : ""}
+            aria-label={isActive ? icon.title : undefined}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+              <g dangerouslySetInnerHTML={{ __html: icon.svg }} />
+            </svg>
+          </span>
+        );
+      })}
+      {active.length === 0 && <span className={styles.amenityNone}>—</span>}
+    </div>
+  );
+}
 
 export default function Pubs() {
   const router = useRouter();
@@ -27,7 +81,8 @@ export default function Pubs() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [activeAmenities, setActiveAmenities] = useState<Set<PubAmenityKey>>(new Set());
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
-  const [randomLoading, setRandomLoading] = useState(false);
+  const [showAllFilters, setShowAllFilters] = useState(false);
+  const [responseMs, setResponseMs] = useState<number | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -52,7 +107,6 @@ export default function Pubs() {
       default:
         sorted.sort((a, b) => a.name.localeCompare(b.name));
     }
-
     return sorted;
   }, [pubs, sortBy]);
 
@@ -60,18 +114,18 @@ export default function Pubs() {
     async function fetchPubs() {
       setLoading(true);
       setError(null);
+      const t0 = Date.now();
       try {
         const params = new URLSearchParams({
           limit: String(PAGE_SIZE),
           page: String(page + 1),
         });
-        if (debouncedSearchTerm) {
-          params.set("search", debouncedSearchTerm);
-        }
+        if (debouncedSearchTerm) params.set("search", debouncedSearchTerm);
         for (const amenity of activeAmenities) {
           params.append(`amenities[${amenity}]`, "true");
         }
         const res = await fetch(`${API_URL}/pubs?${params}`);
+        setResponseMs(Date.now() - t0);
 
         if (!res.ok) {
           const errorData = await res.json() as { message?: string; error?: string };
@@ -80,23 +134,17 @@ export default function Pubs() {
 
         const data = await res.json() as { data: Pub[] };
         setPubs(data.data);
-      } catch (error: unknown) {
-        if (isHttpErrorObject(error)) {
-          setError(
-            error.data.message ||
-              error.data.error ||
-              `HTTP error! status: ${error.response.status}`
-          );
+      } catch (err: unknown) {
+        setResponseMs(null);
+        if (isHttpErrorObject(err)) {
+          setError(err.data.message || err.data.error || `HTTP error! status: ${err.response.status}`);
         } else {
-          setError(
-            error instanceof Error ? error.message : "Failed to load pubs"
-          );
+          setError(err instanceof Error ? err.message : "Failed to load pubs");
         }
       } finally {
         setLoading(false);
       }
     }
-
     fetchPubs();
   }, [page, debouncedSearchTerm, activeAmenities]);
 
@@ -107,11 +155,8 @@ export default function Pubs() {
     setPage(0);
     setActiveAmenities((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
   }
@@ -123,38 +168,101 @@ export default function Pubs() {
     setSortBy("name-asc");
   }
 
-  async function goToRandomPub() {
-    setRandomLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/pubs/random`);
-      if (!res.ok) throw new Error("Failed to fetch random pub");
-      const data = await res.json() as { data: Pub };
-      router.push(`/pubs/${data.data.id}`);
-    } catch {
-      setRandomLoading(false);
-    }
+  const visibleFilters = showAllFilters
+    ? PUB_AMENITY_FIELDS
+    : PUB_AMENITY_FIELDS.slice(0, VISIBLE_FILTER_COUNT);
+  const hiddenCount = PUB_AMENITY_FIELDS.length - VISIBLE_FILTER_COUNT;
+  const hasActiveFilters = debouncedSearchTerm || activeAmenities.size > 0 || sortBy !== "name-asc";
+
+  function pubLocation(pub: Pub): string {
+    const area = pub.area || pub.borough || null;
+    return area ? `${pub.city} · ${area}` : pub.city;
   }
 
-  const isFiltered = debouncedSearchTerm || activeAmenities.size > 0;
-  const hasActiveFilters = isFiltered || sortBy !== "name-asc";
-
   return (
-    <>
-      <Typography variant="headingMedium">Pub DB</Typography>
+    <div className={styles.page}>
+      {/* Page header */}
+      <div className={styles.pageHeader}>
+        <div className={styles.pageHeaderLeft}>
+          <div className={styles.pageTitle}>
+            <h1 className={styles.heading}>All pubs</h1>
+            <span className={styles.apiBadge}>
+              <code>GET /v1/pubs</code>
+            </span>
+          </div>
+          <p className={styles.pageDescription}>
+            Browse the live database. Every result here is exactly what the public API returns —
+            this view is a thin client over the same endpoint.
+          </p>
+        </div>
+        <div className={styles.pageHeaderActions}>
+          <button type="button" className={styles.btnOutline}>
+            <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+              <rect x="2" y="2" width="9" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+              <path d="M5 2V1.5A1.5 1.5 0 0 1 6.5 0h4A1.5 1.5 0 0 1 12 1.5V11a1.5 1.5 0 0 1-1.5 1.5H10" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+            </svg>
+            Copy as cURL
+          </button>
+          <Link href="/add-pub" className={styles.btnPrimary}>
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+              <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+            Add pub
+          </Link>
+        </div>
+      </div>
 
+      {/* Controls */}
       <div className={styles.controls}>
-        <div className={styles.searchRow}>
-          <Input
-            type="text"
-            aria-label="Search pubs"
-            placeholder="Search pubs by name, city, or address..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <div className={styles.sortRow}>
-            <label htmlFor="sort-select" className={styles.sortLabel}>
-              Sort by
-            </label>
+        <div className={styles.filterBar}>
+          <div className={styles.searchWrap}>
+            <svg className={styles.searchIcon} width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.3"/>
+              <path d="M10 10l2.5 2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+            </svg>
+            <input
+              className={styles.searchInput}
+              type="search"
+              aria-label="Search pubs"
+              placeholder="Search by name, city, address..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className={styles.filterChips}>
+            {visibleFilters.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => toggleAmenity(key)}
+                className={`${styles.chip} ${activeAmenities.has(key) ? styles.chipActive : ""}`}
+                aria-pressed={activeAmenities.has(key)}
+              >
+                {label}
+              </button>
+            ))}
+            {!showAllFilters && hiddenCount > 0 && (
+              <button
+                type="button"
+                className={styles.chipMore}
+                onClick={() => setShowAllFilters(true)}
+              >
+                + {hiddenCount} more
+              </button>
+            )}
+            {showAllFilters && (
+              <button
+                type="button"
+                className={styles.chipMore}
+                onClick={() => setShowAllFilters(false)}
+              >
+                Show less
+              </button>
+            )}
+          </div>
+
+          <div className={styles.filterRight}>
             <Dropdown
               id="sort-select"
               value={sortBy}
@@ -166,99 +274,142 @@ export default function Pubs() {
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
             </Dropdown>
+
+            <div className={styles.viewToggle} role="group" aria-label="View mode">
+              <button type="button" className={`${styles.viewBtn} ${styles.viewBtnActive}`} aria-pressed="true">
+                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                  <rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" fill="none"/>
+                  <rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" fill="none"/>
+                  <rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" fill="none"/>
+                  <rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" fill="none"/>
+                </svg>
+                Grid
+              </button>
+              <button type="button" className={styles.viewBtn} aria-pressed="false">
+                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                  <path d="M1 3h12M1 7h12M1 11h12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                </svg>
+                List
+              </button>
+              <button type="button" className={styles.viewBtn} aria-pressed="false">
+                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                  <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3" fill="none"/>
+                  <path d="M7 1.5C7 1.5 4 4 4 7s3 5.5 3 5.5" stroke="currentColor" strokeWidth="1.3"/>
+                  <path d="M7 1.5c0 0 3 2.5 3 5.5s-3 5.5-3 5.5" stroke="currentColor" strokeWidth="1.3"/>
+                  <path d="M1.5 7h11" stroke="currentColor" strokeWidth="1.3"/>
+                </svg>
+                Map
+              </button>
+            </div>
           </div>
         </div>
 
-        <fieldset className={styles.filters}>
-          <legend className={styles.filtersLegend}>Filter by amenity</legend>
-          <div className={styles.filterGrid}>
-            {PUB_AMENITY_FIELDS.map(({ key, label }) => (
-              <label key={key} htmlFor={key} className={styles.filterLabel}>
-                <Input
-                  id={key}
-                  type="checkbox"
-                  checked={activeAmenities.has(key)}
-                  onChange={() => toggleAmenity(key)}
-                  fullWidth={false}
-                />
-                {label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
         {hasActiveFilters && (
-          <div className={styles.filterMeta}>
-            {isFiltered && (
-              <Typography>Showing {pubs.length} pubs</Typography>
-            )}
-            <Button variant="secondary" size="sm" onClick={clearAllFilters}>
+          <div className={styles.activeFiltersMeta}>
+            <button type="button" className={styles.clearFilters} onClick={clearAllFilters}>
               Clear all filters
-            </Button>
+            </button>
           </div>
         )}
+      </div>
 
-        <div>
-          <Button variant="secondary" size="sm" onClick={goToRandomPub} disabled={randomLoading}>
-            {randomLoading ? "Finding a pub…" : "Random pub"}
-          </Button>
+      {/* Results metadata bar */}
+      <div className={styles.resultsMeta}>
+        <span className={styles.resultsCount}>
+          {loading ? "…" : `${filteredPubs.length} / ${filteredPubs.length} pubs`}
+        </span>
+        <div className={styles.resultsRight}>
+          {responseMs !== null && (
+            <span className={styles.responseTime}>
+              <span className={styles.responseDot} aria-hidden="true" />
+              <code>{responseMs}ms response</code>
+            </span>
+          )}
+          <span className={styles.pageInfo}>page {page + 1}</span>
         </div>
       </div>
 
+      {/* Table */}
       {loading ? (
-        <Typography role="status" aria-live="polite">Loading pubs…</Typography>
-      ) : error ? (
-        <div role="alert">
-          <Typography className={styles.errorText}>
-            Error loading pubs: {error}
-          </Typography>
-          <button type="button" onClick={() => window.location.reload()}>
-            Try Again
-          </button>
+        <div className={styles.stateMsg} role="status" aria-live="polite">
+          Loading pubs…
         </div>
-      ) : pubs.length === 0 ? (
-        <Typography>
-          No pubs found
-          {debouncedSearchTerm ? " matching your search" : " in the database"}.
-        </Typography>
+      ) : error ? (
+        <div className={styles.stateMsg} role="alert">
+          <span className={styles.errorText}>Error loading pubs: {error}</span>
+          <button type="button" onClick={() => window.location.reload()}>Try again</button>
+        </div>
+      ) : filteredPubs.length === 0 ? (
+        <div className={styles.stateMsg}>
+          No pubs found{debouncedSearchTerm ? " matching your search" : ""}.
+        </div>
       ) : (
-        <div className={styles.pubResults}>
-          <Link href="/add-pub" className={styles.addPubLink}>
-            <button type="button">Add Pub</button>
-          </Link>
-          {filteredPubs.length > 0 ? (
-            <ul className={styles.pubList}>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th className={styles.thId}>ID</th>
+                <th className={styles.thName}>NAME</th>
+                <th className={styles.thLocation}>LOCATION</th>
+                <th className={styles.thAmenities}>AMENITIES</th>
+                <th className={styles.thArrow} aria-label="View" />
+              </tr>
+            </thead>
+            <tbody>
               {filteredPubs.map((pub) => (
-                <li key={pub.id}>
-                  <Link href={`/pubs/${pub.id}`} prefetch={false}>
-                    <strong>{pub.name}</strong>
-                  </Link>{" "}
-                  – {pub.city}
-                </li>
+                <tr
+                  key={pub.id}
+                  className={styles.tableRow}
+                  onClick={() => router.push(`/pubs/${pub.id}`)}
+                >
+                  <td className={styles.tdId}>
+                    <code className={styles.pubId}>{pub.id.slice(0, 6)}</code>
+                  </td>
+                  <td className={styles.tdName}>
+                    <span className={styles.pubName}>{pub.name}</span>
+                    {(pub.isIndependent || pub.chainName) && (
+                      <span className={styles.pubType}>
+                        {pub.isIndependent ? "Independent" : pub.chainName}
+                      </span>
+                    )}
+                  </td>
+                  <td className={styles.tdLocation}>
+                    <span className={styles.pubLocation}>{pubLocation(pub)}</span>
+                  </td>
+                  <td className={styles.tdAmenities}>
+                    <AmenityIconCell pub={pub} />
+                  </td>
+                  <td className={styles.tdArrow}>
+                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+                      <path d="M4 8h8M9 5l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </td>
+                </tr>
               ))}
-            </ul>
-          ) : (
-            <Typography>No pubs match your current filters.</Typography>
-          )}
+            </tbody>
+          </table>
+
           <div className={styles.pagination}>
             <button
               type="button"
+              className={styles.pageBtn}
               onClick={() => setPage((p) => p - 1)}
               disabled={!hasPrevPage}
             >
-              Previous
+              ← Previous
             </button>
-            <span>Page {page + 1}</span>
+            <span className={styles.pageNum}>Page {page + 1}</span>
             <button
               type="button"
+              className={styles.pageBtn}
               onClick={() => setPage((p) => p + 1)}
               disabled={!hasNextPage}
             >
-              Next
+              Next →
             </button>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
