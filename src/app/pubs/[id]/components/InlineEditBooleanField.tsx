@@ -9,11 +9,12 @@ type Props = {
   value: boolean | null | undefined;
   onSave: (value: boolean | null) => Promise<string | null>;
   canEdit?: boolean;
+  rowLayout?: boolean;
 };
 
 const BOOL_OPTIONS = [true, false, null] as (boolean | null)[];
 
-export default function InlineEditBooleanField({ label, value, onSave, canEdit }: Props) {
+export default function InlineEditBooleanField({ label, value, onSave, canEdit, rowLayout }: Props) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -43,53 +44,43 @@ export default function InlineEditBooleanField({ label, value, onSave, canEdit }
     }
   }
 
+  const editControls = editing ? (
+    <span className={styles.editWrapper}>
+      <span className={styles.boolOptions}>
+        {BOOL_OPTIONS.map((option) => (
+          <Button key={String(option)} size="xs" variant={draft === option ? "primary" : "secondary"} onClick={() => setDraft(option)}>
+            {option == null ? "Not set" : option ? "Yes" : "No"}
+          </Button>
+        ))}
+      </span>
+      <Button size="xs" onClick={() => void save()} disabled={saving} aria-label={`Save ${label}`}>✓</Button>
+      <Button size="xs" variant="secondary" onClick={cancel} disabled={saving} aria-label="Cancel">✗</Button>
+      {error && <Typography as="span" className={styles.inlineError}>{error}</Typography>}
+    </span>
+  ) : (
+    <span className={`${styles.valueWrapper} ${styles.field}`}>
+      <span>{displayText}</span>
+      {canEdit && (
+        <Button variant="ghost" size="xs" className={styles.editLink} onClick={startEdit} aria-label={`Edit ${label}`}>
+          edit
+        </Button>
+      )}
+    </span>
+  );
+
+  if (rowLayout) {
+    return (
+      <div className={styles.row}>
+        <span className={styles.rowLabel}>{label}</span>
+        <span className={styles.rowValue}>{editControls}</span>
+      </div>
+    );
+  }
+
   return (
     <Typography className={styles.field}>
-      <Typography as="span" isBold>
-        {label}:
-      </Typography>{" "}
-      {editing ? (
-        <span className={styles.editWrapper}>
-          <span className={styles.boolOptions}>
-            {BOOL_OPTIONS.map((option) => (
-              <Button
-                key={String(option)}
-                size="xs"
-                variant={draft === option ? "primary" : "secondary"}
-                onClick={() => setDraft(option)}
-              >
-                {option == null ? "Not set" : option ? "Yes" : "No"}
-              </Button>
-            ))}
-          </span>
-          <Button size="xs" onClick={() => void save()} disabled={saving} aria-label={`Save ${label}`}>
-            ✓
-          </Button>
-          <Button size="xs" variant="secondary" onClick={cancel} disabled={saving} aria-label="Cancel">
-            ✗
-          </Button>
-          {error && (
-            <Typography as="span" className={styles.inlineError}>
-              {error}
-            </Typography>
-          )}
-        </span>
-      ) : (
-        <span className={styles.valueWrapper}>
-          <span>{displayText}</span>
-          {canEdit && (
-            <Button
-              variant="ghost"
-              size="xs"
-              className={styles.editLink}
-              onClick={startEdit}
-              aria-label={`Edit ${label}`}
-            >
-              edit
-            </Button>
-          )}
-        </span>
-      )}
+      <Typography as="span" isBold>{label}:</Typography>{" "}
+      {editControls}
     </Typography>
   );
 }

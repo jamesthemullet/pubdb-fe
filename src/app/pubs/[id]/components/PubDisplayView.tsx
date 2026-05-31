@@ -1,9 +1,8 @@
-import type { JSX } from "react";
-import Typography from "@/app/components/typography/typography";
-import type { BeerGarden, OpeningHoursMap, Pub } from "@/types/pub";
-import styles from "../page.module.css";
+import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
+import type { Pub } from "@/types/pub";
 import InlineEditBooleanField from "./InlineEditBooleanField";
 import InlineEditField from "./InlineEditField";
+import styles from "./PubDisplayView.module.css";
 
 type Props = {
   pub: Pub;
@@ -25,464 +24,280 @@ export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineS
     (val: boolean | null): Promise<string | null> =>
       onInlineSave?.(field, val) ?? Promise.resolve(null);
 
+  const activeAmenities = new Set(
+    PUB_AMENITY_FIELDS.filter(({ key }) => pub[key]).map(({ key }) => key)
+  );
+  const inactiveAmenities = PUB_AMENITY_FIELDS.filter(({ key }) => !pub[key]);
+
+  const coordText =
+    pub.lat != null && pub.lng != null
+      ? `${pub.lat.toFixed(4)},  ${pub.lng.toFixed(4)}`
+      : null;
+
   return (
-    <>
-      <InlineEditField
-        label="City"
-        displayValue={pub.city}
-        initialValue={pub.city ?? ""}
-        onSave={save("city")}
-        validate={(val) => (!val.trim() ? "City is required" : null)}
-        canEdit={ce}
-      />
-      <Typography>
-        <Typography as="span" isBold>
-          Country:
-        </Typography>{" "}
-        {getCountryName(pub.country)}
-      </Typography>
-      <InlineEditField
-        label="Address"
-        displayValue={pub.address}
-        initialValue={pub.address ?? ""}
-        onSave={save("address")}
-        validate={(val) => (!val.trim() ? "Address is required" : null)}
-        canEdit={ce}
-      />
-      <InlineEditField
-        label="Postcode"
-        displayValue={pub.postcode}
-        initialValue={pub.postcode ?? ""}
-        onSave={save("postcode")}
-        validate={(val) => (!val.trim() ? "Postcode is required" : null)}
-        canEdit={ce}
-      />
-      <InlineEditField
-        label="Area"
-        displayValue={pub.area || "-"}
-        initialValue={pub.area ?? ""}
-        onSave={save("area")}
-        canEdit={ce}
-      />
-      <InlineEditField
-        label="Borough"
-        displayValue={pub.borough || "-"}
-        initialValue={pub.borough ?? ""}
-        onSave={save("borough")}
-        canEdit={ce}
-      />
-      <InlineEditField
-        label="Operator"
-        displayValue={pub.operator || "-"}
-        initialValue={pub.operator ?? ""}
-        onSave={save("operator")}
-        canEdit={ce}
-      />
-      <InlineEditField
-        label="Phone"
-        displayValue={pub.phone || "-"}
-        initialValue={pub.phone ?? ""}
-        onSave={save("phone")}
-        validate={(val) =>
-          val && !/^\+?[0-9\-\s]*$/.test(val)
-            ? "Invalid phone number format. Only numbers, spaces, and dashes are allowed."
-            : null
-        }
-        canEdit={ce}
-      />
-      <InlineEditField
-        label="Website"
-        displayValue={
-          pub.website ? (
-            <a href={pub.website} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${pub.name} website (opens in new tab)`}>
-              {pub.website}
-            </a>
-          ) : (
-            "-"
-          )
-        }
-        initialValue={pub.website ?? ""}
-        onSave={save("website")}
-        validate={(val) => {
-          if (!val) return null;
-          try {
-            const { protocol } = new URL(val);
-            return protocol === "http:" || protocol === "https:"
-              ? null
-              : "Please enter a valid URL (include http:// or https://)";
-          } catch {
-            return "Please enter a valid URL (include http:// or https://)";
+    <div className={styles.view}>
+      {/* DETAILS section */}
+      <p className={styles.sectionLabel}>DETAILS</p>
+
+      <div className={styles.detailRows}>
+        <InlineEditField
+          rowLayout
+          label="Name"
+          displayValue={pub.name || "—"}
+          initialValue={pub.name ?? ""}
+          onSave={save("name")}
+          validate={(val) => (!val.trim() ? "Name is required" : null)}
+          canEdit={ce}
+        />
+        <InlineEditField
+          rowLayout
+          label="Address"
+          displayValue={pub.address || "—"}
+          initialValue={pub.address ?? ""}
+          onSave={save("address")}
+          validate={(val) => (!val.trim() ? "Address is required" : null)}
+          canEdit={ce}
+        />
+        <InlineEditField
+          rowLayout
+          label="City"
+          displayValue={pub.city || "—"}
+          initialValue={pub.city ?? ""}
+          onSave={save("city")}
+          validate={(val) => (!val.trim() ? "City is required" : null)}
+          canEdit={ce}
+        />
+        <InlineEditField
+          rowLayout
+          label="Area"
+          displayValue={pub.area || "—"}
+          initialValue={pub.area ?? ""}
+          onSave={save("area")}
+          canEdit={ce}
+        />
+        <InlineEditField
+          rowLayout
+          label="Postcode"
+          displayValue={pub.postcode ? <code className={styles.mono}>{pub.postcode}</code> : "—"}
+          initialValue={pub.postcode ?? ""}
+          onSave={save("postcode")}
+          validate={(val) => (!val.trim() ? "Postcode is required" : null)}
+          canEdit={ce}
+        />
+        <InlineEditField
+          rowLayout
+          label="Country"
+          displayValue={pub.country ? getCountryName(pub.country) : "—"}
+          initialValue={pub.country ?? ""}
+          onSave={save("country")}
+          validate={(val) => (!val.trim() ? "Country is required" : null)}
+          canEdit={ce}
+        />
+        <InlineEditField
+          rowLayout
+          label="Operator"
+          displayValue={
+            pub.operator ? (
+              <span className={pub.operator.toLowerCase() === "independent" ? styles.accentValue : undefined}>
+                {pub.operator}
+              </span>
+            ) : pub.isIndependent ? (
+              <span className={styles.accentValue}>Independent</span>
+            ) : (
+              "—"
+            )
           }
-        }}
-        canEdit={ce}
-      />
-      <InlineEditField
-        label="Description"
-        displayValue={pub.description || "-"}
-        initialValue={pub.description ?? ""}
-        onSave={save("description")}
-        type="textarea"
-        canEdit={ce}
-      />
-      <InlineEditField
-        label="Chain name"
-        displayValue={pub.chainName || "-"}
-        initialValue={pub.chainName ?? ""}
-        onSave={save("chainName")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Closed down"
-        value={pub.closedDown}
-        onSave={saveBool("closedDown")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Independent"
-        value={pub.isIndependent}
-        onSave={saveBool("isIndependent")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Food available"
-        value={pub.hasFood}
-        onSave={saveBool("hasFood")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Sunday roast"
-        value={pub.hasSundayRoast}
-        onSave={saveBool("hasSundayRoast")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Beer garden"
-        value={pub.hasBeerGarden}
-        onSave={saveBool("hasBeerGarden")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Cask ale"
-        value={pub.hasCaskAle}
-        onSave={saveBool("hasCaskAle")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Beer-focused"
-        value={pub.isBeerFocused}
-        onSave={saveBool("isBeerFocused")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Dog friendly"
-        value={pub.isDogFriendly}
-        onSave={saveBool("isDogFriendly")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Family friendly"
-        value={pub.isFamilyFriendly}
-        onSave={saveBool("isFamilyFriendly")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Step-free access"
-        value={pub.hasStepFreeAccess}
-        onSave={saveBool("hasStepFreeAccess")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Accessible toilet"
-        value={pub.hasAccessibleToilet}
-        onSave={saveBool("hasAccessibleToilet")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Live sport"
-        value={pub.hasLiveSport}
-        onSave={saveBool("hasLiveSport")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Live music"
-        value={pub.hasLiveMusic}
-        onSave={saveBool("hasLiveMusic")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Pool table"
-        value={pub.hasPoolTable}
-        onSave={saveBool("hasPoolTable")}
-        canEdit={ce}
-      />
-      <InlineEditBooleanField
-        label="Darts board"
-        value={pub.hasDartsBoard}
-        onSave={saveBool("hasDartsBoard")}
-        canEdit={ce}
-      />
-      <Typography>
-        <Typography as="span" isBold>
-          Beer Types:
-        </Typography>{" "}
-        {getBeerTypeNames(pub).length ? getBeerTypeNames(pub).join(", ") : "-"}
-      </Typography>
-      <Typography as="div">
-        <Typography as="span" isBold>
-          Opening Hours:
-        </Typography>
-        {pub.openingHours ? (
-          <div className={styles.openingHoursDisplay}>
-            {renderOpeningHours(pub.openingHours)}
+          initialValue={pub.operator ?? ""}
+          onSave={save("operator")}
+          canEdit={ce}
+        />
+        <InlineEditField
+          rowLayout
+          label="Phone"
+          displayValue={pub.phone || "—"}
+          initialValue={pub.phone ?? ""}
+          onSave={save("phone")}
+          validate={(val) =>
+            val && !/^\+?[0-9\-\s]*$/.test(val)
+              ? "Invalid phone number format"
+              : null
+          }
+          canEdit={ce}
+        />
+        <InlineEditField
+          rowLayout
+          label="Website"
+          displayValue={
+            pub.website ? (
+              <a href={pub.website} target="_blank" rel="noopener noreferrer" className={styles.link}>
+                {pub.website}
+              </a>
+            ) : (
+              "—"
+            )
+          }
+          initialValue={pub.website ?? ""}
+          onSave={save("website")}
+          validate={(val) => {
+            if (!val) return null;
+            try {
+              const { protocol } = new URL(val);
+              return protocol === "http:" || protocol === "https:"
+                ? null
+                : "Please enter a valid URL (include http:// or https://)";
+            } catch {
+              return "Please enter a valid URL (include http:// or https://)";
+            }
+          }}
+          canEdit={ce}
+        />
+
+        {coordText && (
+          <div className={styles.readRow}>
+            <span className={styles.readLabel}>Coordinates</span>
+            <code className={`${styles.readValue} ${styles.mono}`}>{coordText}</code>
           </div>
-        ) : (
-          " -"
         )}
-      </Typography>
-      <div>
-        <Typography as="span" isBold>
-          Beer Gardens:
-        </Typography>
-        {pub.beerGardens && pub.beerGardens.length > 0 ? (
-          <div className={styles.beerGardensDisplay}>
-            {pub.beerGardens.map((garden, index) => (
-              <BeerGardenDisplayCard
-                key={garden.id || `garden-${index}`}
-                garden={garden}
+
+        {!coordText && ce && (
+          <>
+            <InlineEditField
+              rowLayout
+              label="Latitude"
+              displayValue={pub.lat != null ? String(pub.lat) : "—"}
+              initialValue={String(pub.lat ?? "")}
+              onSave={save("lat")}
+              type="number"
+              canEdit={ce}
+            />
+            <InlineEditField
+              rowLayout
+              label="Longitude"
+              displayValue={pub.lng != null ? String(pub.lng) : "—"}
+              initialValue={String(pub.lng ?? "")}
+              onSave={save("lng")}
+              type="number"
+              canEdit={ce}
+            />
+          </>
+        )}
+
+        <div className={styles.readRow}>
+          <span className={styles.readLabel}>Created</span>
+          <code className={`${styles.readValue} ${styles.mono}`}>
+            {new Date(pub.createdAt).toISOString().slice(0, 10)}
+          </code>
+        </div>
+
+        <div className={styles.readRow}>
+          <span className={styles.readLabel}>ID</span>
+          <code className={`${styles.readValue} ${styles.mono}`}>{pub.id}</code>
+        </div>
+
+        {pub.description && (
+          <InlineEditField
+            rowLayout
+            label="Description"
+            displayValue={pub.description}
+            initialValue={pub.description ?? ""}
+            onSave={save("description")}
+            type="textarea"
+            canEdit={ce}
+          />
+        )}
+
+        {pub.chainName && (
+          <InlineEditField
+            rowLayout
+            label="Chain"
+            displayValue={pub.chainName}
+            initialValue={pub.chainName ?? ""}
+            onSave={save("chainName")}
+            canEdit={ce}
+          />
+        )}
+
+        {pub.borough && (
+          <InlineEditField
+            rowLayout
+            label="Borough"
+            displayValue={pub.borough}
+            initialValue={pub.borough ?? ""}
+            onSave={save("borough")}
+            canEdit={ce}
+          />
+        )}
+
+        {pub.updatedAt && (
+          <div className={styles.readRow}>
+            <span className={styles.readLabel}>Last edited</span>
+            <code className={`${styles.readValue} ${styles.mono}`}>
+              {new Date(pub.updatedAt).toISOString().slice(0, 10)}
+            </code>
+          </div>
+        )}
+
+        {ce && (
+          <InlineEditBooleanField
+            rowLayout
+            label="Closed down"
+            value={pub.closedDown}
+            onSave={saveBool("closedDown")}
+            canEdit={ce}
+          />
+        )}
+      </div>
+
+      {/* NOT AVAILABLE HERE section */}
+      {inactiveAmenities.length > 0 && (
+        <>
+          <p className={styles.sectionLabel} style={{ marginTop: "1.75rem" }}>
+            NOT AVAILABLE HERE
+          </p>
+          <div className={styles.inactiveChips}>
+            {inactiveAmenities.map(({ key, label }) => (
+              <span key={key} className={styles.inactiveChip}>
+                <span className={styles.inactiveChipText}>{label}</span>
+              </span>
+            ))}
+          </div>
+          {ce && (
+            <div className={styles.boolEditGrid}>
+              {inactiveAmenities.map(({ key, label }) => (
+                <InlineEditBooleanField
+                  key={key}
+                  rowLayout
+                  label={label}
+                  value={pub[key] as boolean | null | undefined}
+                  onSave={saveBool(key)}
+                  canEdit={ce}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Active amenities edit controls (editors only) */}
+      {ce && activeAmenities.size > 0 && (
+        <>
+          <p className={styles.sectionLabel} style={{ marginTop: "1.75rem" }}>
+            AVAILABLE — EDIT
+          </p>
+          <div className={styles.boolEditGrid}>
+            {PUB_AMENITY_FIELDS.filter(({ key }) => activeAmenities.has(key)).map(({ key, label }) => (
+              <InlineEditBooleanField
+                key={key}
+                rowLayout
+                label={label}
+                value={pub[key] as boolean | null | undefined}
+                onSave={saveBool(key)}
+                canEdit={ce}
               />
             ))}
           </div>
-        ) : (
-          " -"
-        )}
-      </div>
-      <InlineEditField
-        label="Latitude"
-        displayValue={pub.lat}
-        initialValue={String(pub.lat ?? "")}
-        onSave={save("lat")}
-        type="number"
-        canEdit={ce}
-      />
-      <InlineEditField
-        label="Longitude"
-        displayValue={pub.lng}
-        initialValue={String(pub.lng ?? "")}
-        onSave={save("lng")}
-        type="number"
-        canEdit={ce}
-      />
-      <Typography>
-        <Typography as="span" isBold>
-          Created At:
-        </Typography>{" "}
-        {new Date(pub.createdAt).toLocaleString()}
-      </Typography>
-      {pub.updatedAt && (
-        <Typography>
-          <Typography as="span" isBold>
-            Last Edited:
-          </Typography>{" "}
-          {new Date(pub.updatedAt).toLocaleString()}
-        </Typography>
+        </>
       )}
-    </>
-  );
-}
-
-function BeerGardenDisplayCard({ garden }: { garden: BeerGarden }) {
-  return (
-    <div className={styles.gardenDisplayCard}>
-      <Typography>
-        <Typography as="span" isBold>
-          Name:
-        </Typography>{" "}
-        {garden.name}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Description:
-        </Typography>{" "}
-        {garden.description || "-"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Seating capacity:
-        </Typography>{" "}
-        {garden.seatingCapacity ?? "-"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Sun exposure:
-        </Typography>{" "}
-        {garden.sunExposure || "-"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Covered:
-        </Typography>{" "}
-        {garden.isCovered ? "Yes" : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Heated:
-        </Typography>{" "}
-        {garden.isHeated ? "Yes" : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Family friendly:
-        </Typography>{" "}
-        {garden.isFamilyFriendly ? "Yes" : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Pet friendly:
-        </Typography>{" "}
-        {garden.petFriendly ? "Yes" : "No"}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Image:
-        </Typography>{" "}
-        {garden.imageUrl ? (
-          <a
-            href={garden.imageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`View ${garden.name || "beer garden"} image (opens in new tab)`}
-          >
-            {garden.imageUrl}
-          </a>
-        ) : (
-          "-"
-        )}
-      </Typography>
-      <Typography>
-        <Typography as="span" isBold>
-          Notes:
-        </Typography>{" "}
-        {garden.notes || "-"}
-      </Typography>
-      <Typography as="div">
-        <Typography as="span" isBold>
-          Opening Hours:
-        </Typography>
-        {garden.openingHours ? (
-          <div className={styles.openingHoursDisplay}>
-            {renderOpeningHours(garden.openingHours)}
-          </div>
-        ) : (
-          " -"
-        )}
-      </Typography>
-    </div>
-  );
-}
-
-function getBeerTypeNames(pub: Pub): string[] {
-  if (Array.isArray(pub.beerTypes) && pub.beerTypes.length > 0) {
-    return pub.beerTypes
-      .map((entry) => {
-        if (!entry) return undefined;
-        if ("beerType" in entry) {
-          return entry.beerType?.name || entry.beerTypeId;
-        }
-        if ("beerTypeId" in entry) {
-          return entry.beerTypeId;
-        }
-        return entry.name || entry.id;
-      })
-      .filter(Boolean) as string[];
-  }
-  if (pub.beerType) {
-    if (typeof pub.beerType === "string") {
-      return [pub.beerType];
-    }
-    return [pub.beerType.name || pub.beerType.id].filter(Boolean);
-  }
-  if (Array.isArray(pub.beerTypeIds) && pub.beerTypeIds.length > 0) {
-    return pub.beerTypeIds;
-  }
-  return [];
-}
-
-function renderOpeningHours(ohAny: OpeningHoursMap | string | null | undefined): JSX.Element {
-  const weekdays = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
-  let oh: OpeningHoursMap | null = null;
-  if (typeof ohAny === "string") {
-    try {
-      oh = JSON.parse(ohAny) as OpeningHoursMap;
-    } catch {
-      oh = null;
-    }
-  } else if (ohAny != null) {
-    oh = ohAny;
-  }
-
-  if (!oh) {
-    return (
-      <div>
-        {weekdays.map((day) => (
-          <Typography key={day}>
-            <Typography as="span" isBold>
-              {day}:
-            </Typography>{" "}
-            -
-          </Typography>
-        ))}
-      </div>
-    );
-  }
-
-  const map: OpeningHoursMap = {};
-  Object.entries(oh).forEach(([k, v]) => {
-    map[k.toLowerCase()] = v;
-  });
-
-  return (
-    <div>
-      {weekdays.map((day) => {
-        const entry = map[day.toLowerCase()];
-        if (!entry) {
-          return (
-            <Typography key={day}>
-              <Typography as="span" isBold>
-                {day}:
-              </Typography>{" "}
-              -
-            </Typography>
-          );
-        }
-        if (entry.closed) {
-          return (
-            <Typography key={day}>
-              <Typography as="span" isBold>
-                {day}:
-              </Typography>{" "}
-              Closed
-            </Typography>
-          );
-        }
-        const open = entry.open || "-";
-        const close = entry.close || "-";
-        return (
-          <Typography key={day}>
-            <Typography as="span" isBold>
-              {day}:
-            </Typography>{" "}
-            {open} – {close}
-          </Typography>
-        );
-      })}
     </div>
   );
 }

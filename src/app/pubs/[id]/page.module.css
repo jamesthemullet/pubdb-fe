@@ -1,49 +1,853 @@
-.pubContent {
+.page {
+  padding: 1.5rem 2.5rem 3rem;
+  max-width: 1300px;
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
 }
 
-.deleteMessageSuccess {
-  color: green;
-  margin-bottom: 0.5rem;
+.breadcrumbLink {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.1s;
 }
 
-.deleteMessageError {
-  color: red;
-  margin-bottom: 0.5rem;
+.breadcrumbLink:hover {
+  color: var(--text-color);
 }
 
-.pubImage {
-  max-width: 400px;
-  height: auto;
+.breadcrumbSep {
+  color: var(--border-color);
+}
+
+.breadcrumbId {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* ── Page header ── */
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.pageTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.pubHeading {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-color);
+  line-height: 1.15;
+}
+
+.apiBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.apiBadge code {
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+.pageActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btnOutline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  background: var(--surface);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 0.1s;
+  font-family: var(--font-inter), sans-serif;
+}
+
+.btnOutline:hover {
+  background: var(--surface-alt);
+}
+
+/* ── Closed banner ── */
+.closedBanner {
+  background-color: #b91c1c;
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9375rem;
   margin-bottom: 1rem;
 }
 
-.topButtonGroup {
-  margin-top: 1rem;
+/* ── Edit mode ── */
+.editHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
-.cancelButton {
-  margin-left: 1rem;
+.editHeading {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--text-color);
 }
 
-.editSection {
-  margin-top: 1rem;
+.editActions {
+  display: flex;
+  gap: 0.5rem;
 }
 
-.errorText {
-  color: red;
-}
-
-.errorInline {
-  color: red;
-  margin-left: 0.5rem;
-}
-
-.beerTypesOuter {
-  margin-top: 0.35rem;
+/* ── Two-column body ── */
+.body {
   display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* ── Left column ── */
+.leftCol {
+  min-width: 0;
+}
+
+/* Image slot */
+.imageSlot {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1.5px dashed var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+  margin-bottom: 1.5rem;
+}
+
+.pubImage {
+  object-fit: cover;
+}
+
+.imagePlaceholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0, 0, 0, 0.025) 10px,
+    rgba(0, 0, 0, 0.025) 11px
+  );
+}
+
+.imageInitials {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 4.5rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: var(--border-color);
+  line-height: 1;
+}
+
+.imageSlotLabel {
+  font-size: 0.8125rem;
+  color: var(--border-color);
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+/* Pub name + address */
+.pubNameLarge {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-color);
+  margin-bottom: 0.4rem;
+  line-height: 1.15;
+}
+
+.pubAddress {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.pinIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--text-muted);
+}
+
+/* Amenity chips */
+.amenityChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.amenityChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+/* ── Tabs ── */
+.tabs {
+  border-top: 1px solid var(--border-color);
+}
+
+.tabList {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tab {
+  padding: 0.65rem 1rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-inter), sans-serif;
+  transition: color 0.1s;
+  margin-bottom: -1px;
+}
+
+.tab:hover {
+  color: var(--text-color);
+  background: none;
+}
+
+.tabActive {
+  color: var(--text-color);
+  border-bottom-color: var(--text-color);
+}
+
+.tabPanel {
+  padding: 1.5rem 0;
+}
+
+/* Tab content shared */
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detailList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.detailRow {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9375rem;
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailRow dt {
+  min-width: 120px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.detailRow dd {
+  color: var(--text-color);
+  margin: 0;
+}
+
+.emptyTabMsg {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+
+/* ── Hours tab ── */
+.hoursCard {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.hoursCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.hoursCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.clockIcon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.openNowBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  background: #f0fdf4;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #16a34a;
+}
+
+.openNowDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+
+.hoursRows {
+  display: flex;
+  flex-direction: column;
+}
+
+.hoursRow {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.hoursRow:last-child {
+  border-bottom: none;
+}
+
+.hoursRowToday {
+  background: transparent;
+}
+
+.hoursDay {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.hoursRowToday .hoursDay {
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.hoursTodayDot {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.nowChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  background: #dcfce7;
+  color: #16a34a;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.hoursTime {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-color);
+  font-variant-numeric: tabular-nums;
+  min-width: 130px;
+  text-align: right;
+}
+
+.hoursClosed {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.hoursEmpty {
+  padding: 1rem 1.1rem;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+
+/* ── Garden tab ── */
+.gardenEmptyCard {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+
+.gardenTabList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.gardenTabCard {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.gardenTabHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.gardenTabTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.gardenIcon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.gardenSummaryPill {
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.gardenTabBody {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 200px;
+}
+
+.gardenDetailList {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border-right: 1px solid var(--border-color);
+}
+
+.gardenDetailRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.65rem 1.1rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9375rem;
+}
+
+.gardenDetailRow:last-child {
+  border-bottom: none;
+}
+
+.gardenDetailRow dt {
+  min-width: 80px;
+  font-size: 0.875rem;
+  color: #b45309;
+  font-weight: 400;
+  flex-shrink: 0;
+}
+
+.gardenDetailRow dd {
+  color: var(--text-color);
+  margin: 0;
+}
+
+.gardenImageSlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  position: relative;
+}
+
+.gardenImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gardenImageLabel {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.8125rem;
+  color: var(--border-color);
+}
+
+/* ── History tab ── */
+.historyCard {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.historyCardHeader {
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.historyCardTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.historyRows {
+  display: flex;
+  flex-direction: column;
+}
+
+.historyRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.historyRow:last-child {
+  border-bottom: none;
+}
+
+.historyAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.historyContent {
+  flex: 1;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.historyActor {
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.actionEdited {
+  color: #b45309;
+  font-weight: 400;
+}
+
+.actionCreated {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.historyDetail {
+  color: var(--text-muted);
+}
+
+.historyTime {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+/* ── Legacy garden card (kept for edit view compatibility) ── */
+.gardenCard {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.gardenName {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Right column ── */
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: sticky;
+  top: 1.5rem;
+}
+
+/* Code panel */
+.codePanel {
+  background: #1a1a1a;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.codePanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.codeTabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.codeTab {
+  padding: 0.25rem 0.6rem;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.8125rem;
+  font-family: var(--font-jetbrains-mono), monospace;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.1s, background 0.1s;
+}
+
+.codeTab:hover {
+  color: rgba(255, 255, 255, 0.75);
+  background: none;
+}
+
+.codeTabActive {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.codeCopyBtn {
+  padding: 0.2rem 0.6rem;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-family: var(--font-jetbrains-mono), monospace;
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+}
+
+.codeCopyBtn:hover {
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: none;
+}
+
+.codeBlock {
+  padding: 1rem 1.25rem 1.25rem;
+  margin: 0;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: #e2e2e2;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+/* JSON panel */
+.jsonPanel {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.jsonPanelHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.jsonPanelTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.jsonBadge {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+}
+
+.jsonCopyBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.2rem;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  transition: color 0.1s;
+}
+
+.jsonCopyBtn:hover {
+  color: var(--text-color);
+  background: none;
+}
+
+.jsonBlock {
+  padding: 1rem 1.25rem;
+  margin: 0;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+  white-space: pre;
+  overflow-x: auto;
+  background: var(--surface);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+
+  .rightCol {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 1rem;
+  }
+
+  .pubNameLarge {
+    font-size: 1.5rem;
+  }
+
+  .pubHeading {
+    font-size: 1.375rem;
+  }
+
+  .pageActions {
+    flex-wrap: wrap;
+  }
+}
+
+/* ── Preserve existing display view styles used by PubDisplayView ── */
+.openingHoursDisplay {
+  margin-top: 0.5rem;
+}
+
+.beerGardensDisplay {
+  margin-top: 0.5rem;
+  display: grid;
+}
+
+.gardenDisplayCard {
+  border: 1px solid var(--border-color);
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
 }
 
 .beerTypeOptions {
@@ -58,41 +862,13 @@
   min-width: 10rem;
 }
 
-@media (max-width: 768px) {
-  .beerTypeOptions {
-    flex-direction: column;
-  }
-}
-
 .beerTypeName {
   margin-left: 0.5rem;
 }
 
-.beerGardenSection {
-  margin-top: 1rem;
-}
-
-.emptyMessage {
-  color: #666;
-}
-
-.gardenCard {
-  border: 1px solid #ddd;
-  padding: 0.75rem;
-  border-radius: 6px;
-  margin-bottom: 0.75rem;
+.beerTypesOuter {
+  margin-top: 0.35rem;
   display: grid;
-  gap: 0.5rem;
-}
-
-.gardenHeader {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.gardenCheckboxes {
-  display: grid;
-  gap: 0.35rem;
 }
 
 .saveError {
@@ -100,32 +876,6 @@
   margin-top: 0.5rem;
 }
 
-.openingHoursDisplay {
-  margin-top: 0.5rem;
-}
-
-.beerGardensDisplay {
-  margin-top: 0.5rem;
-  display: grid;
-}
-
-.gardenDisplayCard {
-  border: 1px solid #ddd;
-  padding: 0.75rem;
-  border-radius: 6px;
-  margin-bottom: 0.75rem;
-}
-
-.editButtonMessage {
-  margin-top: 1rem;
-}
-
-.closedBanner {
-  background-color: #b91c1c;
-  color: #fff;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
+.errorText {
+  color: red;
 }

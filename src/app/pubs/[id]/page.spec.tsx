@@ -129,7 +129,7 @@ async function renderPageAsAdmin() {
 		authStatus: 200,
 	});
 	render(<PubPage />);
-	await screen.findByRole("heading", { name: "The Harp" });
+	await screen.findByRole("heading", { name: "The Harp", level: 1 });
 	await screen.findByRole("button", { name: "Edit this pub" });
 	return fetchSpy;
 }
@@ -170,17 +170,17 @@ describe("PubPage", () => {
 			setupFetchMock();
 			render(<PubPage />);
 			expect(
-				await screen.findByRole("heading", { name: "The Harp" }),
+				await screen.findByRole("heading", { name: "The Harp", level: 1 }),
 			).toBeInTheDocument();
 		});
 
 		it("renders the pub city, address, and postcode", async () => {
 			setupFetchMock();
 			render(<PubPage />);
-			await screen.findByRole("heading", { name: "The Harp" });
-			expect(screen.getByText(/London/)).toBeInTheDocument();
-			expect(screen.getByText(/47 Chandos Place/)).toBeInTheDocument();
-			expect(screen.getByText(/WC2N 4HS/)).toBeInTheDocument();
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
+			expect(screen.getAllByText(/London/).length).toBeGreaterThan(0);
+			expect(screen.getAllByText(/47 Chandos Place/).length).toBeGreaterThan(0);
+			expect(screen.getAllByText(/WC2N 4HS/).length).toBeGreaterThan(0);
 		});
 
 		it("renders a pub image when imageUrl is present", async () => {
@@ -188,7 +188,7 @@ describe("PubPage", () => {
 				pubData: { ...SAMPLE_PUB, imageUrl: "https://example.com/pub.jpg" },
 			});
 			render(<PubPage />);
-			await screen.findByRole("heading", { name: "The Harp" });
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
 			const img = screen.getByRole("img", { name: "The Harp" });
 			expect(img).toHaveAttribute("src", "https://example.com/pub.jpg");
 		});
@@ -196,15 +196,15 @@ describe("PubPage", () => {
 		it("does not render an image when imageUrl is absent", async () => {
 			setupFetchMock();
 			render(<PubPage />);
-			await screen.findByRole("heading", { name: "The Harp" });
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
 			expect(screen.queryByRole("img")).not.toBeInTheDocument();
 		});
 
 		it("renders a clickable external website link", async () => {
 			setupFetchMock();
 			render(<PubPage />);
-			await screen.findByRole("heading", { name: "The Harp" });
-			const link = screen.getByRole("link", { name: "Visit The Harp website (opens in new tab)" });
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
+			const link = screen.getByRole("link", { name: "https://theharp.co.uk" });
 			expect(link).toHaveAttribute("href", "https://theharp.co.uk");
 			expect(link).toHaveAttribute("target", "_blank");
 			expect(link).toHaveAttribute("rel", "noopener noreferrer");
@@ -227,7 +227,8 @@ describe("PubPage", () => {
 				},
 			});
 			render(<PubPage />);
-			await screen.findByRole("heading", { name: "The Harp" });
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
+			fireEvent.click(screen.getByRole("tab", { name: "Garden" }));
 			expect(screen.getByText("Back Garden")).toBeInTheDocument();
 		});
 
@@ -236,7 +237,7 @@ describe("PubPage", () => {
 				pubData: { ...SAMPLE_PUB, hasFood: true, isDogFriendly: false },
 			});
 			render(<PubPage />);
-			await screen.findByRole("heading", { name: "The Harp" });
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
 			expect(screen.getByText(/Food available/)).toBeInTheDocument();
 			expect(screen.getByText(/Dog friendly/)).toBeInTheDocument();
 		});
@@ -426,7 +427,7 @@ describe("PubPage", () => {
 			fireEvent.click(await waitForSaveButton());
 
 			expect(
-				await screen.findByRole("heading", { name: "The Harp (Renamed)" }),
+				await screen.findByRole("heading", { name: "The Harp (Renamed)", level: 1 }),
 			).toBeInTheDocument();
 		});
 
