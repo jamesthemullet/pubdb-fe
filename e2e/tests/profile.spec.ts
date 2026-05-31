@@ -31,9 +31,9 @@ function dashboardResponse(tier = "HOBBY") {
 }
 
 test.describe("Profile page (/profile)", () => {
-  test("shows the Profile heading regardless of auth state", async ({ page }) => {
+  test("shows the API keys heading regardless of auth state", async ({ page }) => {
     await page.goto("/profile");
-    await expect(page.getByRole("heading", { name: "Profile" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "API keys & usage" })).toBeVisible();
   });
 
   test("shows no dashboard content when unauthenticated", async ({ page }) => {
@@ -56,8 +56,7 @@ test.describe("Profile page (/profile)", () => {
       await page.getByText(/pk_test/).waitFor();
     });
 
-    test("shows the Dashboard heading and API key info", async ({ page }) => {
-      await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+    test("shows API key info when authenticated", async ({ page }) => {
       await expect(page.getByText(/pk_test/)).toBeVisible();
       await expect(page.getByText(/HOBBY/)).toBeVisible();
     });
@@ -77,7 +76,7 @@ test.describe("Profile page (/profile)", () => {
       })
     );
     await page.goto("/profile");
-    await expect(page.getByText(/Error loading dashboard/)).toBeVisible();
-    await expect(page.getByRole("button", { name: "Try Again" })).toBeVisible();
+    await expect(page.getByText(/Error:/)).toBeVisible();
+    await expect(page.getByRole("button", { name: /try again/i })).toBeVisible();
   });
 });

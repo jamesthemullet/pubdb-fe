@@ -54,7 +54,7 @@ test.describe("Pubs list (/pubs)", () => {
     await page.route(PUBS_API, (route) => route.fulfill(pubsResponse([])));
     await page.goto("/pubs");
 
-    await expect(page.getByText("No pubs found in the database.")).toBeVisible();
+    await expect(page.getByText("No pubs found.")).toBeVisible();
   });
 
   test("shows error message on API failure", async ({ page }) => {
@@ -77,14 +77,14 @@ test.describe("Pubs list (/pubs)", () => {
     );
     await page.goto("/pubs");
 
-    await expect(page.getByRole("button", { name: "Try Again" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /try again/i })).toBeVisible();
   });
 
-  test("shows Add Pub button when pubs are loaded", async ({ page }) => {
+  test("shows Add Pub link when pubs are loaded", async ({ page }) => {
     await page.route(PUBS_API, (route) => route.fulfill(pubsResponse()));
     await page.goto("/pubs");
 
-    await expect(page.getByRole("button", { name: "Add Pub" })).toBeVisible();
+    await expect(page.locator("#main-content").getByRole("link", { name: /add pub/i })).toBeVisible();
   });
 
   test.describe("search", () => {
@@ -107,7 +107,7 @@ test.describe("Pubs list (/pubs)", () => {
     });
 
     test("filters pubs by name", async ({ page }) => {
-      await page.getByRole("textbox", { name: "Search pubs" }).fill("Harp");
+      await page.getByRole("searchbox", { name: "Search pubs" }).fill("Harp");
 
       await expect(page.getByRole("link", { name: "The Harp" })).toBeVisible();
       await expect(page.getByRole("link", { name: "The Crown" })).not.toBeVisible();
@@ -115,31 +115,31 @@ test.describe("Pubs list (/pubs)", () => {
     });
 
     test("filters pubs by city", async ({ page }) => {
-      await page.getByRole("textbox", { name: "Search pubs" }).fill("Brighton");
+      await page.getByRole("searchbox", { name: "Search pubs" }).fill("Brighton");
 
       await expect(page.getByRole("link", { name: "The Crown" })).toBeVisible();
       await expect(page.getByRole("link", { name: "The Harp" })).not.toBeVisible();
     });
 
     test("filters pubs by address", async ({ page }) => {
-      await page.getByRole("textbox", { name: "Search pubs" }).fill("Bene't");
+      await page.getByRole("searchbox", { name: "Search pubs" }).fill("Bene't");
 
       await expect(page.getByRole("link", { name: "The Eagle" })).toBeVisible();
       await expect(page.getByRole("link", { name: "The Harp" })).not.toBeVisible();
     });
 
     test("shows result count while searching", async ({ page }) => {
-      await page.getByRole("textbox", { name: "Search pubs" }).fill("Harp");
+      await page.getByRole("searchbox", { name: "Search pubs" }).fill("Harp");
 
-      await expect(page.getByText(/Showing 1 pubs/)).toBeVisible();
+      await expect(page.getByText(/1 \/ 1 pubs/)).toBeVisible();
     });
 
-    test("hides result count when search is cleared", async ({ page }) => {
-      await page.getByRole("textbox", { name: "Search pubs" }).fill("Harp");
-      await expect(page.getByText(/Showing/)).toBeVisible();
+    test("result count updates when search is cleared", async ({ page }) => {
+      await page.getByRole("searchbox", { name: "Search pubs" }).fill("Harp");
+      await expect(page.getByText(/1 \/ 1 pubs/)).toBeVisible();
 
-      await page.getByRole("textbox", { name: "Search pubs" }).clear();
-      await expect(page.getByText(/Showing/)).not.toBeVisible();
+      await page.getByRole("searchbox", { name: "Search pubs" }).clear();
+      await expect(page.getByText(/3 \/ 3 pubs/)).toBeVisible();
     });
   });
 });

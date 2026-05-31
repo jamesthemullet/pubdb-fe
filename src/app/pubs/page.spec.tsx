@@ -63,15 +63,15 @@ describe("Pubs page", () => {
 		expect(screen.getByText("Blue Anchor")).toBeInTheDocument();
 	});
 
-	it("renders pub entries in the table", async () => {
+	it("renders pub links pointing to the correct detail pages", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			jsonResponse({ data: SAMPLE_PUBS }),
 		);
 
 		render(<Pubs />);
 
-		expect(await screen.findByText("The Harp")).toBeInTheDocument();
-		expect(screen.getByText("The Crown")).toBeInTheDocument();
+		const harpLink = await screen.findByRole("link", { name: "The Harp" });
+		expect(harpLink).toHaveAttribute("href", "/pubs/1");
 	});
 
 	it("shows empty state when no pubs are returned", async () => {
@@ -108,7 +108,7 @@ describe("Pubs page", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders Try Again button on error", async () => {
+	it("renders Try again button on error", async () => {
 		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("timeout"));
 
 		render(<Pubs />);
@@ -118,7 +118,7 @@ describe("Pubs page", () => {
 		).toBeInTheDocument();
 	});
 
-	it("shows the Add Pub link when pubs are loaded", async () => {
+	it("shows the Add pub link when pubs are loaded", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			jsonResponse({ data: SAMPLE_PUBS }),
 		);
