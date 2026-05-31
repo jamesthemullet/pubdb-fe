@@ -59,7 +59,7 @@ test.describe("Pub detail (/pubs/[id])", () => {
     await page.route(PUB_API, (route) => route.fulfill(pubResponse()));
     await silenceSecondaryAPIs(page);
     await page.goto("/pubs/42");
-    await page.getByRole("heading", { name: "The Anchor" }).waitFor();
+    await page.getByRole("heading", { name: "The Anchor" }).first().waitFor();
     await expect(page.getByRole("link", { name: "Log in to edit this pub" })).toBeVisible();
   });
 
@@ -81,13 +81,13 @@ test.describe("Pub detail (/pubs/[id])", () => {
       await page.route(PUB_API, (route) => route.fulfill(pubResponse()));
       await silenceSecondaryAPIs(page);
       await page.goto("/pubs/42");
-      await page.getByRole("heading", { name: "The Anchor" }).waitFor();
+      await page.getByRole("heading", { name: "The Anchor" }).first().waitFor();
     });
 
     test("renders pub name, city, address, and edit button", async ({ page }) => {
-      await expect(page.getByRole("heading", { name: "The Anchor" })).toBeVisible();
-      await expect(page.getByText(/Bristol/)).toBeVisible();
-      await expect(page.getByText(/5 King Street/)).toBeVisible();
+      await expect(page.getByRole("heading", { name: "The Anchor" }).first()).toBeVisible();
+      await expect(page.getByText(/Bristol/).first()).toBeVisible();
+      await expect(page.getByText(/5 King Street/).first()).toBeVisible();
       await expect(page.getByRole("button", { name: "Edit this pub" })).toBeVisible();
     });
 
@@ -128,7 +128,7 @@ test.describe("Pub detail (/pubs/[id])", () => {
 
       await page.getByRole("button", { name: "Save" }).first().click();
 
-      await expect(page.getByRole("heading", { name: "The Crown" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "The Crown" }).first()).toBeVisible();
       await expect(page.getByRole("button", { name: "Edit this pub" })).toBeVisible();
     });
   });

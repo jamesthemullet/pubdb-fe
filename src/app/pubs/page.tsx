@@ -368,7 +368,7 @@ export default function Pubs() {
                     <code className={styles.pubId}>{pub.id.slice(0, 6)}</code>
                   </td>
                   <td className={styles.tdName}>
-                    <span className={styles.pubName}>{pub.name}</span>
+                    <Link href={`/pubs/${pub.id}`} className={styles.pubName}>{pub.name}</Link>
                     {(pub.isIndependent || pub.chainName) && (
                       <span className={styles.pubType}>
                         {pub.isIndependent ? "Independent" : pub.chainName}

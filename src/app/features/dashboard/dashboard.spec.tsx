@@ -70,14 +70,14 @@ describe("Dashboard", () => {
 	});
 
 	describe("authentication", () => {
-		it("renders nothing when not authenticated", () => {
+		it("shows a sign-in prompt when not authenticated", () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(
 				jsonResponse(SAMPLE_DASHBOARD_DATA),
 			);
 
-			const { container } = render(<Dashboard />);
+			render(<Dashboard />);
 
-			expect(container).toBeEmptyDOMElement();
+			expect(screen.getByText(/Sign in to manage your API keys/)).toBeInTheDocument();
 		});
 
 		it("fetches dashboard data when token is present", async () => {
@@ -89,7 +89,7 @@ describe("Dashboard", () => {
 			render(<Dashboard />);
 
 			await waitFor(() => {
-				expect(screen.getByText("Welcome, Alice Smith")).toBeInTheDocument();
+				expect(screen.getByText("My Key")).toBeInTheDocument();
 			});
 		});
 
@@ -98,8 +98,8 @@ describe("Dashboard", () => {
 				jsonResponse(SAMPLE_DASHBOARD_DATA),
 			);
 
-			const { container } = render(<Dashboard />);
-			expect(container).toBeEmptyDOMElement();
+			render(<Dashboard />);
+			expect(screen.getByText(/Sign in to manage your API keys/)).toBeInTheDocument();
 
 			localStorage.setItem("token", "test-token");
 			act(() => {
@@ -107,7 +107,7 @@ describe("Dashboard", () => {
 			});
 
 			await waitFor(() => {
-				expect(screen.getByText("Welcome, Alice Smith")).toBeInTheDocument();
+				expect(screen.getByText("My Key")).toBeInTheDocument();
 			});
 		});
 	});
@@ -115,34 +115,6 @@ describe("Dashboard", () => {
 	describe("dashboard data display", () => {
 		beforeEach(() => {
 			localStorage.setItem("token", "test-token");
-		});
-
-		it("shows user email", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
-
-			render(<Dashboard />);
-
-			await waitFor(() => {
-				expect(
-					screen.getByText("Email: alice@example.com"),
-				).toBeInTheDocument();
-			});
-		});
-
-		it("falls back to username when name is empty", async () => {
-			const data = {
-				...SAMPLE_DASHBOARD_DATA,
-				user: { ...SAMPLE_DASHBOARD_DATA.user, name: "" },
-			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
-
-			render(<Dashboard />);
-
-			await waitFor(() => {
-				expect(screen.getByText("Welcome, alice")).toBeInTheDocument();
-			});
 		});
 
 		it("shows pending approval warning when not approved", async () => {
@@ -175,7 +147,7 @@ describe("Dashboard", () => {
 			});
 		});
 
-		it("shows 'No API keys' message when apiKeys is empty", async () => {
+		it("shows empty state message when apiKeys is empty", async () => {
 			const data = {
 				...SAMPLE_DASHBOARD_DATA,
 				apiKeys: [],
@@ -187,14 +159,12 @@ describe("Dashboard", () => {
 
 			await waitFor(() => {
 				expect(
-					screen.getByText(
-						"No API keys found. You may need to create an API key to get started.",
-					),
+					screen.getByText("No API keys yet. Create one to get started."),
 				).toBeInTheDocument();
 			});
 		});
 
-		it("renders API key card with name, tier, and key prefix", async () => {
+		it("renders API key card with name and masked prefix", async () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(
 				jsonResponse(SAMPLE_DASHBOARD_DATA),
 			);
@@ -203,46 +173,11 @@ describe("Dashboard", () => {
 
 			await waitFor(() => {
 				expect(screen.getByText("My Key")).toBeInTheDocument();
-				expect(
-					screen.getByText(/Tier: PRO \| Key: pk_abc\*\*\*/),
-				).toBeInTheDocument();
+				expect(screen.getByText(/pk_abc/)).toBeInTheDocument();
 			});
 		});
 
-		it("renders usage stats (hourly, daily, monthly)", async () => {
-			// Make each period have distinct usage percentages
-			const data = {
-				...SAMPLE_DASHBOARD_DATA,
-				apiKeys: [
-					{
-						...SAMPLE_API_KEY,
-						remaining: { hour: 80, day: 700, month: 5000 },
-						limits: {
-							requestsPerHour: 100,
-							requestsPerDay: 1000,
-							requestsPerMonth: 10000,
-						},
-					},
-				],
-			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
-
-			render(<Dashboard />);
-
-			await waitFor(() => {
-				expect(screen.getByText("Hourly")).toBeInTheDocument();
-				expect(screen.getByText("Daily")).toBeInTheDocument();
-				expect(screen.getByText("Monthly")).toBeInTheDocument();
-				// 100-80 = 20 used → 20.0%
-				expect(screen.getByText("20.0% used")).toBeInTheDocument();
-				// 1000-700 = 300 used → 30.0%
-				expect(screen.getByText("30.0% used")).toBeInTheDocument();
-				// 10000-5000 = 5000 used → 50.0%
-				expect(screen.getByText("50.0% used")).toBeInTheDocument();
-			});
-		});
-
-		it("shows last used date when present", async () => {
+		it("renders the tier badge", async () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(
 				jsonResponse(SAMPLE_DASHBOARD_DATA),
 			);
@@ -250,11 +185,36 @@ describe("Dashboard", () => {
 			render(<Dashboard />);
 
 			await waitFor(() => {
-				expect(screen.getByText(/Last used:/)).toBeInTheDocument();
+				expect(screen.getByText("PRO")).toBeInTheDocument();
 			});
 		});
 
-		it("does not show last used when lastUsed is null", async () => {
+		it("renders monthly usage count and limit", async () => {
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(
+				jsonResponse(SAMPLE_DASHBOARD_DATA),
+			);
+
+			render(<Dashboard />);
+
+			await waitFor(() => {
+				// monthly used = 10000 - 8000 = 2000
+				expect(screen.getByText(/2,000 \/ 10,000/)).toBeInTheDocument();
+			});
+		});
+
+		it("shows last used time when lastUsed is present", async () => {
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(
+				jsonResponse(SAMPLE_DASHBOARD_DATA),
+			);
+
+			render(<Dashboard />);
+
+			await waitFor(() => {
+				expect(screen.getByText(/last used/)).toBeInTheDocument();
+			});
+		});
+
+		it("shows 'never' when lastUsed is null", async () => {
 			const data = {
 				...SAMPLE_DASHBOARD_DATA,
 				apiKeys: [{ ...SAMPLE_API_KEY, lastUsed: null }],
@@ -264,71 +224,7 @@ describe("Dashboard", () => {
 			render(<Dashboard />);
 
 			await waitFor(() => {
-				expect(screen.queryByText(/Last used:/)).not.toBeInTheDocument();
-			});
-		});
-
-		it("shows summary with total keys and usage", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
-
-			render(<Dashboard />);
-
-			await waitFor(() => {
-				expect(
-					screen.getByText(/Summary: 1 API key\(s\) with 42 total requests/),
-				).toBeInTheDocument();
-			});
-		});
-
-		it("shows Location Search in features when allowLocationSearch is true", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
-
-			render(<Dashboard />);
-
-			await waitFor(() => {
-				expect(screen.getByText(/Location Search/)).toBeInTheDocument();
-			});
-		});
-
-		it("shows 'Basic API access only' when no features enabled", async () => {
-			const data = {
-				...SAMPLE_DASHBOARD_DATA,
-				apiKeys: [
-					{
-						...SAMPLE_API_KEY,
-						features: { allowLocationSearch: false, allowStats: false },
-					},
-				],
-			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
-
-			render(<Dashboard />);
-
-			await waitFor(() => {
-				expect(screen.getByText(/Basic API access only/)).toBeInTheDocument();
-			});
-		});
-
-		it("shows Statistics feature when allowStats is true", async () => {
-			const data = {
-				...SAMPLE_DASHBOARD_DATA,
-				apiKeys: [
-					{
-						...SAMPLE_API_KEY,
-						features: { allowLocationSearch: false, allowStats: true },
-					},
-				],
-			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
-
-			render(<Dashboard />);
-
-			await waitFor(() => {
-				expect(screen.getByText(/Statistics/)).toBeInTheDocument();
+				expect(screen.getByText(/last used never/)).toBeInTheDocument();
 			});
 		});
 	});
@@ -347,7 +243,7 @@ describe("Dashboard", () => {
 
 			await waitFor(() => {
 				expect(
-					screen.getByText(/Error loading dashboard: Network failure/),
+					screen.getByText(/Error: Network failure/),
 				).toBeInTheDocument();
 			});
 		});
@@ -361,7 +257,7 @@ describe("Dashboard", () => {
 
 			await waitFor(() => {
 				expect(
-					screen.getByText(/Error loading dashboard: Unauthorized access/),
+					screen.getByText(/Error: Unauthorized access/),
 				).toBeInTheDocument();
 			});
 		});
@@ -375,19 +271,19 @@ describe("Dashboard", () => {
 
 			await waitFor(() => {
 				expect(
-					screen.getByText(/Error loading dashboard: Token expired/),
+					screen.getByText(/Error: Token expired/),
 				).toBeInTheDocument();
 			});
 		});
 
-		it("shows Try Again button in error state", async () => {
+		it("shows Try again button in error state", async () => {
 			vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("fail"));
 
 			render(<Dashboard />);
 
 			await waitFor(() => {
 				expect(
-					screen.getByRole("button", { name: "Try Again" }),
+					screen.getByRole("button", { name: "Try again" }),
 				).toBeInTheDocument();
 			});
 		});
@@ -398,21 +294,25 @@ describe("Dashboard", () => {
 			localStorage.setItem("token", "test-token");
 		});
 
-		it("shows cancel subscription button for non-HOBBY ACTIVE keys", async () => {
+		async function openKeyMenu() {
+			await screen.findByText("My Key");
+			fireEvent.click(screen.getByRole("button", { name: /More options for My Key/ }));
+		}
+
+		it("shows cancel subscription option in key menu for non-HOBBY ACTIVE keys", async () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(
 				jsonResponse(SAMPLE_DASHBOARD_DATA),
 			);
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			await waitFor(() => {
-				expect(
-					screen.getByRole("button", { name: "Cancel subscription" }),
-				).toBeInTheDocument();
-			});
+			expect(
+				screen.getByRole("button", { name: /Cancel subscription/ }),
+			).toBeInTheDocument();
 		});
 
-		it("does not show cancel button for HOBBY tier", async () => {
+		it("does not show cancel option for HOBBY tier", async () => {
 			const data = {
 				...SAMPLE_DASHBOARD_DATA,
 				apiKeys: [{ ...SAMPLE_API_KEY, tier: "HOBBY" }],
@@ -420,16 +320,14 @@ describe("Dashboard", () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			await waitFor(() => {
-				expect(screen.getByText("My Key")).toBeInTheDocument();
-			});
 			expect(
-				screen.queryByRole("button", { name: "Cancel subscription" }),
+				screen.queryByRole("button", { name: /Cancel subscription/ }),
 			).not.toBeInTheDocument();
 		});
 
-		it("does not show cancel button for INACTIVE keys", async () => {
+		it("does not show cancel option for INACTIVE keys", async () => {
 			const data = {
 				...SAMPLE_DASHBOARD_DATA,
 				apiKeys: [{ ...SAMPLE_API_KEY, keyStatus: "INACTIVE" }],
@@ -437,12 +335,10 @@ describe("Dashboard", () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			await waitFor(() => {
-				expect(screen.getByText("My Key")).toBeInTheDocument();
-			});
 			expect(
-				screen.queryByRole("button", { name: "Cancel subscription" }),
+				screen.queryByRole("button", { name: /Cancel subscription/ }),
 			).not.toBeInTheDocument();
 		});
 
@@ -455,11 +351,9 @@ describe("Dashboard", () => {
 			vi.spyOn(window, "confirm").mockReturnValue(true);
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			const cancelBtn = await screen.findByRole("button", {
-				name: "Cancel subscription",
-			});
-			fireEvent.click(cancelBtn);
+			fireEvent.click(screen.getByRole("button", { name: /Cancel subscription/ }));
 
 			await waitFor(() => {
 				expect(
@@ -477,11 +371,9 @@ describe("Dashboard", () => {
 			vi.spyOn(window, "confirm").mockReturnValue(true);
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			const cancelBtn = await screen.findByRole("button", {
-				name: "Cancel subscription",
-			});
-			fireEvent.click(cancelBtn);
+			fireEvent.click(screen.getByRole("button", { name: /Cancel subscription/ }));
 
 			await waitFor(() => {
 				expect(
@@ -497,13 +389,10 @@ describe("Dashboard", () => {
 			vi.spyOn(window, "confirm").mockReturnValue(false);
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			const cancelBtn = await screen.findByRole("button", {
-				name: "Cancel subscription",
-			});
-			fireEvent.click(cancelBtn);
+			fireEvent.click(screen.getByRole("button", { name: /Cancel subscription/ }));
 
-			// Only the initial dashboard fetch should occur
 			await waitFor(() => {
 				expect(fetchSpy).toHaveBeenCalledTimes(1);
 			});
@@ -515,18 +404,22 @@ describe("Dashboard", () => {
 			localStorage.setItem("token", "test-token");
 		});
 
-		it("shows forgot API key button for non-HOBBY ACTIVE keys", async () => {
+		async function openKeyMenu() {
+			await screen.findByText("My Key");
+			fireEvent.click(screen.getByRole("button", { name: /More options for My Key/ }));
+		}
+
+		it("shows Forgot API key option in key menu for non-HOBBY ACTIVE keys", async () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(
 				jsonResponse(SAMPLE_DASHBOARD_DATA),
 			);
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			await waitFor(() => {
-				expect(
-					screen.getByRole("button", { name: "Forgot API key" }),
-				).toBeInTheDocument();
-			});
+			expect(
+				screen.getByRole("button", { name: "Forgot API key" }),
+			).toBeInTheDocument();
 		});
 
 		it("shows success message after forgot API key (no new key in response)", async () => {
@@ -539,11 +432,9 @@ describe("Dashboard", () => {
 				);
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			const forgotBtn = await screen.findByRole("button", {
-				name: "Forgot API key",
-			});
-			fireEvent.click(forgotBtn);
+			fireEvent.click(screen.getByRole("button", { name: "Forgot API key" }));
 
 			await waitFor(() => {
 				expect(
@@ -560,11 +451,9 @@ describe("Dashboard", () => {
 				);
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			const forgotBtn = await screen.findByRole("button", {
-				name: "Forgot API key",
-			});
-			fireEvent.click(forgotBtn);
+			fireEvent.click(screen.getByRole("button", { name: "Forgot API key" }));
 
 			await waitFor(() => {
 				expect(screen.getByText("Key not found")).toBeInTheDocument();
@@ -589,11 +478,9 @@ describe("Dashboard", () => {
 				);
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			const forgotBtn = await screen.findByRole("button", {
-				name: "Forgot API key",
-			});
-			fireEvent.click(forgotBtn);
+			fireEvent.click(screen.getByRole("button", { name: "Forgot API key" }));
 
 			await waitFor(() => {
 				expect(
@@ -621,11 +508,9 @@ describe("Dashboard", () => {
 				);
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			const forgotBtn = await screen.findByRole("button", {
-				name: "Forgot API key",
-			});
-			fireEvent.click(forgotBtn);
+			fireEvent.click(screen.getByRole("button", { name: "Forgot API key" }));
 
 			await waitFor(() => {
 				expect(
@@ -633,8 +518,7 @@ describe("Dashboard", () => {
 				).toBeInTheDocument();
 			});
 
-			const closeBtn = screen.getByRole("button", { name: "Close" });
-			fireEvent.click(closeBtn);
+			fireEvent.click(screen.getByRole("button", { name: "Close" }));
 
 			await waitFor(() => {
 				expect(
@@ -668,15 +552,11 @@ describe("Dashboard", () => {
 			});
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			const forgotBtn = await screen.findByRole("button", {
-				name: "Forgot API key",
-			});
-			fireEvent.click(forgotBtn);
+			fireEvent.click(screen.getByRole("button", { name: "Forgot API key" }));
 
-			const copyBtn = await screen.findByRole("button", {
-				name: "Copy API key",
-			});
+			const copyBtn = await screen.findByRole("button", { name: "Copy API key" });
 			fireEvent.click(copyBtn);
 
 			await waitFor(() => {
@@ -710,15 +590,11 @@ describe("Dashboard", () => {
 			});
 
 			render(<Dashboard />);
+			await openKeyMenu();
 
-			const forgotBtn = await screen.findByRole("button", {
-				name: "Forgot API key",
-			});
-			fireEvent.click(forgotBtn);
+			fireEvent.click(screen.getByRole("button", { name: "Forgot API key" }));
 
-			const copyBtn = await screen.findByRole("button", {
-				name: "Copy API key",
-			});
+			const copyBtn = await screen.findByRole("button", { name: "Copy API key" });
 			fireEvent.click(copyBtn);
 
 			await waitFor(() => {
