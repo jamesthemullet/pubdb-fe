@@ -783,7 +783,7 @@ const AVATAR_COLORS = [
   { bg: "#fee2e2", fg: "#991b1b" },
 ];
 
-function avatarColor(initial: string) {
+function avatarColor(initial: string): { bg: string; fg: string } {
   return AVATAR_COLORS[initial.toUpperCase().charCodeAt(0) % AVATAR_COLORS.length];
 }
 

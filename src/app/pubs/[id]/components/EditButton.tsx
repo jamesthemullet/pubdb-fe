@@ -54,11 +54,15 @@ export default function EditButton({ pubName, pubId, user, onEdit }: Props) {
         headers: buildAuthHeaders(token),
       });
       if (!res.ok) {
-        const data = await res.json();
-        setDeleteMessage({
-          type: "error",
-          text: data.error || "Failed to delete pub",
-        });
+        const data: unknown = await res.json();
+        const errMsg =
+          typeof data === "object" &&
+          data !== null &&
+          "error" in data &&
+          typeof (data as { error: unknown }).error === "string"
+            ? (data as { error: string }).error
+            : "Failed to delete pub";
+        setDeleteMessage({ type: "error", text: errMsg });
       } else {
         setDeleteMessage({ type: "success", text: "Pub deleted successfully" });
         window.location.href = "/pubs";
