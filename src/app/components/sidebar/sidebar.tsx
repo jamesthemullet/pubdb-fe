@@ -16,8 +16,8 @@ const WORKSPACE_LINKS = [
 
 const ACCOUNT_LINKS = [
   { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/profile", label: "Billing" },
-  { href: "/profile", label: "Settings" },
+  { href: "/billing", label: "Billing" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export default function Sidebar() {
@@ -104,7 +104,7 @@ export default function Sidebar() {
               <li key={label}>
                 <Link
                   href={href}
-                  className={`${styles.navItem} ${pathname === href && label === "Leaderboard" ? styles.navItemActive : ""}`}
+                  className={`${styles.navItem} ${pathname === href ? styles.navItemActive : ""}`}
                   onClick={() => setMenuOpen(false)}
                 >
                   <span className={styles.navLabel}>{label}</span>
