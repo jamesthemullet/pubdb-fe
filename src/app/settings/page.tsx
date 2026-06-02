@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useAuth } from "@/hooks/useAuth";
 import styles from "./page.module.css";
 
@@ -30,6 +31,10 @@ const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const { user } = useAuth();
+
+  if (!user) {
+    return <AuthGate context="Settings" />;
+  }
 
   return (
     <div className={styles.page}>

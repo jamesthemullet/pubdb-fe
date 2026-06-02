@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useContributions } from "@/hooks/useContributions";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
@@ -328,21 +329,7 @@ const Dashboard: React.FC = () => {
   }
 
   if (!isAuthenticated) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.pageHeader}>
-          <div>
-            <h1 className={styles.pageTitle}>API keys &amp; usage</h1>
-            <p className={styles.pageSubtitle}>Track request volume, manage keys, and review activity across your projects.</p>
-          </div>
-        </div>
-        <div className={styles.unauthState}>
-          <p className={styles.unauthTitle}>Sign in to manage your API keys</p>
-          <p className={styles.unauthDesc}>Create and manage API keys, track usage, and monitor your request volume.</p>
-          <a href="/register" className={styles.btnPrimary}>Sign in / Register</a>
-        </div>
-      </div>
-    );
+    return <AuthGate context="API keys" />;
   }
 
   if (loading) {
