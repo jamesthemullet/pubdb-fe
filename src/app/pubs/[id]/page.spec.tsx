@@ -356,15 +356,15 @@ describe("PubPage", () => {
 	});
 
 	describe("edit mode", () => {
-		// The edit form renders two Save buttons (top and bottom of the form).
+		// The edit form renders two Save buttons (header + footer).
 		// These helpers always interact with the first one.
 		async function waitForSaveButton() {
 			await waitFor(() => {
 				expect(
-					screen.getAllByRole("button", { name: "Save" }).length,
+					screen.getAllByRole("button", { name: /save changes/i }).length,
 				).toBeGreaterThan(0);
 			});
-			return screen.getAllByRole("button", { name: "Save" })[0];
+			return screen.getAllByRole("button", { name: /save changes/i })[0];
 		}
 
 		it("shows Save and Cancel buttons when Edit is clicked", async () => {
@@ -373,7 +373,7 @@ describe("PubPage", () => {
 			const saveBtn = await waitForSaveButton();
 			expect(saveBtn).toBeInTheDocument();
 			expect(
-				screen.getAllByRole("button", { name: "Cancel" })[0],
+				screen.getAllByRole("button", { name: /cancel/i })[0],
 			).toBeInTheDocument();
 		});
 
@@ -381,10 +381,10 @@ describe("PubPage", () => {
 			await renderPageAsAdmin();
 			fireEvent.click(screen.getByRole("button", { name: "Edit this pub" }));
 			await waitForSaveButton();
-			fireEvent.click(screen.getAllByRole("button", { name: "Cancel" })[0]);
+			fireEvent.click(screen.getAllByRole("button", { name: /cancel/i })[0]);
 			await waitFor(() => {
 				expect(
-					screen.queryAllByRole("button", { name: "Save" }),
+					screen.queryAllByRole("button", { name: /save changes/i }),
 				).toHaveLength(0);
 			});
 			expect(
@@ -443,7 +443,7 @@ describe("PubPage", () => {
 
 			await waitFor(() => {
 				expect(
-					screen.queryAllByRole("button", { name: "Save" }),
+					screen.queryAllByRole("button", { name: /save changes/i }),
 				).toHaveLength(0);
 			});
 		});
@@ -479,7 +479,7 @@ describe("PubPage", () => {
 			fireEvent.click(screen.getByRole("button", { name: "Edit this pub" }));
 			await waitForSaveButton();
 
-			fireEvent.change(screen.getByLabelText(/Website:/), {
+			fireEvent.change(screen.getByLabelText(/Website/i), {
 				target: { value: "not-a-url" },
 			});
 
@@ -489,7 +489,7 @@ describe("PubPage", () => {
 				),
 			).toBeInTheDocument();
 			expect(
-				screen.getAllByRole("button", { name: "Save" })[0],
+				screen.getAllByRole("button", { name: /save changes/i })[0],
 			).toBeDisabled();
 		});
 	});
