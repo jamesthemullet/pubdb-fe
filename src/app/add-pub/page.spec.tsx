@@ -58,91 +58,40 @@ async function renderApprovedPageWithSubmitResult(
   });
 
   render(<AddPubPage />);
-  await screen.findByText(/please fill out the form below/i);
+  await screen.findByRole("heading", { level: 1, name: "Add pub" });
 }
 
 function submitCurrentForm() {
-  const submitButton = screen.getByRole("button", { name: "Add Pub" });
-  const form = submitButton.closest("form");
+  const form = document.getElementById("add-pub-form") as HTMLFormElement;
   expect(form).not.toBeNull();
-  fireEvent.submit(form as HTMLFormElement);
+  fireEvent.submit(form);
 }
 
-function fillAllInputs() {
-  fireEvent.change(screen.getByLabelText(/^Name:/i), {
+// Labels as displayed in the component (overrides PUB_AMENITY_FIELDS labels where different)
+const DISPLAY_LABELS: Record<string, string> = {
+  hasFood: "Food",
+  hasStepFreeAccess: "Step Free Access",
+  hasAccessibleToilet: "Accessible Toilet",
+  hasPoolTable: "Pool Table",
+  hasDartsBoard: "Darts Board",
+};
+
+function fillRequiredInputs() {
+  fireEvent.change(screen.getByLabelText(/Pub name/i), {
     target: { value: "The Harp" },
   });
-  fireEvent.change(screen.getByLabelText(/^City:/i), {
+  fireEvent.change(screen.getByLabelText(/^City/i), {
     target: { value: "London" },
   });
-  fireEvent.change(screen.getByLabelText(/^Country:/i), {
+  fireEvent.change(screen.getByLabelText(/^Country/i), {
     target: { value: "GB" },
   });
-  fireEvent.change(screen.getByLabelText(/^Address:/i), {
+  fireEvent.change(screen.getByLabelText(/Street address/i), {
     target: { value: "47 Chandos Place" },
   });
-  fireEvent.change(screen.getByLabelText(/^Postcode:/i), {
+  fireEvent.change(screen.getByLabelText(/^Postcode/i), {
     target: { value: "WC2N 4HS" },
   });
-  fireEvent.change(screen.getByLabelText(/^Latitude:/i), {
-    target: { value: "51.5072" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Latitude:/i), {
-    target: { value: "" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Longitude:/i), {
-    target: { value: "-0.1276" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Longitude:/i), {
-    target: { value: "" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Website:/i), {
-    target: { value: "https://example.com" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Website:/i), {
-    target: { value: "" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Description:/i), {
-    target: { value: "A classic pub." },
-  });
-  fireEvent.change(screen.getByLabelText(/^Description:/i), {
-    target: { value: "" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Image URL:/i), {
-    target: { value: "https://example.com/pub.jpg" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Image URL:/i), {
-    target: { value: "" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Operator\/Owner:/i), {
-    target: { value: "Pub Group" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Operator\/Owner:/i), {
-    target: { value: "" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Area:/i), {
-    target: { value: "West End" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Area:/i), {
-    target: { value: "" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Phone:/i), {
-    target: { value: "+44 20 0000 0000" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Phone:/i), {
-    target: { value: "" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Borough:/i), {
-    target: { value: "Westminster" },
-  });
-  fireEvent.change(screen.getByLabelText(/^Borough:/i), {
-    target: { value: "" },
-  });
-  fireEvent.change(
-    screen.getByLabelText(/Paste opening hours from Google/i),
-    { target: { value: "Monday\n9 am–11 pm\nTuesday\n9 am–11 pm" } }
-  );
-  fireEvent.click(screen.getByRole("button", { name: /Apply from Google/i }));
 }
 
 describe("AddPubPage", () => {
@@ -177,11 +126,8 @@ describe("AddPubPage", () => {
     render(<AddPubPage />);
 
     expect(
-      await screen.findByText("You must be logged in to add a pub.")
+      await screen.findByRole("heading", { name: "Log in" })
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Register or Login" })
-    ).toHaveAttribute("href", "/register");
   });
 
   it("shows approval guidance and includes the user email in the mailto link", async () => {
@@ -204,7 +150,7 @@ describe("AddPubPage", () => {
     render(<AddPubPage />);
 
     expect(
-      await screen.findByText(/your account is not approved for editing/i)
+      await screen.findByText(/isn't approved for editing/i)
     ).toBeInTheDocument();
 
     const approvalLink = screen.getByRole("link", {
@@ -223,7 +169,7 @@ describe("AddPubPage", () => {
     );
     const fetchSpy = vi.spyOn(globalThis, "fetch");
 
-    fillAllInputs();
+    fillRequiredInputs();
     submitCurrentForm();
 
     await waitFor(() => {
@@ -240,7 +186,7 @@ describe("AddPubPage", () => {
     });
 
     expect(
-      await screen.findByText("Pub added successfully!")
+      await screen.findByText("Pub submitted for review!")
     ).toBeInTheDocument();
 
     await waitFor(
@@ -277,7 +223,7 @@ describe("AddPubPage", () => {
       });
 
     render(<AddPubPage />);
-    await screen.findByText(/please fill out the form below/i);
+    await screen.findByRole("heading", { level: 1, name: "Add pub" });
 
     localStorage.removeItem("token");
     submitCurrentForm();
@@ -302,7 +248,7 @@ describe("AddPubPage", () => {
     submitCurrentForm();
 
     const openExistingButton = await screen.findByRole("button", {
-      name: "Open existing pub to edit",
+      name: "Open existing pub →",
     });
 
     fireEvent.click(openExistingButton);
@@ -340,7 +286,7 @@ describe("AddPubPage", () => {
       )
     );
 
-    fillAllInputs();
+    fillRequiredInputs();
     submitCurrentForm();
 
     expect(await screen.findByText("Validation failed")).toBeInTheDocument();
@@ -348,19 +294,8 @@ describe("AddPubPage", () => {
     expect(screen.getByText("Country is required")).toBeInTheDocument();
     expect(screen.getByText("Address is required")).toBeInTheDocument();
     expect(screen.getByText("Postcode is required")).toBeInTheDocument();
-    expect(
-      screen.getByText("Opening hours format is invalid")
-    ).toBeInTheDocument();
     expect(screen.getByText("Phone is invalid")).toBeInTheDocument();
-    expect(screen.getByText("Borough is too long")).toBeInTheDocument();
-    expect(screen.getByText("Operator is invalid")).toBeInTheDocument();
-    expect(screen.getByText("Area is invalid")).toBeInTheDocument();
-    expect(screen.getByText("Description is invalid")).toBeInTheDocument();
-    expect(screen.getByText("Image URL is invalid")).toBeInTheDocument();
     expect(screen.getByText("Website is invalid")).toBeInTheDocument();
-    expect(screen.getByText("Chain name is invalid")).toBeInTheDocument();
-    expect(screen.getByText("Longitude is invalid")).toBeInTheDocument();
-    expect(screen.getByText("Latitude is invalid")).toBeInTheDocument();
     expect(screen.queryByText("Unknown error")).not.toBeInTheDocument();
   });
 
@@ -445,7 +380,7 @@ describe("AddPubPage", () => {
     render(<AddPubPage />);
 
     expect(
-      await screen.findByText("You must be logged in to add a pub.")
+      await screen.findByRole("heading", { name: "Log in" })
     ).toBeInTheDocument();
   });
 
@@ -471,11 +406,11 @@ describe("AddPubPage", () => {
     render(<AddPubPage />);
 
     expect(
-      await screen.findByText("You must be logged in to add a pub.")
+      await screen.findByRole("heading", { name: "Log in" })
     ).toBeInTheDocument();
   });
 
-  it("shows an error message and disables the country selector when country fetch fails", async () => {
+  it("shows an error option and disables the country selector when country fetch fails", async () => {
     localStorage.setItem("token", "test-token");
 
     vi.spyOn(console, "error").mockImplementation(() => undefined);
@@ -496,16 +431,16 @@ describe("AddPubPage", () => {
 
     render(<AddPubPage />);
 
-    await screen.findByText(/please fill out the form below/i);
+    await screen.findByRole("heading", { level: 1, name: "Add pub" });
     expect(
-      screen.getByRole("option", { name: "Failed to load countries" })
+      screen.getByRole("option", { name: "Failed to load" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("alert")
-    ).toHaveTextContent("Failed to fetch countries: 500");
+      screen.getByRole("combobox", { name: /Country/i })
+    ).toBeDisabled();
   });
 
-  it("shows Loading countries placeholder while countries are still fetching", async () => {
+  it("shows Loading placeholder while countries are still fetching", async () => {
     localStorage.setItem("token", "test-token");
 
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
@@ -526,9 +461,9 @@ describe("AddPubPage", () => {
 
     render(<AddPubPage />);
 
-    await screen.findByText(/please fill out the form below/i);
+    await screen.findByRole("heading", { level: 1, name: "Add pub" });
     expect(
-      await screen.findByRole("option", { name: "Loading countries..." })
+      await screen.findByRole("option", { name: "Loading…" })
     ).toBeInTheDocument();
   });
 
@@ -559,17 +494,22 @@ describe("AddPubPage", () => {
     });
 
     render(<AddPubPage />);
-    await screen.findByText(/please fill out the form below/i);
+    await screen.findByRole("heading", { level: 1, name: "Add pub" });
 
-    fireEvent.change(screen.getByLabelText(/^Chain name:/i), {
+    // Show chain name field, fill then clear it, then revert to independent
+    fireEvent.click(screen.getByRole("button", { name: /^Chain$/i }));
+    fireEvent.change(screen.getByLabelText(/^Chain name/i), {
       target: { value: "Fuller's" },
     });
-    fireEvent.change(screen.getByLabelText(/^Chain name:/i), {
+    fireEvent.change(screen.getByLabelText(/^Chain name/i), {
       target: { value: "" },
     });
+    fireEvent.click(screen.getByRole("button", { name: /^Independent$/i }));
 
-    for (const amenity of PUB_AMENITY_FIELDS) {
-      const checkbox = screen.getByRole("checkbox", { name: amenity.label });
+    const amenityFields = PUB_AMENITY_FIELDS.filter((f) => f.key !== "isIndependent");
+    for (const amenity of amenityFields) {
+      const label = DISPLAY_LABELS[amenity.key] ?? amenity.label;
+      const checkbox = screen.getByRole("checkbox", { name: label });
       fireEvent.click(checkbox);
       expect(checkbox).toBeChecked();
     }
@@ -587,8 +527,9 @@ describe("AddPubPage", () => {
     const submitted = submittedBody as Record<string, unknown>;
 
     expect(submitted.chainName).toBeUndefined();
-    for (const amenity of PUB_AMENITY_FIELDS) {
+    for (const amenity of amenityFields) {
       expect(submitted[amenity.key]).toBe(true);
     }
+    expect(submitted.isIndependent).toBe(true);
   });
 });

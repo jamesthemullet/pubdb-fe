@@ -1,10 +1,8 @@
-import type { Metadata } from "next";
-import styles from "./page.module.css";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Billing",
-  description: "Manage your Pub DB plan, payment method, and invoices.",
-};
+import AuthGate from "@/app/components/auth-gate/AuthGate";
+import { useAuth } from "@/hooks/useAuth";
+import styles from "./page.module.css";
 
 // ── Static mock data ──────────────────────────────────────────────────────────
 
@@ -133,6 +131,12 @@ const TAX_ITEMS = [
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function BillingPage() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <AuthGate context="Billing" />;
+  }
+
   return (
     <div className={styles.page}>
       {/* Header */}

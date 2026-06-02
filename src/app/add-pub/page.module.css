@@ -1,82 +1,570 @@
-.requiredAsterisk {
-  color: var(--action-red);
-}
-
-.openingHoursFieldset {
-  border: none;
-  padding: 0;
-  margin: 0;
-}
-
-.editLinkContainer {
-  margin-top: 8px;
+.page {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid color-mix(in srgb, var(--action-red) 45%, white);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--action-red) 10%, white);
+  min-height: 100vh;
+  background: var(--background);
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 2rem 2rem 1.5rem;
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.endpointBadge {
+  font-size: 0.75rem;
+  font-family: var(--font-mono, monospace);
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 480px;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-shrink: 0;
+  padding-top: 0.25rem;
+}
+
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.45rem 0.875rem;
+  cursor: pointer;
+  font-family: var(--font-inter), sans-serif;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cancelBtn:hover {
+  background: var(--surface-alt);
+  color: var(--text-color);
+}
+
+.submitBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--button-primary-text);
+  background: var(--button-primary);
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  font-family: var(--font-inter), sans-serif;
+  transition: background 0.15s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--button-primary-hover);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Form ── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0 2rem;
+}
+
+/* ── Section cards ── */
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  width: 100%;
+  background: transparent;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  cursor: default;
+  text-align: left;
+  font-family: inherit;
+}
+
+/* When sectionHead is a button (opening hours) */
+button.sectionHead {
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+button.sectionHead:hover {
+  background: #fafaf8;
+}
+
+.sectionHeadText {
+  flex: 1;
+}
+
+.sectionIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-color);
+  font-family: var(--font-mono, monospace);
+}
+
+.sectionDesc {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+  line-height: 1.45;
+}
+
+.chevron {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* ── Fields ── */
+.fieldBlock {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.fieldBlock:last-child {
+  border-bottom: none;
+}
+
+.fieldGrid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.fieldGrid2 .fieldBlock {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.fieldGrid2 .fieldBlock:nth-child(odd) {
+  border-right: 1px solid var(--border-color);
+}
+
+.fieldGrid2 .fieldBlock:last-child,
+.fieldGrid2 .fieldBlock:nth-last-child(2):nth-child(odd) {
+  border-bottom: none;
+}
+
+.fieldLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.req {
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+.optLabel {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* ── Inputs ── */
+.textInput {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: var(--font-inter), sans-serif;
+  color: var(--text-color);
+  transition: border-color 0.15s;
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.inputError {
+  border-color: #dc2626;
+}
+
+.selectInput {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: var(--font-inter), sans-serif;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.selectInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: var(--font-inter), sans-serif;
+  color: var(--text-color);
+  resize: vertical;
+  line-height: 1.5;
+  transition: border-color 0.15s;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* ── Ownership toggle ── */
+.ownershipToggle {
+  display: flex;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.ownershipBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  font-family: var(--font-inter), sans-serif;
+  transition: background 0.15s, color 0.15s;
+  border-right: 1px solid var(--border-color);
+}
+
+.ownershipBtn:last-child {
+  border-right: none;
+}
+
+.ownershipBtn:hover {
+  background: var(--surface-alt);
+  color: var(--text-color);
+}
+
+.ownershipBtnActive {
+  background: var(--accent);
+  color: #fff;
+}
+
+.ownershipBtnActive:hover {
+  background: var(--accent-hover);
+  color: #fff;
+}
+
+/* ── Amenities grid ── */
+.amenitiesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+
+.amenityCard {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.12s;
+  user-select: none;
+}
+
+.amenityCard:hover {
+  background: #f9f9f7;
+}
+
+/* Remove right border from every 3rd card */
+.amenityCard:nth-child(3n) {
+  border-right: none;
+}
+
+/* Remove bottom border from last row */
+.amenityCard:nth-last-child(-n+3):nth-child(3n+1),
+.amenityCard:nth-last-child(-n+3):nth-child(3n+2),
+.amenityCard:nth-last-child(-n+3):nth-child(3n) {
+  border-bottom: none;
+}
+
+/* Handle a partial last row */
+.amenityCard:last-child {
+  border-bottom: none;
+}
+
+.amenityCardChecked {
+  background: #eff6ff;
+}
+
+.amenityCardChecked:hover {
+  background: #e8f0fe;
+}
+
+.amenityCardIcon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.amenityCardLabel {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.amenityCardCheck {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-color);
+  flex-shrink: 0;
+  background: var(--surface);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.amenityCardCheckOn {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.amenityHiddenInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* ── Opening hours body ── */
+.openingHoursBody {
+  padding: 1.25rem 1.5rem;
+}
+
+/* ── Form footer ── */
+.formFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0 2rem;
+  flex-wrap: wrap;
+}
+
+.requiredNote {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.footerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  flex-wrap: wrap;
+}
+
+.errorSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .errorText {
-  color: var(--action-red);
-  margin-top: 4px;
+  font-size: 0.8125rem;
+  color: #dc2626;
 }
 
-.feedbackPanel {
-  margin-top: 8px;
+.successText {
+  font-size: 0.875rem;
+  color: #10b981;
+  font-weight: 500;
+}
+
+.editLinkBtn {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 0.45rem 0.875rem;
+  cursor: pointer;
+  font-family: var(--font-inter), sans-serif;
+  transition: background 0.15s;
+}
+
+.editLinkBtn:hover {
+  background: #eff6ff;
+}
+
+/* ── Auth gate ── */
+.gateCard {
+  margin: 3rem 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 1rem;
+  max-width: 420px;
 }
 
-.editLinkLead {
-  color: var(--action-red);
-  font-weight: 600;
+.gateText {
+  font-size: 0.9375rem;
+  color: var(--text-color);
 }
 
-.editLinkAction {
-  width: fit-content;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background-color: var(--button-primary);
-  color: var(--button-primary-text);
+.gateLink {
+  font-size: 0.875rem;
   font-weight: 600;
+  color: var(--accent);
   text-decoration: none;
 }
 
-.editLinkAction:hover {
-  background-color: var(--button-primary-hover);
+.gateLink:hover {
+  text-decoration: underline;
 }
 
-.advancedSection {
-  margin-top: 12px;
-  padding: 8px;
-  border: 1px solid color-mix(in srgb, var(--button-primary) 30%, white);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--button-primary) 6%, white);
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .header {
+    padding: 1.25rem 1rem 1rem;
+    flex-direction: column;
+  }
+
+  .form {
+    padding: 0 1rem;
+  }
+
+  .amenitiesGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .amenityCard:nth-child(3n) {
+    border-right: 1px solid var(--border-color);
+  }
+
+  .amenityCard:nth-child(2n) {
+    border-right: none;
+  }
+
+  .fieldGrid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .fieldGrid2 .fieldBlock:nth-child(odd) {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .fieldGrid2 .fieldBlock:last-child {
+    border-bottom: none;
+  }
 }
 
-.advancedSummary {
-  cursor: pointer;
-  font-weight: 600;
-}
+@media (max-width: 480px) {
+  .amenitiesGrid {
+    grid-template-columns: 1fr;
+  }
 
-.advancedContent {
-  margin-top: 10px;
-  display: grid;
-  gap: 12px;
-}
-
-.amenitiesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 8px;
-}
-
-.amenityLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  .amenityCard {
+    border-right: none !important;
+  }
 }

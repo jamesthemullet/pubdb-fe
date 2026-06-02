@@ -1,23 +1,5 @@
-.forgotPasswordLink {
-  margin-top: 1rem;
-  text-align: center;
-}
-
-.forgotPasswordLink a {
-  color: #007bff;
-  font-size: 0.9rem;
-}
-
-.toggleButton {
-  margin-top: 1rem;
-}
-
-.verificationNote {
-  margin-top: 0.75rem;
-  color: #555;
-  font-size: 0.95rem;
-}
-
-.verificationNote a {
-  color: #007bff;
+.page {
+  min-height: 100vh;
+  background: var(--background);
+  padding: 2rem 2rem 4rem;
 }
