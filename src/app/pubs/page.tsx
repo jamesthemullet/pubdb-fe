@@ -350,7 +350,6 @@ export default function Pubs() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th className={styles.thId}>ID</th>
                 <th className={styles.thName}>NAME</th>
                 <th className={styles.thLocation}>LOCATION</th>
                 <th className={styles.thAmenities}>AMENITIES</th>
@@ -364,9 +363,6 @@ export default function Pubs() {
                   className={styles.tableRow}
                   onClick={() => router.push(`/pubs/${pub.id}`)}
                 >
-                  <td className={styles.tdId}>
-                    <code className={styles.pubId}>{pub.id.slice(0, 6)}</code>
-                  </td>
                   <td className={styles.tdName}>
                     <Link href={`/pubs/${pub.id}`} className={styles.pubName}>{pub.name}</Link>
                     {(pub.isIndependent || pub.chainName) && (

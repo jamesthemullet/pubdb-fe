@@ -3,8 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import Pricing from "./pricing";
 
-vi.mock("./ApiPreview", () => ({ default: () => null }));
-
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,

@@ -372,7 +372,6 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.thId { width: 90px; }
 .thName { width: 28%; }
 .thLocation { width: 22%; }
 .thAmenities { width: auto; }
@@ -395,16 +394,6 @@
 .table td {
   padding: 0.85rem 1rem;
   vertical-align: middle;
-}
-
-.tdId {
-  width: 90px;
-}
-
-.pubId {
-  font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 0.8125rem;
-  color: var(--text-muted);
 }
 
 .tdName {
@@ -569,11 +558,6 @@
 
   .searchWrap {
     width: 100%;
-  }
-
-  .thLocation,
-  .tdLocation {
-    display: none;
   }
 
   .thAmenities,

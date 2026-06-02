@@ -527,35 +527,88 @@ button.sectionHead:hover {
   .header {
     padding: 1.25rem 1rem 1rem;
     flex-direction: column;
+    gap: 0.625rem;
   }
 
   .form {
     padding: 0 1rem;
   }
 
-  .amenitiesGrid {
-    grid-template-columns: 1fr 1fr;
+  /* Section cards: transparent on mobile — sit directly on beige background */
+  .section {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 0;
   }
 
-  .amenityCard:nth-child(3n) {
-    border-right: 1px solid var(--border-color);
+  .section:last-of-type {
+    border-bottom: none;
   }
 
-  .amenityCard:nth-child(2n) {
-    border-right: none;
+  .sectionHead {
+    border-bottom: none;
+    padding: 0 0 0.25rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.25rem;
+  }
+
+  .sectionDesc {
+    margin-top: 0.3rem;
+  }
+
+  /* Remove per-field bottom borders; section padding provides rhythm */
+  .fieldBlock {
+    border-bottom: none;
+    padding: 0.75rem 0 0;
+  }
+
+  .fieldBlock:first-of-type {
+    padding-top: 0.875rem;
   }
 
   .fieldGrid2 {
     grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .fieldGrid2 .fieldBlock {
+    border-bottom: none;
+    border-right: none;
+    padding: 0.75rem 0 0;
   }
 
   .fieldGrid2 .fieldBlock:nth-child(odd) {
     border-right: none;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: none;
   }
 
   .fieldGrid2 .fieldBlock:last-child {
     border-bottom: none;
+  }
+
+  .amenitiesGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  /* Individual card borders via gap layout */
+  .amenityCard {
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 6px;
+  }
+
+  .openingHoursBody {
+    padding: 1rem 0 0;
+  }
+
+  .formFooter {
+    padding: 0.75rem 0 2rem;
   }
 }
 
@@ -565,6 +618,6 @@ button.sectionHead:hover {
   }
 
   .amenityCard {
-    border-right: none !important;
+    border-right: 1px solid var(--border-color);
   }
 }
