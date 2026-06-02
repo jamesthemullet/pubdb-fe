@@ -77,7 +77,7 @@ describe("Dashboard", () => {
 
 			render(<Dashboard />);
 
-			expect(screen.getByText(/Sign in to manage your API keys/)).toBeInTheDocument();
+			expect(screen.getByRole("heading", { name: "Log in" })).toBeInTheDocument();
 		});
 
 		it("fetches dashboard data when token is present", async () => {
@@ -99,7 +99,7 @@ describe("Dashboard", () => {
 			);
 
 			render(<Dashboard />);
-			expect(screen.getByText(/Sign in to manage your API keys/)).toBeInTheDocument();
+			expect(screen.getByRole("heading", { name: "Log in" })).toBeInTheDocument();
 
 			localStorage.setItem("token", "test-token");
 			act(() => {
