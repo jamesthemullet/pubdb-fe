@@ -365,7 +365,6 @@ export default function PubPage() {
           onAddBeerGarden={addBeerGarden}
           onRemoveBeerGarden={removeBeerGarden}
           onSave={handleSave}
-          onCancel={() => setEditing(false)}
           onDelete={handleDelete}
           countries={countries}
           countriesLoading={countriesLoading}

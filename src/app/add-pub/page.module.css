@@ -596,10 +596,10 @@ button.sectionHead:hover {
     gap: 0.5rem;
   }
 
-  /* Remove grid border tricks — use gap instead */
+  /* Individual card borders via gap layout */
   .amenityCard {
-    border-right: 1px solid var(--border-color) !important;
-    border-bottom: 1px solid var(--border-color) !important;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
     border-radius: 6px;
   }
 
@@ -618,6 +618,6 @@ button.sectionHead:hover {
   }
 
   .amenityCard {
-    border-right: 1px solid var(--border-color) !important;
+    border-right: 1px solid var(--border-color);
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
+import { useState } from "react";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
 import { PUB_AMENITY_FIELDS, type PubAmenityKey } from "@/constants/pubFormFields";
 import type { BeerType } from "@/hooks/useBeerTypes";
@@ -26,7 +26,6 @@ type Props = {
   onAddBeerGarden: () => void;
   onRemoveBeerGarden: (index: number) => void;
   onSave: () => void;
-  onCancel: () => void;
   onDelete: () => Promise<void>;
   countries: CountryOption[];
   countriesLoading: boolean;
@@ -71,7 +70,6 @@ export default function PubEditView({
   onAddBeerGarden,
   onRemoveBeerGarden,
   onSave,
-  onCancel,
   onDelete,
   countries,
   countriesLoading,
@@ -583,12 +581,13 @@ export default function PubEditView({
 
         <div className={styles.fieldGrid2}>
           <div className={styles.fieldBlock}>
-            <label className={styles.fieldLabel}>Pub ID</label>
-            <input className={styles.textInput} type="text" value={pubDisplayId} disabled />
+            <label className={styles.fieldLabel} htmlFor="meta-pub-id">Pub ID</label>
+            <input id="meta-pub-id" className={styles.textInput} type="text" value={pubDisplayId} disabled />
           </div>
           <div className={styles.fieldBlock}>
-            <label className={styles.fieldLabel}>Created</label>
+            <label className={styles.fieldLabel} htmlFor="meta-created">Created</label>
             <input
+              id="meta-created"
               className={styles.textInput}
               type="text"
               value={pub.createdAt ? pub.createdAt.slice(0, 10) : "—"}
