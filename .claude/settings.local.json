@@ -27,7 +27,8 @@
       "Bash(npx tsc *)",
       "Bash(npx jest *)",
       "Bash(npx next *)",
-      "WebFetch(domain:claude.ai)"
+      "WebFetch(domain:claude.ai)",
+      "Bash(yarn list *)"
     ]
   }
 }
