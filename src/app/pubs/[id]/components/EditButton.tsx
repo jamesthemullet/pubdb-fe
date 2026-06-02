@@ -81,7 +81,7 @@ export default function EditButton({ pubName, pubId, user, onEdit }: Props) {
           {deleteMessage.text}
         </Typography>
       )}
-      <Button onClick={onEdit}>Edit this pub</Button>
+      <Button size="sm" onClick={onEdit}>Edit this pub</Button>
       {user?.admin && (
         <Button variant="red" onClick={handleDelete}>
           Delete this pub

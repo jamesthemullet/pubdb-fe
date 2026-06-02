@@ -9,9 +9,9 @@ import styles from "./sidebar.module.css";
 const WORKSPACE_LINKS = [
   { href: "/", label: "Overview" },
   { href: "/pubs", label: "Browse pubs", badge: "12.4k" },
+  { href: "/add-pub", label: "Add pub" },
   { href: "/profile", label: "API keys" },
   { href: "/docs", label: "Docs" },
-  { href: "/add-pub", label: "Add pub" },
 ];
 
 const ACCOUNT_LINKS = [
