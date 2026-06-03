@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { memo, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
-import { PUB_AMENITY_FIELDS, type PubAmenityKey } from "@/constants/pubFormFields";
+import {
+  PUB_AMENITY_FIELDS,
+  type PubAmenityKey,
+} from "@/constants/pubFormFields";
 import { API_URL } from "@/lib/apiConfig";
 import { isHttpErrorObject } from "@/lib/errors";
 import type { Pub } from "@/types/pub";
@@ -12,21 +15,27 @@ import styles from "./page.module.css";
 
 type SortOption = "name-asc" | "name-desc" | "newest" | "oldest";
 
-const SORT_OPTIONS: SortOption[] = ["name-asc", "name-desc", "newest", "oldest"];
+const SORT_OPTIONS: SortOption[] = [
+  "name-asc",
+  "name-desc",
+  "newest",
+  "oldest",
+];
 
 function isSortOption(value: string): value is SortOption {
   return (SORT_OPTIONS as string[]).includes(value);
 }
 
 type PubsApiResponse = { data: Pub[] };
-type PubApiResponse = { data: Pub };
 type ApiErrorResponse = { message?: string; error?: string };
 
 const PAGE_SIZE = 50;
 
 const VISIBLE_FILTER_COUNT = 6;
 
-const AMENITY_ICONS: Partial<Record<PubAmenityKey, { svg: string; title: string }>> = {
+const AMENITY_ICONS: Partial<
+  Record<PubAmenityKey, { svg: string; title: string }>
+> = {
   isIndependent: {
     title: "Independent",
     svg: '<circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/>',
@@ -67,7 +76,9 @@ const AmenityIconCell = memo(function AmenityIconCell({ pub }: { pub: Pub }) {
           <span
             key={key}
             role="img"
-            className={`${styles.amenityDot} ${isActive ? styles.amenityDotActive : ""}`}
+            className={`${styles.amenityDot} ${
+              isActive ? styles.amenityDotActive : ""
+            }`}
             title={isActive ? icon.title : ""}
             aria-label={isActive ? icon.title : undefined}
           >
@@ -91,7 +102,9 @@ export default function Pubs() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [activeAmenities, setActiveAmenities] = useState<Set<PubAmenityKey>>(new Set());
+  const [activeAmenities, setActiveAmenities] = useState<Set<PubAmenityKey>>(
+    new Set()
+  );
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [showAllFilters, setShowAllFilters] = useState(false);
   const [responseMs, setResponseMs] = useState<number | null>(null);
@@ -111,10 +124,16 @@ export default function Pubs() {
         sorted.sort((a, b) => b.name.localeCompare(a.name));
         break;
       case "newest":
-        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        sorted.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
         break;
       case "oldest":
-        sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        sorted.sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
         break;
       default:
         sorted.sort((a, b) => a.name.localeCompare(b.name));
@@ -140,16 +159,20 @@ export default function Pubs() {
         setResponseMs(Date.now() - t0);
 
         if (!res.ok) {
-          const errorData = await res.json() as ApiErrorResponse;
+          const errorData = (await res.json()) as ApiErrorResponse;
           throw { response: res, data: errorData };
         }
 
-        const data = await res.json() as PubsApiResponse;
+        const data = (await res.json()) as PubsApiResponse;
         setPubs(data.data);
       } catch (err: unknown) {
         setResponseMs(null);
         if (isHttpErrorObject(err)) {
-          setError(err.data.message || err.data.error || `HTTP error! status: ${err.response.status}`);
+          setError(
+            err.data.message ||
+              err.data.error ||
+              `HTTP error! status: ${err.response.status}`
+          );
         } else {
           setError(err instanceof Error ? err.message : "Failed to load pubs");
         }
@@ -180,22 +203,12 @@ export default function Pubs() {
     setSortBy("name-asc");
   }
 
-  async function goToRandomPub() {
-    setRandomLoading(true);
-    try {
-      const res = await fetch(`${API_URL}/pubs/random`);
-      if (!res.ok) throw new Error("Failed to fetch random pub");
-      const data = await res.json() as PubApiResponse;
-      router.push(`/pubs/${data.data.id}`);
-    } catch {
-      setRandomLoading(false);
-    }
-  }
   const visibleFilters = showAllFilters
     ? PUB_AMENITY_FIELDS
     : PUB_AMENITY_FIELDS.slice(0, VISIBLE_FILTER_COUNT);
   const hiddenCount = PUB_AMENITY_FIELDS.length - VISIBLE_FILTER_COUNT;
-  const hasActiveFilters = debouncedSearchTerm || activeAmenities.size > 0 || sortBy !== "name-asc";
+  const hasActiveFilters =
+    debouncedSearchTerm || activeAmenities.size > 0 || sortBy !== "name-asc";
 
   function pubLocation(pub: Pub): string {
     const area = pub.area || pub.borough || null;
@@ -214,21 +227,41 @@ export default function Pubs() {
             </span>
           </div>
           <p className={styles.pageDescription}>
-            Browse the live database. Every result here is exactly what the public API returns —
-            this view is a thin client over the same endpoint.
+            Browse the live database. Every result here is exactly what the
+            public API returns — this view is a thin client over the same
+            endpoint.
           </p>
         </div>
         <div className={styles.pageHeaderActions}>
           <button type="button" className={styles.btnOutline}>
             <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
-              <rect x="2" y="2" width="9" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-              <path d="M5 2V1.5A1.5 1.5 0 0 1 6.5 0h4A1.5 1.5 0 0 1 12 1.5V11a1.5 1.5 0 0 1-1.5 1.5H10" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+              <rect
+                x="2"
+                y="2"
+                width="9"
+                height="11"
+                rx="1.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                fill="none"
+              />
+              <path
+                d="M5 2V1.5A1.5 1.5 0 0 1 6.5 0h4A1.5 1.5 0 0 1 12 1.5V11a1.5 1.5 0 0 1-1.5 1.5H10"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                fill="none"
+              />
             </svg>
             Copy as cURL
           </button>
           <Link href="/add-pub" className={styles.btnPrimary}>
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-              <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path
+                d="M6 1v10M1 6h10"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
             </svg>
             Add pub
           </Link>
@@ -239,9 +272,27 @@ export default function Pubs() {
       <div className={styles.controls}>
         <div className={styles.filterBar}>
           <div className={styles.searchWrap}>
-            <svg className={styles.searchIcon} width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <circle cx="6" cy="6" r="4.5" stroke="currentColor" strokeWidth="1.3"/>
-              <path d="M10 10l2.5 2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+            <svg
+              className={styles.searchIcon}
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              aria-hidden="true"
+            >
+              <circle
+                cx="6"
+                cy="6"
+                r="4.5"
+                stroke="currentColor"
+                strokeWidth="1.3"
+              />
+              <path
+                d="M10 10l2.5 2.5"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+              />
             </svg>
             <input
               className={styles.searchInput}
@@ -259,7 +310,9 @@ export default function Pubs() {
                 key={key}
                 type="button"
                 onClick={() => toggleAmenity(key)}
-                className={`${styles.chip} ${activeAmenities.has(key) ? styles.chipActive : ""}`}
+                className={`${styles.chip} ${
+                  activeAmenities.has(key) ? styles.chipActive : ""
+                }`}
                 aria-pressed={activeAmenities.has(key)}
               >
                 {label}
@@ -302,27 +355,110 @@ export default function Pubs() {
             </Dropdown>
 
             <fieldset className={styles.viewToggle} aria-label="View mode">
-              <button type="button" className={`${styles.viewBtn} ${styles.viewBtnActive}`} aria-pressed="true">
-                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-                  <rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" fill="none"/>
-                  <rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" fill="none"/>
-                  <rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" fill="none"/>
-                  <rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" fill="none"/>
+              <button
+                type="button"
+                className={`${styles.viewBtn} ${styles.viewBtnActive}`}
+                aria-pressed="true"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  aria-hidden="true"
+                >
+                  <rect
+                    x="1"
+                    y="1"
+                    width="5"
+                    height="5"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    fill="none"
+                  />
+                  <rect
+                    x="8"
+                    y="1"
+                    width="5"
+                    height="5"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    fill="none"
+                  />
+                  <rect
+                    x="1"
+                    y="8"
+                    width="5"
+                    height="5"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    fill="none"
+                  />
+                  <rect
+                    x="8"
+                    y="8"
+                    width="5"
+                    height="5"
+                    rx="1"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    fill="none"
+                  />
                 </svg>
                 Grid
               </button>
-              <button type="button" className={styles.viewBtn} aria-pressed="false">
-                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-                  <path d="M1 3h12M1 7h12M1 11h12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+              <button
+                type="button"
+                className={styles.viewBtn}
+                aria-pressed="false"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M1 3h12M1 7h12M1 11h12"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                  />
                 </svg>
                 List
               </button>
-              <button type="button" className={styles.viewBtn} aria-pressed="false">
-                <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-                  <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3" fill="none"/>
-                  <path d="M7 1.5C7 1.5 4 4 4 7s3 5.5 3 5.5" stroke="currentColor" strokeWidth="1.3"/>
-                  <path d="M7 1.5c0 0 3 2.5 3 5.5s-3 5.5-3 5.5" stroke="currentColor" strokeWidth="1.3"/>
-                  <path d="M1.5 7h11" stroke="currentColor" strokeWidth="1.3"/>
+              <button
+                type="button"
+                className={styles.viewBtn}
+                aria-pressed="false"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="7"
+                    cy="7"
+                    r="5.5"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    fill="none"
+                  />
+                  <path
+                    d="M7 1.5C7 1.5 4 4 4 7s3 5.5 3 5.5"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                  />
+                  <path
+                    d="M7 1.5c0 0 3 2.5 3 5.5s-3 5.5-3 5.5"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                  />
+                  <path d="M1.5 7h11" stroke="currentColor" strokeWidth="1.3" />
                 </svg>
                 Map
               </button>
@@ -332,7 +468,11 @@ export default function Pubs() {
 
         {hasActiveFilters && (
           <div className={styles.activeFiltersMeta}>
-            <button type="button" className={styles.clearFilters} onClick={clearAllFilters}>
+            <button
+              type="button"
+              className={styles.clearFilters}
+              onClick={clearAllFilters}
+            >
               Clear all filters
             </button>
           </div>
@@ -342,7 +482,9 @@ export default function Pubs() {
       {/* Results metadata bar */}
       <div className={styles.resultsMeta}>
         <span className={styles.resultsCount}>
-          {loading ? "…" : `${filteredPubs.length} / ${filteredPubs.length} pubs`}
+          {loading
+            ? "…"
+            : `${filteredPubs.length} / ${filteredPubs.length} pubs`}
         </span>
         <div className={styles.resultsRight}>
           {responseMs !== null && (
@@ -363,7 +505,9 @@ export default function Pubs() {
       ) : error ? (
         <div className={styles.stateMsg} role="alert">
           <span className={styles.errorText}>Error loading pubs: {error}</span>
-          <button type="button" onClick={() => window.location.reload()}>Try again</button>
+          <button type="button" onClick={() => window.location.reload()}>
+            Try again
+          </button>
         </div>
       ) : filteredPubs.length === 0 ? (
         <div className={styles.stateMsg}>
@@ -388,7 +532,9 @@ export default function Pubs() {
                   onClick={() => router.push(`/pubs/${pub.id}`)}
                 >
                   <td className={styles.tdName}>
-                    <Link href={`/pubs/${pub.id}`} className={styles.pubName}>{pub.name}</Link>
+                    <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
+                      {pub.name}
+                    </Link>
                     {(pub.isIndependent || pub.chainName) && (
                       <span className={styles.pubType}>
                         {pub.isIndependent ? "Independent" : pub.chainName}
@@ -396,14 +542,27 @@ export default function Pubs() {
                     )}
                   </td>
                   <td className={styles.tdLocation}>
-                    <span className={styles.pubLocation}>{pubLocation(pub)}</span>
+                    <span className={styles.pubLocation}>
+                      {pubLocation(pub)}
+                    </span>
                   </td>
                   <td className={styles.tdAmenities}>
                     <AmenityIconCell pub={pub} />
                   </td>
                   <td className={styles.tdArrow}>
-                    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-                      <path d="M4 8h8M9 5l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M4 8h8M9 5l3 3-3 3"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </td>
                 </tr>
