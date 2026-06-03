@@ -87,7 +87,7 @@ describe("useCountries", () => {
   });
 
   it("returns cached countries immediately on subsequent mounts without fetching", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       jsonResponse([
         { name: { common: "Australia" }, cca2: "AU" },
         { name: { common: "France" }, cca2: "FR" },
@@ -98,7 +98,7 @@ describe("useCountries", () => {
     const { result: first } = renderHook(() => useCountries());
     await waitFor(() => expect(first.current.countriesLoading).toBe(false));
 
-    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    fetchSpy.mockClear();
 
     // Second mount — should use cache, no new fetch
     const { result: second } = renderHook(() => useCountries());
