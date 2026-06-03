@@ -82,7 +82,7 @@ describe("Pubs page", () => {
 		render(<Pubs />);
 
 		expect(
-			await screen.findByText("No pubs found in the database."),
+			await screen.findByText("No pubs found."),
 		).toBeInTheDocument();
 	});
 
@@ -108,24 +108,24 @@ describe("Pubs page", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders Try Again button on error", async () => {
+	it("renders Try again button on error", async () => {
 		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("timeout"));
 
 		render(<Pubs />);
 
 		expect(
-			await screen.findByRole("button", { name: "Try Again" }),
+			await screen.findByRole("button", { name: "Try again" }),
 		).toBeInTheDocument();
 	});
 
-	it("shows the Add Pub link when pubs are loaded", async () => {
+	it("shows the Add pub link when pubs are loaded", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			jsonResponse({ data: SAMPLE_PUBS }),
 		);
 
 		render(<Pubs />);
 
-		const addPubLink = await screen.findByRole("link", { name: "Add Pub" });
+		const addPubLink = await screen.findByRole("link", { name: /add pub/i });
 		expect(addPubLink).toHaveAttribute("href", "/add-pub");
 	});
 
@@ -144,7 +144,7 @@ describe("Pubs page", () => {
 			await screen.findByText("The Harp");
 
 			const searchInput = screen.getByPlaceholderText(
-				/search pubs by name, city/i,
+				/search by name, city/i,
 			);
 			fireEvent.change(searchInput, { target: { value: "harp" } });
 
@@ -169,7 +169,7 @@ describe("Pubs page", () => {
 			await screen.findByText("The Harp");
 
 			const searchInput = screen.getByPlaceholderText(
-				/search pubs by name, city/i,
+				/search by name, city/i,
 			);
 			fireEvent.change(searchInput, { target: { value: "manchester" } });
 
@@ -194,7 +194,7 @@ describe("Pubs page", () => {
 			await screen.findByText("The Harp");
 
 			const searchInput = screen.getByPlaceholderText(
-				/search pubs by name, city/i,
+				/search by name, city/i,
 			);
 			fireEvent.change(searchInput, { target: { value: "Lower Mall" } });
 
@@ -219,12 +219,12 @@ describe("Pubs page", () => {
 			await screen.findByText("The Harp");
 
 			const searchInput = screen.getByPlaceholderText(
-				/search pubs by name, city/i,
+				/search by name, city/i,
 			);
 			fireEvent.change(searchInput, { target: { value: "london" } });
 
 			await waitFor(() => {
-				expect(screen.getByText(/Showing 2 pubs/i)).toBeInTheDocument();
+				expect(screen.getByText(/2 \/ 2 pubs/)).toBeInTheDocument();
 			});
 		});
 

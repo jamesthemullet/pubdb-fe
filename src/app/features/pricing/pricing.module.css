@@ -217,12 +217,12 @@
 }
 
 .tierBtnPopular {
-  background: #ffffff !important;
-  color: #111111 !important;
+  background: #ffffff;
+  color: #111111;
 }
 
 .tierBtnPopular:hover {
-  background: #e8e8e8 !important;
+  background: #e8e8e8;
 }
 
 @media (max-width: 900px) {

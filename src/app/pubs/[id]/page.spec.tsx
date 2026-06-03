@@ -129,7 +129,7 @@ async function renderPageAsAdmin() {
 		authStatus: 200,
 	});
 	render(<PubPage />);
-	await screen.findByRole("heading", { name: "The Harp" });
+	await screen.findByRole("heading", { name: "The Harp", level: 1 });
 	await screen.findByRole("button", { name: "Edit this pub" });
 	return fetchSpy;
 }
@@ -170,17 +170,17 @@ describe("PubPage", () => {
 			setupFetchMock();
 			render(<PubPage />);
 			expect(
-				await screen.findByRole("heading", { name: "The Harp" }),
+				await screen.findByRole("heading", { name: "The Harp", level: 1 }),
 			).toBeInTheDocument();
 		});
 
 		it("renders the pub city, address, and postcode", async () => {
 			setupFetchMock();
 			render(<PubPage />);
-			await screen.findByRole("heading", { name: "The Harp" });
-			expect(screen.getByText(/London/)).toBeInTheDocument();
-			expect(screen.getByText(/47 Chandos Place/)).toBeInTheDocument();
-			expect(screen.getByText(/WC2N 4HS/)).toBeInTheDocument();
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
+			expect(screen.getAllByText(/London/).length).toBeGreaterThan(0);
+			expect(screen.getAllByText(/47 Chandos Place/).length).toBeGreaterThan(0);
+			expect(screen.getAllByText(/WC2N 4HS/).length).toBeGreaterThan(0);
 		});
 
 		it("renders a pub image when imageUrl is present", async () => {
@@ -188,7 +188,7 @@ describe("PubPage", () => {
 				pubData: { ...SAMPLE_PUB, imageUrl: "https://example.com/pub.jpg" },
 			});
 			render(<PubPage />);
-			await screen.findByRole("heading", { name: "The Harp" });
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
 			const img = screen.getByRole("img", { name: "The Harp" });
 			expect(img).toHaveAttribute("src", "https://example.com/pub.jpg");
 		});
@@ -196,15 +196,15 @@ describe("PubPage", () => {
 		it("does not render an image when imageUrl is absent", async () => {
 			setupFetchMock();
 			render(<PubPage />);
-			await screen.findByRole("heading", { name: "The Harp" });
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
 			expect(screen.queryByRole("img")).not.toBeInTheDocument();
 		});
 
 		it("renders a clickable external website link", async () => {
 			setupFetchMock();
 			render(<PubPage />);
-			await screen.findByRole("heading", { name: "The Harp" });
-			const link = screen.getByRole("link", { name: "Visit The Harp website (opens in new tab)" });
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
+			const link = screen.getByRole("link", { name: "https://theharp.co.uk" });
 			expect(link).toHaveAttribute("href", "https://theharp.co.uk");
 			expect(link).toHaveAttribute("target", "_blank");
 			expect(link).toHaveAttribute("rel", "noopener noreferrer");
@@ -227,7 +227,8 @@ describe("PubPage", () => {
 				},
 			});
 			render(<PubPage />);
-			await screen.findByRole("heading", { name: "The Harp" });
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
+			fireEvent.click(screen.getByRole("tab", { name: "Garden" }));
 			expect(screen.getByText("Back Garden")).toBeInTheDocument();
 		});
 
@@ -236,7 +237,7 @@ describe("PubPage", () => {
 				pubData: { ...SAMPLE_PUB, hasFood: true, isDogFriendly: false },
 			});
 			render(<PubPage />);
-			await screen.findByRole("heading", { name: "The Harp" });
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
 			expect(screen.getByText(/Food available/)).toBeInTheDocument();
 			expect(screen.getByText(/Dog friendly/)).toBeInTheDocument();
 		});
@@ -355,15 +356,15 @@ describe("PubPage", () => {
 	});
 
 	describe("edit mode", () => {
-		// The edit form renders two Save buttons (top and bottom of the form).
+		// The edit form renders two Save buttons (header + footer).
 		// These helpers always interact with the first one.
 		async function waitForSaveButton() {
 			await waitFor(() => {
 				expect(
-					screen.getAllByRole("button", { name: "Save" }).length,
+					screen.getAllByRole("button", { name: /save changes/i }).length,
 				).toBeGreaterThan(0);
 			});
-			return screen.getAllByRole("button", { name: "Save" })[0];
+			return screen.getAllByRole("button", { name: /save changes/i })[0];
 		}
 
 		it("shows Save and Cancel buttons when Edit is clicked", async () => {
@@ -372,7 +373,7 @@ describe("PubPage", () => {
 			const saveBtn = await waitForSaveButton();
 			expect(saveBtn).toBeInTheDocument();
 			expect(
-				screen.getAllByRole("button", { name: "Cancel" })[0],
+				screen.getAllByRole("button", { name: /cancel/i })[0],
 			).toBeInTheDocument();
 		});
 
@@ -380,10 +381,10 @@ describe("PubPage", () => {
 			await renderPageAsAdmin();
 			fireEvent.click(screen.getByRole("button", { name: "Edit this pub" }));
 			await waitForSaveButton();
-			fireEvent.click(screen.getAllByRole("button", { name: "Cancel" })[0]);
+			fireEvent.click(screen.getAllByRole("button", { name: /cancel/i })[0]);
 			await waitFor(() => {
 				expect(
-					screen.queryAllByRole("button", { name: "Save" }),
+					screen.queryAllByRole("button", { name: /save changes/i }),
 				).toHaveLength(0);
 			});
 			expect(
@@ -426,7 +427,7 @@ describe("PubPage", () => {
 			fireEvent.click(await waitForSaveButton());
 
 			expect(
-				await screen.findByRole("heading", { name: "The Harp (Renamed)" }),
+				await screen.findByRole("heading", { name: "The Harp (Renamed)", level: 1 }),
 			).toBeInTheDocument();
 		});
 
@@ -442,7 +443,7 @@ describe("PubPage", () => {
 
 			await waitFor(() => {
 				expect(
-					screen.queryAllByRole("button", { name: "Save" }),
+					screen.queryAllByRole("button", { name: /save changes/i }),
 				).toHaveLength(0);
 			});
 		});
@@ -478,7 +479,7 @@ describe("PubPage", () => {
 			fireEvent.click(screen.getByRole("button", { name: "Edit this pub" }));
 			await waitForSaveButton();
 
-			fireEvent.change(screen.getByLabelText(/Website:/), {
+			fireEvent.change(screen.getByLabelText(/Website/i), {
 				target: { value: "not-a-url" },
 			});
 
@@ -488,7 +489,7 @@ describe("PubPage", () => {
 				),
 			).toBeInTheDocument();
 			expect(
-				screen.getAllByRole("button", { name: "Save" })[0],
+				screen.getAllByRole("button", { name: /save changes/i })[0],
 			).toBeDisabled();
 		});
 	});

@@ -15,6 +15,8 @@ type Props = {
   onSave: (value: string) => Promise<string | null>;
   validate?: (value: string) => string | null;
   canEdit?: boolean;
+  rowLayout?: boolean;
+  valueClassName?: string;
 };
 
 export default function InlineEditField({
@@ -25,6 +27,8 @@ export default function InlineEditField({
   onSave,
   validate,
   canEdit,
+  rowLayout,
+  valueClassName,
 }: Props) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -58,6 +62,55 @@ export default function InlineEditField({
     } else {
       setEditing(false);
     }
+  }
+
+  if (rowLayout) {
+    return (
+      <div className={styles.row}>
+        <span className={styles.rowLabel}>{label}</span>
+        <span className={`${styles.rowValue} ${valueClassName ?? ""}`}>
+          {editing ? (
+            <span className={styles.editWrapper}>
+              {type === "textarea" ? (
+                <Textarea
+                  fullWidth={false}
+                  className={styles.inlineTextarea}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  autoFocus
+                  onKeyDown={(e) => { if (e.key === "Escape") cancel(); }}
+                />
+              ) : (
+                <Input
+                  fullWidth={false}
+                  className={styles.inlineInput}
+                  type={type}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void save();
+                    if (e.key === "Escape") cancel();
+                  }}
+                />
+              )}
+              <Button size="xs" onClick={() => void save()} disabled={saving} aria-label={`Save ${label}`}>✓</Button>
+              <Button size="xs" variant="secondary" onClick={cancel} disabled={saving} aria-label="Cancel">✗</Button>
+              {error && <Typography as="span" className={styles.inlineError}>{error}</Typography>}
+            </span>
+          ) : (
+            <span className={`${styles.rowValueInner} ${styles.field}`}>
+              <span>{displayValue}</span>
+              {canEdit && (
+                <Button variant="ghost" size="xs" className={styles.editLink} onClick={startEdit} aria-label={`Edit ${label}`}>
+                  edit
+                </Button>
+              )}
+            </span>
+          )}
+        </span>
+      </div>
+    );
   }
 
   return (

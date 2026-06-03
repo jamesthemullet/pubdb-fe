@@ -6,7 +6,6 @@ import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
-import ApiPreview from "./ApiPreview";
 import styles from "./pricing.module.css";
 
 type ProrationItem = {
@@ -657,7 +656,6 @@ const Pricing: React.FC = () => {
         })}
       </div>
 
-      <ApiPreview />
     </div>
   );
 };

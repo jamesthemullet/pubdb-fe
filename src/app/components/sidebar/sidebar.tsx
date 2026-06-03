@@ -9,15 +9,15 @@ import styles from "./sidebar.module.css";
 const WORKSPACE_LINKS = [
   { href: "/", label: "Overview" },
   { href: "/pubs", label: "Browse pubs", badge: "12.4k" },
+  { href: "/add-pub", label: "Add pub" },
   { href: "/profile", label: "API keys" },
   { href: "/docs", label: "Docs" },
-  { href: "/add-pub", label: "Add pub" },
 ];
 
 const ACCOUNT_LINKS = [
   { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/profile", label: "Billing" },
-  { href: "/profile", label: "Settings" },
+  { href: "/billing", label: "Billing" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export default function Sidebar() {
@@ -104,7 +104,7 @@ export default function Sidebar() {
               <li key={label}>
                 <Link
                   href={href}
-                  className={`${styles.navItem} ${pathname === href && label === "Leaderboard" ? styles.navItemActive : ""}`}
+                  className={`${styles.navItem} ${pathname === href ? styles.navItemActive : ""}`}
                   onClick={() => setMenuOpen(false)}
                 >
                   <span className={styles.navLabel}>{label}</span>
