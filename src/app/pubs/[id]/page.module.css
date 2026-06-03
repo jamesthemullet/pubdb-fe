@@ -114,6 +114,90 @@
 }
 
 /* ── Edit mode ── */
+.editBreadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.editBreadcrumbLink {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.editBreadcrumbLink:hover {
+  color: var(--text-color);
+}
+
+.editBreadcrumbSep {
+  color: var(--border-color);
+}
+
+.editBreadcrumbCode {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.editBreadcrumbCurrent {
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.editPageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.editPageHeaderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.editTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.editHeading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.editPatchBadge {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.editPatchBadge code {
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+.editSubtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
 .editHeader {
   display: flex;
   align-items: center;
@@ -123,15 +207,10 @@
   flex-wrap: wrap;
 }
 
-.editHeading {
-  font-size: 1.375rem;
-  font-weight: 700;
-  color: var(--text-color);
-}
-
 .editActions {
   display: flex;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 /* ── Two-column body ── */
@@ -556,8 +635,6 @@
 }
 
 .gardenImage {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
 }
 
@@ -811,7 +888,7 @@
 
   .rightCol {
     position: static;
-    order: -1;
+    order: 1;
   }
 }
 
@@ -830,6 +907,13 @@
 
   .pageActions {
     flex-wrap: wrap;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .tab {
+    font-size: 0.8125rem;
+    padding: 0.55rem 0.65rem;
   }
 }
 
@@ -874,6 +958,23 @@
 .saveError {
   color: red;
   margin-top: 0.5rem;
+}
+
+.closedDownLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.closedDownCheckbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #dc2626;
 }
 
 .errorText {

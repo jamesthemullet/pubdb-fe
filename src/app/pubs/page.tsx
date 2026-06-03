@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import { PUB_AMENITY_FIELDS, type PubAmenityKey } from "@/constants/pubFormFields";
 import { API_URL } from "@/lib/apiConfig";
@@ -45,7 +45,7 @@ const AMENITY_ICONS: Partial<Record<PubAmenityKey, { svg: string; title: string 
 
 const TABLE_AMENITY_KEYS = Object.keys(AMENITY_ICONS) as PubAmenityKey[];
 
-function AmenityIconCell({ pub }: { pub: Pub }) {
+const AmenityIconCell = memo(function AmenityIconCell({ pub }: { pub: Pub }) {
   const active = TABLE_AMENITY_KEYS.filter((k) => pub[k]);
   return (
     <div className={styles.amenityGrid}>
@@ -71,7 +71,7 @@ function AmenityIconCell({ pub }: { pub: Pub }) {
       {active.length === 0 && <span className={styles.amenityNone}>—</span>}
     </div>
   );
-}
+});
 
 export default function Pubs() {
   const router = useRouter();
@@ -350,7 +350,6 @@ export default function Pubs() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th className={styles.thId}>ID</th>
                 <th className={styles.thName}>NAME</th>
                 <th className={styles.thLocation}>LOCATION</th>
                 <th className={styles.thAmenities}>AMENITIES</th>
@@ -364,9 +363,6 @@ export default function Pubs() {
                   className={styles.tableRow}
                   onClick={() => router.push(`/pubs/${pub.id}`)}
                 >
-                  <td className={styles.tdId}>
-                    <code className={styles.pubId}>{pub.id.slice(0, 6)}</code>
-                  </td>
                   <td className={styles.tdName}>
                     <Link href={`/pubs/${pub.id}`} className={styles.pubName}>{pub.name}</Link>
                     {(pub.isIndependent || pub.chainName) && (

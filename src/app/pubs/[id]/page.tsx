@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
 import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,6 +12,7 @@ import { useCountries } from "@/hooks/useCountries";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import type { BeerGarden, Pub } from "@/types/pub";
+import addPubStyles from "../../add-pub/page.module.css";
 import EditButton from "./components/EditButton";
 import PubDisplayView from "./components/PubDisplayView";
 import PubEditView from "./components/PubEditView";
@@ -302,28 +302,70 @@ export default function PubPage() {
 
   const jsonPreview = buildJsonPreview(pub);
 
+  const handleDelete = async () => {
+    if (!confirm(`Are you sure you want to delete "${pub.name}"? This cannot be undone.`)) return;
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/pubs/${pub.id}`, {
+        method: "DELETE",
+        headers: buildAuthHeaders(token),
+      });
+      if (res.ok) window.location.href = "/pubs";
+    } catch { /* ignore */ }
+  };
+
   if (editing) {
     return (
       <div className={styles.page}>
-        <div className={styles.editHeader}>
-          <h1 className={styles.editHeading}>Edit: {pub.name}</h1>
+        {/* Breadcrumb */}
+        <nav className={styles.editBreadcrumb} aria-label="Breadcrumb">
+          <Link href="/pubs" className={styles.editBreadcrumbLink}>Pubs</Link>
+          <span className={styles.editBreadcrumbSep}>/</span>
+          <span className={styles.editBreadcrumbLink}>{pub.city}</span>
+          <span className={styles.editBreadcrumbSep}>/</span>
+          <code className={styles.editBreadcrumbCode}>{displayId}</code>
+          <span className={styles.editBreadcrumbSep}>/</span>
+          <strong className={styles.editBreadcrumbCurrent}>Edit</strong>
+        </nav>
+
+        {/* Edit page header */}
+        <div className={styles.editPageHeader}>
+          <div className={styles.editPageHeaderLeft}>
+            <div className={styles.editTitleRow}>
+              <h1 className={styles.editHeading}>Edit pub</h1>
+              <span className={styles.editPatchBadge}>
+                <code>PATCH /v1/pubs/{displayId}</code>
+              </span>
+            </div>
+            <p className={styles.editSubtitle}>
+              Editing <strong>{pub.name}</strong> · Changes take effect immediately after saving.
+            </p>
+          </div>
           <div className={styles.editActions}>
-            <Button onClick={handleSave} disabled={isSaveDisabled}>Save</Button>
-            <Button variant="secondary" onClick={() => setEditing(false)}>Cancel</Button>
+            <button type="button" className={addPubStyles.cancelBtn} onClick={() => setEditing(false)}>
+              × Cancel
+            </button>
+            <button type="button" className={addPubStyles.submitBtn} onClick={handleSave} disabled={isSaveDisabled}>
+              ✓ Save changes
+            </button>
           </div>
         </div>
+
         <PubEditView
+          pub={pub}
+          pubDisplayId={displayId}
           editFields={editFields}
           fieldErrors={fieldErrors}
           saveError={saveError}
           isSaveDisabled={isSaveDisabled}
+          isAdmin={user?.admin ?? false}
           onFieldChange={handleFieldChange}
           onToggleBeerType={toggleBeerType}
           onUpdateBeerGarden={updateBeerGarden}
           onAddBeerGarden={addBeerGarden}
           onRemoveBeerGarden={removeBeerGarden}
           onSave={handleSave}
-          onCancel={() => setEditing(false)}
+          onDelete={handleDelete}
           countries={countries}
           countriesLoading={countriesLoading}
           countriesError={countriesError ?? null}
@@ -750,8 +792,13 @@ function GardenTab({ pub }: { pub: Pub }) {
 
               <div className={styles.gardenImageSlot}>
                 {g.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={g.imageUrl} alt={g.name} className={styles.gardenImage} />
+                  <Image
+                    src={g.imageUrl}
+                    alt={g.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className={styles.gardenImage}
+                  />
                 ) : (
                   <span className={styles.gardenImageLabel}>image-slot · garden photo</span>
                 )}
