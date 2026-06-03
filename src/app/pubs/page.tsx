@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { memo, useEffect, useMemo, useState } from "react";
+import { Suspense, memo, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import {
   PUB_AMENITY_FIELDS,
@@ -94,7 +94,7 @@ const AmenityIconCell = memo(function AmenityIconCell({ pub }: { pub: Pub }) {
   );
 });
 
-export default function Pubs() {
+function PubsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
@@ -598,5 +598,13 @@ export default function Pubs() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function Pubs() {
+  return (
+    <Suspense>
+      <PubsContent />
+    </Suspense>
   );
 }
