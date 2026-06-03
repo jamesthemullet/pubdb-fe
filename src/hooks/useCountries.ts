@@ -63,7 +63,7 @@ function writeStorageCache(data: CountryOption[]): void {
   }
 }
 
-export function useCountries() {
+export function useCountries(): { countries: CountryOption[]; countriesLoading: boolean; countriesError: string | null } {
   const [countries, setCountries] = useState<CountryOption[]>(
     countriesCache ?? []
   );
