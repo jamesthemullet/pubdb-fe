@@ -76,24 +76,23 @@ const AmenityIconCell = memo(function AmenityIconCell({ pub }: { pub: Pub }) {
 export default function Pubs() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialQuery = searchParams.get("q") ?? "";
+  const urlQuery = searchParams.get("q") ?? "";
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState(initialQuery);
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(initialQuery);
+  const [searchTerm, setSearchTerm] = useState(urlQuery);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(urlQuery);
   const [activeAmenities, setActiveAmenities] = useState<Set<PubAmenityKey>>(new Set());
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [showAllFilters, setShowAllFilters] = useState(false);
   const [responseMs, setResponseMs] = useState<number | null>(null);
 
   useEffect(() => {
-    const q = searchParams.get("q") ?? "";
-    setSearchTerm(q);
-    setDebouncedSearchTerm(q);
+    setSearchTerm(urlQuery);
+    setDebouncedSearchTerm(urlQuery);
     setPage(0);
-  }, [searchParams]);
+  }, [urlQuery]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
