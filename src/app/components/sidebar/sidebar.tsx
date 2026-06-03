@@ -1,10 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { API_URL } from "@/lib/apiConfig";
+import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./sidebar.module.css";
+
+type ApiKey = {
+  tier: string;
+  limits: { requestsPerMonth: number };
+  remaining: { month: number };
+};
+
+type PlanData = {
+  planName: string;
+  used: number;
+  limit: number;
+  pct: number;
+};
 
 const WORKSPACE_LINKS = [
   { href: "/", label: "Overview" },
@@ -22,8 +37,28 @@ const ACCOUNT_LINKS = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [planData, setPlanData] = useState<PlanData | null>(null);
+
+  useEffect(() => {
+    if (!user) { setPlanData(null); return; }
+    const token = localStorage.getItem("token");
+    fetch(`${API_URL}/auth/dashboard`, { headers: buildAuthHeaders(token) })
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data: { apiKeys: ApiKey[] }) => {
+        const keys = data.apiKeys ?? [];
+        if (keys.length === 0) return;
+        const used = keys.reduce((s, k) => s + (k.limits.requestsPerMonth - k.remaining.month), 0);
+        const limit = keys.reduce((s, k) => s + k.limits.requestsPerMonth, 0);
+        const tier = keys[0].tier ?? "";
+        const planName = `${tier.charAt(0).toUpperCase()}${tier.slice(1).toLowerCase()} plan`;
+        setPlanData({ planName, used, limit, pct: limit > 0 ? Math.round((used / limit) * 100) : 0 });
+      })
+      .catch(() => setPlanData(null));
+  }, [user]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -75,8 +110,15 @@ export default function Sidebar() {
             type="search"
             placeholder="Search pubs, endpoints, docs..."
             aria-label="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && searchQuery.trim()) {
+                router.push(`/pubs?q=${encodeURIComponent(searchQuery.trim())}`);
+                setMenuOpen(false);
+              }
+            }}
           />
-          <kbd className={styles.searchKbd}>⌘K</kbd>
         </div>
 
         <nav aria-label="Workspace navigation">
@@ -137,25 +179,27 @@ export default function Sidebar() {
 
         <div className={styles.spacer} />
 
-        <div className={styles.planCard}>
-          <div className={styles.planCardTop}>
-            <span className={styles.planName}>Developer plan</span>
-            <span className={styles.planPct}>42% used</span>
+        {planData && (
+          <div className={styles.planCard}>
+            <div className={styles.planCardTop}>
+              <span className={styles.planName}>{planData.planName}</span>
+              <span className={styles.planPct}>{planData.pct}% used</span>
+            </div>
+            <div className={styles.planBar}>
+              <div className={styles.planBarFill} style={{ width: `${planData.pct}%` }} />
+            </div>
+            <p className={styles.planRequests}>
+              {planData.used.toLocaleString()} / {planData.limit.toLocaleString()} requests<br />this month
+            </p>
+            <Link
+              href="/profile"
+              className={styles.upgradeBtn}
+              onClick={() => setMenuOpen(false)}
+            >
+              Upgrade plan
+            </Link>
           </div>
-          <div className={styles.planBar}>
-            <div className={styles.planBarFill} />
-          </div>
-          <p className={styles.planRequests}>
-            42,318 / 100,000 requests<br />this month
-          </p>
-          <Link
-            href="/profile"
-            className={styles.upgradeBtn}
-            onClick={() => setMenuOpen(false)}
-          >
-            Upgrade plan
-          </Link>
-        </div>
+        )}
 
         {userInitials && (
           <div className={styles.userRow}>

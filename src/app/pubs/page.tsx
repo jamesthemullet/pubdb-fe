@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { memo, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { memo, Suspense, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import {
   PUB_AMENITY_FIELDS,
@@ -94,20 +94,26 @@ const AmenityIconCell = memo(function AmenityIconCell({ pub }: { pub: Pub }) {
   );
 });
 
-export default function Pubs() {
+function PubsContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get("q") ?? "";
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [activeAmenities, setActiveAmenities] = useState<Set<PubAmenityKey>>(
-    new Set()
-  );
+  const [searchTerm, setSearchTerm] = useState(urlQuery);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(urlQuery);
+  const [activeAmenities, setActiveAmenities] = useState<Set<PubAmenityKey>>(new Set());
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [showAllFilters, setShowAllFilters] = useState(false);
   const [responseMs, setResponseMs] = useState<number | null>(null);
+
+  useEffect(() => {
+    setSearchTerm(urlQuery);
+    setDebouncedSearchTerm(urlQuery);
+    setPage(0);
+  }, [urlQuery]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -592,5 +598,13 @@ export default function Pubs() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function Pubs() {
+  return (
+    <Suspense>
+      <PubsContent />
+    </Suspense>
   );
 }

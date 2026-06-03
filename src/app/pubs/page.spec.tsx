@@ -15,6 +15,7 @@ vi.mock("next/link", () => ({
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: vi.fn() }),
+	useSearchParams: () => ({ get: () => null }),
 }));
 
 function jsonResponse(data: unknown, status = 200): Response {
