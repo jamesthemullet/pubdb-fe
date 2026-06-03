@@ -123,7 +123,7 @@ test.describe("Pub detail (/pubs/[id])", () => {
       await page.getByRole("button", { name: "Edit this pub" }).click();
       await page.getByRole("button", { name: "Save" }).first().waitFor();
 
-      const nameInput = page.locator("#name");
+      const nameInput = page.locator("#edit-name");
       await nameInput.fill("The Crown");
 
       await page.getByRole("button", { name: "Save" }).first().click();

@@ -14,7 +14,6 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 function mockCountries(page: import("@playwright/test").Page) {
-  // Provide at least one country so the required <select> can be filled in tests
   return page.route(COUNTRIES_API, (route) =>
     route.fulfill(jsonResponse([{ name: { common: "United Kingdom" }, cca2: "GB" }]))
   );
@@ -31,19 +30,19 @@ async function setApprovedUser(page: import("@playwright/test").Page) {
 }
 
 async function fillRequiredFields(page: import("@playwright/test").Page) {
-  await page.getByPlaceholder("Enter pub name").fill("The Red Lion");
-  await page.getByPlaceholder("Enter city").fill("Manchester");
+  await page.getByPlaceholder(/crown.*anchor|the crown/i).fill("The Red Lion");
+  await page.getByPlaceholder(/e\.g\. london/i).fill("Manchester");
   await page.locator("#country").selectOption("GB");
-  await page.getByPlaceholder("Enter address").fill("10 Deansgate");
-  await page.getByPlaceholder("Enter postcode").fill("M3 2GQ");
+  await page.getByPlaceholder(/dean street/i).fill("10 Deansgate");
+  await page.getByPlaceholder(/W1D 4PX/i).fill("M3 2GQ");
 }
 
 test.describe("Add Pub (/add-pub)", () => {
   test("shows login prompt for unauthenticated visitors", async ({ page }) => {
     await mockCountries(page);
     await page.goto("/add-pub");
-    await expect(page.getByText("You must be logged in to add a pub.")).toBeVisible();
-    await expect(page.getByRole("link", { name: "Register or Login" })).toBeVisible();
+    // Unauthenticated state shows the AuthGate sign-in form
+    await expect(page.getByRole("button", { name: "Log in" })).toBeVisible();
   });
 
   test("shows approval prompt for unapproved users", async ({ page }) => {
@@ -56,7 +55,7 @@ test.describe("Add Pub (/add-pub)", () => {
     );
     await mockCountries(page);
     await page.goto("/add-pub");
-    await expect(page.getByText(/Your account is not approved for editing/)).toBeVisible();
+    await expect(page.getByText(/Your account isn't approved for editing yet/)).toBeVisible();
   });
 
   test.describe("with an approved user", () => {
@@ -64,15 +63,15 @@ test.describe("Add Pub (/add-pub)", () => {
       await setApprovedUser(page);
       await mockCountries(page);
       await page.goto("/add-pub");
-      await page.getByRole("button", { name: "Add Pub" }).waitFor();
+      await page.getByRole("button", { name: /submit pub/i }).first().waitFor();
     });
 
     test("renders the form with required fields and submit button", async ({ page }) => {
-      await expect(page.getByPlaceholder("Enter pub name")).toBeVisible();
-      await expect(page.getByPlaceholder("Enter city")).toBeVisible();
-      await expect(page.getByPlaceholder("Enter address")).toBeVisible();
-      await expect(page.getByPlaceholder("Enter postcode")).toBeVisible();
-      await expect(page.getByRole("button", { name: "Add Pub" })).toBeVisible();
+      await expect(page.getByLabel(/pub name/i)).toBeVisible();
+      await expect(page.getByLabel(/^city/i)).toBeVisible();
+      await expect(page.getByLabel(/street address/i)).toBeVisible();
+      await expect(page.getByLabel(/postcode/i)).toBeVisible();
+      await expect(page.getByRole("button", { name: /submit pub/i }).first()).toBeVisible();
     });
 
     test("shows success message after successful submission", async ({ page }) => {
@@ -81,21 +80,20 @@ test.describe("Add Pub (/add-pub)", () => {
       );
 
       await fillRequiredFields(page);
-      await page.getByRole("button", { name: "Add Pub" }).click();
+      await page.getByRole("button", { name: /submit pub/i }).first().click();
 
-      await expect(page.getByText("Pub added successfully!")).toBeVisible();
+      await expect(page.getByText("Pub submitted for review!")).toBeVisible();
     });
 
-    test("shows duplicate pub message with edit link on 409", async ({ page }) => {
+    test("shows duplicate pub error message on 409", async ({ page }) => {
       await page.route(ADD_PUB_API, (route) =>
         route.fulfill(jsonResponse({ id: "55", error: "Pub already exists" }, 409))
       );
 
       await fillRequiredFields(page);
-      await page.getByRole("button", { name: "Add Pub" }).click();
+      await page.getByRole("button", { name: /submit pub/i }).first().click();
 
-      await expect(page.getByText("A matching pub already exists.")).toBeVisible();
-      await expect(page.getByRole("button", { name: "Open existing pub to edit" })).toBeVisible();
+      await expect(page.getByText("Pub already exists")).toBeVisible();
     });
 
     test("shows API validation error on failure", async ({ page }) => {
@@ -104,7 +102,7 @@ test.describe("Add Pub (/add-pub)", () => {
       );
 
       await fillRequiredFields(page);
-      await page.getByRole("button", { name: "Add Pub" }).click();
+      await page.getByRole("button", { name: /submit pub/i }).first().click();
 
       await expect(page.getByText("Name is too long")).toBeVisible();
     });
@@ -113,7 +111,7 @@ test.describe("Add Pub (/add-pub)", () => {
       await page.route(ADD_PUB_API, (route) => route.abort());
 
       await fillRequiredFields(page);
-      await page.getByRole("button", { name: "Add Pub" }).click();
+      await page.getByRole("button", { name: /submit pub/i }).first().click();
 
       await expect(page.getByText("Network error")).toBeVisible();
     });

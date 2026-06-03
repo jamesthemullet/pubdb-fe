@@ -31,9 +31,10 @@ function dashboardResponse(tier = "HOBBY") {
 }
 
 test.describe("Profile page (/profile)", () => {
-  test("shows the API keys heading regardless of auth state", async ({ page }) => {
+  test("shows sign-in form when unauthenticated", async ({ page }) => {
     await page.goto("/profile");
-    await expect(page.getByRole("heading", { name: "API keys & usage" })).toBeVisible();
+    // Unauthenticated state shows the AuthGate sign-in form
+    await expect(page.getByRole("button", { name: "Log in" })).toBeVisible();
   });
 
   test("shows no dashboard content when unauthenticated", async ({ page }) => {
