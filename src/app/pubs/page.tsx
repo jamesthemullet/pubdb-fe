@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import { PUB_AMENITY_FIELDS, type PubAmenityKey } from "@/constants/pubFormFields";
 import { API_URL } from "@/lib/apiConfig";
@@ -45,7 +45,7 @@ const AMENITY_ICONS: Partial<Record<PubAmenityKey, { svg: string; title: string 
 
 const TABLE_AMENITY_KEYS = Object.keys(AMENITY_ICONS) as PubAmenityKey[];
 
-function AmenityIconCell({ pub }: { pub: Pub }) {
+const AmenityIconCell = memo(function AmenityIconCell({ pub }: { pub: Pub }) {
   const active = TABLE_AMENITY_KEYS.filter((k) => pub[k]);
   return (
     <div className={styles.amenityGrid}>
@@ -71,7 +71,7 @@ function AmenityIconCell({ pub }: { pub: Pub }) {
       {active.length === 0 && <span className={styles.amenityNone}>—</span>}
     </div>
   );
-}
+});
 
 export default function Pubs() {
   const router = useRouter();

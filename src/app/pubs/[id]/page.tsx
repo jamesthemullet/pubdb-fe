@@ -792,8 +792,13 @@ function GardenTab({ pub }: { pub: Pub }) {
 
               <div className={styles.gardenImageSlot}>
                 {g.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={g.imageUrl} alt={g.name} className={styles.gardenImage} />
+                  <Image
+                    src={g.imageUrl}
+                    alt={g.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className={styles.gardenImage}
+                  />
                 ) : (
                   <span className={styles.gardenImageLabel}>image-slot · garden photo</span>
                 )}
