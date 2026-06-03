@@ -4,10 +4,11 @@ import type { Metadata } from "next";
 import { useState } from "react";
 import styles from "./page.module.css";
 
-const CURL_QUICK_START = `curl https://api.pubdb.io/v1/pubs \\
-  -H "Authorization: Bearer $PUBDB_KEY"`;
+const CURL_QUICK_START = `curl https://hopeful-playfulness-production.up.railway.app/api/v1/pubs \\
+  -H "X-API-Key: $PUBDB_KEY"`;
 
 const JSON_QUICK_START = `{
+  "success": true,
   "data": [
     {
       "id": "pub_0f1a3b",
@@ -16,33 +17,25 @@ const JSON_QUICK_START = `{
       "area": "Soho",
       "postcode": "W1D 3HB",
       "country": "GB",
-      "hasRoastie": true,
-      "rating": 4.4
+      "hasCaskAle": true,
+      "hasSundayRoast": false
     }
   ],
-  "meta": {
-    "total": 12418,
+  "pagination": {
     "page": 1,
-    "per_page": 50,
-    "took_ms": 22
+    "limit": 50,
+    "total": 12418,
+    "pages": 249,
+    "hasNext": true,
+    "hasPrev": false
   }
 }`;
 
-const CURL_AUTH = `Authorization: Bearer pdb_live_xxff····`;
+const CURL_AUTH = `X-API-Key: pk_developer_xxxx····`;
 
-const CURL_POST_PUB = `{
-  "name": "The Fox & Hounds",
-  "address": "18 Passmore Street",
-  "city": "London",
-  "postcode": "SW1W 8HR",
-  "country": "GB",
-  "isIndependent": true,
-  "hasFood": true,
-  "hasCaskAle": true
-}`;
 
-const CURL_FILTER = `curl "https://api.pubdb.io/v1/pubs?hasCaskAle=true" \\
-  -H "Authorization: Bearer $PUBDB_KEY"`;
+const CURL_FILTER = `curl "https://hopeful-playfulness-production.up.railway.app/api/v1/pubs?hasCaskAle=true" \\
+  -H "X-API-Key: $PUBDB_KEY"`;
 
 const NAV_ITEMS = [
   { id: "quick-start", label: "Quick start" },
@@ -52,29 +45,17 @@ const NAV_ITEMS = [
   { id: "pagination", label: "Pagination" },
   { id: "rate-limits", label: "Rate limits" },
   { id: "errors", label: "Errors" },
-  { id: "sdks", label: "SDKs & libraries" },
 ];
 
 const ENDPOINTS = [
-  { method: "GET", path: "/v1/pubs", description: "List all pubs (paginated)" },
-  { method: "GET", path: "/v1/pubs/:id", description: "Get a single pub by ID" },
-  { method: "GET", path: "/v1/pubs/search", description: "Full-text + geo search" },
-  { method: "GET", path: "/v1/beers", description: "List tracked beer types" },
-  { method: "POST", path: "/v1/pubs", description: "Submit a new pub (auth required)" },
+  { method: "GET", path: "/api/v1/pubs", description: "List all pubs (paginated)" },
+  { method: "GET", path: "/api/v1/pubs/:id", description: "Get a single pub by ID" },
+  { method: "GET", path: "/api/v1/pubs/near", description: "Geo search — Developer tier+" },
+  { method: "GET", path: "/api/v1/beer-types", description: "List tracked beer types" },
+  { method: "GET", path: "/api/v1/contributors/leaderboard", description: "Contributor leaderboard" },
+  { method: "GET", path: "/api/v1/stats", description: "Database stats — Developer tier+" },
 ];
 
-const RESPONSE_FIELDS = [
-  { name: "id", type: "string", description: "Unique pub ID" },
-  { name: "name", type: "string", description: "Pub name" },
-  { name: "city", type: "string", description: "City or town" },
-  { name: "area", type: "string | null", description: "Neighbourhood or borough" },
-  { name: "address", type: "string", description: "Street address" },
-  { name: "postcode", type: "string", description: "UK postcode" },
-  { name: "country", type: "string", description: "ISO 3166-1 alpha-2 code" },
-  { name: "lat / lng", type: "number", description: "WGS 84 coordinates" },
-  { name: "isIndependent", type: "boolean", description: "True if not part of a chain" },
-  { name: "chainId", type: "string | null", description: "Parent chain name, if applicable" },
-];
 
 const AMENITY_TAGS = [
   "isIndependent", "hasFood", "hasCaskAle", "hasBeerGarden",
@@ -149,10 +130,12 @@ export default function DocsPage() {
         <div className={styles.needHelp}>
           <p className={styles.needHelpTitle}>Need help?</p>
           <p className={styles.needHelpText}>
-            Check the <a href="/changelog" className={styles.needHelpLink}>changelog</a> for
-            recent updates or reach us at{" "}
-            <a href="mailto:support@pubdb.io" className={styles.needHelpLink}>
-              support@pubdb.io
+            {/* TODO: add /changelog page */}
+            {/* Check the <a href="/changelog" className={styles.needHelpLink}>changelog</a> for
+            recent updates or reach us at{" "} */}
+            Reach us at{" "}
+            <a href="mailto:hello@thepubdb.com" className={styles.needHelpLink}>
+              hello@thepubdb.com
             </a>
           </p>
         </div>
@@ -163,7 +146,7 @@ export default function DocsPage() {
           <div>
             <div className={styles.titleRow}>
               <h1 className={styles.pageTitle}>Documentation</h1>
-              <code className={styles.apiVersion}>api.pubdb.io/v1</code>
+              <code className={styles.apiVersion}>hopeful-playfulness-production.up.railway.app</code>
             </div>
             <p className={styles.pageSubtitle}>
               Everything you need to integrate with the Pub DB API — authentication, endpoints,
@@ -171,18 +154,14 @@ export default function DocsPage() {
             </p>
           </div>
           <div className={styles.headerActions}>
-            <a href="/api/openapi.json" className={styles.headerBtn}>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              OpenAPI spec
-            </a>
+            {/* TODO: add /playground page
             <a href="/playground" className={styles.headerBtn}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                 <polygon points="3,2 11,7 3,12" fill="currentColor" />
               </svg>
               Playground
             </a>
+            */}
           </div>
         </div>
 
@@ -196,14 +175,14 @@ export default function DocsPage() {
           <p className={styles.sectionText}>
             The API returns JSON by default. Every response wraps results in a{" "}
             <code className={styles.inlineCode}>data</code> array with a{" "}
-            <code className={styles.inlineCode}>meta</code> object for pagination and timing.
+            <code className={styles.inlineCode}>pagination</code> object for page metadata.
           </p>
           <CodeBlock code={JSON_QUICK_START} />
           <div className={styles.baseUrlBar}>
             <span className={styles.baseUrlIcon} aria-hidden="true">◎</span>
             <span>
-              <strong>Base URL</strong> — all endpoints are relative to{" "}
-              <code className={styles.inlineCode}>https://api.pubdb.io/v1</code>. Include the version prefix on every request.
+              <strong>Base URL</strong> — all API key endpoints are relative to{" "}
+              <code className={styles.inlineCode}>https://hopeful-playfulness-production.up.railway.app/api/v1</code>.
             </span>
           </div>
         </section>
@@ -211,27 +190,27 @@ export default function DocsPage() {
         <section id="authentication" className={styles.section}>
           <h2 className={styles.sectionTitle}>Authentication</h2>
           <p className={styles.sectionText}>
-            Authenticate via a Bearer token in the{" "}
-            <code className={styles.inlineCode}>Authorization</code> header. Every request must
-            include a valid API key.
+            Pass your API key in the{" "}
+            <code className={styles.inlineCode}>X-API-Key</code> header on every request to an
+            authenticated endpoint.
           </p>
           <CodeBlock code={CURL_AUTH} />
 
-          <h3 className={styles.subTitle}>Key types</h3>
+          <h3 className={styles.subTitle}>Tiers</h3>
           <div className={styles.keyTypesGrid}>
             <div className={styles.keyTypeCard}>
               <div className={styles.keyTypeHeader}>
-                <span className={styles.keyTypeLive}>LIVE</span>
-                <code className={styles.keyTypeCode}>pdb_live_*</code>
+                <span className={styles.keyTypeLive}>FREE</span>
+                <code className={styles.keyTypeCode}>pk_free_*</code>
               </div>
-              <p>Production keys. Counts against your monthly quota. Use for deployed apps.</p>
+              <p>Access to core list and detail endpoints. Limited monthly quota.</p>
             </div>
             <div className={styles.keyTypeCard}>
               <div className={styles.keyTypeHeader}>
-                <span className={styles.keyTypeTest}>TEST</span>
-                <code className={styles.keyTypeCode}>pdb_test_*</code>
+                <span className={styles.keyTypeTest}>DEVELOPER</span>
+                <code className={styles.keyTypeCode}>pk_developer_*</code>
               </div>
-              <p>Sandbox keys. No usage charge, returns fixture data. Use for development and CI.</p>
+              <p>Unlocks geo search, stats, and a higher monthly quota.</p>
             </div>
           </div>
 
@@ -261,57 +240,13 @@ export default function DocsPage() {
             ))}
           </div>
 
-          <h3 className={styles.subTitle} id="get-pub-by-id" style={{ marginTop: "2rem" }}>
-            GET /v1/pubs/:id
-          </h3>
-          <p className={styles.sectionText}>
-            Returns the full pub object including amenities, opening hours, beer list, and beer
-            garden details if available.
-          </p>
-
-          <h4 className={styles.fieldGroupTitle}>PATH PARAMETERS</h4>
-          <div className={styles.fieldList}>
-            <div className={styles.fieldRow}>
-              <div className={styles.fieldLeft}>
-                <code className={styles.fieldName}>id</code>
-                <TypeBadge type="string" />
-                <span className={styles.requiredBadge}>required</span>
-              </div>
-              <div className={styles.fieldDesc}>
-                The pub&apos;s unique identifier, e.g.{" "}
-                <code className={styles.inlineCode}>pub_f1a9b</code>
-              </div>
-            </div>
-          </div>
-
-          <h4 className={styles.fieldGroupTitle}>RESPONSE FIELDS</h4>
-          <div className={styles.fieldList}>
-            {RESPONSE_FIELDS.map(({ name, type, description }) => (
-              <div key={name} className={styles.fieldRow}>
-                <div className={styles.fieldLeft}>
-                  <code className={styles.fieldName}>{name}</code>
-                  <TypeBadge type={type} />
-                </div>
-                <div className={styles.fieldDesc}>{description}</div>
-              </div>
-            ))}
-          </div>
-
-          <h3 className={styles.subTitle} style={{ marginTop: "2rem" }}>POST /v1/pubs</h3>
-          <p className={styles.sectionText}>
-            Submit a new pub to the database. Requires a live API key on the Developer tier or
-            above. The pub enters a moderation queue before going live.
-          </p>
-          <h4 className={styles.fieldGroupTitle}>REQUEST BODY</h4>
-          <CodeBlock code={CURL_POST_PUB} />
         </section>
 
         <section id="filtering" className={styles.section}>
           <h2 className={styles.sectionTitle}>Filtering &amp; search</h2>
           <p className={styles.sectionText}>
             Filter pubs by amenities, location, or free-text search. All filters are query
-            parameters on <code className={styles.inlineCode}>GET /v1/pubs</code> and{" "}
-            <code className={styles.inlineCode}>GET /v1/pubs/search</code>.
+            parameters on <code className={styles.inlineCode}>GET /api/v1/pubs</code>.
           </p>
 
           <h3 className={styles.subTitle}>Amenity filters</h3>
@@ -331,27 +266,28 @@ export default function DocsPage() {
           <h2 className={styles.sectionTitle}>Pagination</h2>
           <p className={styles.sectionText}>
             All list endpoints are paginated. Use <code className={styles.inlineCode}>page</code>{" "}
-            and <code className={styles.inlineCode}>per_page</code> query parameters. The{" "}
-            <code className={styles.inlineCode}>meta</code> object in every response includes{" "}
+            and <code className={styles.inlineCode}>limit</code> query parameters. The{" "}
+            <code className={styles.inlineCode}>pagination</code> object in every response includes{" "}
             <code className={styles.inlineCode}>total</code>, <code className={styles.inlineCode}>page</code>,{" "}
-            and <code className={styles.inlineCode}>per_page</code>.
+            <code className={styles.inlineCode}>pages</code>, <code className={styles.inlineCode}>hasNext</code>,{" "}
+            and <code className={styles.inlineCode}>hasPrev</code>.
           </p>
-          <CodeBlock code={`GET /v1/pubs?page=2&per_page=25`} />
+          <CodeBlock code={`GET /pubs?page=2&limit=25`} />
           <p className={styles.sectionText}>
-            Default page size is 50. Maximum is 100. Pages are 1-indexed.
+            Default page size is 50. Pages are 1-indexed.
           </p>
         </section>
 
         <section id="rate-limits" className={styles.section}>
           <h2 className={styles.sectionTitle}>Rate limits</h2>
           <p className={styles.sectionText}>
-            Rate limits are applied per API key, per calendar month. Limits vary by plan.
+            Rate limits are applied per API key across three windows: hourly, daily, and monthly.
           </p>
           <div className={styles.fieldList}>
             {[
-              { plan: "Free", limit: "1,000 requests / month" },
-              { plan: "Developer", limit: "100,000 requests / month" },
-              { plan: "Pro", limit: "Unlimited" },
+              { plan: "Hobby", limit: "20 / hour · 200 / day · 1,000 / month" },
+              { plan: "Developer", limit: "1,000 / hour · 10,000 / day · 100,000 / month" },
+              { plan: "Business", limit: "5,000 / hour · 50,000 / day · 500,000 / month" },
             ].map(({ plan, limit }) => (
               <div key={plan} className={styles.fieldRow}>
                 <div className={styles.fieldLeft}>
@@ -381,7 +317,7 @@ export default function DocsPage() {
               { code: "401", name: "unauthorized", desc: "Missing or invalid API key" },
               { code: "403", name: "forbidden", desc: "Key lacks permission for this action" },
               { code: "404", name: "not_found", desc: "Resource does not exist" },
-              { code: "429", name: "rate_limited", desc: "Monthly quota exceeded" },
+              { code: "429", name: "rate_limited", desc: "Hourly, daily, or monthly quota exceeded" },
               { code: "500", name: "server_error", desc: "Something went wrong on our end" },
             ].map(({ code, name, desc }) => (
               <div key={code} className={styles.fieldRow}>
@@ -395,26 +331,6 @@ export default function DocsPage() {
           </div>
         </section>
 
-        <section id="sdks" className={styles.section}>
-          <h2 className={styles.sectionTitle}>SDKs &amp; libraries</h2>
-          <p className={styles.sectionText}>
-            Official SDKs are in progress. In the meantime, the REST API works with any HTTP
-            client.
-          </p>
-          <div className={styles.sdkList}>
-            {[
-              { lang: "JavaScript / TypeScript", status: "Coming soon", note: "npm install pubdb" },
-              { lang: "Python", status: "Coming soon", note: "pip install pubdb" },
-              { lang: "Go", status: "Coming soon", note: "go get github.com/pubdb/pubdb-go" },
-            ].map(({ lang, status, note }) => (
-              <div key={lang} className={styles.sdkRow}>
-                <div className={styles.sdkLang}>{lang}</div>
-                <span className={styles.sdkStatus}>{status}</span>
-                <code className={styles.sdkNote}>{note}</code>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
     </div>
   );

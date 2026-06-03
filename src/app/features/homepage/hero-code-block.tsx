@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import styles from "./hero-code-block.module.css";
 
 const CODE_EXAMPLES = {
-  curl: `$ curl https://api.pubdb.io/v1/pubs/search \\
+  curl: `$ curl https://hopeful-playfulness-production.up.railway.app/pubs/search \\
   -G --data-urlencode "near=SE1 3XB" \\
       --data-urlencode "hasSundayRoast=true" \\
       -H "Authorization: Bearer $PUBDB_KEY"`,
   node: `const res = await fetch(
-  'https://api.pubdb.io/v1/pubs/search?' +
+  'https://hopeful-playfulness-production.up.railway.app/pubs/search?' +
   new URLSearchParams({
     near: 'SE1 3XB',
     hasSundayRoast: 'true',
@@ -24,7 +24,7 @@ const { data } = await res.json();`,
   python: `import requests
 
 res = requests.get(
-    'https://api.pubdb.io/v1/pubs/search',
+    'https://hopeful-playfulness-production.up.railway.app/pubs/search',
     params={
         'near': 'SE1 3XB',
         'hasSundayRoast': True,
@@ -37,7 +37,7 @@ pubs = res.json()['data']`,
   ruby: `require 'net/http'
 require 'json'
 
-uri = URI('https://api.pubdb.io/v1/pubs/search')
+uri = URI('https://hopeful-playfulness-production.up.railway.app/pubs/search')
 uri.query = URI.encode_www_form(
   near: 'SE1 3XB',
   hasSundayRoast: true

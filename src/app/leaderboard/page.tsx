@@ -308,7 +308,7 @@ export default function LeaderboardPage() {
 
   function handleCopyAsCurl() {
     navigator.clipboard.writeText(
-      'curl "https://api.pubdb.io/v1/contributors/leaderboard" \\\n  -H "Authorization: Bearer $PUBDB_KEY"',
+      'curl "https://hopeful-playfulness-production.up.railway.app/contributors/leaderboard" \\\n  -H "Authorization: Bearer $PUBDB_KEY"',
     );
   }
 
