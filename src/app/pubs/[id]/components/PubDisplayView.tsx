@@ -251,7 +251,7 @@ export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineS
       {/* NOT AVAILABLE HERE section */}
       {inactiveAmenities.length > 0 && (
         <>
-          <p className={styles.sectionLabel} style={{ marginTop: "1.75rem" }}>
+          <p className={`${styles.sectionLabel} ${styles.sectionLabelSpaced}`}>
             NOT AVAILABLE HERE
           </p>
           <div className={styles.inactiveChips}>
@@ -281,7 +281,7 @@ export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineS
       {/* Active amenities edit controls (editors only) */}
       {ce && activeAmenities.size > 0 && (
         <>
-          <p className={styles.sectionLabel} style={{ marginTop: "1.75rem" }}>
+          <p className={`${styles.sectionLabel} ${styles.sectionLabelSpaced}`}>
             AVAILABLE — EDIT
           </p>
           <div className={styles.boolEditGrid}>
