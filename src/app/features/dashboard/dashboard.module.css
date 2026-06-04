@@ -502,6 +502,10 @@
   background: var(--surface-alt);
 }
 
+.menuDropdown button.menuItem {
+  color: var(--text-color);
+}
+
 .menuDropdown button.menuItemDanger {
   color: #dc2626;
 }

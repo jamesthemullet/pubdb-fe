@@ -539,14 +539,24 @@ const Dashboard: React.FC = () => {
                         {isMenuOpen && (
                           <div className={styles.menuDropdown}>
                             {key.tier !== "HOBBY" && key.keyStatus === "ACTIVE" && (
-                              <button
-                                type="button"
-                                className={styles.menuItemDanger}
-                                disabled={cancelling}
-                                onClick={() => { void handleCancelSubscription(); setOpenMenu(null); }}
-                              >
-                                {cancelling ? "Cancelling…" : "Cancel subscription"}
-                              </button>
+                              <>
+                                <button
+                                  type="button"
+                                  className={styles.menuItem}
+                                  disabled={isForgotLoading}
+                                  onClick={() => { void handleForgotApiKey(key.keyPrefix); setOpenMenu(null); }}
+                                >
+                                  Forgot API key
+                                </button>
+                                <button
+                                  type="button"
+                                  className={styles.menuItemDanger}
+                                  disabled={cancelling}
+                                  onClick={() => { void handleCancelSubscription(); setOpenMenu(null); }}
+                                >
+                                  {cancelling ? "Cancelling…" : "Cancel subscription"}
+                                </button>
+                              </>
                             )}
                           </div>
                         )}
