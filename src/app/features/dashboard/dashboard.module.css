@@ -388,23 +388,6 @@
   background: none;
 }
 
-.regenBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  padding: 0.15rem;
-  cursor: pointer;
-  color: var(--text-muted);
-  border-radius: 3px;
-  transition: color 0.1s;
-}
-
-.regenBtn:hover {
-  color: var(--text-color);
-  background: var(--surface-alt);
-}
 
 .keyLastUsed {
   font-size: 0.72rem;
@@ -517,6 +500,10 @@
 
 .menuDropdown button:hover {
   background: var(--surface-alt);
+}
+
+.menuDropdown button.menuItem {
+  color: var(--text-color);
 }
 
 .menuDropdown button.menuItemDanger {
