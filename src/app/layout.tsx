@@ -28,6 +28,12 @@ export const metadata: Metadata = {
     description:
       "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pub DB",
+    description:
+      "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
+  },
 };
 
 export default function RootLayout({
