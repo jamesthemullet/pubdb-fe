@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { type LeaderboardEntry, useLeaderboard } from "@/hooks/useLeaderboard";
 import styles from "./page.module.css";
