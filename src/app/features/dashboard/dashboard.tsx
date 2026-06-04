@@ -42,46 +42,45 @@ type DashboardData = {
   summary: { totalApiKeys: number; totalUsage: number };
 };
 
-// ── Static display data (no analytics endpoint yet) ───────────────────────────
+// TODO: restore request volume chart once API returns time-series data
+// const CHART_BARS = [
+//   2200, 2550, 2300, 2850, 2650,
+//   2300, 1900, 1700, 1450, 1400,
+//   1600, 1800, 1700, 1650, 1800,
+//   2100, 2200, 2050, 1900, 1750,
+//   500,  600,  650,  580,  550,
+//   1100, 1200, 1290, 1380, 3200,
+// ].map((v, i) => ({ id: `c${i}`, v }));
 
-const CHART_BARS = [
-  2200, 2550, 2300, 2850, 2650,
-  2300, 1900, 1700, 1450, 1400,
-  1600, 1800, 1700, 1650, 1800,
-  2100, 2200, 2050, 1900, 1750,
-  500,  600,  650,  580,  550,
-  1100, 1200, 1290, 1380, 3200,
-].map((v, i) => ({ id: `c${i}`, v }));
 
-const SPARKLINE = {
-  requests: [180,210,190,240,220,280,260,300,280,320,290,340,320,380,360,410,390,420,400,440],
-  latency:  [42,40,38,41,37,39,36,38,35,37,34,38,36,39,37,38,36,37,35,38],
-  error:    [3,4,2,5,3,6,4,3,5,4,3,5,4,6,5,4,5,4,5,4],
-  pubs:     [300,320,340,360,350,370,380,360,370,380,370,385,380,390,385,390,385,392,388,389],
-};
-
-const TOP_ENDPOINTS = [
-  { method: "GET",  path: "/v1/pubs",        count: 18922, pct: 100 },
-  { method: "GET",  path: "/v1/pubs/:id",    count: 12041, pct: 64  },
-  { method: "GET",  path: "/v1/pubs/search", count: 6391,  pct: 34  },
-  { method: "GET",  path: "/v1/beers",       count: 2882,  pct: 15  },
-  { method: "POST", path: "/v1/pubs",        count: 162,   pct: 1   },
-];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function sparklinePoints(data: number[], w = 120, h = 32): string {
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-  return data
-    .map((v, i) => {
-      const x = (i / (data.length - 1)) * w;
-      const y = h - 2 - ((v - min) / range) * (h - 4);
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-}
+// TODO: restore sparkline once API returns time-series usage data
+// const SPARKLINE = {
+//   requests: [180,210,190,240,220,280,260,300,280,320,290,340,320,380,360,410,390,420,400,440],
+// };
+//
+// function sparklinePoints(data: number[], w = 120, h = 32): string {
+//   const min = Math.min(...data);
+//   const max = Math.max(...data);
+//   const range = max - min || 1;
+//   return data
+//     .map((v, i) => {
+//       const x = (i / (data.length - 1)) * w;
+//       const y = h - 2 - ((v - min) / range) * (h - 4);
+//       return `${x.toFixed(1)},${y.toFixed(1)}`;
+//     })
+//     .join(" ");
+// }
+//
+// function Sparkline({ data, color }: { data: number[]; color: string }) {
+//   return (
+//     <svg width="120" height="32" aria-hidden="true" className={styles.sparklineSvg}>
+//       <polyline points={sparklinePoints(data)} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+//     </svg>
+//   );
+// }
 
 function fmtRelative(iso: string | null): string {
   if (!iso) return "never";
@@ -94,63 +93,7 @@ function fmtRelative(iso: string | null): string {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function Sparkline({ data, color }: { data: number[]; color: string }) {
-  return (
-    <svg width="120" height="32" aria-hidden="true" className={styles.sparklineSvg}>
-      <polyline
-        points={sparklinePoints(data)}
-        fill="none"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function BarChart() {
-  const W = 900, H = 180, ML = 36, MT = 10, MB = 28;
-  const cW = W - ML, cH = H - MT - MB;
-  const MAX = 3500;
-  const n = CHART_BARS.length;
-  const slotW = cW / n;
-  const bW = Math.max(slotW * 0.72, 6);
-  const gX = (slotW - bW) / 2;
-
-  const bX = (i: number) => ML + i * slotW + gX;
-  const bH = (v: number) => (Math.min(v, MAX) / MAX) * cH;
-  const bY = (v: number) => MT + cH - bH(v);
-  const yPos = (v: number) => MT + cH - (v / MAX) * cH;
-
-  const yLabels = [{ v: 3000, t: "3k" }, { v: 2000, t: "2k" }, { v: 1000, t: "1k" }, { v: 0, t: "0" }];
-  const xLabels = [{ idx: 0, t: "Apr 5" }, { idx: 10, t: "Apr 15" }, { idx: 20, t: "Apr 25" }, { idx: 29, t: "May 5" }];
-
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className={styles.barChartSvg} aria-hidden="true">
-      {yLabels.map(({ v, t }) => (
-        <g key={v}>
-          <line x1={ML} y1={yPos(v)} x2={W} y2={yPos(v)} stroke="#e8e8e4" strokeWidth="1" />
-          <text x={ML - 6} y={yPos(v) + 4} textAnchor="end" fontSize="10" fill="#9ca3af">{t}</text>
-        </g>
-      ))}
-      {CHART_BARS.map(({ id, v }, i) => (
-        <rect
-          key={id}
-          x={bX(i)}
-          y={bY(v)}
-          width={bW}
-          height={bH(v)}
-          fill={i === n - 1 ? "#2563eb" : "#555555"}
-          rx="2"
-        />
-      ))}
-      {xLabels.map(({ idx, t }) => (
-        <text key={t} x={bX(idx) + bW / 2} y={H - 4} textAnchor="middle" fontSize="10" fill="#9ca3af">{t}</text>
-      ))}
-    </svg>
-  );
-}
+// function BarChart() { ... } // TODO: restore with real time-series data
 
 function UsageBar({ pct }: { pct: number }) {
   const fill = pct > 90 ? "#ef4444" : pct > 75 ? "#f59e0b" : "#555555";
@@ -181,9 +124,14 @@ const Dashboard: React.FC = () => {
   const [showForgotKeyModal, setShowForgotKeyModal] = useState(false);
   const [forgotKeyCopyStatus, setForgotKeyCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [chartRange, setChartRange] = useState<"24h" | "7d" | "30d" | "90d">("30d");
+  const [showCreateKeyModal, setShowCreateKeyModal] = useState(false);
+  const [createKeyName, setCreateKeyName] = useState("");
+  const [createKeyLoading, setCreateKeyLoading] = useState(false);
+  const [createKeyError, setCreateKeyError] = useState<string | null>(null);
   const forgotKeyModalRef = useRef<HTMLDivElement>(null);
   const forgotKeyModalTriggerRef = useRef<HTMLElement | null>(null);
+  const createKeyModalRef = useRef<HTMLDivElement>(null);
+  const createKeyModalTriggerRef = useRef<HTMLElement | null>(null);
 
   function toggleEditTypes(pubId: string) {
     setExpandedEdits((prev) => {
@@ -305,6 +253,64 @@ const Dashboard: React.FC = () => {
     forgotKeyModalTriggerRef.current?.focus();
   }
 
+  function openCreateKeyModal() {
+    createKeyModalTriggerRef.current = document.activeElement as HTMLElement;
+    setCreateKeyName("");
+    setCreateKeyError(null);
+    setShowCreateKeyModal(true);
+  }
+
+  function handleCloseCreateKeyModal() {
+    setShowCreateKeyModal(false);
+    setCreateKeyName("");
+    setCreateKeyError(null);
+    createKeyModalTriggerRef.current?.focus();
+  }
+
+  function handleCreateKeyModalKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === "Escape") { handleCloseCreateKeyModal(); return; }
+    if (e.key !== "Tab" || !createKeyModalRef.current) return;
+    const els = Array.from(
+      createKeyModalRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    );
+    const first = els[0], last = els[els.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+  }
+
+  async function handleCreateApiKey(e: React.FormEvent) {
+    e.preventDefault();
+    const name = createKeyName.trim();
+    if (!name) { setCreateKeyError("Key name is required."); return; }
+    try {
+      setCreateKeyLoading(true);
+      setCreateKeyError(null);
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/auth/api-keys`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
+        body: JSON.stringify({ name }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
+      handleCloseCreateKeyModal();
+      if (data.apiKey) {
+        setForgotKeyDetails({ ...data.apiKey });
+        setShowForgotKeyModal(true);
+        setForgotKeyCopyStatus("idle");
+      }
+      // Refresh dashboard data so the new key appears in the list
+      const dashRes = await fetch(`${API_URL}/auth/dashboard`, { headers: buildAuthHeaders(token) });
+      if (dashRes.ok) setDashboardData(await dashRes.json());
+    } catch (err: unknown) {
+      setCreateKeyError(getErrorMessage(err, "Failed to create API key"));
+    } finally {
+      setCreateKeyLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (showForgotKeyModal && forgotKeyDetails) {
       forgotKeyModalTriggerRef.current = document.activeElement as HTMLElement;
@@ -314,6 +320,15 @@ const Dashboard: React.FC = () => {
       focusable?.focus();
     }
   }, [showForgotKeyModal, forgotKeyDetails]);
+
+  useEffect(() => {
+    if (showCreateKeyModal) {
+      const focusable = createKeyModalRef.current?.querySelector<HTMLElement>(
+        'input:not([disabled]), button:not([disabled])'
+      );
+      focusable?.focus();
+    }
+  }, [showCreateKeyModal]);
 
   function handleForgotKeyModalKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key === "Escape") { handleCloseForgotKeyModal(); return; }
@@ -412,18 +427,7 @@ const Dashboard: React.FC = () => {
             <p className={styles.pageSubtitle}>Track request volume, manage keys, and review activity across your projects.</p>
           </div>
           <div className={styles.pageActions}>
-            <a href="https://status.pubdb.io" className={styles.btnOutline} target="_blank" rel="noopener noreferrer">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M7 1h4v4M11 1L5 7M2 3h3M2 3v7h7V7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Status page
-            </a>
-            <button type="button" className={styles.btnPrimary}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M6 1v10M1 6h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              Create API key
-            </button>
+            {/* TODO: wire Create API key button to POST /auth/api-keys once endpoint is confirmed */}
           </div>
         </div>
 
@@ -450,107 +454,19 @@ const Dashboard: React.FC = () => {
                 </svg>
                 REQUESTS · 30D
               </span>
-              <Sparkline data={SPARKLINE.requests} color="#3b82f6" />
             </div>
             <div className={styles.statValue}>
-              {totalUsed > 0 ? totalUsed.toLocaleString() : "42,318"}
+              {totalUsed.toLocaleString()}
               <span className={styles.statSuffix}>/{totalLimit > 0 ? `${Math.round(totalLimit / 1000)}k` : "100k"}</span>
             </div>
-            <div className={`${styles.statTrend} ${styles.trendGood}`}>
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              12.4% vs prev
-            </div>
+            {/* TODO: show % vs prev period once API returns historical usage data */}
           </div>
 
           {/* Latency */}
-          <div className={styles.statCard}>
-            <div className={styles.statHeader}>
-              <span className={styles.statLabel}>
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true" className={styles.statIcon}>
-                  <path d="M1 6c1.5-3 8.5-3 10 0s-8.5 3-10 0z" stroke="#6b7280" strokeWidth="1.2"/>
-                  <circle cx="6" cy="6" r="1.2" fill="#6b7280"/>
-                </svg>
-                P95 LATENCY
-              </span>
-              <Sparkline data={SPARKLINE.latency} color="#3b82f6" />
-            </div>
-            <div className={styles.statValue}>
-              38
-              <span className={styles.statSuffix}> ms</span>
-            </div>
-            <div className={`${styles.statTrend} ${styles.trendGood}`}>
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M5 2v6M2 5l3 3 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              4ms faster
-            </div>
-          </div>
-
-          {/* Error rate */}
-          <div className={styles.statCard}>
-            <div className={styles.statHeader}>
-              <span className={styles.statLabel}>
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true" className={styles.statIcon}>
-                  <circle cx="6" cy="6" r="5" stroke="#6b7280" strokeWidth="1.2"/>
-                  <path d="M4 4l4 4M8 4l-4 4" stroke="#6b7280" strokeWidth="1.2" strokeLinecap="round"/>
-                </svg>
-                ERROR RATE
-              </span>
-              <Sparkline data={SPARKLINE.error} color="#ef4444" />
-            </div>
-            <div className={styles.statValue}>
-              0.04
-              <span className={styles.statSuffix}>%</span>
-            </div>
-            <div className={`${styles.statTrend} ${styles.trendBad}`}>
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              0.01pp
-            </div>
-          </div>
-
-          {/* Pubs returned */}
-          <div className={styles.statCard}>
-            <div className={styles.statHeader}>
-              <span className={styles.statLabel}>
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true" className={styles.statIcon}>
-                  <rect x="1" y="1" width="4" height="4" rx="0.8" stroke="#6b7280" strokeWidth="1.2"/>
-                  <rect x="7" y="1" width="4" height="4" rx="0.8" stroke="#6b7280" strokeWidth="1.2"/>
-                  <rect x="1" y="7" width="4" height="4" rx="0.8" stroke="#6b7280" strokeWidth="1.2"/>
-                  <rect x="7" y="7" width="4" height="4" rx="0.8" stroke="#6b7280" strokeWidth="1.2"/>
-                </svg>
-                PUBS RETURNED
-              </span>
-              <Sparkline data={SPARKLINE.pubs} color="#22c55e" />
-            </div>
-            <div className={styles.statValue}>
-              389
-              <span className={styles.statSuffix}> k</span>
-            </div>
-            <div className={`${styles.statTrend} ${styles.trendGood}`}>
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M5 8V2M2 5l3-3 3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              22% vs prev
-            </div>
-          </div>
+          {/* TODO: Pubs returned stat card — show once API returns total pub records served */}
         </div>
 
-        {/* Request volume chart */}
-        <div className={styles.chartSection}>
-          <div className={styles.chartHeader}>
-            <span className={styles.chartTitle}>Request volume</span>
-            <span className={styles.chartPeriod}>last 30 days</span>
-            <div className={styles.rangeButtons}>
-              {(["24h", "7d", "30d", "90d"] as const).map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  className={chartRange === r ? styles.rangeActive : styles.rangeBtn}
-                  onClick={() => setChartRange(r)}
-                >
-                  {r}
-                </button>
-              ))}
-            </div>
-          </div>
-          <BarChart />
-        </div>
+        {/* TODO: Request volume chart — restore once API returns time-series request data */}
 
         {/* Bottom row: keys + top endpoints */}
         <div className={styles.bottomRow}>
@@ -562,9 +478,7 @@ const Dashboard: React.FC = () => {
                 <span className={styles.keysPanelTitle}>API keys</span>
                 <span className={styles.activeCountBadge}>{activeKeyCount} active</span>
               </div>
-              <button type="button" className={styles.newKeyBtn}>
-                + New key
-              </button>
+              {/* TODO: wire + New key button once Create API key is confirmed working */}
             </div>
 
             {cancelError && <p className={styles.inlineError}>Error cancelling subscription: {cancelError}</p>}
@@ -585,20 +499,16 @@ const Dashboard: React.FC = () => {
                       <span className={styles.keyName}>{key.name}</span>
                       <div className={styles.keyMeta}>
                         <code className={styles.keyPrefix}>{key.keyPrefix} ····</code>
-                        <button
-                          type="button"
-                          className={styles.regenBtn}
-                          title="Regenerate key"
-                          disabled={isForgotLoading}
-                          onClick={() => handleForgotApiKey(key.keyPrefix)}
-                          aria-label={`Regenerate key for ${key.name}`}
-                        >
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                            <path d="M1 6a5 5 0 1 0 1.2-3.2M1 2v3h3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </button>
                         <span className={styles.keyLastUsed}>· last used {fmtRelative(key.lastUsed)}</span>
                       </div>
+                      <button
+                        type="button"
+                        className={styles.btnOutline}
+                        disabled={isForgotLoading}
+                        onClick={() => handleForgotApiKey(key.keyPrefix)}
+                      >
+                        {isForgotLoading ? "Regenerating…" : "Regenerate API key"}
+                      </button>
                       {forgotKeyTarget === key.keyPrefix && (
                         <>
                           {forgotKeyError && <p className={styles.inlineError}>{forgotKeyError}</p>}
@@ -628,13 +538,6 @@ const Dashboard: React.FC = () => {
                         </button>
                         {isMenuOpen && (
                           <div className={styles.menuDropdown}>
-                            <button
-                              type="button"
-                              onClick={() => { void handleForgotApiKey(key.keyPrefix); setOpenMenu(null); }}
-                              disabled={isForgotLoading}
-                            >
-                              {isForgotLoading ? "Sending…" : "Forgot API key"}
-                            </button>
                             {key.tier !== "HOBBY" && key.keyStatus === "ACTIVE" && (
                               <button
                                 type="button"
@@ -655,25 +558,6 @@ const Dashboard: React.FC = () => {
             )}
           </div>
 
-          {/* Top endpoints panel */}
-          <div className={styles.endpointsPanel}>
-            <div className={styles.endpointsPanelHeader}>
-              <span className={styles.endpointsTitle}>Top endpoints</span>
-              <span className={styles.endpointsPeriod}>last 7d</span>
-            </div>
-            {TOP_ENDPOINTS.map((ep) => (
-              <div key={`${ep.method}-${ep.path}`} className={styles.endpointRow}>
-                <div className={styles.endpointLabel}>
-                  <span className={styles.endpointMethod}>{ep.method}</span>
-                  <code className={styles.endpointPath}>{ep.path}</code>
-                </div>
-                <div className={styles.endpointBarWrap}>
-                  <div className={styles.endpointBar} style={{ width: `${ep.pct}%` }} />
-                </div>
-                <span className={styles.endpointCount}>{ep.count.toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Contributions section */}
