@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Typography from "@/app/components/typography/typography";
 import styles from "./style-guide.module.css";
+
+export const metadata: Metadata = {
+  title: "Style Guide",
+  description: "Pub DB design system style guide.",
+  robots: { index: false },
+};
 
 const palette = [
   { name: "Background",       variable: "--background",       swatchClass: styles.swatchBackground },

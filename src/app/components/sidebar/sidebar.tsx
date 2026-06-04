@@ -44,6 +44,15 @@ export default function Sidebar() {
   const [planData, setPlanData] = useState<PlanData | null>(null);
 
   useEffect(() => {
+    if (!menuOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
+
+  useEffect(() => {
     if (!user) { setPlanData(null); return; }
     const token = localStorage.getItem("token");
     fetch(`${API_URL}/auth/dashboard`, { headers: buildAuthHeaders(token) })
