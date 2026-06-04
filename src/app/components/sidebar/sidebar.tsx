@@ -32,7 +32,8 @@ const WORKSPACE_LINKS = [
 const ACCOUNT_LINKS = [
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/billing", label: "Billing" },
-  { href: "/settings", label: "Settings" },
+  // TODO: re-enable once settings page is wired to real API
+  // { href: "/settings", label: "Settings" },
 ];
 
 export default function Sidebar() {
