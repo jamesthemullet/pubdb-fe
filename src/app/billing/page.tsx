@@ -505,9 +505,6 @@ export default function BillingPage() {
         <div className={styles.card}>
           <div className={styles.bdHeader}>
             <h2 className={styles.sectionTitle}>Billing details</h2>
-            <button type="button" className={styles.pmUpdateBtn}>
-              <EditIcon /> Edit
-            </button>
           </div>
           <div className={styles.bdFields}>
             {billingFields.length > 0 ? billingFields.map((field) => (
@@ -575,20 +572,6 @@ function ExternalIcon() {
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
       <path
         d="M10 6.5V10a1 1 0 01-1 1H2a1 1 0 01-1-1V3a1 1 0 011-1h3.5M8 1h3m0 0v3m0-3L5 7"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function EditIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-      <path
-        d="M8.5 1.5l2 2L4 10H2v-2L8.5 1.5z"
         stroke="currentColor"
         strokeWidth="1.2"
         strokeLinecap="round"
