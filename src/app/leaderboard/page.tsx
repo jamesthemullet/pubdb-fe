@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { type LeaderboardEntry, useLeaderboard } from "@/hooks/useLeaderboard";
 import styles from "./page.module.css";
@@ -35,61 +36,82 @@ interface MockProfile {
 
 // ── Static decorative data keyed by rank ──────────────────────────────────────
 
-const MOCK_PROFILES: Record<number, MockProfile> = {
-  1: {
-    handle: "@jamesthemonkeh",
-    location: "London",
-    joined: "2024-01",
-    badges: [{ label: "Founder", variant: "amber" }],
-    streak: 14,
-    avatarColor: "#2563eb",
-    activity: [5, 8, 6, 10, 9, 12, 11],
-  },
-  2: {
-    handle: "@sienna_p",
-    location: "Edinburgh",
-    joined: "2023-08",
-    badges: [
-      { label: "Verified", variant: "green" },
-      { label: "Garden expert", variant: "green" },
-    ],
-    streak: 31,
-    avatarColor: "#2563eb",
-    activity: [18, 24, 20, 30, 28, 35, 32],
-  },
-  3: {
-    handle: "@alex.k",
-    location: "Manchester",
-    joined: "2023-09",
-    badges: [{ label: "Beer nerd", variant: "purple" }],
-    streak: 22,
-    avatarColor: "#10b981",
-    activity: [15, 20, 18, 25, 22, 28, 26],
-  },
-  4: {
-    handle: "@imo",
-    location: "Bristol",
-    joined: "2024-01",
-    badges: [{ label: "Verified", variant: "green" }],
-    streak: 18,
-    avatarColor: "#6366f1",
-    activity: [12, 18, 14, 22, 20, 25, 22],
-  },
-  5: {
-    handle: "@danob",
-    location: "Dublin",
-    joined: "2024-02",
-    badges: [{ label: "Roast rater", variant: "orange" }],
-    streak: 12,
-    avatarColor: "#f97316",
-    activity: [10, 15, 12, 18, 16, 20, 19],
-  },
-};
+// const MOCK_PROFILES: Record<number, MockProfile> = {
+//   1: {
+//     handle: "@jamesthemonkeh",
+//     location: "London",
+//     joined: "2024-01",
+//     badges: [{ label: "Founder", variant: "amber" }],
+//     streak: 14,
+//     avatarColor: "#2563eb",
+//     activity: [5, 8, 6, 10, 9, 12, 11],
+//   },
+//   2: {
+//     handle: "@sienna_p",
+//     location: "Edinburgh",
+//     joined: "2023-08",
+//     badges: [
+//       { label: "Verified", variant: "green" },
+//       { label: "Garden expert", variant: "green" },
+//     ],
+//     streak: 31,
+//     avatarColor: "#2563eb",
+//     activity: [18, 24, 20, 30, 28, 35, 32],
+//   },
+//   3: {
+//     handle: "@alex.k",
+//     location: "Manchester",
+//     joined: "2023-09",
+//     badges: [{ label: "Beer nerd", variant: "purple" }],
+//     streak: 22,
+//     avatarColor: "#10b981",
+//     activity: [15, 20, 18, 25, 22, 28, 26],
+//   },
+//   4: {
+//     handle: "@imo",
+//     location: "Bristol",
+//     joined: "2024-01",
+//     badges: [{ label: "Verified", variant: "green" }],
+//     streak: 18,
+//     avatarColor: "#6366f1",
+//     activity: [12, 18, 14, 22, 20, 25, 22],
+//   },
+//   5: {
+//     handle: "@danob",
+//     location: "Dublin",
+//     joined: "2024-02",
+//     badges: [{ label: "Roast rater", variant: "orange" }],
+//     streak: 12,
+//     avatarColor: "#f97316",
+//     activity: [10, 15, 12, 18, 16, 20, 19],
+//   },
+// };
 
 const CLIMBING_FASTEST = [
-  { initials: "IR", color: "#6366f1", name: "Imogen Reid", from: 22, to: 4, gain: 18 },
-  { initials: "TL", color: "#14b8a6", name: "Tomás Linhart", from: 19, to: 8, gain: 11 },
-  { initials: "AD", color: "#f97316", name: "Aoife Doyle", from: 18, to: 11, gain: 7 },
+  {
+    initials: "IR",
+    color: "#6366f1",
+    name: "Imogen Reid",
+    from: 22,
+    to: 4,
+    gain: 18,
+  },
+  {
+    initials: "TL",
+    color: "#14b8a6",
+    name: "Tomás Linhart",
+    from: 19,
+    to: 8,
+    gain: 11,
+  },
+  {
+    initials: "AD",
+    color: "#f97316",
+    name: "Aoife Doyle",
+    from: 18,
+    to: 11,
+    gain: 7,
+  },
 ];
 
 const TOP_THIS_WEEK = [
@@ -126,19 +148,20 @@ function getInitials(entry: LeaderboardEntry): string {
     : entry.username.slice(0, 2).toUpperCase();
 }
 
-function getMock(rank: number): MockProfile {
-  return (
-    MOCK_PROFILES[rank] ?? {
-      handle: `@user${rank}`,
-      location: "UK",
-      joined: "2024-06",
-      badges: [],
-      streak: 0,
-      avatarColor: "#64748b",
-      activity: [3, 5, 4, 6, 5, 7, 6],
-    }
-  );
-}
+// TODO: remove getMock entirely once the API returns avatar, streak, handle, location, badges, and activity
+// function getMock(rank: number): MockProfile {
+//   return (
+//     MOCK_PROFILES[rank] ?? {
+//       handle: `@user${rank}`,
+//       location: "UK",
+//       joined: "2024-06",
+//       badges: [],
+//       streak: 0,
+//       avatarColor: "#64748b",
+//       activity: [3, 5, 4, 6, 5, 7, 6],
+//     }
+//   );
+// }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -186,27 +209,39 @@ function PodiumCard({
   elevated?: boolean;
   isYou?: boolean;
 }) {
-  const mock = getMock(entry.rank);
   const medal = MEDAL[position];
   return (
-    <div className={`${styles.podiumCard} ${elevated ? styles.podiumCardElevated : ""}`}>
-      <div className={styles.podiumMedal} style={{ background: medal.bg, color: medal.text }}>
+    <div
+      className={`${styles.podiumCard} ${
+        elevated ? styles.podiumCardElevated : ""
+      }`}
+    >
+      <div
+        className={styles.podiumMedal}
+        style={{ background: medal.bg, color: medal.text }}
+      >
         {position}
       </div>
       <div className={styles.podiumAvatarWrap}>
-        <span className={styles.podiumAvatar} style={{ background: mock.avatarColor }}>
-          {getInitials(entry)}
-        </span>
+        {/* TODO: avatarColor — needs real avatar/colour from API */}
+        <span className={styles.podiumAvatar}>{getInitials(entry)}</span>
+        {/* TODO: streak — needs real streak data from API
         {mock.streak > 0 && (
           <span className={styles.podiumStreak}>🔥 {mock.streak}</span>
         )}
+        */}
       </div>
       <p className={styles.podiumName}>
-        {isYou ? `You (${entry.displayName || entry.username})` : (entry.displayName || entry.username)}
+        {isYou
+          ? `You (${entry.displayName || entry.username})`
+          : entry.displayName || entry.username}
       </p>
+      {/* TODO: handle + location — needs real user profile data from API
       <p className={styles.podiumMeta}>
         {mock.handle} · {mock.location}
       </p>
+      */}
+      {/* TODO: badges — needs real badge data from API
       {mock.badges.length > 0 && (
         <div className={styles.podiumBadges}>
           {mock.badges.map((b) => (
@@ -216,13 +251,16 @@ function PodiumCard({
           ))}
         </div>
       )}
+      */}
       <div className={styles.podiumStats}>
         <div className={styles.podiumStat}>
           <span className={styles.podiumStatNum}>{entry.totalAdded}</span>
           <span className={styles.podiumStatLabel}>ADDED</span>
         </div>
         <div className={styles.podiumStat}>
-          <span className={styles.podiumStatNum}>{entry.totalEdits.toLocaleString()}</span>
+          <span className={styles.podiumStatNum}>
+            {entry.totalEdits.toLocaleString()}
+          </span>
           <span className={styles.podiumStatLabel}>EDITS</span>
         </div>
         <div className={styles.podiumStat}>
@@ -236,21 +274,29 @@ function PodiumCard({
   );
 }
 
-function YourRankBanner({ entry }: { entry: LeaderboardEntry }) {
-  const mock = getMock(entry.rank);
+function YourRankBanner({
+  entry,
+  onViewProfile,
+}: {
+  entry: LeaderboardEntry;
+  onViewProfile: () => void;
+}) {
   return (
     <div className={styles.yourRankBanner}>
       <span className={styles.yourRankLabel}>YOUR RANK</span>
-      <span className={styles.yourRankAvatar} style={{ background: mock.avatarColor }}>
+      {/* TODO: avatarColor — needs real avatar/colour from API */}
+      <span className={styles.yourRankAvatar}>
         {getInitials(entry)}
       </span>
       <div className={styles.yourRankInfo}>
         <span className={styles.yourRankName}>
           You ({entry.displayName || entry.username})
         </span>
+        {/* TODO: handle + location — needs real user profile data from API
         <span className={styles.yourRankMeta}>
           {mock.handle} · {mock.location}
         </span>
+        */}
       </div>
       <div className={styles.yourRankStats}>
         <div className={styles.yourRankStat}>
@@ -261,16 +307,24 @@ function YourRankBanner({ entry }: { entry: LeaderboardEntry }) {
           <span className={styles.yourRankStatNum}>{entry.totalEdits}</span>
           <span className={styles.yourRankStatLabel}>EDITS</span>
         </div>
+        {/* TODO: streak — needs real streak data from API
         <div className={styles.yourRankStat}>
           <span className={styles.yourRankStatNum}>🔥 {mock.streak}</span>
           <span className={styles.yourRankStatLabel}>DAY STREAK</span>
         </div>
+        */}
         <div className={styles.yourRankStat}>
-          <span className={styles.yourRankStatNum}>{entry.totalContributions}</span>
+          <span className={styles.yourRankStatNum}>
+            {entry.totalContributions}
+          </span>
           <span className={styles.yourRankStatLabel}>TOTAL</span>
         </div>
       </div>
-      <button type="button" className={styles.viewProfileBtn}>
+      <button
+        type="button"
+        className={styles.viewProfileBtn}
+        onClick={onViewProfile}
+      >
         View profile →
       </button>
     </div>
@@ -280,9 +334,12 @@ function YourRankBanner({ entry }: { entry: LeaderboardEntry }) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function LeaderboardPage() {
-  const { leaderboard, leaderboardLoading, leaderboardError } = useLeaderboard();
+  const { leaderboard, leaderboardLoading, leaderboardError } =
+    useLeaderboard();
   const { user } = useAuth();
+  const router = useRouter();
   const [period, setPeriod] = useState<TimePeriod>("30d");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const entries = leaderboard?.leaderboard ?? [];
 
@@ -291,26 +348,42 @@ export default function LeaderboardPage() {
   const yourEntry = entries.find(
     (e) =>
       e.username.toLowerCase() === emailPrefix ||
-      nameInitials(e.displayName ?? "").toLowerCase() === emailPrefix,
+      nameInitials(e.displayName ?? "").toLowerCase() === emailPrefix
   );
 
   // Podium only when 3+ entries exist; arranged as 2nd–1st–3rd
   const hasPodium = entries.length >= 3;
   const top3 = hasPodium
-    ? (entries.slice(0, 3) as [LeaderboardEntry, LeaderboardEntry, LeaderboardEntry])
+    ? (entries.slice(0, 3) as [
+        LeaderboardEntry,
+        LeaderboardEntry,
+        LeaderboardEntry
+      ])
     : null;
 
   const periodLabel =
-    period === "7d" ? "last 7d"
-    : period === "30d" ? "last 30d"
-    : period === "90d" ? "last 90d"
-    : "all time";
+    period === "7d"
+      ? "last 7d"
+      : period === "30d"
+      ? "last 30d"
+      : period === "90d"
+      ? "last 90d"
+      : "all time";
 
-  function handleCopyAsCurl() {
-    navigator.clipboard.writeText(
-      'curl "https://hopeful-playfulness-production.up.railway.app/contributors/leaderboard" \\\n  -H "Authorization: Bearer $PUBDB_KEY"',
-    );
+  async function handleShare() {
+    const url = window.location.href;
+    if (navigator.share) {
+      await navigator.share({ title: "Contributor leaderboard – Pub DB", url });
+    } else {
+      await navigator.clipboard.writeText(url);
+    }
   }
+
+  const sortedEntries = [...entries].sort((a, b) =>
+    sortDir === "desc"
+      ? b.totalContributions - a.totalContributions
+      : a.totalContributions - b.totalContributions
+  );
 
   return (
     <div className={styles.page}>
@@ -322,15 +395,16 @@ export default function LeaderboardPage() {
             <span className={styles.endpointBadge}>GET /v1/leaderboard</span>
           </div>
           <p className={styles.description}>
-            The people keeping the dataset alive. Ranked by total contributions — new pubs
-            added carry more weight than edits.
+            The people keeping the dataset alive. Ranked by total contributions
+            — new pubs added carry more weight than edits.
           </p>
         </div>
         <div className={styles.headerActions}>
-          <button type="button" className={styles.actionBtn} onClick={handleCopyAsCurl}>
-            <CopyIcon /> Copy as cURL
-          </button>
-          <button type="button" className={styles.actionBtn}>
+          <button
+            type="button"
+            className={styles.actionBtn}
+            onClick={handleShare}
+          >
             <ShareIcon /> Share
           </button>
         </div>
@@ -339,43 +413,54 @@ export default function LeaderboardPage() {
       {/* Filter bar */}
       <div className={styles.filterBar}>
         <div className={styles.filterLeft}>
+          {/* TODO: time period filter — needs ?period= support on the leaderboard endpoint
           <div className={styles.timePills}>
             {TIME_PERIODS.map(({ id, label }) => (
               <button
                 key={id}
                 type="button"
-                className={`${styles.timePill} ${period === id ? styles.timePillActive : ""}`}
+                className={`${styles.timePill} ${
+                  period === id ? styles.timePillActive : ""
+                }`}
                 onClick={() => setPeriod(id)}
               >
                 {label}
               </button>
             ))}
           </div>
-          <select className={styles.regionSelect} aria-label="Filter by region">
-            <option>All regions</option>
-            <option>UK</option>
-            <option>Ireland</option>
-            <option>Europe</option>
-          </select>
+          */}
         </div>
         <div className={styles.filterMeta}>
           <span className={styles.snapshotDot} />
           <span>
             {leaderboard?.generatedAt
-              ? `Snapshot ${new Date(leaderboard.generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+              ? `Snapshot ${new Date(
+                  leaderboard.generatedAt
+                ).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}`
               : "Snapshot …"}
           </span>
           <span className={styles.metaDivider}>·</span>
           <span>
-            {entries.length > 0 ? `${entries.length.toLocaleString()} contributor${entries.length !== 1 ? "s" : ""}` : "—"}
+            {entries.length > 0
+              ? `${entries.length.toLocaleString()} contributor${
+                  entries.length !== 1 ? "s" : ""
+                }`
+              : "—"}
           </span>
         </div>
       </div>
 
       {/* Loading / error */}
-      {leaderboardLoading && <div className={styles.loading}>Loading leaderboard…</div>}
+      {leaderboardLoading && (
+        <div className={styles.loading}>Loading leaderboard…</div>
+      )}
       {leaderboardError && (
-        <div className={styles.errorMsg}>Error loading leaderboard: {leaderboardError}</div>
+        <div className={styles.errorMsg}>
+          Error loading leaderboard: {leaderboardError}
+        </div>
       )}
 
       {!leaderboardLoading && !leaderboardError && entries.length === 0 && (
@@ -387,14 +472,32 @@ export default function LeaderboardPage() {
           {/* Podium */}
           {top3 && (
             <div className={styles.podiumSection}>
-              <PodiumCard entry={top3[1]} position={2} isYou={yourEntry?.userId === top3[1].userId} />
-              <PodiumCard entry={top3[0]} position={1} elevated isYou={yourEntry?.userId === top3[0].userId} />
-              <PodiumCard entry={top3[2]} position={3} isYou={yourEntry?.userId === top3[2].userId} />
+              <PodiumCard
+                entry={top3[1]}
+                position={2}
+                isYou={yourEntry?.userId === top3[1].userId}
+              />
+              <PodiumCard
+                entry={top3[0]}
+                position={1}
+                elevated
+                isYou={yourEntry?.userId === top3[0].userId}
+              />
+              <PodiumCard
+                entry={top3[2]}
+                position={3}
+                isYou={yourEntry?.userId === top3[2].userId}
+              />
             </div>
           )}
 
           {/* Your rank banner */}
-          {yourEntry && <YourRankBanner entry={yourEntry} />}
+          {yourEntry && (
+            <YourRankBanner
+              entry={yourEntry}
+              onViewProfile={() => router.push("/profile")}
+            />
+          )}
 
           {/* Full ranking table + sidebar */}
           <div className={styles.mainBody}>
@@ -404,8 +507,14 @@ export default function LeaderboardPage() {
                   <span className={styles.tableTitle}>Full ranking</span>
                   <span className={styles.tablePeriodLabel}>{periodLabel}</span>
                 </div>
-                <button type="button" className={styles.sortBtn}>
-                  Total contributions ↓
+                <button
+                  type="button"
+                  className={styles.sortBtn}
+                  onClick={() =>
+                    setSortDir((d) => (d === "desc" ? "asc" : "desc"))
+                  }
+                >
+                  Total contributions {sortDir === "desc" ? "↓" : "↑"}
                 </button>
               </div>
               <table className={styles.table}>
@@ -420,30 +529,37 @@ export default function LeaderboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {entries.map((entry) => {
-                    const mock = getMock(entry.rank);
+                  {sortedEntries.map((entry) => {
                     const isYou = yourEntry?.userId === entry.userId;
                     return (
-                      <tr key={entry.userId} className={isYou ? styles.yourRow : undefined}>
+                      <tr
+                        key={entry.userId}
+                        className={isYou ? styles.yourRow : undefined}
+                      >
                         <td className={styles.colRank}>{entry.rank}</td>
                         <td className={styles.colContributor}>
                           <div className={styles.contributorCell}>
-                            <span
-                              className={styles.rowAvatar}
-                              style={{ background: mock.avatarColor }}
-                            >
+                            {/* TODO: avatarColor — needs real avatar/colour from API */}
+                            <span className={styles.rowAvatar}>
                               {getInitials(entry)}
                             </span>
                             <div className={styles.contributorInfo}>
                               <div className={styles.contributorNameRow}>
                                 <span className={styles.contributorName}>
                                   {isYou
-                                    ? `You (${entry.displayName || entry.username})`
-                                    : (entry.displayName || entry.username)}
+                                    ? `You (${
+                                        entry.displayName || entry.username
+                                      })`
+                                    : entry.displayName || entry.username}
                                 </span>
+                                {/* TODO: streak — needs real streak data from API
                                 {mock.streak > 0 && (
-                                  <span className={styles.streakInline}>🔥 {mock.streak}</span>
+                                  <span className={styles.streakInline}>
+                                    🔥 {mock.streak}
+                                  </span>
                                 )}
+                                */}
+                                {/* TODO: badges — needs real badge data from API
                                 {mock.badges.map((b) => (
                                   <span
                                     key={b.label}
@@ -453,18 +569,24 @@ export default function LeaderboardPage() {
                                     {b.label}
                                   </span>
                                 ))}
+                                */}
                               </div>
+                              {/* TODO: handle, location, joined — needs real user profile data from API
                               <div className={styles.contributorMeta}>
-                                {mock.handle} · {mock.location} · joined {mock.joined}
+                                {mock.handle} · {mock.location} · joined{" "}
+                                {mock.joined}
                               </div>
+                              */}
                             </div>
                           </div>
                         </td>
                         <td className={styles.colNum}>{entry.totalAdded}</td>
                         <td className={styles.colNum}>{entry.totalEdits}</td>
+                        {/* TODO: activity sparkline — needs real per-user activity data from API
                         <td className={styles.colActivity}>
                           <Sparkline data={mock.activity} />
                         </td>
+                        */}
                         <td className={`${styles.colNum} ${styles.totalCell}`}>
                           {entry.totalContributions.toLocaleString()}
                         </td>
@@ -476,7 +598,7 @@ export default function LeaderboardPage() {
             </div>
 
             <div className={styles.sidebar}>
-              {/* Climbing fastest */}
+              {/* TODO: "Climbing fastest" panel — needs previous-period rank data from the API
               <div className={styles.sidebarPanel}>
                 <div className={styles.sidebarPanelHeader}>
                   <span className={styles.sidebarPanelTitle}>Climbing fastest</span>
@@ -495,8 +617,9 @@ export default function LeaderboardPage() {
                   </div>
                 ))}
               </div>
+              */}
 
-              {/* Top this week */}
+              {/* TODO: "Top this week" panel — needs a ?period=7d filter on the leaderboard endpoint
               <div className={styles.sidebarPanel}>
                 <div className={styles.sidebarPanelHeader}>
                   <span className={styles.sidebarPanelTitle}>Top this week</span>
@@ -516,8 +639,9 @@ export default function LeaderboardPage() {
                   </div>
                 ))}
               </div>
+              */}
 
-              {/* Earn badges */}
+              {/* TODO: "Earn badges" panel — needs per-user badge progress from the API
               <div className={styles.sidebarPanel}>
                 <div className={styles.sidebarPanelHeader}>
                   <span className={styles.sidebarPanelTitle}>Earn badges</span>
@@ -542,6 +666,7 @@ export default function LeaderboardPage() {
                   </div>
                 ))}
               </div>
+              */}
             </div>
           </div>
         </>
@@ -552,18 +677,15 @@ export default function LeaderboardPage() {
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
-function CopyIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <rect x="1.5" y="3.5" width="8" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M4.5 2H11a1 1 0 011 1v7.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function ShareIcon() {
   return (
-    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 14 14"
+      fill="none"
+      aria-hidden="true"
+    >
       <path
         d="M9.5 1L13 4.5M13 4.5L9.5 8M13 4.5H5a3 3 0 000 6h1"
         stroke="currentColor"
