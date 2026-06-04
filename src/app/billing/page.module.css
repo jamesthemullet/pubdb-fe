@@ -202,6 +202,24 @@
   text-decoration: underline;
 }
 
+.cancelBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.cancelSuccess {
+  font-size: 0.8125rem;
+  color: #10b981;
+  margin: 0.25rem 0 0;
+}
+
+.cancelError {
+  font-size: 0.8125rem;
+  color: var(--color-error, #ef4444);
+  margin: 0.25rem 0 0;
+}
+
 /* ── Usage meters ── */
 .usageGrid {
   display: grid;
@@ -396,13 +414,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.25rem 1rem;
+  padding: 1.25rem 1.25rem 0.75rem;
 }
 
 .pmTitle {
   font-size: 0.9375rem;
   font-weight: 700;
   color: var(--text-color);
+}
+
+.pmPortalNote {
+  padding: 0 1.25rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.pmPortalBtnWrap {
+  padding: 0 1.25rem 1.25rem;
+  display: flex;
+  justify-content: center;
 }
 
 .pmUpdateBtn {
@@ -617,6 +648,10 @@
 }
 
 /* ── Sections (full-width below the two-col body) ── */
+.pricingSection {
+  padding: 0 2rem 1.5rem;
+}
+
 .section {
   margin: 0 2rem 1.5rem;
   background: var(--surface);
