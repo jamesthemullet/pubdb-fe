@@ -133,7 +133,7 @@
 .termsLink {
   text-decoration: underline;
   text-underline-offset: 2px;
-  cursor: default;
+  cursor: pointer;
 }
 
 .errorBox {

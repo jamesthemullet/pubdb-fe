@@ -161,8 +161,8 @@ export default function AuthGate({ context, onLogin }: AuthGateProps) {
         {mode === "register" && (
           <p className={styles.termsText}>
             By creating an account you agree to our{" "}
-            <span className={styles.termsLink}>Terms of Service</span>{" "}
-            and <span className={styles.termsLink}>Privacy Policy</span>.
+            <Link href="/terms" className={styles.termsLink}>Terms of Service</Link>{" "}
+            and <Link href="/privacy" className={styles.termsLink}>Privacy Policy</Link>.
           </p>
         )}
       </form>
