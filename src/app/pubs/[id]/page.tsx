@@ -295,9 +295,9 @@ export default function PubPage() {
 
   const displayId = pubDisplayId(pub.id);
   const activeAmenities = PUB_AMENITY_FIELDS.filter(({ key }) => pub[key]);
-  const curlCode = `# Fetch this pub\ncurl https://hopeful-playfulness-production.up.railway.app/pubs/${displayId} \\\n     -H "Authorization: Bearer $PUBDB_KEY"`;
-  const nodeCode = `const res = await fetch(\n  'https://hopeful-playfulness-production.up.railway.app/pubs/${displayId}',\n  { headers: { Authorization: \`Bearer \${process.env.PUBDB_KEY}\` } }\n);\nconst pub = await res.json();`;
-  const pythonCode = `import requests\nres = requests.get(\n  f'https://hopeful-playfulness-production.up.railway.app/pubs/${displayId}',\n  headers={'Authorization': f'Bearer {PUBDB_KEY}'}\n)\npub = res.json()`;
+  const curlCode = `# Fetch this pub\ncurl https://hopeful-playfulness-production.up.railway.app/pubs/${pub.id} \\\n     -H "Authorization: Bearer $PUBDB_KEY"`;
+  const nodeCode = `const res = await fetch(\n  'https://hopeful-playfulness-production.up.railway.app/pubs/${pub.id}',\n  { headers: { Authorization: \`Bearer \${process.env.PUBDB_KEY}\` } }\n);\nconst pub = await res.json();`;
+  const pythonCode = `import requests\nres = requests.get(\n  f'https://hopeful-playfulness-production.up.railway.app/pubs/${pub.id}',\n  headers={'Authorization': f'Bearer {PUBDB_KEY}'}\n)\npub = res.json()`;
   const codeByTab: Record<CodeTab, string> = { curl: curlCode, node: nodeCode, python: pythonCode };
 
   const jsonPreview = buildJsonPreview(pub);
@@ -334,7 +334,7 @@ export default function PubPage() {
             <div className={styles.editTitleRow}>
               <h1 className={styles.editHeading}>Edit pub</h1>
               <span className={styles.editPatchBadge}>
-                <code>PATCH /v1/pubs/{displayId}</code>
+                <code>PATCH /v1/pubs/{pub.id}</code>
               </span>
             </div>
             <p className={styles.editSubtitle}>
@@ -394,25 +394,10 @@ export default function PubPage() {
         <div className={styles.pageTitleRow}>
           <h1 className={styles.pubHeading}>{pub.name}</h1>
           <span className={styles.apiBadge}>
-            <code>GET /v1/pubs/{displayId}</code>
+            <code>GET /v1/pubs/{pub.id}</code>
           </span>
         </div>
         <div className={styles.pageActions}>
-          {pub.lat && pub.lng && (
-            <a
-              href={`https://www.google.com/maps?q=${pub.lat},${pub.lng}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.btnOutline}
-              aria-label="Open on map"
-            >
-              <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M8 2a4 4 0 0 1 4 4c0 3-4 8-4 8S4 9 4 6a4 4 0 0 1 4-4z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                <circle cx="8" cy="6" r="1.5" fill="currentColor"/>
-              </svg>
-              Open on map
-            </a>
-          )}
           <button
             type="button"
             className={styles.btnOutline}
@@ -458,7 +443,8 @@ export default function PubPage() {
             ) : (
               <div className={styles.imagePlaceholder}>
                 <span className={styles.imageInitials}>{pubInitials(pub.name)}</span>
-                <span className={styles.imageSlotLabel}>image-slot · drag a photo to fill</span>
+                {/* TODO: implement image upload */}
+                <span className={styles.imageSlotLabel}>Image functionality coming soon</span>
               </div>
             )}
           </div>
@@ -489,7 +475,8 @@ export default function PubPage() {
           {/* Tabs */}
           <div className={styles.tabs}>
             <div className={styles.tabList} role="tablist">
-              {(["overview", "beers", "hours", "garden", "history"] as PubTab[]).map((tab) => (
+              {/* TODO: restore history tab once API returns edit history data */}
+              {(["overview", "beers", "hours", "garden"] as PubTab[]).map((tab) => (
                 <button
                   key={tab}
                   type="button"
@@ -590,11 +577,11 @@ function BeersTab({ pub }: { pub: Pub }) {
       <dl className={styles.detailList}>
         <div className={styles.detailRow}>
           <dt>Cask ale</dt>
-          <dd>{pub.hasCaskAle ? "Yes" : "No"}</dd>
+          <dd>{pub.hasCaskAle === true ? "Yes" : pub.hasCaskAle === false ? "No" : "—"}</dd>
         </div>
         <div className={styles.detailRow}>
           <dt>Beer-focused</dt>
-          <dd>{pub.isBeerFocused ? "Yes" : "No"}</dd>
+          <dd>{pub.isBeerFocused === true ? "Yes" : pub.isBeerFocused === false ? "No" : "—"}</dd>
         </div>
         <div className={styles.detailRow}>
           <dt>Beer types</dt>
@@ -913,7 +900,7 @@ function HistoryTab({ pub }: { pub: Pub }) {
 
 function buildJsonPreview(pub: Pub): string {
   const preview: Record<string, unknown> = {
-    id: pubDisplayId(pub.id),
+    id: pub.id,
     name: pub.name,
     city: pub.city,
     address: pub.address,
