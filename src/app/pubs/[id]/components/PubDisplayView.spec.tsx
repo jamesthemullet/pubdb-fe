@@ -98,9 +98,29 @@ describe("PubDisplayView", () => {
       ["hasLiveMusic", "Live music"],
       ["hasPoolTable", "Pool table"],
       ["hasDartsBoard", "Darts board"],
-    ] as const)('renders "%s" as an inactive chip when unset', (_field, label) => {
-      renderView();
+    ] as const)('renders "%s" as an inactive chip when explicitly false', (field, label) => {
+      renderView({ [field]: false });
       expect(screen.getByText(label)).toBeInTheDocument();
+    });
+
+    it.each([
+      ["isIndependent", "Independent"],
+      ["hasFood", "Food available"],
+      ["hasSundayRoast", "Sunday roast"],
+      ["hasBeerGarden", "Beer garden"],
+      ["hasCaskAle", "Cask ale"],
+      ["isBeerFocused", "Beer-focused"],
+      ["isDogFriendly", "Dog friendly"],
+      ["isFamilyFriendly", "Family friendly"],
+      ["hasStepFreeAccess", "Step-free access"],
+      ["hasAccessibleToilet", "Accessible toilet"],
+      ["hasLiveSport", "Live sport"],
+      ["hasLiveMusic", "Live music"],
+      ["hasPoolTable", "Pool table"],
+      ["hasDartsBoard", "Darts board"],
+    ] as const)('does not render "%s" as an inactive chip when null', (field, label) => {
+      renderView({ [field]: null });
+      expect(screen.queryByText(label)).not.toBeInTheDocument();
     });
   });
 });
