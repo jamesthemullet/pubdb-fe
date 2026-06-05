@@ -169,7 +169,7 @@ function PubsContent() {
         }
 
         const data = (await res.json()) as PubsApiResponse;
-        setPubs(data.data);
+        setPubs(data.data ?? []);
       } catch (err: unknown) {
         setResponseMs(null);
         if (isHttpErrorObject(err)) {
