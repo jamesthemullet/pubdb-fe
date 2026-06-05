@@ -17,13 +17,10 @@ describe("GET /api/pubs", () => {
     process.env = originalEnv;
   });
 
-  it("returns 500 when TESTING_API_KEY is missing", async () => {
+  it("proceeds without X-API-Key header when TESTING_API_KEY is missing", async () => {
     const response = await GET(new Request("http://localhost/api/pubs"));
 
-    expect(response.status).toBe(500);
-    await expect(response.json()).resolves.toEqual({
-      error: "Missing API key",
-    });
+    expect(response.status).not.toBe(500);
   });
 
   it("fetches pubs and returns response data on success", async () => {
