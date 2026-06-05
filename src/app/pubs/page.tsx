@@ -8,7 +8,6 @@ import {
   PUB_AMENITY_FIELDS,
   type PubAmenityKey,
 } from "@/constants/pubFormFields";
-import { API_URL } from "@/lib/apiConfig";
 import { isHttpErrorObject } from "@/lib/errors";
 import type { Pub } from "@/types/pub";
 import styles from "./page.module.css";
@@ -161,7 +160,7 @@ function PubsContent() {
         for (const amenity of activeAmenities) {
           params.append(`amenities[${amenity}]`, "true");
         }
-        const res = await fetch(`${API_URL}/pubs?${params}`);
+        const res = await fetch(`/api/pubs?${params}`);
         setResponseMs(Date.now() - t0);
 
         if (!res.ok) {
