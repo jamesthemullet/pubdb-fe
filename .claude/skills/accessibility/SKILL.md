@@ -1,12 +1,12 @@
 ---
 name: accessibility
-description: Audits the Next.js / React app for accessibility issues, then creates GitHub issues — minor findings are grouped into one issue, significant findings each get their own issue. No issues are created if nothing worth improving is found.
-version: 1.0.0
+description: Incremental accessibility improvement. Each invocation picks one category, finds the single clearest instance of an accessibility issue, fixes it, and raises a PR.
+version: 2.0.0
 ---
 
 # Accessibility Skill
 
-You are running an accessibility audit session for Pub DB — a Next.js 15 / React 19 / TypeScript app.
+You are running an incremental accessibility improvement session for Pub DB — a Next.js 15 / React 19 / TypeScript app.
 
 ## Stack
 
@@ -19,127 +19,72 @@ You are running an accessibility audit session for Pub DB — a Next.js 15 / Rea
 
 ## What to do each invocation
 
-### Step 1 — Audit the codebase
+### Step 1 — Pick a category
 
-Read the source files under `src/`. Audit across all of these accessibility categories simultaneously:
+Use the current second of the clock (or any arbitrary signal) to pick **one** of these five categories. Vary the selection — do not always pick the same one:
 
-**Semantic HTML & landmarks**
-- Non-semantic elements (`<div>`, `<span>`) used where a semantic element (`<button>`, `<nav>`, `<main>`, `<header>`, `<section>`, `<article>`, `<aside>`) would be appropriate
-- Missing or misused landmark roles (`main`, `navigation`, `banner`, `contentinfo`, `complementary`)
-- Heading hierarchy gaps (e.g. jumping from `<h1>` to `<h3>`, using `<p>` or styled `<div>` as section headings instead of `<h2>`–`<h6>`)
-- Interactive elements that are not natively focusable (`<div onClick>`, `<span onClick>`) — these need `role="button"` and `tabIndex={0}`
+1. **ARIA & roles** — missing `role="progressbar"` + values, missing `aria-expanded`/`aria-controls` on disclosure widgets, missing `aria-live` / `role="alert"` on dynamically injected content, incorrect `aria-hidden` usage
+2. **Forms** — inputs without associated `<label>`, error messages not linked via `aria-describedby`, required fields without `aria-required` or `required`, validation errors with no live announcement
+3. **Keyboard navigation** — `outline: none` without a visible replacement focus style, interactive elements unreachable by keyboard, missing `Escape` handler on dialogs/dropdowns, focus not trapped in modals
+4. **Semantic HTML** — non-semantic `<div>`/`<span>` where a semantic element is appropriate, heading hierarchy gaps, active nav items missing `aria-current="page"`, landmark misuse
+5. **Images & icons** — `<img>` missing `alt`, meaningful SVGs missing `aria-label` or `<title>`, decorative SVGs missing `aria-hidden="true"`
 
-**ARIA**
-- Missing `aria-label` / `aria-labelledby` on icon-only buttons, SVG icons used as interactive elements, or inputs without a visible label
-- `aria-hidden="true"` applied incorrectly (e.g. on focusable elements, or on containers that contain focusable children)
-- `aria-expanded`, `aria-controls`, `aria-haspopup` missing on disclosure widgets (dropdowns, accordions, modals)
-- Progress bars or meters without `role="progressbar"` and `aria-valuenow` / `aria-valuemin` / `aria-valuemax`
-- `aria-live` regions missing for dynamically injected content (toast messages, async fetch results, error summaries)
+### Step 2 — Find the best candidate
 
-**Keyboard navigation**
-- Focus not trapped in modal dialogs or overlapping panels when they are open
-- Missing `Escape` key handler on dialogs, drawers, or dropdowns
-- Tab order that does not match the visual reading order
-- Missing skip-navigation link (`<a href="#main-content">Skip to content</a>`) before the primary nav
-- Interactive elements that cannot be activated with `Enter` or `Space`
+Read the relevant source files under `src/`. Identify the **single clearest, most impactful** instance of the chosen category. Prefer issues that:
+- Are in shared components used across many pages
+- Have an unambiguous, self-contained fix
+- Won't require changes across many files
 
-**Forms**
-- `<input>`, `<textarea>`, or `<select>` without an associated `<label>` (via `htmlFor` / `id`, `aria-label`, or `aria-labelledby`)
-- Error messages not programmatically associated with their input (`aria-describedby`)
-- Required fields not indicated accessibly (`aria-required="true"` or `required` attribute)
-- Form validation errors announced only visually (no `role="alert"` or `aria-live` region)
+If all known issues in the chosen category are already fixed, pick the next most impactful finding from any other category.
 
-**Images & media**
-- `<img>` tags missing `alt` attribute, or `alt=""` used on non-decorative images
-- SVG icons that convey meaning but lack `aria-label` or `<title>` (decorative SVGs should have `aria-hidden="true"`)
-- Background images used to convey content (CSS `background-image` on elements that represent meaningful images)
+### Step 3 — Fix it
 
-**Color & contrast** *(static analysis only — flag patterns, do not compute ratios)*
-- Text rendered as placeholder-only (no visible label) — placeholders disappear on input and have low contrast in most browsers
-- Disabled-state elements that convey no visual feedback beyond reduced opacity (may be invisible to low-vision users)
-- Focus outlines removed via `outline: none` / `outline: 0` in CSS without a replacement focus indicator
+Make the fix. Keep scope tight — one issue, one or two files. Do not refactor beyond what is needed to address the specific finding.
 
-**Announced state & live regions**
-- Loading spinners or skeleton states with no screen-reader announcement
-- Success / error toasts or banners injected into the DOM without `role="alert"` or `aria-live`
-- Route changes in the SPA not announcing the new page title to screen readers
+After fixing, run `yarn ts-check` to confirm no new type errors were introduced.
 
-### Step 2 — Classify findings
+### Step 4 — Create a PR
 
-For each finding, decide its severity:
+1. Create a new branch from `main` named `a11y/<category-slug>-<short-description>` (e.g. `a11y/aria-progress-bar`, `a11y/forms-aria-describedby`, `a11y/keyboard-focus-outline`).
+2. Stage only the files you changed and commit with a message following this pattern:
+   ```
+   fix(a11y): <what was fixed> (<WCAG criterion>)
+   ```
+3. Push the branch and open a PR against `main` using `gh pr create`. Use this body template:
 
-- **Significant** — blocks or severely impairs a user relying on a keyboard, screen reader, or other assistive technology. Examples: an icon-only button with no accessible name, a form input with no label, a modal that does not trap focus, a skip-navigation link missing from a page with a long nav, a progress bar with no ARIA role or values, a div with an onClick handler but no keyboard support.
-- **Minor** — real but lower impact. Examples: a placeholder used as the only label hint, a decorative SVG missing `aria-hidden`, a heading level skipped once, `aria-live` missing on a non-critical status update, a CSS `outline: none` without a custom replacement.
+   ```
+   ## Accessibility improvement
 
-If there are **no findings** worth reporting (the app is already in good shape), output this and stop — do **not** create any GitHub issues:
+   **Category:** <chosen category name>
+   **WCAG criterion:** <e.g. 4.1.2 Name, Role, Value (Level A)>
+   **File:** <path:line>
+   **Issue:** <one sentence describing the problem and its impact on assistive technology users>
+   **Fix:** <what was changed and why>
 
-```
-## Accessibility audit
+   ---
+   **Next suggestion:** <the next candidate worth tackling, with file path>
 
-No significant or minor accessibility issues found. The app is in good shape.
-```
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+   ```
 
-### Step 3 — Report
+4. Return the PR URL to the user.
 
-Output this structure:
+## Known issues backlog (as of 2026-06-05)
 
-```
-## Accessibility audit
+Use this as a starting point each run — check whether items are still present before acting on them, and add new ones you discover:
 
-### Significant findings
-<numbered list — each finding: file:line, WCAG criterion (e.g. 1.1.1, 4.1.2), one-sentence description of the problem and its impact>
-
-### Minor findings
-<numbered list — each finding: file:line, WCAG criterion, one-sentence description>
-
-### No action needed
-<anything you explicitly checked and found to be fine — so the next run doesn't re-examine it>
-```
-
-If there are no significant (or no minor) findings, omit that section rather than writing "None."
-
-### Step 4 — Create GitHub issues
-
-**Significant findings:** create one GitHub issue per finding.
-
-Use the GitHub MCP tools (mcp__github__issue_write) to create issues. Do NOT use the `gh` CLI.
-
-For each significant finding, call mcp__github__issue_write with:
-- owner: `jamesthemullet`
-- repo: `pubdb-fe`
-- title: `a11y: <short title>`
-- body including:
-  - **WCAG criterion**: e.g. 1.1.1 Non-text Content (Level A)
-  - **File**: file:line
-  - **Problem**: what the issue is and why it matters for accessibility
-  - **Suggested fix**: concrete change referencing the existing stack patterns
-  - **Impact**: who is affected and how (screen reader users, keyboard-only users, etc.)
-- labels: `["accessibility"]`
-
-**Minor findings:** if there are two or more, group them into a single issue. If there is only one, still create one issue.
-
-Call mcp__github__issue_write with:
-- owner: `jamesthemullet`
-- repo: `pubdb-fe`
-- title: `a11y: minor improvements batch`
-- body listing each minor finding with its file, criterion, problem, and fix
-- labels: `["accessibility"]`
-
-After creating each issue, output its URL.
-
-If the `accessibility` label does not exist, create it first using mcp__github__issue_write or another appropriate MCP tool. The label color should be `"0075ca"` (GitHub's default blue for accessibility) and description `"Accessibility improvements"`.
+- **ARIA & roles:** Plan usage progress bar (`src/app/components/sidebar/sidebar.tsx:145`) — needs `role="progressbar"` + `aria-valuenow/min/max`
+- **ARIA & roles:** Auth success message (`src/app/components/auth-gate/AuthGate.tsx:151`) — needs `role="alert"` or `aria-live`
+- **ARIA & roles:** Add-pub error summary (`src/app/add-pub/page.tsx:541`) — needs `role="alert"`
+- **Forms:** `FieldErrorList` errors not linked to inputs via `aria-describedby` (`src/app/components/pub-form/FieldErrorList.tsx`)
+- **Semantic HTML:** Active nav links missing `aria-current="page"` (`src/app/components/sidebar/sidebar.tsx:89,108`)
+- **Keyboard navigation:** `outline: none` without sufficient replacement in `src/app/add-pub/page.module.css`, `src/app/pubs/page.module.css`, `src/app/settings/page.module.css`, `src/app/pubs/[id]/components/PubEditView.module.css`
 
 ## Known project patterns
 
-- **Sidebar nav:** Uses `<aside>` + `<nav aria-label="...">` correctly. The burger button has `aria-label` and `aria-expanded`. Overlay div uses `aria-hidden="true"`. The active nav item is styled but not indicated via `aria-current="page"`.
-- **Plan progress bar:** `src/app/components/sidebar/sidebar.tsx` renders a visual progress bar (`planBar` / `planBarFill`) with no `role="progressbar"` or ARIA value attributes — screen readers cannot convey the usage percentage.
-- **Section headings in nav:** The `WORKSPACE` and `ACCOUNT` labels are rendered as `<p>` elements, not as semantic headings or elements with `role="heading"`.
-- **Forms:** Inputs in pub forms, login, and register pages should each have a programmatically associated `<label>`. Check `src/app/components/input/Input.tsx`, `src/app/components/pub-form/`, and auth pages.
-- **Error messages:** `FieldErrorList` in `src/app/components/pub-form/FieldErrorList.tsx` renders validation errors — check whether these are announced live or associated via `aria-describedby`.
-- **Icon buttons:** The edit button (`src/app/components/edit-button/`) and any icon-only controls need accessible names.
-- **Auth:** Login and register pages (`src/app/register/`, `src/app/login/`) contain forms — verify labels are present and errors are announced.
-- **Dropdown:** `src/app/components/dropdown/Dropdown.tsx` — check for `aria-expanded`, `aria-haspopup`, and keyboard support.
-- **Images:** Check all `<img>` tags and SVG icons across the codebase for missing or incorrect `alt` / `aria-hidden`.
-- **Skip link:** Verify whether a skip-to-content link exists in the root layout.
-- **No router announcement:** Next.js App Router does not automatically announce route changes to screen readers — check if a `RouteAnnouncer` or equivalent exists.
-- **WCAG target:** Aim for WCAG 2.1 Level AA compliance. Flag Level A violations as significant; Level AA violations that are impactful as significant, others as minor.
+- **Styling:** CSS Modules — every component has a co-located `.module.css` file.
+- **Auth:** JWT token in `localStorage` under key `"token"`. Auth helpers in `src/lib/auth.ts`.
+- **Sidebar nav:** Uses `<aside>` + `<nav aria-label="...">`. Burger button has `aria-label` and `aria-expanded`. Overlay has `aria-hidden="true"`. Skip link present in root layout.
+- **Forms:** `FieldErrorList` renders per-field validation errors. `PubCoreIdentityFields` and `PubAmenitiesFields` use the shared `Input` and `Dropdown` components.
+- **WCAG target:** Aim for WCAG 2.1 Level AA. Flag Level A violations as highest priority.
