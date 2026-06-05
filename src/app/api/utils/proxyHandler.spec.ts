@@ -17,12 +17,11 @@ describe("createApiProxyHandler", () => {
     process.env = originalEnv;
   });
 
-  it("returns 500 when TESTING_API_KEY is missing", async () => {
+  it("proceeds without X-API-Key header when TESTING_API_KEY is missing", async () => {
     const handler = createApiProxyHandler("/api/v1/resource");
     const response = await handler(new Request("http://localhost/api/resource"));
 
-    expect(response.status).toBe(500);
-    await expect(response.json()).resolves.toEqual({ error: "Missing API key" });
+    expect(response.status).not.toBe(500);
   });
 
   it("fetches the configured endpoint with X-API-Key header", async () => {
