@@ -59,7 +59,7 @@ export default function PubPage() {
   useEffect(() => {
     async function fetchPub() {
       try {
-        const res = await fetch(`${API_URL}/pubs/${id}`);
+        const res = await fetch(`/api/pubs/${id}`);
         setPub(res.ok ? (await res.json()) || null : null);
       } catch {
         setPub(null);
