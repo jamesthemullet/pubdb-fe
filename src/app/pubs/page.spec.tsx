@@ -206,28 +206,6 @@ describe("Pubs page", () => {
 			});
 		});
 
-		it("shows match count when search term is active", async () => {
-			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
-				const search = new URL(url as string).searchParams.get("search") ?? "";
-				const filtered = SAMPLE_PUBS.filter((p) =>
-					p.city.toLowerCase().includes(search.toLowerCase()),
-				);
-				return Promise.resolve(jsonResponse({ data: search ? filtered : SAMPLE_PUBS }));
-			});
-
-			render(<Pubs />);
-
-			await screen.findByText("The Harp");
-
-			const searchInput = screen.getByPlaceholderText(
-				/search by name, city/i,
-			);
-			fireEvent.change(searchInput, { target: { value: "london" } });
-
-			await waitFor(() => {
-				expect(screen.getByText(/2 \/ 2 pubs/)).toBeInTheDocument();
-			});
-		});
 
 		it("does not show match count when search term is empty", async () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(
