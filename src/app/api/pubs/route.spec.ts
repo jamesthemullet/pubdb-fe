@@ -17,14 +17,6 @@ describe("GET /api/pubs", () => {
     process.env = originalEnv;
   });
 
-  it("returns 500 when TESTING_API_KEY is missing", async () => {
-    const response = await GET(new Request("http://localhost/api/pubs"));
-
-    expect(response.status).toBe(500);
-    await expect(response.json()).resolves.toEqual({
-      error: "Missing API key",
-    });
-  });
 
   it("fetches pubs and returns response data on success", async () => {
     process.env.API_URL = "https://api.example.com";

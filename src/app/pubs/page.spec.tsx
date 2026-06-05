@@ -133,7 +133,7 @@ describe("Pubs page", () => {
 	describe("search filtering", () => {
 		it("filters pubs by name after debounce", async () => {
 			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
-				const search = new URL(url as string).searchParams.get("search") ?? "";
+				const search = new URL(url as string, "http://localhost").searchParams.get("search") ?? "";
 				const filtered = SAMPLE_PUBS.filter((p) =>
 					p.name.toLowerCase().includes(search.toLowerCase()),
 				);
@@ -158,7 +158,7 @@ describe("Pubs page", () => {
 
 		it("filters pubs by city", async () => {
 			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
-				const search = new URL(url as string).searchParams.get("search") ?? "";
+				const search = new URL(url as string, "http://localhost").searchParams.get("search") ?? "";
 				const filtered = SAMPLE_PUBS.filter((p) =>
 					p.city.toLowerCase().includes(search.toLowerCase()),
 				);
@@ -183,7 +183,7 @@ describe("Pubs page", () => {
 
 		it("filters pubs by address", async () => {
 			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
-				const search = new URL(url as string).searchParams.get("search") ?? "";
+				const search = new URL(url as string, "http://localhost").searchParams.get("search") ?? "";
 				const filtered = SAMPLE_PUBS.filter((p) =>
 					p.address.toLowerCase().includes(search.toLowerCase()),
 				);
