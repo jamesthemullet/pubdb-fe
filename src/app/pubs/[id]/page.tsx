@@ -31,8 +31,8 @@ function pubInitials(name: string): string {
     .toUpperCase();
 }
 
-function pubDisplayId(id: string): string {
-  return `pub_${id.slice(0, 6)}`;
+function pubDisplayId(id: string | undefined): string {
+  return id ? `pub_${id.slice(0, 6)}` : "pub_??????";
 }
 
 export default function PubPage() {
@@ -60,7 +60,13 @@ export default function PubPage() {
     async function fetchPub() {
       try {
         const res = await fetch(`/api/pubs/${id}`);
-        setPub(res.ok ? (await res.json()) || null : null);
+        if (!res.ok) { setPub(null); return; }
+        const raw: unknown = await res.json();
+        const unwrapped =
+          raw && typeof raw === "object" && "data" in raw
+            ? (raw as { data: unknown }).data
+            : raw;
+        setPub((unwrapped as Pub) || null);
       } catch {
         setPub(null);
       } finally {
