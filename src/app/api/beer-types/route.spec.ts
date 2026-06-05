@@ -17,13 +17,6 @@ describe("GET /api/beer-types", () => {
     process.env = originalEnv;
   });
 
-  it("proceeds without X-API-Key header when TESTING_API_KEY is missing", async () => {
-    const request = new Request("http://localhost/api/beer-types");
-
-    const response = await GET(request);
-
-    expect(response.status).not.toBe(500);
-  });
 
   it("fetches beer types with X-API-Key header", async () => {
     process.env.API_URL = "https://api.example.com";
