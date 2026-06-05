@@ -17,22 +17,27 @@ export const metadata: Metadata = {
   },
 };
 
-const STATS = [
-  { value: "12,418", label: "pubs in production" },
-  { value: "99.98%", label: "uptime, 90 days" },
-  { value: "38ms", label: "p95 response time" },
-  { value: "4.2k", label: "developers using us" },
-];
+// TODO: fetch real stats from API before re-enabling stats bar
+// const STATS = [
+//   { value: "12,418", label: "pubs in production" },
+//   { value: "99.98%", label: "uptime, 90 days" },
+//   { value: "38ms", label: "p95 response time" },
+//   { value: "4.2k", label: "developers using us" },
+// ];
 
 export default function Home() {
   return (
     <div className={styles.page}>
+      <div className={styles.earlyAccessBanner}>
+        <strong>Early access:</strong> Pub DB is under active development. The API and data are subject to change. Expect rough edges.
+      </div>
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <div className={styles.heroBadge}>
+          {/* TODO: replace with real version/pub count/country data from API */}
+          {/* <div className={styles.heroBadge}>
             <span className={styles.heroBadgeDot} aria-hidden="true" />
             v2.4 · 12,418 pubs · 4 new countries
-          </div>
+          </div> */}
           <h1 className={styles.heroHeading}>
             The pub database
             <br />
@@ -58,13 +63,32 @@ export default function Home() {
         </div>
       </section>
 
-      <div className={styles.statsBar}>
+      {/* TODO: re-enable stats bar once real stats are fetched from API */}
+      {/* <div className={styles.statsBar}>
         {STATS.map(({ value, label }) => (
           <div key={label} className={styles.statItem}>
             <span className={styles.statValue}>{value}</span>
             <span className={styles.statLabel}>{label}</span>
           </div>
         ))}
+      </div> */}
+
+      <div className={styles.contributeSection}>
+        <div className={styles.contributeContent}>
+          <h2 className={styles.contributeHeading}>Most pubs are in — but the details aren&apos;t.</h2>
+          <p className={styles.contributeText}>
+            Got a local? Chances are it&apos;s already here, but missing its beer garden, cask ales, or opening hours.
+            Browse the database and help us fill in the gaps.
+          </p>
+          <div className={styles.contributeCtas}>
+            <Link href="/pubs" className={styles.ctaPrimary}>
+              Find your local →
+            </Link>
+            <Link href="/add-pub" className={styles.ctaSecondary}>
+              Add a missing pub
+            </Link>
+          </div>
+        </div>
       </div>
 
       <div className={styles.pricingSection}>

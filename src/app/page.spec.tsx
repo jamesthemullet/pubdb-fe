@@ -26,11 +26,17 @@ describe("Home page", () => {
     expect(screen.getByRole("link", { name: /browse pubs/i })).toBeInTheDocument();
   });
 
-  it("renders the stats bar", () => {
+  it("renders the early access banner", () => {
     render(<Home />);
 
-    expect(screen.getByText("12,418")).toBeInTheDocument();
-    expect(screen.getByText(/pubs in production/i)).toBeInTheDocument();
+    expect(screen.getByText(/early access/i)).toBeInTheDocument();
+  });
+
+  it("renders the contribute section", () => {
+    render(<Home />);
+
+    expect(screen.getByRole("link", { name: /find your local/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /add a missing pub/i })).toBeInTheDocument();
   });
 
   it("renders the pricing section", () => {

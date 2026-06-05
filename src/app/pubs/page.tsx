@@ -239,27 +239,6 @@ function PubsContent() {
           </p>
         </div>
         <div className={styles.pageHeaderActions}>
-          <button type="button" className={styles.btnOutline}>
-            <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
-              <rect
-                x="2"
-                y="2"
-                width="9"
-                height="11"
-                rx="1.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                fill="none"
-              />
-              <path
-                d="M5 2V1.5A1.5 1.5 0 0 1 6.5 0h4A1.5 1.5 0 0 1 12 1.5V11a1.5 1.5 0 0 1-1.5 1.5H10"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                fill="none"
-              />
-            </svg>
-            Copy as cURL
-          </button>
           <Link href="/add-pub" className={styles.btnPrimary}>
             <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
               <path
@@ -360,7 +339,8 @@ function PubsContent() {
               <option value="oldest">Oldest first</option>
             </Dropdown>
 
-            <fieldset className={styles.viewToggle} aria-label="View mode">
+            {/* TODO: implement grid and map view modes with real view-mode state and conditional rendering */}
+            {/* <fieldset className={styles.viewToggle} aria-label="View mode">
               <button
                 type="button"
                 className={`${styles.viewBtn} ${styles.viewBtnActive}`}
@@ -468,7 +448,7 @@ function PubsContent() {
                 </svg>
                 Map
               </button>
-            </fieldset>
+            </fieldset> */}
           </div>
         </div>
 
@@ -487,11 +467,12 @@ function PubsContent() {
 
       {/* Results metadata bar */}
       <div className={styles.resultsMeta}>
-        <span className={styles.resultsCount}>
+        {/* TODO: show real result count (current page / total) once API returns a total count field */}
+        {/* <span className={styles.resultsCount}>
           {loading
             ? "…"
             : `${filteredPubs.length} / ${filteredPubs.length} pubs`}
-        </span>
+        </span> */}
         <div className={styles.resultsRight}>
           {responseMs !== null && (
             <span className={styles.responseTime}>
@@ -526,7 +507,8 @@ function PubsContent() {
               <tr>
                 <th className={styles.thName}>NAME</th>
                 <th className={styles.thLocation}>LOCATION</th>
-                <th className={styles.thAmenities}>AMENITIES</th>
+                {/* TODO: improve amenity display (icons unclear, title tooltip unreliable) before re-enabling */}
+                {/* <th className={styles.thAmenities}>AMENITIES</th> */}
                 <th className={styles.thArrow} aria-label="View" />
               </tr>
             </thead>
@@ -552,9 +534,9 @@ function PubsContent() {
                       {pubLocation(pub)}
                     </span>
                   </td>
-                  <td className={styles.tdAmenities}>
+                  {/* <td className={styles.tdAmenities}>
                     <AmenityIconCell pub={pub} />
-                  </td>
+                  </td> */}
                   <td className={styles.tdArrow}>
                     <svg
                       width="16"

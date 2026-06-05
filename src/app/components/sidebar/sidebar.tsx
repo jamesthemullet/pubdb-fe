@@ -107,7 +107,6 @@ export default function Sidebar() {
         <div className={styles.logoRow}>
           <div className={styles.logoIcon}>P</div>
           <span className={styles.logoText}>Pub DB</span>
-          <span className={styles.logoVersion}>v2.4</span>
         </div>
 
         <div className={styles.searchWrap}>

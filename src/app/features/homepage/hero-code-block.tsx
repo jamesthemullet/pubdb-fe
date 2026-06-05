@@ -4,19 +4,19 @@ import { useEffect, useState } from "react";
 import styles from "./hero-code-block.module.css";
 
 const CODE_EXAMPLES = {
-  curl: `$ curl https://hopeful-playfulness-production.up.railway.app/pubs/search \\
-  -G --data-urlencode "near=SE1 3XB" \\
-      --data-urlencode "hasSundayRoast=true" \\
-      -H "Authorization: Bearer $PUBDB_KEY"`,
+  curl: `$ curl https://api.thepubdb.com/api/v1/pubs \\
+  -G --data-urlencode "search=London" \\
+      --data-urlencode "amenities[hasSundayRoast]=true" \\
+      -H "X-API-Key: $PUBDB_KEY"`,
   node: `const res = await fetch(
-  'https://hopeful-playfulness-production.up.railway.app/pubs/search?' +
+  'https://api.thepubdb.com/api/v1/pubs?' +
   new URLSearchParams({
-    near: 'SE1 3XB',
-    hasSundayRoast: 'true',
+    search: 'London',
+    'amenities[hasSundayRoast]': 'true',
   }),
   {
     headers: {
-      Authorization: \`Bearer \${process.env.PUBDB_KEY}\`,
+      'X-API-Key': process.env.PUBDB_KEY,
     },
   }
 );
@@ -24,27 +24,27 @@ const { data } = await res.json();`,
   python: `import requests
 
 res = requests.get(
-    'https://hopeful-playfulness-production.up.railway.app/pubs/search',
+    'https://api.thepubdb.com/api/v1/pubs',
     params={
-        'near': 'SE1 3XB',
-        'hasSundayRoast': True,
+        'search': 'London',
+        'amenities[hasSundayRoast]': 'true',
     },
     headers={
-        'Authorization': f'Bearer {PUBDB_KEY}',
+        'X-API-Key': PUBDB_KEY,
     },
 )
 pubs = res.json()['data']`,
   ruby: `require 'net/http'
 require 'json'
 
-uri = URI('https://hopeful-playfulness-production.up.railway.app/pubs/search')
+uri = URI('https://api.thepubdb.com/api/v1/pubs')
 uri.query = URI.encode_www_form(
-  near: 'SE1 3XB',
-  hasSundayRoast: true
+  'search' => 'London',
+  'amenities[hasSundayRoast]' => 'true'
 )
 res = Net::HTTP.get_response(
   uri,
-  'Authorization' => "Bearer #{ENV['PUBDB_KEY']}"
+  'X-API-Key' => ENV['PUBDB_KEY']
 )
 pubs = JSON.parse(res.body)['data']`,
 } as const;
