@@ -295,9 +295,9 @@ export default function PubPage() {
 
   const displayId = pubDisplayId(pub.id);
   const activeAmenities = PUB_AMENITY_FIELDS.filter(({ key }) => pub[key]);
-  const curlCode = `# Fetch this pub\ncurl https://hopeful-playfulness-production.up.railway.app/pubs/${pub.id} \\\n     -H "Authorization: Bearer $PUBDB_KEY"`;
-  const nodeCode = `const res = await fetch(\n  'https://hopeful-playfulness-production.up.railway.app/pubs/${pub.id}',\n  { headers: { Authorization: \`Bearer \${process.env.PUBDB_KEY}\` } }\n);\nconst pub = await res.json();`;
-  const pythonCode = `import requests\nres = requests.get(\n  f'https://hopeful-playfulness-production.up.railway.app/pubs/${pub.id}',\n  headers={'Authorization': f'Bearer {PUBDB_KEY}'}\n)\npub = res.json()`;
+  const curlCode = `# Fetch this pub\ncurl https://api.thepubdb.com/api/v1/pubs/${pub.id} \\\n     -H "X-API-Key: $PUBDB_KEY"`;
+  const nodeCode = `const res = await fetch(\n  'https://api.thepubdb.com/api/v1/pubs/${pub.id}',\n  { headers: { 'X-API-Key': process.env.PUBDB_KEY } }\n);\nconst pub = await res.json();`;
+  const pythonCode = `import requests\nres = requests.get(\n  f'https://api.thepubdb.com/api/v1/pubs/${pub.id}',\n  headers={'X-API-Key': PUBDB_KEY}\n)\npub = res.json()`;
   const codeByTab: Record<CodeTab, string> = { curl: curlCode, node: nodeCode, python: pythonCode };
 
   const jsonPreview = buildJsonPreview(pub);

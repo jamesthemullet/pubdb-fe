@@ -3,6 +3,16 @@
   flex-direction: column;
 }
 
+/* Early access banner */
+.earlyAccessBanner {
+  background-color: #fef9c3;
+  border-bottom: 1px solid #fde047;
+  color: #713f12;
+  font-size: 0.875rem;
+  padding: 10px 20px;
+  text-align: center;
+}
+
 /* Hero */
 .hero {
   display: grid;
@@ -142,6 +152,36 @@
 .statLabel {
   font-size: 13.5px;
   color: var(--text-muted);
+}
+
+/* Contribute section */
+.contributeSection {
+  padding: 60px 64px;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+}
+
+.contributeContent {
+  max-width: 560px;
+}
+
+.contributeHeading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.contributeText {
+  color: var(--color-muted, #6b7280);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.contributeCtas {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 /* Pricing wrapper */

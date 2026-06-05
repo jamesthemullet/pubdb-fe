@@ -3,7 +3,7 @@
 import { useState } from "react";
 import styles from "./page.module.css";
 
-const CURL_QUICK_START = `curl https://hopeful-playfulness-production.up.railway.app/api/v1/pubs \\
+const CURL_QUICK_START = `curl https://api.thepubdb.com/api/v1/pubs \\
   -H "X-API-Key: $PUBDB_KEY"`;
 
 const JSON_QUICK_START = `{
@@ -33,7 +33,7 @@ const JSON_QUICK_START = `{
 const CURL_AUTH = `X-API-Key: pk_developer_xxxx····`;
 
 
-const CURL_FILTER = `curl "https://hopeful-playfulness-production.up.railway.app/api/v1/pubs?hasCaskAle=true" \\
+const CURL_FILTER = `curl "https://api.thepubdb.com/api/v1/pubs?hasCaskAle=true" \\
   -H "X-API-Key: $PUBDB_KEY"`;
 
 const NAV_ITEMS = [
@@ -145,7 +145,7 @@ export default function DocsPage() {
           <div>
             <div className={styles.titleRow}>
               <h1 className={styles.pageTitle}>Documentation</h1>
-              <code className={styles.apiVersion}>hopeful-playfulness-production.up.railway.app</code>
+              <code className={styles.apiVersion}>api.thepubdb.com</code>
             </div>
             <p className={styles.pageSubtitle}>
               Everything you need to integrate with the Pub DB API — authentication, endpoints,
@@ -181,7 +181,7 @@ export default function DocsPage() {
             <span className={styles.baseUrlIcon} aria-hidden="true">◎</span>
             <span>
               <strong>Base URL</strong> — all API key endpoints are relative to{" "}
-              <code className={styles.inlineCode}>https://hopeful-playfulness-production.up.railway.app/api/v1</code>.
+              <code className={styles.inlineCode}>https://api.thepubdb.com/api/v1</code>.
             </span>
           </div>
         </section>
