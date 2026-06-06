@@ -617,7 +617,7 @@ function checkOpenNow(
   Object.entries(oh).forEach(([k, v]) => { map[k.toLowerCase()] = v; });
   const entry = map[todayFull.toLowerCase()];
   if (!entry || entry.closed || !entry.open || !entry.close) return false;
-  const toMins = (t: string) => {
+  const toMins = (t: string): number => {
     const [h, m] = t.split(":").map(Number);
     return h * 60 + (m ?? 0);
   };

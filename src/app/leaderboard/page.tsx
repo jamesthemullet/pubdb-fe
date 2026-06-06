@@ -19,12 +19,12 @@ const TIME_PERIODS: { id: TimePeriod; label: string }[] = [
 
 type BadgeVariant = "green" | "orange" | "purple" | "amber" | "blue";
 
-interface Badge {
+type Badge = {
   label: string;
   variant: BadgeVariant;
-}
+};
 
-interface MockProfile {
+type MockProfile = {
   handle: string;
   location: string;
   joined: string;
@@ -32,7 +32,7 @@ interface MockProfile {
   streak: number;
   avatarColor: string;
   activity: number[];
-}
+};
 
 // ── Static decorative data keyed by rank ──────────────────────────────────────
 

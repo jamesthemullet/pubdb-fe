@@ -5,12 +5,12 @@ import { useState } from "react";
 import { API_URL } from "@/lib/apiConfig";
 import styles from "./AuthGate.module.css";
 
-interface AuthGateProps {
+type AuthGateProps = {
   /** Shown above the form to explain why sign-in is needed. */
   context?: string;
   /** Called after a successful login so the parent can re-check auth. */
   onLogin?: () => void;
-}
+};
 
 export default function AuthGate({ context, onLogin }: AuthGateProps) {
   const [mode, setMode] = useState<"register" | "login">("login");
