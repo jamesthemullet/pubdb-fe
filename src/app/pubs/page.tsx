@@ -517,6 +517,13 @@ function PubsContent() {
                   key={pub.id}
                   className={styles.tableRow}
                   onClick={() => router.push(`/pubs/${pub.id}`)}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      router.push(`/pubs/${pub.id}`);
+                    }
+                  }}
                 >
                   <td className={styles.tdName}>
                     <Link href={`/pubs/${pub.id}`} className={styles.pubName}>

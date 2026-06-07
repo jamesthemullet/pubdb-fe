@@ -265,10 +265,11 @@ export default function AddPubPage() {
 
           <div className={styles.fieldBlock}>
             <p className={styles.fieldLabel}>Ownership</p>
-            <div className={styles.ownershipToggle}>
+            <div className={styles.ownershipToggle} role="group" aria-label="Ownership type">
               <button
                 type="button"
                 className={`${styles.ownershipBtn} ${isIndependent ? styles.ownershipBtnActive : ""}`}
+                aria-pressed={isIndependent}
                 onClick={() => setIsIndependent(true)}
               >
                 <IndependentIcon /> Independent
@@ -276,6 +277,7 @@ export default function AddPubPage() {
               <button
                 type="button"
                 className={`${styles.ownershipBtn} ${!isIndependent ? styles.ownershipBtnActive : ""}`}
+                aria-pressed={!isIndependent}
                 onClick={() => setIsIndependent(false)}
               >
                 <ChainIcon /> Chain

@@ -504,7 +504,7 @@ export default function LeaderboardPage() {
             <div className={styles.tableSection}>
               <div className={styles.tableHeader}>
                 <div className={styles.tableHeaderLeft}>
-                  <span className={styles.tableTitle}>Full ranking</span>
+                  <h2 className={styles.tableTitle}>Full ranking</h2>
                   <span className={styles.tablePeriodLabel}>{periodLabel}</span>
                 </div>
                 <button
