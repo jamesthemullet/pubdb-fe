@@ -15,9 +15,16 @@ function jsonResponse(data: unknown, status = 200): Response {
   });
 }
 
-function input(container: HTMLElement, field: "name" | "username" | "email" | "password"): HTMLInputElement | null {
-  const idMap = { name: "ag-name", username: "ag-username", email: "ag-email", password: "ag-password" };
-  return container.querySelector(`#${idMap[field]}`);
+const idMap = { name: "ag-name", username: "ag-username", email: "ag-email", password: "ag-password" };
+
+function input(container: HTMLElement, field: "name" | "username" | "email" | "password"): HTMLInputElement {
+  const el = container.querySelector<HTMLInputElement>(`#${idMap[field]}`);
+  if (!el) throw new Error(`Input #${idMap[field]} not found`);
+  return el;
+}
+
+function queryInput(container: HTMLElement, field: "name" | "username" | "email" | "password"): HTMLInputElement | null {
+  return container.querySelector<HTMLInputElement>(`#${idMap[field]}`);
 }
 
 describe("RegisterLoginPage", () => {
@@ -42,8 +49,8 @@ describe("RegisterLoginPage", () => {
       expect(screen.getByRole("heading", { name: "Log in" })).toBeInTheDocument();
       expect(input(container, "email")).toBeInTheDocument();
       expect(input(container, "password")).toBeInTheDocument();
-      expect(input(container, "name")).toBeNull();
-      expect(input(container, "username")).toBeNull();
+      expect(queryInput(container, "name")).toBeNull();
+      expect(queryInput(container, "username")).toBeNull();
       expect(screen.getByRole("button", { name: "Log in" })).toBeInTheDocument();
     });
 
@@ -70,8 +77,8 @@ describe("RegisterLoginPage", () => {
 
       const { container } = render(<RegisterLoginPage />);
 
-      fireEvent.change(input(container, "email")!, { target: { value: "user@example.com" } });
-      fireEvent.change(input(container, "password")!, { target: { value: "mypassword" } });
+      fireEvent.change(input(container, "email"), { target: { value: "user@example.com" } });
+      fireEvent.change(input(container, "password"), { target: { value: "mypassword" } });
       fireEvent.click(screen.getByRole("button", { name: "Log in" }));
 
       await waitFor(() =>
@@ -88,8 +95,8 @@ describe("RegisterLoginPage", () => {
 
       const { container } = render(<RegisterLoginPage />);
 
-      fireEvent.change(input(container, "email")!, { target: { value: "user@example.com" } });
-      fireEvent.change(input(container, "password")!, { target: { value: "wrong" } });
+      fireEvent.change(input(container, "email"), { target: { value: "user@example.com" } });
+      fireEvent.change(input(container, "password"), { target: { value: "wrong" } });
       fireEvent.click(screen.getByRole("button", { name: "Log in" }));
 
       await waitFor(() =>
@@ -102,8 +109,8 @@ describe("RegisterLoginPage", () => {
 
       const { container } = render(<RegisterLoginPage />);
 
-      fireEvent.change(input(container, "email")!, { target: { value: "user@example.com" } });
-      fireEvent.change(input(container, "password")!, { target: { value: "pw" } });
+      fireEvent.change(input(container, "email"), { target: { value: "user@example.com" } });
+      fireEvent.change(input(container, "password"), { target: { value: "pw" } });
       fireEvent.click(screen.getByRole("button", { name: "Log in" }));
 
       await waitFor(() =>
@@ -118,8 +125,8 @@ describe("RegisterLoginPage", () => {
 
       const { container } = render(<RegisterLoginPage />);
 
-      fireEvent.change(input(container, "email")!, { target: { value: "me@example.com" } });
-      fireEvent.change(input(container, "password")!, { target: { value: "pass" } });
+      fireEvent.change(input(container, "email"), { target: { value: "me@example.com" } });
+      fireEvent.change(input(container, "password"), { target: { value: "pass" } });
       fireEvent.click(screen.getByRole("button", { name: "Log in" }));
 
       await waitFor(() => expect(fetchSpy).toHaveBeenCalled());
@@ -174,10 +181,10 @@ describe("RegisterLoginPage", () => {
 
       const { container } = switchToRegister();
 
-      fireEvent.change(input(container, "name")!, { target: { value: "Alice" } });
-      fireEvent.change(input(container, "username")!, { target: { value: "alice123" } });
-      fireEvent.change(input(container, "email")!, { target: { value: "alice@example.com" } });
-      fireEvent.change(input(container, "password")!, { target: { value: "secret" } });
+      fireEvent.change(input(container, "name"), { target: { value: "Alice" } });
+      fireEvent.change(input(container, "username"), { target: { value: "alice123" } });
+      fireEvent.change(input(container, "email"), { target: { value: "alice@example.com" } });
+      fireEvent.change(input(container, "password"), { target: { value: "secret" } });
 
       fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
@@ -206,10 +213,10 @@ describe("RegisterLoginPage", () => {
 
       const { container } = switchToRegister();
 
-      fireEvent.change(input(container, "name")!, { target: { value: "Alice" } });
-      fireEvent.change(input(container, "username")!, { target: { value: "alice" } });
-      fireEvent.change(input(container, "email")!, { target: { value: "taken@example.com" } });
-      fireEvent.change(input(container, "password")!, { target: { value: "secret" } });
+      fireEvent.change(input(container, "name"), { target: { value: "Alice" } });
+      fireEvent.change(input(container, "username"), { target: { value: "alice" } });
+      fireEvent.change(input(container, "email"), { target: { value: "taken@example.com" } });
+      fireEvent.change(input(container, "password"), { target: { value: "secret" } });
       fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
       await waitFor(() =>
@@ -222,10 +229,10 @@ describe("RegisterLoginPage", () => {
 
       const { container } = switchToRegister();
 
-      fireEvent.change(input(container, "name")!, { target: { value: "Alice" } });
-      fireEvent.change(input(container, "username")!, { target: { value: "alice" } });
-      fireEvent.change(input(container, "email")!, { target: { value: "x@example.com" } });
-      fireEvent.change(input(container, "password")!, { target: { value: "secret" } });
+      fireEvent.change(input(container, "name"), { target: { value: "Alice" } });
+      fireEvent.change(input(container, "username"), { target: { value: "alice" } });
+      fireEvent.change(input(container, "email"), { target: { value: "x@example.com" } });
+      fireEvent.change(input(container, "password"), { target: { value: "secret" } });
       fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
       await waitFor(() =>
@@ -243,10 +250,10 @@ describe("RegisterLoginPage", () => {
 
       const { container } = switchToRegister();
 
-      fireEvent.change(input(container, "name")!, { target: { value: "Alice" } });
-      fireEvent.change(input(container, "username")!, { target: { value: "alice" } });
-      fireEvent.change(input(container, "email")!, { target: { value: "x@example.com" } });
-      fireEvent.change(input(container, "password")!, { target: { value: "secret" } });
+      fireEvent.change(input(container, "name"), { target: { value: "Alice" } });
+      fireEvent.change(input(container, "username"), { target: { value: "alice" } });
+      fireEvent.change(input(container, "email"), { target: { value: "x@example.com" } });
+      fireEvent.change(input(container, "password"), { target: { value: "secret" } });
       fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
       await waitFor(() =>
@@ -265,8 +272,8 @@ describe("RegisterLoginPage", () => {
 
       const { container } = render(<RegisterLoginPage />);
 
-      fireEvent.change(input(container, "email")!, { target: { value: "user@example.com" } });
-      fireEvent.change(input(container, "password")!, { target: { value: "wrong" } });
+      fireEvent.change(input(container, "email"), { target: { value: "user@example.com" } });
+      fireEvent.change(input(container, "password"), { target: { value: "wrong" } });
       fireEvent.click(screen.getByRole("button", { name: "Log in" }));
 
       await waitFor(() =>
