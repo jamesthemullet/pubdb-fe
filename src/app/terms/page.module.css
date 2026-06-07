@@ -1,0 +1,15 @@
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.section {
+  margin-top: 2rem;
+}
+
+.backLink {
+  margin-top: 2rem;
+  display: inline-block;
+  color: #007bff;
+}

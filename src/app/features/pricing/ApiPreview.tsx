@@ -20,7 +20,10 @@ export default function ApiPreview() {
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
       .then((data: unknown) => {
         if (!ignore) {
-          const pubs = (data as { data?: unknown[] })?.data;
+          const pubs =
+            typeof data === "object" && data !== null && "data" in data
+              ? (data as Record<string, unknown>).data
+              : undefined;
           const sample = Array.isArray(pubs) ? pubs[0] : data;
           setJson(JSON.stringify(sample, null, 2));
         }

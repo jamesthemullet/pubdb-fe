@@ -43,7 +43,24 @@ Incrementally improve test coverage for this repo by adding one well-chosen test
    - Unit: `yarn test --run <path-to-spec>`
    - E2e: `yarn test:e2e <path-to-spec>` (requires the dev server to be running)
 
-6. **Report** what was added, why it was chosen, and what gap it closes.
+6. **Create a pull request** — once the test passes, create a branch and PR:
+   - Create a new branch: `git checkout -b test/<short-descriptor>` (e.g. `test/inline-edit-boolean-field`)
+   - Stage only the new spec file: `git add <path-to-spec>`
+   - Commit: `git commit -m "test: add unit tests for <ComponentName>"`
+   - Push: `git push -u origin <branch>`
+   - Open a PR with `gh pr create` using this body template:
+     ```
+     ## What
+     One-sentence description of the test added.
+
+     ## Why
+     Which gap it closes and why it was the highest-value choice.
+
+     ## Test type
+     Unit / E2e
+     ```
+
+7. **Report** the PR URL, what was added, why it was chosen, and what gap it closes.
 
 ## Patterns
 

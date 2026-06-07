@@ -10,6 +10,12 @@ export type AuthUser = {
 
 type AuthPayload = { email: string; approved?: boolean; admin?: boolean };
 
+function isAuthPayload(value: unknown): value is AuthPayload {
+  if (typeof value !== "object" || value === null) return false;
+  const obj = value as Record<string, unknown>;
+  return typeof obj.email === "string";
+}
+
 export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boolean } {
   const [user, setUser] = useState<AuthUser>(null);
 
@@ -25,14 +31,20 @@ export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boole
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
-          const data = await res.json() as AuthPayload;
-          setUser({ email: data.email, approved: data.approved, admin: data.admin });
-          return;
+          const raw: unknown = await res.json();
+          if (isAuthPayload(raw)) {
+            setUser({ email: raw.email, approved: raw.approved, admin: raw.admin });
+            return;
+          }
         }
       } catch { /* fall through to JWT decode */ }
       try {
-        const payload = JSON.parse(atob(token.split(".")[1])) as AuthPayload;
-        setUser({ email: payload.email, approved: payload.approved, admin: payload.admin });
+        const payload: unknown = JSON.parse(atob(token.split(".")[1]));
+        if (isAuthPayload(payload)) {
+          setUser({ email: payload.email, approved: payload.approved, admin: payload.admin });
+        } else {
+          setUser(null);
+        }
       } catch {
         setUser(null);
       }

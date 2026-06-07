@@ -2,13 +2,14 @@
 
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useContributions } from "@/hooks/useContributions";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import { getErrorMessage, isHttpErrorObject } from "@/lib/errors";
-import Button from "../../components/button/button";
-import Typography from "../../components/typography/typography";
 import styles from "./dashboard.module.css";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 type ApiKey = {
   name: string;
@@ -20,25 +21,14 @@ type ApiKey = {
   createdAt: string;
   lastUsed: string | null;
   usageCount: number;
-  remaining: {
-    hour: number;
-    day: number;
-    month: number;
-  };
+  remaining: { hour: number; day: number; month: number };
   limits: {
     requestsPerHour: number;
     requestsPerDay: number;
     requestsPerMonth: number;
   };
-  resetTimes: {
-    hour: string;
-    day: string;
-    month: string;
-  };
-  features: {
-    allowLocationSearch: boolean;
-    allowStats: boolean;
-  };
+  resetTimes: { hour: string; day: string; month: string };
+  features: { allowLocationSearch: boolean; allowStats: boolean };
 };
 
 type GeneratedApiKeyResponse = {
@@ -59,26 +49,81 @@ type DashboardData = {
     emailVerified: boolean;
   };
   apiKeys: ApiKey[];
-  summary: {
-    totalApiKeys: number;
-    totalUsage: number;
-  };
+  summary: { totalApiKeys: number; totalUsage: number };
 };
+
+// TODO: restore request volume chart once API returns time-series data
+// const CHART_BARS = [
+//   2200, 2550, 2300, 2850, 2650,
+//   2300, 1900, 1700, 1450, 1400,
+//   1600, 1800, 1700, 1650, 1800,
+//   2100, 2200, 2050, 1900, 1750,
+//   500,  600,  650,  580,  550,
+//   1100, 1200, 1290, 1380, 3200,
+// ].map((v, i) => ({ id: `c${i}`, v }));
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+// TODO: restore sparkline once API returns time-series usage data
+// const SPARKLINE = {
+//   requests: [180,210,190,240,220,280,260,300,280,320,290,340,320,380,360,410,390,420,400,440],
+// };
+//
+// function sparklinePoints(data: number[], w = 120, h = 32): string {
+//   const min = Math.min(...data);
+//   const max = Math.max(...data);
+//   const range = max - min || 1;
+//   return data
+//     .map((v, i) => {
+//       const x = (i / (data.length - 1)) * w;
+//       const y = h - 2 - ((v - min) / range) * (h - 4);
+//       return `${x.toFixed(1)},${y.toFixed(1)}`;
+//     })
+//     .join(" ");
+// }
+//
+// function Sparkline({ data, color }: { data: number[]; color: string }) {
+//   return (
+//     <svg width="120" height="32" aria-hidden="true" className={styles.sparklineSvg}>
+//       <polyline points={sparklinePoints(data)} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+//     </svg>
+//   );
+// }
+
+function fmtRelative(iso: string | null): string {
+  if (!iso) return "never";
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return `${s}s ago`;
+  if (s < 3600) return `${Math.floor(s / 60)}min ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+// function BarChart() { ... } // TODO: restore with real time-series data
+
+function UsageBar({ pct }: { pct: number }) {
+  const fill = pct > 90 ? "#ef4444" : pct > 75 ? "#f59e0b" : "#555555";
+  return (
+    <div className={styles.usageBarTrack}>
+      <div
+        className={styles.usageBarFill}
+        style={{ width: `${Math.min(pct, 100)}%`, background: fill }}
+      />
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 
 const Dashboard: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
   );
-  const { contributions, contributionsLoading, contributionsError } = useContributions();
+  const { contributions, contributionsLoading, contributionsError } =
+    useContributions();
   const [expandedEdits, setExpandedEdits] = useState<Set<string>>(new Set());
-
-  function toggleEditTypes(pubId: string) {
-    setExpandedEdits((prev) => {
-      const next = new Set(prev);
-      next.has(pubId) ? next.delete(pubId) : next.add(pubId);
-      return next;
-    });
-  }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -95,19 +140,26 @@ const Dashboard: React.FC = () => {
   const [forgotKeyCopyStatus, setForgotKeyCopyStatus] = useState<
     "idle" | "copied" | "error"
   >("idle");
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const forgotKeyModalRef = useRef<HTMLDivElement>(null);
   const forgotKeyModalTriggerRef = useRef<HTMLElement | null>(null);
+  const createKeyModalRef = useRef<HTMLDivElement>(null);
+
+  function toggleEditTypes(pubId: string) {
+    setExpandedEdits((prev) => {
+      const next = new Set(prev);
+      next.has(pubId) ? next.delete(pubId) : next.add(pubId);
+      return next;
+    });
+  }
 
   useEffect(() => {
     const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      setIsAuthenticated(!!token);
+      setIsAuthenticated(!!localStorage.getItem("token"));
     };
-
     checkAuth();
     window.addEventListener("authChanged", checkAuth);
     window.addEventListener("storage", checkAuth);
-
     return () => {
       window.removeEventListener("authChanged", checkAuth);
       window.removeEventListener("storage", checkAuth);
@@ -120,40 +172,33 @@ const Dashboard: React.FC = () => {
         setLoading(false);
         return;
       }
-
       try {
         setError(null);
-        const apiUrl = API_URL;
         const token = localStorage.getItem("token");
-
-        const res = await fetch(`${apiUrl}/auth/dashboard`, {
+        const res = await fetch(`${API_URL}/auth/dashboard`, {
           headers: buildAuthHeaders(token),
         });
-
         if (!res.ok) {
           const errorData = await res.json();
           throw { response: res, data: errorData };
         }
-
-        const data = await res.json();
-        setDashboardData(data);
-      } catch (error: unknown) {
-        if (isHttpErrorObject(error)) {
+        setDashboardData(await res.json());
+      } catch (err: unknown) {
+        if (isHttpErrorObject(err)) {
           setError(
-            error.data.message ||
-              error.data.error ||
-              `HTTP error! status: ${error.response.status}`
+            err.data.message ||
+              err.data.error ||
+              `HTTP error! status: ${err.response.status}`
           );
         } else {
           setError(
-            error instanceof Error ? error.message : "Failed to load dashboard"
+            err instanceof Error ? err.message : "Failed to load dashboard"
           );
         }
       } finally {
         setLoading(false);
       }
     }
-
     fetchDashboard();
   }, [isAuthenticated]);
 
@@ -162,19 +207,14 @@ const Dashboard: React.FC = () => {
       !confirm(
         "Cancel subscription? This will stop automatic renewal — your subscription will remain active until the end of the current billing period."
       )
-    ) {
+    )
       return;
-    }
-
     try {
       setCancelling(true);
       setCancelError(null);
       setCancelMessage(null);
-
-      const apiUrl = API_URL;
       const token = localStorage.getItem("token");
-
-      const res = await fetch(`${apiUrl}/payments/cancel-subscription`, {
+      const res = await fetch(`${API_URL}/payments/cancel-subscription`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -182,18 +222,12 @@ const Dashboard: React.FC = () => {
         },
         body: JSON.stringify({}),
       });
-
       const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        throw data || new Error(`HTTP error ${res.status}`);
-      }
-
+      if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       setCancelMessage(
         data.message ||
           "Subscription cancelled. It will expire at the end of the current billing period."
       );
-      // refresh dashboard data
       setTimeout(() => window.dispatchEvent(new Event("authChanged")), 800);
     } catch (err: unknown) {
       setCancelError(getErrorMessage(err, "Failed to cancel subscription"));
@@ -205,10 +239,9 @@ const Dashboard: React.FC = () => {
   async function handleForgotApiKey(keyPrefix: string) {
     const userEmail = dashboardData?.user.email;
     if (!userEmail) {
-      setForgotKeyError("Unable to determine account email for this request.");
+      setForgotKeyError("Unable to determine account email.");
       return;
     }
-
     try {
       setForgotKeyLoading(true);
       setForgotKeyError(null);
@@ -217,11 +250,8 @@ const Dashboard: React.FC = () => {
       setShowForgotKeyModal(false);
       setForgotKeyCopyStatus("idle");
       setForgotKeyTarget(keyPrefix);
-
-      const apiUrl = API_URL;
       const token = localStorage.getItem("token");
-
-      const res = await fetch(`${apiUrl}/auth/forgot-api-key`, {
+      const res = await fetch(`${API_URL}/auth/forgot-api-key`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -229,13 +259,8 @@ const Dashboard: React.FC = () => {
         },
         body: JSON.stringify({ keyPrefix, email: userEmail }),
       });
-
       const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        throw data || new Error(`HTTP error ${res.status}`);
-      }
-
+      if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       setForgotKeyMessage(
         data.message ||
           "If this API key is eligible, instructions have been emailed to the account owner."
@@ -249,7 +274,9 @@ const Dashboard: React.FC = () => {
         setForgotKeyCopyStatus("idle");
       }
     } catch (err: unknown) {
-      setForgotKeyError(getErrorMessage(err, "Failed to request API key reminder"));
+      setForgotKeyError(
+        getErrorMessage(err, "Failed to request API key reminder")
+      );
       setForgotKeyDetails(null);
       setShowForgotKeyModal(false);
       setForgotKeyCopyStatus("idle");
@@ -259,19 +286,12 @@ const Dashboard: React.FC = () => {
   }
 
   async function handleCopyNewApiKey() {
-    if (!forgotKeyDetails?.key) {
-      return;
-    }
-
+    if (!forgotKeyDetails?.key) return;
     try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(forgotKeyDetails.key);
-      } else {
-        throw new Error("Clipboard API unavailable");
-      }
+      await navigator.clipboard.writeText(forgotKeyDetails.key);
       setForgotKeyCopyStatus("copied");
       setTimeout(() => setForgotKeyCopyStatus("idle"), 2000);
-    } catch (_err) {
+    } catch {
       setForgotKeyCopyStatus("error");
     }
   }
@@ -299,13 +319,13 @@ const Dashboard: React.FC = () => {
       return;
     }
     if (e.key !== "Tab" || !forgotKeyModalRef.current) return;
-    const focusableElements = Array.from(
+    const els = Array.from(
       forgotKeyModalRef.current.querySelectorAll<HTMLElement>(
         'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
       )
     );
-    const first = focusableElements[0];
-    const last = focusableElements[focusableElements.length - 1];
+    const first = els[0],
+      last = els[els.length - 1];
     if (e.shiftKey && document.activeElement === first) {
       e.preventDefault();
       last?.focus();
@@ -316,47 +336,50 @@ const Dashboard: React.FC = () => {
   }
 
   if (!isAuthenticated) {
-    return null;
+    return <AuthGate context="API keys" />;
   }
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <Typography variant="bodyMedium">Loading dashboard...</Typography>
+      <div className={styles.stateBox}>
+        <span className={styles.loadingDot} />
+        Loading dashboard…
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.errorContainer}>
-        <Typography variant="bodyMedium">
-          Error loading dashboard: {error}
-        </Typography>
-        <Button variant="primary" onClick={() => window.location.reload()}>
-          <Typography as="span" variant="bodySmall">
-            Try Again
-          </Typography>
-        </Button>
+      <div className={styles.stateBox}>
+        <span className={styles.errorText}>Error: {error}</span>
+        <button
+          type="button"
+          className={styles.btnOutline}
+          onClick={() => window.location.reload()}
+        >
+          Try again
+        </button>
       </div>
     );
   }
 
-  if (!dashboardData) {
-    return null;
-  }
+  if (!dashboardData) return null;
 
-  const formatUsagePercentage = (
-    used: number,
-    limit: number
-  ): { remaining: number; percentage: string; used: number } => {
-    const remaining = limit - used;
-    const percentage = ((used / limit) * 100).toFixed(1);
-    return { remaining, percentage, used };
-  };
+  const totalUsed = dashboardData.apiKeys.reduce(
+    (sum, k) => sum + (k.limits.requestsPerMonth - k.remaining.month),
+    0
+  );
+  const totalLimit = dashboardData.apiKeys.reduce(
+    (sum, k) => sum + k.limits.requestsPerMonth,
+    0
+  );
+  const activeKeyCount = dashboardData.apiKeys.filter(
+    (k) => k.keyStatus === "ACTIVE" || k.isActive
+  ).length;
 
   return (
     <>
+      {/* ── Forgot-key modal ─────────────────────────────────────────────── */}
       {forgotKeyDetails && showForgotKeyModal && (
         <div className={styles.modalOverlay}>
           <div
@@ -367,346 +390,339 @@ const Dashboard: React.FC = () => {
             aria-labelledby="forgot-key-modal-title"
             onKeyDown={handleForgotKeyModalKeyDown}
           >
-            <Typography variant="headingSmall" id="forgot-key-modal-title">
+            <p className={styles.modalTitle} id="forgot-key-modal-title">
               New API key generated
-            </Typography>
-            <Typography variant="bodySmall" className={styles.modalDescription}>
+            </p>
+            <p className={styles.modalDesc}>
               This key is shown only once. Copy it now and store it securely.
-            </Typography>
-            <Typography variant="bodySmall" className={styles.fieldRow}>
-              Name: {forgotKeyDetails.name || "Untitled key"}
-            </Typography>
-            <Typography variant="bodySmall" className={styles.fieldRow}>
-              Tier: {forgotKeyDetails.tier || "—"}
-            </Typography>
-            <Typography variant="bodySmall" className={styles.fieldRow}>
-              Status: {forgotKeyDetails.keyStatus || "—"}
-            </Typography>
-            <Typography variant="bodySmall" className={styles.fieldRow}>
-              Key prefix: {forgotKeyDetails.keyPrefix || "—"}
-            </Typography>
-            {forgotKeyDetails.permissions?.length ? (
-              <Typography variant="bodySmall" className={styles.fieldRow}>
-                Permissions: {forgotKeyDetails.permissions.join(", ")}
-              </Typography>
-            ) : null}
+            </p>
+            <dl className={styles.modalFields}>
+              <div>
+                <dt>Name</dt>
+                <dd>{forgotKeyDetails.name || "Untitled key"}</dd>
+              </div>
+              <div>
+                <dt>Tier</dt>
+                <dd>{forgotKeyDetails.tier || "—"}</dd>
+              </div>
+              <div>
+                <dt>Status</dt>
+                <dd>{forgotKeyDetails.keyStatus || "—"}</dd>
+              </div>
+              <div>
+                <dt>Key prefix</dt>
+                <dd>{forgotKeyDetails.keyPrefix || "—"}</dd>
+              </div>
+              {!!forgotKeyDetails.permissions?.length && (
+                <div>
+                  <dt>Permissions</dt>
+                  <dd>{forgotKeyDetails.permissions.join(", ")}</dd>
+                </div>
+              )}
+            </dl>
             {forgotKeyDetails.key && (
-              <div className={styles.modalKeyContainer}>
-                <Typography
-                  as="span"
-                  variant="bodySmall"
-                  className={styles.modalKeyLabel}
-                >
-                  API key
-                </Typography>
-                <pre className={styles.apiKeyPre}>
-                  <Typography as="span" variant="bodySmall">
-                    {forgotKeyDetails.key}
-                  </Typography>
-                </pre>
-                <Button
+              <div className={styles.modalKeyBlock}>
+                <p className={styles.modalKeyLabel}>API key</p>
+                <pre className={styles.modalKeyPre}>{forgotKeyDetails.key}</pre>
+                <button
                   type="button"
-                  variant="primary"
+                  className={styles.btnPrimary}
                   onClick={handleCopyNewApiKey}
                 >
-                  <Typography as="span" variant="bodySmall">
-                    {forgotKeyCopyStatus === "copied"
-                      ? "Copied!"
-                      : forgotKeyCopyStatus === "error"
-                      ? "Copy failed"
-                      : "Copy API key"}
-                  </Typography>
-                </Button>
+                  {forgotKeyCopyStatus === "copied"
+                    ? "Copied!"
+                    : forgotKeyCopyStatus === "error"
+                    ? "Copy failed"
+                    : "Copy API key"}
+                </button>
               </div>
             )}
-            <div className={styles.modalActions}>
-              <Button onClick={handleCloseForgotKeyModal} variant="secondary">
-                <Typography as="span" variant="bodySmall">
-                  Close
-                </Typography>
-              </Button>
+            <div className={styles.modalFooter}>
+              <button
+                type="button"
+                className={styles.btnOutline}
+                onClick={handleCloseForgotKeyModal}
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
       )}
-      <div className={styles.mainCard}>
-        <Typography variant="headingMedium" as="h1">Dashboard</Typography>
 
-        <div className={styles.userInfo}>
-          <Typography variant="bodyMedium">
-            Welcome, {dashboardData.user.name || dashboardData.user.username}
-          </Typography>
-          <Typography variant="bodyMedium">
-            Email: {dashboardData.user.email}
-          </Typography>
-          {!dashboardData.user.approved && (
-            <Typography variant="bodySmall" className={styles.warningText}>
-              <span>⚠️</span> Account pending approval
-            </Typography>
-          )}
-          {!dashboardData.user.emailVerified && (
-            <Typography variant="bodySmall" className={styles.warningText}>
-              <span>⚠️</span> Email not verified
-            </Typography>
-          )}
+      {/* ── Page ─────────────────────────────────────────────────────────── */}
+      <div className={styles.page}>
+        {/* Page header */}
+        <div className={styles.pageHeader}>
+          <div>
+            <h1 className={styles.pageTitle}>API keys &amp; usage</h1>
+            <p className={styles.pageSubtitle}>
+              Track request volume, manage keys, and review activity across your
+              projects.
+            </p>
+          </div>
+          <div className={styles.pageActions}>
+            {/* TODO: wire Create API key button to POST /auth/api-keys once endpoint is confirmed */}
+          </div>
         </div>
 
-        {cancelError && (
-          <Typography variant="bodySmall" className={styles.cancelError}>
-            Error cancelling subscription: {cancelError}
-          </Typography>
+        {/* Account warnings */}
+        {(!dashboardData.user.approved ||
+          !dashboardData.user.emailVerified) && (
+          <div className={styles.warningBanner}>
+            {!dashboardData.user.approved && (
+              <span className={styles.warningItem}>
+                Account pending approval
+              </span>
+            )}
+            {!dashboardData.user.emailVerified && (
+              <span className={styles.warningItem}>Email not verified</span>
+            )}
+          </div>
         )}
-        {cancelMessage && (
-          <Typography variant="bodySmall" className={styles.cancelError}>
-            {cancelMessage}
-          </Typography>
-        )}
 
-        {dashboardData?.apiKeys?.length > 0 ? (
-          <div>
-            <Typography variant="headingSmall">Your API Keys</Typography>
-            {dashboardData.apiKeys.map((apiKey, _index) => {
-              const hourlyUsage = formatUsagePercentage(
-                apiKey.limits.requestsPerHour - apiKey.remaining.hour,
-                apiKey.limits.requestsPerHour
-              );
-              const dailyUsage = formatUsagePercentage(
-                apiKey.limits.requestsPerDay - apiKey.remaining.day,
-                apiKey.limits.requestsPerDay
-              );
-              const monthlyUsage = formatUsagePercentage(
-                apiKey.limits.requestsPerMonth - apiKey.remaining.month,
-                apiKey.limits.requestsPerMonth
-              );
-
-              return (
-                <div key={apiKey.keyPrefix} className={styles.apiKeyCard}>
-                  <div className={styles.apiHeader}>
-                    <div>
-                      <Typography variant="headingSmall">
-                        {apiKey.name}
-                      </Typography>
-                      <Typography variant="bodySmall">
-                        Tier: {apiKey.tier} | Key: {apiKey.keyPrefix}*** | Total
-                        Usage: {apiKey.usageCount.toLocaleString()}
-                      </Typography>
-                    </div>
-                    {apiKey.tier &&
-                      apiKey.tier !== "HOBBY" &&
-                      apiKey.keyStatus === "ACTIVE" && (
-                        <div>
-                          <div className={styles.actionsContainer}>
-                            <Button
-                              variant="red"
-                              onClick={handleCancelSubscription}
-                              disabled={cancelling}
-                            >
-                              <Typography as="span" variant="bodySmall">
-                                {cancelling
-                                  ? "Cancelling…"
-                                  : "Cancel subscription"}
-                              </Typography>
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              onClick={() =>
-                                handleForgotApiKey(apiKey.keyPrefix)
-                              }
-                              disabled={
-                                forgotKeyLoading &&
-                                forgotKeyTarget === apiKey.keyPrefix
-                              }
-                            >
-                              <Typography as="span" variant="bodySmall">
-                                {forgotKeyLoading &&
-                                forgotKeyTarget === apiKey.keyPrefix
-                                  ? "Sending…"
-                                  : "Forgot API key"}
-                              </Typography>
-                            </Button>
-                          </div>
-                          {forgotKeyTarget === apiKey.keyPrefix && (
-                            <>
-                              {forgotKeyError && (
-                                <Typography
-                                  variant="bodySmall"
-                                  className={styles.inlineError}
-                                >
-                                  {forgotKeyError}
-                                </Typography>
-                              )}
-                              {forgotKeyMessage && (
-                                <Typography
-                                  variant="bodySmall"
-                                  className={styles.inlineSuccess}
-                                >
-                                  {forgotKeyMessage}
-                                </Typography>
-                              )}
-                            </>
-                          )}
-                          <Typography
-                            variant="bodySmall"
-                            className={styles.helperText}
-                          >
-                            Cancelling will stop renewals — subscription remains
-                            active until period end.
-                          </Typography>
-                        </div>
-                      )}
-                  </div>
-
-                  <div className={styles.rateLimitsGrid}>
-                    <div>
-                      <Typography variant="bodySmall">Hourly</Typography>
-                      <Typography variant="bodySmall">
-                        {hourlyUsage.remaining.toLocaleString()} /{" "}
-                        {apiKey.limits.requestsPerHour.toLocaleString()}{" "}
-                        remaining
-                      </Typography>
-                      <progress
-                        className={styles.progressBar}
-                        value={parseFloat(hourlyUsage.percentage)}
-                        max={100}
-                        data-danger={parseFloat(hourlyUsage.percentage) > 80}
-                        aria-label={`Hourly usage: ${hourlyUsage.percentage}% used`}
-                      />
-                      <Typography variant="bodySmall">
-                        {hourlyUsage.percentage}% used
-                      </Typography>
-                    </div>
-
-                    <div>
-                      <Typography variant="bodySmall">Daily</Typography>
-                      <Typography variant="bodySmall">
-                        {dailyUsage.remaining.toLocaleString()} /{" "}
-                        {apiKey.limits.requestsPerDay.toLocaleString()}{" "}
-                        remaining
-                      </Typography>
-                      <progress
-                        className={styles.progressBar}
-                        value={parseFloat(dailyUsage.percentage)}
-                        max={100}
-                        data-danger={parseFloat(dailyUsage.percentage) > 80}
-                        aria-label={`Daily usage: ${dailyUsage.percentage}% used`}
-                      />
-                      <Typography variant="bodySmall">
-                        {dailyUsage.percentage}% used
-                      </Typography>
-                    </div>
-
-                    <div>
-                      <Typography variant="bodySmall">Monthly</Typography>
-                      <Typography variant="bodySmall">
-                        {monthlyUsage.remaining.toLocaleString()} /{" "}
-                        {apiKey.limits.requestsPerMonth.toLocaleString()}{" "}
-                        remaining
-                      </Typography>
-                      <progress
-                        className={styles.progressBar}
-                        value={parseFloat(monthlyUsage.percentage)}
-                        max={100}
-                        data-danger={parseFloat(monthlyUsage.percentage) > 80}
-                        aria-label={`Monthly usage: ${monthlyUsage.percentage}% used`}
-                      />
-                      <Typography variant="bodySmall">
-                        {monthlyUsage.percentage}% used
-                      </Typography>
-                    </div>
-                  </div>
-
-                  <Typography variant="bodySmall" className={styles.features}>
-                    Features:
-                    {apiKey.features.allowLocationSearch && " Location Search"}
-                    {apiKey.features.allowLocationSearch &&
-                      apiKey.features.allowStats &&
-                      ","}
-                    {apiKey.features.allowStats && " Statistics"}
-                    {!apiKey.features.allowLocationSearch &&
-                      !apiKey.features.allowStats &&
-                      " Basic API access only"}
-                  </Typography>
-
-                  {apiKey.lastUsed && (
-                    <Typography variant="bodySmall" className={styles.lastUsed}>
-                      Last used: {new Date(apiKey.lastUsed).toLocaleString()}
-                    </Typography>
-                  )}
-                </div>
-              );
-            })}
-
-            <div className={styles.summaryCard}>
-              <Typography variant="bodySmall">
-                Summary: {dashboardData.summary.totalApiKeys} API key(s) with{" "}
-                {dashboardData.summary.totalUsage.toLocaleString()} total
-                requests
-              </Typography>
+        {/* Stat cards */}
+        <div className={styles.statsRow}>
+          {/* Requests */}
+          <div className={styles.statCard}>
+            <div className={styles.statHeader}>
+              <span className={styles.statLabel}>
+                <svg
+                  width="11"
+                  height="11"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  aria-hidden="true"
+                  className={styles.statIcon}
+                >
+                  <path
+                    d="M1 9L4 5l3 3 4-6"
+                    stroke="#6b7280"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                REQUESTS · 30D
+              </span>
             </div>
+            <div className={styles.statValue}>
+              {totalUsed.toLocaleString()}
+              <span className={styles.statSuffix}>
+                /{totalLimit > 0 ? `${Math.round(totalLimit / 1000)}k` : "100k"}
+              </span>
+            </div>
+            {/* TODO: show % vs prev period once API returns historical usage data */}
           </div>
-        ) : (
-          <div>
-            <Typography variant="bodyMedium">
-              No API keys found. You may need to create an API key to get
-              started.
-            </Typography>
-          </div>
-        )}
 
+          {/* Latency */}
+          {/* TODO: Pubs returned stat card — show once API returns total pub records served */}
+        </div>
+
+        {/* TODO: Request volume chart — restore once API returns time-series request data */}
+
+        {/* Bottom row: keys + top endpoints */}
+        <div className={styles.bottomRow}>
+          {/* API keys panel */}
+          <div className={styles.keysPanel}>
+            <div className={styles.keysPanelHeader}>
+              <div className={styles.keysPanelLeft}>
+                <span className={styles.keysPanelTitle}>API keys</span>
+                <span className={styles.activeCountBadge}>
+                  {activeKeyCount} active
+                </span>
+              </div>
+              {/* TODO: wire + New key button once Create API key is confirmed working */}
+            </div>
+
+            {cancelError && (
+              <p className={styles.inlineError}>
+                Error cancelling subscription: {cancelError}
+              </p>
+            )}
+            {cancelMessage && (
+              <p className={styles.inlineSuccess}>{cancelMessage}</p>
+            )}
+
+            {dashboardData.apiKeys.length === 0 ? (
+              <div className={styles.emptyKeys}>
+                No API keys yet. Create one to get started.
+              </div>
+            ) : (
+              dashboardData.apiKeys.map((key) => {
+                const used = key.limits.requestsPerMonth - key.remaining.month;
+                const pct = (used / key.limits.requestsPerMonth) * 100;
+                const isMenuOpen = openMenu === key.keyPrefix;
+                const isForgotLoading =
+                  forgotKeyLoading && forgotKeyTarget === key.keyPrefix;
+
+                return (
+                  <div key={key.keyPrefix} className={styles.keyRow}>
+                    <div className={styles.keyLeft}>
+                      <span className={styles.keyName}>{key.name}</span>
+                      <div className={styles.keyMeta}>
+                        <code className={styles.keyPrefix}>
+                          {key.keyPrefix} ····
+                        </code>
+                        <span className={styles.keyLastUsed}>
+                          · last used {fmtRelative(key.lastUsed)}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className={styles.btnOutline}
+                        disabled={isForgotLoading}
+                        onClick={() => handleForgotApiKey(key.keyPrefix)}
+                      >
+                        {isForgotLoading
+                          ? "Regenerating…"
+                          : "Regenerate API key"}
+                      </button>
+                      {forgotKeyTarget === key.keyPrefix && (
+                        <>
+                          {forgotKeyError && (
+                            <p className={styles.inlineError}>
+                              {forgotKeyError}
+                            </p>
+                          )}
+                          {forgotKeyMessage && !showForgotKeyModal && (
+                            <p className={styles.inlineSuccess}>
+                              {forgotKeyMessage}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    <div className={styles.keyRight}>
+                      <span
+                        className={`${styles.tierBadge} ${
+                          key.tier === "HOBBY"
+                            ? styles.tierHobby
+                            : styles.tierDev
+                        }`}
+                      >
+                        {key.tier}
+                      </span>
+                      <div className={styles.keyUsageGroup}>
+                        <span className={styles.usageText}>
+                          {used.toLocaleString()} /{" "}
+                          {key.limits.requestsPerMonth.toLocaleString()}
+                        </span>
+                        <UsageBar pct={pct} />
+                      </div>
+                      <div className={styles.keyMenuWrap}>
+                        <button
+                          type="button"
+                          className={styles.menuDotBtn}
+                          aria-label={`More options for ${key.name}`}
+                          onClick={() =>
+                            setOpenMenu(isMenuOpen ? null : key.keyPrefix)
+                          }
+                        >
+                          •••
+                        </button>
+                        {isMenuOpen && (
+                          <div className={styles.menuDropdown}>
+                            {key.tier !== "HOBBY" &&
+                              key.keyStatus === "ACTIVE" && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className={styles.menuItem}
+                                    disabled={isForgotLoading}
+                                    onClick={() => {
+                                      void handleForgotApiKey(key.keyPrefix);
+                                      setOpenMenu(null);
+                                    }}
+                                  >
+                                    Forgot API key
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={styles.menuItemDanger}
+                                    disabled={cancelling}
+                                    onClick={() => {
+                                      void handleCancelSubscription();
+                                      setOpenMenu(null);
+                                    }}
+                                  >
+                                    {cancelling
+                                      ? "Cancelling…"
+                                      : "Cancel subscription"}
+                                  </button>
+                                </>
+                              )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Contributions section */}
         {dashboardData.user.approved && (
           <div className={styles.contributionsSection}>
-            <Typography variant="headingSmall">Your Contributions</Typography>
-            {contributionsLoading && (
-              <Typography variant="bodySmall">Loading contributions...</Typography>
-            )}
+            <p className={styles.contributionsSectionTitle}>
+              Your contributions
+            </p>
+            {contributionsLoading && <p className={styles.muted}>Loading…</p>}
             {contributionsError && (
-              <Typography variant="bodySmall" className={styles.inlineError}>
-                {contributionsError}
-              </Typography>
+              <p className={styles.inlineError}>{contributionsError}</p>
             )}
             {!contributionsLoading && !contributionsError && contributions && (
               <>
-                <Typography variant="bodyMedium" className={styles.contributionStat}>
-                  {contributions.totalAdded} pub{contributions.totalAdded !== 1 ? "s" : ""} added
-                </Typography>
-                {contributions.recentPubs.length > 0 ? (
+                <p className={styles.muted}>
+                  {contributions.totalAdded} pub
+                  {contributions.totalAdded !== 1 ? "s" : ""} added
+                </p>
+                {contributions.recentPubs.length > 0 && (
                   <ul className={styles.recentPubList}>
                     {contributions.recentPubs.map((pub) => (
                       <li key={pub.id}>
-                        <a href={`/pubs/${pub.id}`} className={styles.recentPubLink}>
-                          <Typography as="span" variant="bodySmall">
-                            {pub.name}
-                          </Typography>
+                        <a
+                          href={`/pubs/${pub.id}`}
+                          className={styles.recentPubLink}
+                        >
+                          {pub.name}
                         </a>
-                        <Typography as="span" variant="bodySmall" className={styles.recentPubMeta}>
-                          {" — "}{pub.city}
-                        </Typography>
+                        <span className={styles.muted}> — {pub.city}</span>
                       </li>
                     ))}
                   </ul>
-                ) : (
-                  <Typography variant="bodySmall">No pubs added yet.</Typography>
                 )}
-
                 {contributions.editsByPub.length > 0 && (
                   <div className={styles.editsSection}>
-                    <Typography variant="headingSmall">Recent Edits</Typography>
+                    <p
+                      className={styles.contributionsSectionTitle}
+                      style={{ marginTop: "1rem" }}
+                    >
+                      Recent edits
+                    </p>
                     <ul className={styles.recentPubList}>
                       {contributions.editsByPub.map((entry) => (
                         <li key={entry.pubId} className={styles.editEntry}>
                           <div className={styles.editEntryRow}>
                             <div>
-                              <a href={`/pubs/${entry.pubId}`} className={styles.recentPubLink}>
-                                <Typography as="span" variant="bodySmall">
-                                  {entry.pubName}
-                                </Typography>
+                              <a
+                                href={`/pubs/${entry.pubId}`}
+                                className={styles.recentPubLink}
+                              >
+                                {entry.pubName}
                               </a>
-                              <Typography as="span" variant="bodySmall" className={styles.recentPubMeta}>
-                                {" — "}{entry.city}
-                              </Typography>
-                              <Typography as="span" variant="bodySmall" className={styles.editCount}>
-                                {" "}({entry.editCount} edit{entry.editCount !== 1 ? "s" : ""})
-                              </Typography>
+                              <span className={styles.muted}>
+                                {" "}
+                                — {entry.city}
+                              </span>
+                              <span className={styles.muted}>
+                                {" "}
+                                ({entry.editCount} edit
+                                {entry.editCount !== 1 ? "s" : ""})
+                              </span>
                             </div>
                             {entry.editTypes.length > 0 && (
                               <button
@@ -715,19 +731,17 @@ const Dashboard: React.FC = () => {
                                 onClick={() => toggleEditTypes(entry.pubId)}
                                 aria-expanded={expandedEdits.has(entry.pubId)}
                               >
-                                <Typography as="span" variant="bodySmall">
-                                  {expandedEdits.has(entry.pubId) ? "Hide fields" : "Show fields"}
-                                </Typography>
+                                {expandedEdits.has(entry.pubId)
+                                  ? "Hide"
+                                  : "Show fields"}
                               </button>
                             )}
                           </div>
-                          {expandedEdits.has(entry.pubId) && entry.editTypes.length > 0 && (
+                          {expandedEdits.has(entry.pubId) && (
                             <ul className={styles.editTypeList}>
-                              {entry.editTypes.map((type) => (
-                                <li key={type} className={styles.editTypePill}>
-                                  <Typography as="span" variant="bodySmall">
-                                    {type}
-                                  </Typography>
+                              {entry.editTypes.map((t) => (
+                                <li key={t} className={styles.editTypePill}>
+                                  {t}
                                 </li>
                               ))}
                             </ul>

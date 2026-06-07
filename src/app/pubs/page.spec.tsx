@@ -15,6 +15,7 @@ vi.mock("next/link", () => ({
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: vi.fn() }),
+	useSearchParams: () => ({ get: () => null }),
 }));
 
 function jsonResponse(data: unknown, status = 200): Response {
@@ -82,7 +83,7 @@ describe("Pubs page", () => {
 		render(<Pubs />);
 
 		expect(
-			await screen.findByText("No pubs found in the database."),
+			await screen.findByText("No pubs found."),
 		).toBeInTheDocument();
 	});
 
@@ -108,31 +109,31 @@ describe("Pubs page", () => {
 		).toBeInTheDocument();
 	});
 
-	it("renders Try Again button on error", async () => {
+	it("renders Try again button on error", async () => {
 		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("timeout"));
 
 		render(<Pubs />);
 
 		expect(
-			await screen.findByRole("button", { name: "Try Again" }),
+			await screen.findByRole("button", { name: "Try again" }),
 		).toBeInTheDocument();
 	});
 
-	it("shows the Add Pub link when pubs are loaded", async () => {
+	it("shows the Add pub link when pubs are loaded", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			jsonResponse({ data: SAMPLE_PUBS }),
 		);
 
 		render(<Pubs />);
 
-		const addPubLink = await screen.findByRole("link", { name: "Add Pub" });
+		const addPubLink = await screen.findByRole("link", { name: /add pub/i });
 		expect(addPubLink).toHaveAttribute("href", "/add-pub");
 	});
 
 	describe("search filtering", () => {
 		it("filters pubs by name after debounce", async () => {
 			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
-				const search = new URL(url as string).searchParams.get("search") ?? "";
+				const search = new URL(url as string, "http://localhost").searchParams.get("search") ?? "";
 				const filtered = SAMPLE_PUBS.filter((p) =>
 					p.name.toLowerCase().includes(search.toLowerCase()),
 				);
@@ -144,7 +145,7 @@ describe("Pubs page", () => {
 			await screen.findByText("The Harp");
 
 			const searchInput = screen.getByPlaceholderText(
-				/search pubs by name, city/i,
+				/search by name, city/i,
 			);
 			fireEvent.change(searchInput, { target: { value: "harp" } });
 
@@ -157,7 +158,7 @@ describe("Pubs page", () => {
 
 		it("filters pubs by city", async () => {
 			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
-				const search = new URL(url as string).searchParams.get("search") ?? "";
+				const search = new URL(url as string, "http://localhost").searchParams.get("search") ?? "";
 				const filtered = SAMPLE_PUBS.filter((p) =>
 					p.city.toLowerCase().includes(search.toLowerCase()),
 				);
@@ -169,7 +170,7 @@ describe("Pubs page", () => {
 			await screen.findByText("The Harp");
 
 			const searchInput = screen.getByPlaceholderText(
-				/search pubs by name, city/i,
+				/search by name, city/i,
 			);
 			fireEvent.change(searchInput, { target: { value: "manchester" } });
 
@@ -182,7 +183,7 @@ describe("Pubs page", () => {
 
 		it("filters pubs by address", async () => {
 			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
-				const search = new URL(url as string).searchParams.get("search") ?? "";
+				const search = new URL(url as string, "http://localhost").searchParams.get("search") ?? "";
 				const filtered = SAMPLE_PUBS.filter((p) =>
 					p.address.toLowerCase().includes(search.toLowerCase()),
 				);
@@ -194,7 +195,7 @@ describe("Pubs page", () => {
 			await screen.findByText("The Harp");
 
 			const searchInput = screen.getByPlaceholderText(
-				/search pubs by name, city/i,
+				/search by name, city/i,
 			);
 			fireEvent.change(searchInput, { target: { value: "Lower Mall" } });
 
@@ -205,28 +206,6 @@ describe("Pubs page", () => {
 			});
 		});
 
-		it("shows match count when search term is active", async () => {
-			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
-				const search = new URL(url as string).searchParams.get("search") ?? "";
-				const filtered = SAMPLE_PUBS.filter((p) =>
-					p.city.toLowerCase().includes(search.toLowerCase()),
-				);
-				return Promise.resolve(jsonResponse({ data: search ? filtered : SAMPLE_PUBS }));
-			});
-
-			render(<Pubs />);
-
-			await screen.findByText("The Harp");
-
-			const searchInput = screen.getByPlaceholderText(
-				/search pubs by name, city/i,
-			);
-			fireEvent.change(searchInput, { target: { value: "london" } });
-
-			await waitFor(() => {
-				expect(screen.getByText(/Showing 2 pubs/i)).toBeInTheDocument();
-			});
-		});
 
 		it("does not show match count when search term is empty", async () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(

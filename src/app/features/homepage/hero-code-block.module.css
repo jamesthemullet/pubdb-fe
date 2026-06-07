@@ -109,3 +109,14 @@
   font-family: inherit;
   font-size: inherit;
 }
+
+@media (max-width: 600px) {
+  .codeBlock {
+    font-size: 11px;
+  }
+
+  .requestCode,
+  .responseCode {
+    padding: 14px 14px;
+  }
+}

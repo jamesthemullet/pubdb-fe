@@ -23,7 +23,13 @@
       "Bash(yarn test:ci *)",
       "Bash(gh issue *)",
       "Bash(yarn biome *)",
-      "Bash(npx playwright *)"
+      "Bash(npx playwright *)",
+      "Bash(npx tsc *)",
+      "Bash(npx jest *)",
+      "Bash(npx next *)",
+      "WebFetch(domain:claude.ai)",
+      "Bash(yarn list *)",
+      "Bash(git show *)"
     ]
   }
 }

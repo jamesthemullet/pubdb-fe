@@ -9,11 +9,8 @@ export function createApiProxyHandler(
     const apiUrl = getServerApiUrl();
     const apiKey = process.env.TESTING_API_KEY;
 
-    if (!apiKey) {
-      return NextResponse.json({ error: "Missing API key" }, { status: 500 });
-    }
-
-    const headers: Record<string, string> = { "X-API-Key": apiKey };
+    const headers: Record<string, string> = {};
+    if (apiKey) headers["X-API-Key"] = apiKey;
     if (options?.forwardAuth) {
       const authHeader = request.headers.get("authorization");
       if (authHeader) {
