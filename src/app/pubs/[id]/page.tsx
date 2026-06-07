@@ -485,9 +485,12 @@ export default function PubPage() {
               {(["overview", "beers", "hours", "garden"] as PubTab[]).map((tab) => (
                 <button
                   key={tab}
+                  id={`tab-${tab}`}
                   type="button"
                   role="tab"
                   aria-selected={activeTab === tab}
+                  aria-controls="tab-panel"
+                  tabIndex={activeTab === tab ? 0 : -1}
                   className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ""}`}
                   onClick={() => setActiveTab(tab)}
                 >
@@ -496,7 +499,7 @@ export default function PubPage() {
               ))}
             </div>
 
-            <div className={styles.tabPanel} role="tabpanel">
+            <div id="tab-panel" className={styles.tabPanel} role="tabpanel" aria-labelledby={`tab-${activeTab}`}>
               {activeTab === "overview" && (
                 <PubDisplayView
                   pub={pub}

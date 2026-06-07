@@ -451,6 +451,7 @@
   font-size: 0.9375rem;
   font-weight: 700;
   color: var(--text-color);
+  margin: 0;
 }
 
 .tablePeriodLabel {

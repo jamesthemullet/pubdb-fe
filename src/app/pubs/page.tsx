@@ -61,38 +61,6 @@ const AMENITY_ICONS: Partial<
   },
 };
 
-const TABLE_AMENITY_KEYS = Object.keys(AMENITY_ICONS) as PubAmenityKey[];
-
-const AmenityIconCell = memo(function AmenityIconCell({ pub }: { pub: Pub }) {
-  const active = TABLE_AMENITY_KEYS.filter((k) => pub[k]);
-  return (
-    <div className={styles.amenityGrid}>
-      {TABLE_AMENITY_KEYS.map((key) => {
-        const icon = AMENITY_ICONS[key];
-        if (!icon) return null;
-        const isActive = Boolean(pub[key]);
-        return (
-          <span
-            key={key}
-            role="img"
-            className={`${styles.amenityDot} ${
-              isActive ? styles.amenityDotActive : ""
-            }`}
-            title={isActive ? icon.title : ""}
-            aria-label={isActive ? icon.title : undefined}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-              {/* biome-ignore lint/security/noDangerouslySetInnerHtml: trusted internal SVG icon data */}
-              <g dangerouslySetInnerHTML={{ __html: icon.svg }} />
-            </svg>
-          </span>
-        );
-      })}
-      {active.length === 0 && <span className={styles.amenityNone}>—</span>}
-    </div>
-  );
-});
-
 function PubsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -103,7 +71,9 @@ function PubsContent() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState(urlQuery);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(urlQuery);
-  const [activeAmenities, setActiveAmenities] = useState<Set<PubAmenityKey>>(new Set());
+  const [activeAmenities, setActiveAmenities] = useState<Set<PubAmenityKey>>(
+    new Set()
+  );
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [showAllFilters, setShowAllFilters] = useState(false);
   const [responseMs, setResponseMs] = useState<number | null>(null);
@@ -508,7 +478,7 @@ function PubsContent() {
                 <th className={styles.thLocation}>LOCATION</th>
                 {/* TODO: improve amenity display (icons unclear, title tooltip unreliable) before re-enabling */}
                 {/* <th className={styles.thAmenities}>AMENITIES</th> */}
-                <th className={styles.thArrow} aria-label="View" />
+                {/* <th className={styles.thArrow} aria-label="View" /> */}
               </tr>
             </thead>
             <tbody>
@@ -517,6 +487,13 @@ function PubsContent() {
                   key={pub.id}
                   className={styles.tableRow}
                   onClick={() => router.push(`/pubs/${pub.id}`)}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      router.push(`/pubs/${pub.id}`);
+                    }
+                  }}
                 >
                   <td className={styles.tdName}>
                     <Link href={`/pubs/${pub.id}`} className={styles.pubName}>

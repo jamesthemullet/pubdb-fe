@@ -8,31 +8,14 @@ import styles from "./page.module.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type TimePeriod = "7d" | "30d" | "90d" | "all";
+// type TimePeriod = "7d" | "30d" | "90d" | "all";
 
-const TIME_PERIODS: { id: TimePeriod; label: string }[] = [
-  { id: "7d", label: "Last 7 days" },
-  { id: "30d", label: "Last 30 days" },
-  { id: "90d", label: "Last 90 days" },
-  { id: "all", label: "All-time" },
-];
-
-type BadgeVariant = "green" | "orange" | "purple" | "amber" | "blue";
-
-interface Badge {
-  label: string;
-  variant: BadgeVariant;
-}
-
-interface MockProfile {
-  handle: string;
-  location: string;
-  joined: string;
-  badges: Badge[];
-  streak: number;
-  avatarColor: string;
-  activity: number[];
-}
+// const TIME_PERIODS: { id: TimePeriod; label: string }[] = [
+//   { id: "7d", label: "Last 7 days" },
+//   { id: "30d", label: "Last 30 days" },
+//   { id: "90d", label: "Last 90 days" },
+//   { id: "all", label: "All-time" },
+// ];
 
 // ── Static decorative data keyed by rank ──────────────────────────────────────
 
@@ -87,50 +70,6 @@ interface MockProfile {
 //   },
 // };
 
-const CLIMBING_FASTEST = [
-  {
-    initials: "IR",
-    color: "#6366f1",
-    name: "Imogen Reid",
-    from: 22,
-    to: 4,
-    gain: 18,
-  },
-  {
-    initials: "TL",
-    color: "#14b8a6",
-    name: "Tomás Linhart",
-    from: 19,
-    to: 8,
-    gain: 11,
-  },
-  {
-    initials: "AD",
-    color: "#f97316",
-    name: "Aoife Doyle",
-    from: 18,
-    to: 11,
-    gain: 7,
-  },
-];
-
-const TOP_THIS_WEEK = [
-  { name: "James Winfield", value: 24 },
-  { name: "Sienna Park", value: 19 },
-  { name: "Alex Kovač", value: 14 },
-  { name: "Daniel Ó Briain", value: 11 },
-];
-
-const EARN_BADGES = [
-  {
-    emoji: "🌿",
-    label: "Garden expert",
-    description: "Edit 25 beer garden entries",
-    progress: 17,
-    total: 25,
-  },
-];
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function nameInitials(name: string): string {
@@ -164,33 +103,6 @@ function getInitials(entry: LeaderboardEntry): string {
 // }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
-
-function Sparkline({ data }: { data: number[] }) {
-  const W = 80;
-  const H = 24;
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const range = max - min || 1;
-  const pts = data
-    .map((v, i) => {
-      const x = (i / (data.length - 1)) * W;
-      const y = H - ((v - min) / range) * (H - 6) - 3;
-      return `${x},${y}`;
-    })
-    .join(" ");
-  return (
-    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
-      <polyline
-        points={pts}
-        fill="none"
-        stroke="var(--text-muted)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 const MEDAL: Record<1 | 2 | 3, { bg: string; text: string }> = {
   1: { bg: "#fbbf24", text: "#78350f" },
@@ -285,9 +197,7 @@ function YourRankBanner({
     <div className={styles.yourRankBanner}>
       <span className={styles.yourRankLabel}>YOUR RANK</span>
       {/* TODO: avatarColor — needs real avatar/colour from API */}
-      <span className={styles.yourRankAvatar}>
-        {getInitials(entry)}
-      </span>
+      <span className={styles.yourRankAvatar}>{getInitials(entry)}</span>
       <div className={styles.yourRankInfo}>
         <span className={styles.yourRankName}>
           You ({entry.displayName || entry.username})
@@ -338,7 +248,6 @@ export default function LeaderboardPage() {
     useLeaderboard();
   const { user } = useAuth();
   const router = useRouter();
-  const [period, setPeriod] = useState<TimePeriod>("30d");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
   const entries = leaderboard?.leaderboard ?? [];
@@ -361,14 +270,14 @@ export default function LeaderboardPage() {
       ])
     : null;
 
-  const periodLabel =
-    period === "7d"
-      ? "last 7d"
-      : period === "30d"
-      ? "last 30d"
-      : period === "90d"
-      ? "last 90d"
-      : "all time";
+  // const periodLabel =
+  //   period === "7d"
+  //     ? "last 7d"
+  //     : period === "30d"
+  //     ? "last 30d"
+  //     : period === "90d"
+  //     ? "last 90d"
+  //     : "all time";
 
   async function handleShare() {
     const url = window.location.href;
@@ -504,8 +413,8 @@ export default function LeaderboardPage() {
             <div className={styles.tableSection}>
               <div className={styles.tableHeader}>
                 <div className={styles.tableHeaderLeft}>
-                  <span className={styles.tableTitle}>Full ranking</span>
-                  <span className={styles.tablePeriodLabel}>{periodLabel}</span>
+                  <h2 className={styles.tableTitle}>Full ranking</h2>
+                  {/* <span className={styles.tablePeriodLabel}>{periodLabel}</span> */}
                 </div>
                 <button
                   type="button"
