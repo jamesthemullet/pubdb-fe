@@ -22,7 +22,11 @@ type ApiKey = {
   lastUsed: string | null;
   usageCount: number;
   remaining: { hour: number; day: number; month: number };
-  limits: { requestsPerHour: number; requestsPerDay: number; requestsPerMonth: number };
+  limits: {
+    requestsPerHour: number;
+    requestsPerDay: number;
+    requestsPerMonth: number;
+  };
   resetTimes: { hour: string; day: string; month: string };
   features: { allowLocationSearch: boolean; allowStats: boolean };
 };
@@ -37,7 +41,13 @@ type GeneratedApiKeyResponse = {
 };
 
 type DashboardData = {
-  user: { name: string; username: string; email: string; approved: boolean; emailVerified: boolean };
+  user: {
+    name: string;
+    username: string;
+    email: string;
+    approved: boolean;
+    emailVerified: boolean;
+  };
   apiKeys: ApiKey[];
   summary: { totalApiKeys: number; totalUsage: number };
 };
@@ -51,8 +61,6 @@ type DashboardData = {
 //   500,  600,  650,  580,  550,
 //   1100, 1200, 1290, 1380, 3200,
 // ].map((v, i) => ({ id: `c${i}`, v }));
-
-
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -99,7 +107,10 @@ function UsageBar({ pct }: { pct: number }) {
   const fill = pct > 90 ? "#ef4444" : pct > 75 ? "#f59e0b" : "#555555";
   return (
     <div className={styles.usageBarTrack}>
-      <div className={styles.usageBarFill} style={{ width: `${Math.min(pct, 100)}%`, background: fill }} />
+      <div
+        className={styles.usageBarFill}
+        style={{ width: `${Math.min(pct, 100)}%`, background: fill }}
+      />
     </div>
   );
 }
@@ -107,8 +118,11 @@ function UsageBar({ pct }: { pct: number }) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 const Dashboard: React.FC = () => {
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const { contributions, contributionsLoading, contributionsError } = useContributions();
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(
+    null
+  );
+  const { contributions, contributionsLoading, contributionsError } =
+    useContributions();
   const [expandedEdits, setExpandedEdits] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,18 +134,16 @@ const Dashboard: React.FC = () => {
   const [forgotKeyMessage, setForgotKeyMessage] = useState<string | null>(null);
   const [forgotKeyError, setForgotKeyError] = useState<string | null>(null);
   const [forgotKeyTarget, setForgotKeyTarget] = useState<string | null>(null);
-  const [forgotKeyDetails, setForgotKeyDetails] = useState<GeneratedApiKeyResponse | null>(null);
+  const [forgotKeyDetails, setForgotKeyDetails] =
+    useState<GeneratedApiKeyResponse | null>(null);
   const [showForgotKeyModal, setShowForgotKeyModal] = useState(false);
-  const [forgotKeyCopyStatus, setForgotKeyCopyStatus] = useState<"idle" | "copied" | "error">("idle");
+  const [forgotKeyCopyStatus, setForgotKeyCopyStatus] = useState<
+    "idle" | "copied" | "error"
+  >("idle");
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [showCreateKeyModal, setShowCreateKeyModal] = useState(false);
-  const [createKeyName, setCreateKeyName] = useState("");
-  const [createKeyLoading, setCreateKeyLoading] = useState(false);
-  const [createKeyError, setCreateKeyError] = useState<string | null>(null);
   const forgotKeyModalRef = useRef<HTMLDivElement>(null);
   const forgotKeyModalTriggerRef = useRef<HTMLElement | null>(null);
   const createKeyModalRef = useRef<HTMLDivElement>(null);
-  const createKeyModalTriggerRef = useRef<HTMLElement | null>(null);
 
   function toggleEditTypes(pubId: string) {
     setExpandedEdits((prev) => {
@@ -142,7 +154,9 @@ const Dashboard: React.FC = () => {
   }
 
   useEffect(() => {
-    const checkAuth = () => { setIsAuthenticated(!!localStorage.getItem("token")); };
+    const checkAuth = () => {
+      setIsAuthenticated(!!localStorage.getItem("token"));
+    };
     checkAuth();
     window.addEventListener("authChanged", checkAuth);
     window.addEventListener("storage", checkAuth);
@@ -154,11 +168,16 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function fetchDashboard() {
-      if (!isAuthenticated) { setLoading(false); return; }
+      if (!isAuthenticated) {
+        setLoading(false);
+        return;
+      }
       try {
         setError(null);
         const token = localStorage.getItem("token");
-        const res = await fetch(`${API_URL}/auth/dashboard`, { headers: buildAuthHeaders(token) });
+        const res = await fetch(`${API_URL}/auth/dashboard`, {
+          headers: buildAuthHeaders(token),
+        });
         if (!res.ok) {
           const errorData = await res.json();
           throw { response: res, data: errorData };
@@ -166,9 +185,15 @@ const Dashboard: React.FC = () => {
         setDashboardData(await res.json());
       } catch (err: unknown) {
         if (isHttpErrorObject(err)) {
-          setError(err.data.message || err.data.error || `HTTP error! status: ${err.response.status}`);
+          setError(
+            err.data.message ||
+              err.data.error ||
+              `HTTP error! status: ${err.response.status}`
+          );
         } else {
-          setError(err instanceof Error ? err.message : "Failed to load dashboard");
+          setError(
+            err instanceof Error ? err.message : "Failed to load dashboard"
+          );
         }
       } finally {
         setLoading(false);
@@ -178,7 +203,12 @@ const Dashboard: React.FC = () => {
   }, [isAuthenticated]);
 
   async function handleCancelSubscription() {
-    if (!confirm("Cancel subscription? This will stop automatic renewal — your subscription will remain active until the end of the current billing period.")) return;
+    if (
+      !confirm(
+        "Cancel subscription? This will stop automatic renewal — your subscription will remain active until the end of the current billing period."
+      )
+    )
+      return;
     try {
       setCancelling(true);
       setCancelError(null);
@@ -186,12 +216,18 @@ const Dashboard: React.FC = () => {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/payments/cancel-subscription`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
         body: JSON.stringify({}),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
-      setCancelMessage(data.message || "Subscription cancelled. It will expire at the end of the current billing period.");
+      setCancelMessage(
+        data.message ||
+          "Subscription cancelled. It will expire at the end of the current billing period."
+      );
       setTimeout(() => window.dispatchEvent(new Event("authChanged")), 800);
     } catch (err: unknown) {
       setCancelError(getErrorMessage(err, "Failed to cancel subscription"));
@@ -202,7 +238,10 @@ const Dashboard: React.FC = () => {
 
   async function handleForgotApiKey(keyPrefix: string) {
     const userEmail = dashboardData?.user.email;
-    if (!userEmail) { setForgotKeyError("Unable to determine account email."); return; }
+    if (!userEmail) {
+      setForgotKeyError("Unable to determine account email.");
+      return;
+    }
     try {
       setForgotKeyLoading(true);
       setForgotKeyError(null);
@@ -214,19 +253,30 @@ const Dashboard: React.FC = () => {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/auth/forgot-api-key`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
         body: JSON.stringify({ keyPrefix, email: userEmail }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
-      setForgotKeyMessage(data.message || "If this API key is eligible, instructions have been emailed to the account owner.");
+      setForgotKeyMessage(
+        data.message ||
+          "If this API key is eligible, instructions have been emailed to the account owner."
+      );
       if (data.apiKey) {
-        setForgotKeyDetails({ ...data.apiKey, keyPrefix: data.apiKey.keyPrefix || keyPrefix });
+        setForgotKeyDetails({
+          ...data.apiKey,
+          keyPrefix: data.apiKey.keyPrefix || keyPrefix,
+        });
         setShowForgotKeyModal(true);
         setForgotKeyCopyStatus("idle");
       }
     } catch (err: unknown) {
-      setForgotKeyError(getErrorMessage(err, "Failed to request API key reminder"));
+      setForgotKeyError(
+        getErrorMessage(err, "Failed to request API key reminder")
+      );
       setForgotKeyDetails(null);
       setShowForgotKeyModal(false);
       setForgotKeyCopyStatus("idle");
@@ -253,64 +303,6 @@ const Dashboard: React.FC = () => {
     forgotKeyModalTriggerRef.current?.focus();
   }
 
-  function openCreateKeyModal() {
-    createKeyModalTriggerRef.current = document.activeElement as HTMLElement;
-    setCreateKeyName("");
-    setCreateKeyError(null);
-    setShowCreateKeyModal(true);
-  }
-
-  function handleCloseCreateKeyModal() {
-    setShowCreateKeyModal(false);
-    setCreateKeyName("");
-    setCreateKeyError(null);
-    createKeyModalTriggerRef.current?.focus();
-  }
-
-  function handleCreateKeyModalKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
-    if (e.key === "Escape") { handleCloseCreateKeyModal(); return; }
-    if (e.key !== "Tab" || !createKeyModalRef.current) return;
-    const els = Array.from(
-      createKeyModalRef.current.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      )
-    );
-    const first = els[0], last = els[els.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
-  }
-
-  async function handleCreateApiKey(e: React.FormEvent) {
-    e.preventDefault();
-    const name = createKeyName.trim();
-    if (!name) { setCreateKeyError("Key name is required."); return; }
-    try {
-      setCreateKeyLoading(true);
-      setCreateKeyError(null);
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/auth/api-keys`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
-        body: JSON.stringify({ name }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
-      handleCloseCreateKeyModal();
-      if (data.apiKey) {
-        setForgotKeyDetails({ ...data.apiKey });
-        setShowForgotKeyModal(true);
-        setForgotKeyCopyStatus("idle");
-      }
-      // Refresh dashboard data so the new key appears in the list
-      const dashRes = await fetch(`${API_URL}/auth/dashboard`, { headers: buildAuthHeaders(token) });
-      if (dashRes.ok) setDashboardData(await dashRes.json());
-    } catch (err: unknown) {
-      setCreateKeyError(getErrorMessage(err, "Failed to create API key"));
-    } finally {
-      setCreateKeyLoading(false);
-    }
-  }
-
   useEffect(() => {
     if (showForgotKeyModal && forgotKeyDetails) {
       forgotKeyModalTriggerRef.current = document.activeElement as HTMLElement;
@@ -321,26 +313,26 @@ const Dashboard: React.FC = () => {
     }
   }, [showForgotKeyModal, forgotKeyDetails]);
 
-  useEffect(() => {
-    if (showCreateKeyModal) {
-      const focusable = createKeyModalRef.current?.querySelector<HTMLElement>(
-        'input:not([disabled]), button:not([disabled])'
-      );
-      focusable?.focus();
-    }
-  }, [showCreateKeyModal]);
-
   function handleForgotKeyModalKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
-    if (e.key === "Escape") { handleCloseForgotKeyModal(); return; }
+    if (e.key === "Escape") {
+      handleCloseForgotKeyModal();
+      return;
+    }
     if (e.key !== "Tab" || !forgotKeyModalRef.current) return;
     const els = Array.from(
       forgotKeyModalRef.current.querySelectorAll<HTMLElement>(
         'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
       )
     );
-    const first = els[0], last = els[els.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+    const first = els[0],
+      last = els[els.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last?.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first?.focus();
+    }
   }
 
   if (!isAuthenticated) {
@@ -360,7 +352,11 @@ const Dashboard: React.FC = () => {
     return (
       <div className={styles.stateBox}>
         <span className={styles.errorText}>Error: {error}</span>
-        <button type="button" className={styles.btnOutline} onClick={() => window.location.reload()}>
+        <button
+          type="button"
+          className={styles.btnOutline}
+          onClick={() => window.location.reload()}
+        >
           Try again
         </button>
       </div>
@@ -370,12 +366,16 @@ const Dashboard: React.FC = () => {
   if (!dashboardData) return null;
 
   const totalUsed = dashboardData.apiKeys.reduce(
-    (sum, k) => sum + (k.limits.requestsPerMonth - k.remaining.month), 0
+    (sum, k) => sum + (k.limits.requestsPerMonth - k.remaining.month),
+    0
   );
   const totalLimit = dashboardData.apiKeys.reduce(
-    (sum, k) => sum + k.limits.requestsPerMonth, 0
+    (sum, k) => sum + k.limits.requestsPerMonth,
+    0
   );
-  const activeKeyCount = dashboardData.apiKeys.filter(k => k.keyStatus === "ACTIVE" || k.isActive).length;
+  const activeKeyCount = dashboardData.apiKeys.filter(
+    (k) => k.keyStatus === "ACTIVE" || k.isActive
+  ).length;
 
   return (
     <>
@@ -390,28 +390,61 @@ const Dashboard: React.FC = () => {
             aria-labelledby="forgot-key-modal-title"
             onKeyDown={handleForgotKeyModalKeyDown}
           >
-            <p className={styles.modalTitle} id="forgot-key-modal-title">New API key generated</p>
-            <p className={styles.modalDesc}>This key is shown only once. Copy it now and store it securely.</p>
+            <p className={styles.modalTitle} id="forgot-key-modal-title">
+              New API key generated
+            </p>
+            <p className={styles.modalDesc}>
+              This key is shown only once. Copy it now and store it securely.
+            </p>
             <dl className={styles.modalFields}>
-              <div><dt>Name</dt><dd>{forgotKeyDetails.name || "Untitled key"}</dd></div>
-              <div><dt>Tier</dt><dd>{forgotKeyDetails.tier || "—"}</dd></div>
-              <div><dt>Status</dt><dd>{forgotKeyDetails.keyStatus || "—"}</dd></div>
-              <div><dt>Key prefix</dt><dd>{forgotKeyDetails.keyPrefix || "—"}</dd></div>
+              <div>
+                <dt>Name</dt>
+                <dd>{forgotKeyDetails.name || "Untitled key"}</dd>
+              </div>
+              <div>
+                <dt>Tier</dt>
+                <dd>{forgotKeyDetails.tier || "—"}</dd>
+              </div>
+              <div>
+                <dt>Status</dt>
+                <dd>{forgotKeyDetails.keyStatus || "—"}</dd>
+              </div>
+              <div>
+                <dt>Key prefix</dt>
+                <dd>{forgotKeyDetails.keyPrefix || "—"}</dd>
+              </div>
               {!!forgotKeyDetails.permissions?.length && (
-                <div><dt>Permissions</dt><dd>{forgotKeyDetails.permissions.join(", ")}</dd></div>
+                <div>
+                  <dt>Permissions</dt>
+                  <dd>{forgotKeyDetails.permissions.join(", ")}</dd>
+                </div>
               )}
             </dl>
             {forgotKeyDetails.key && (
               <div className={styles.modalKeyBlock}>
                 <p className={styles.modalKeyLabel}>API key</p>
                 <pre className={styles.modalKeyPre}>{forgotKeyDetails.key}</pre>
-                <button type="button" className={styles.btnPrimary} onClick={handleCopyNewApiKey}>
-                  {forgotKeyCopyStatus === "copied" ? "Copied!" : forgotKeyCopyStatus === "error" ? "Copy failed" : "Copy API key"}
+                <button
+                  type="button"
+                  className={styles.btnPrimary}
+                  onClick={handleCopyNewApiKey}
+                >
+                  {forgotKeyCopyStatus === "copied"
+                    ? "Copied!"
+                    : forgotKeyCopyStatus === "error"
+                    ? "Copy failed"
+                    : "Copy API key"}
                 </button>
               </div>
             )}
             <div className={styles.modalFooter}>
-              <button type="button" className={styles.btnOutline} onClick={handleCloseForgotKeyModal}>Close</button>
+              <button
+                type="button"
+                className={styles.btnOutline}
+                onClick={handleCloseForgotKeyModal}
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
@@ -419,12 +452,14 @@ const Dashboard: React.FC = () => {
 
       {/* ── Page ─────────────────────────────────────────────────────────── */}
       <div className={styles.page}>
-
         {/* Page header */}
         <div className={styles.pageHeader}>
           <div>
             <h1 className={styles.pageTitle}>API keys &amp; usage</h1>
-            <p className={styles.pageSubtitle}>Track request volume, manage keys, and review activity across your projects.</p>
+            <p className={styles.pageSubtitle}>
+              Track request volume, manage keys, and review activity across your
+              projects.
+            </p>
           </div>
           <div className={styles.pageActions}>
             {/* TODO: wire Create API key button to POST /auth/api-keys once endpoint is confirmed */}
@@ -432,10 +467,13 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Account warnings */}
-        {(!dashboardData.user.approved || !dashboardData.user.emailVerified) && (
+        {(!dashboardData.user.approved ||
+          !dashboardData.user.emailVerified) && (
           <div className={styles.warningBanner}>
             {!dashboardData.user.approved && (
-              <span className={styles.warningItem}>Account pending approval</span>
+              <span className={styles.warningItem}>
+                Account pending approval
+              </span>
             )}
             {!dashboardData.user.emailVerified && (
               <span className={styles.warningItem}>Email not verified</span>
@@ -449,15 +487,30 @@ const Dashboard: React.FC = () => {
           <div className={styles.statCard}>
             <div className={styles.statHeader}>
               <span className={styles.statLabel}>
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true" className={styles.statIcon}>
-                  <path d="M1 9L4 5l3 3 4-6" stroke="#6b7280" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg
+                  width="11"
+                  height="11"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  aria-hidden="true"
+                  className={styles.statIcon}
+                >
+                  <path
+                    d="M1 9L4 5l3 3 4-6"
+                    stroke="#6b7280"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
                 REQUESTS · 30D
               </span>
             </div>
             <div className={styles.statValue}>
               {totalUsed.toLocaleString()}
-              <span className={styles.statSuffix}>/{totalLimit > 0 ? `${Math.round(totalLimit / 1000)}k` : "100k"}</span>
+              <span className={styles.statSuffix}>
+                /{totalLimit > 0 ? `${Math.round(totalLimit / 1000)}k` : "100k"}
+              </span>
             </div>
             {/* TODO: show % vs prev period once API returns historical usage data */}
           </div>
@@ -470,36 +523,50 @@ const Dashboard: React.FC = () => {
 
         {/* Bottom row: keys + top endpoints */}
         <div className={styles.bottomRow}>
-
           {/* API keys panel */}
           <div className={styles.keysPanel}>
             <div className={styles.keysPanelHeader}>
               <div className={styles.keysPanelLeft}>
                 <span className={styles.keysPanelTitle}>API keys</span>
-                <span className={styles.activeCountBadge}>{activeKeyCount} active</span>
+                <span className={styles.activeCountBadge}>
+                  {activeKeyCount} active
+                </span>
               </div>
               {/* TODO: wire + New key button once Create API key is confirmed working */}
             </div>
 
-            {cancelError && <p className={styles.inlineError}>Error cancelling subscription: {cancelError}</p>}
-            {cancelMessage && <p className={styles.inlineSuccess}>{cancelMessage}</p>}
+            {cancelError && (
+              <p className={styles.inlineError}>
+                Error cancelling subscription: {cancelError}
+              </p>
+            )}
+            {cancelMessage && (
+              <p className={styles.inlineSuccess}>{cancelMessage}</p>
+            )}
 
             {dashboardData.apiKeys.length === 0 ? (
-              <div className={styles.emptyKeys}>No API keys yet. Create one to get started.</div>
+              <div className={styles.emptyKeys}>
+                No API keys yet. Create one to get started.
+              </div>
             ) : (
               dashboardData.apiKeys.map((key) => {
                 const used = key.limits.requestsPerMonth - key.remaining.month;
                 const pct = (used / key.limits.requestsPerMonth) * 100;
                 const isMenuOpen = openMenu === key.keyPrefix;
-                const isForgotLoading = forgotKeyLoading && forgotKeyTarget === key.keyPrefix;
+                const isForgotLoading =
+                  forgotKeyLoading && forgotKeyTarget === key.keyPrefix;
 
                 return (
                   <div key={key.keyPrefix} className={styles.keyRow}>
                     <div className={styles.keyLeft}>
                       <span className={styles.keyName}>{key.name}</span>
                       <div className={styles.keyMeta}>
-                        <code className={styles.keyPrefix}>{key.keyPrefix} ····</code>
-                        <span className={styles.keyLastUsed}>· last used {fmtRelative(key.lastUsed)}</span>
+                        <code className={styles.keyPrefix}>
+                          {key.keyPrefix} ····
+                        </code>
+                        <span className={styles.keyLastUsed}>
+                          · last used {fmtRelative(key.lastUsed)}
+                        </span>
                       </div>
                       <button
                         type="button"
@@ -507,23 +574,40 @@ const Dashboard: React.FC = () => {
                         disabled={isForgotLoading}
                         onClick={() => handleForgotApiKey(key.keyPrefix)}
                       >
-                        {isForgotLoading ? "Regenerating…" : "Regenerate API key"}
+                        {isForgotLoading
+                          ? "Regenerating…"
+                          : "Regenerate API key"}
                       </button>
                       {forgotKeyTarget === key.keyPrefix && (
                         <>
-                          {forgotKeyError && <p className={styles.inlineError}>{forgotKeyError}</p>}
-                          {forgotKeyMessage && !showForgotKeyModal && <p className={styles.inlineSuccess}>{forgotKeyMessage}</p>}
+                          {forgotKeyError && (
+                            <p className={styles.inlineError}>
+                              {forgotKeyError}
+                            </p>
+                          )}
+                          {forgotKeyMessage && !showForgotKeyModal && (
+                            <p className={styles.inlineSuccess}>
+                              {forgotKeyMessage}
+                            </p>
+                          )}
                         </>
                       )}
                     </div>
 
                     <div className={styles.keyRight}>
-                      <span className={`${styles.tierBadge} ${key.tier === "HOBBY" ? styles.tierHobby : styles.tierDev}`}>
+                      <span
+                        className={`${styles.tierBadge} ${
+                          key.tier === "HOBBY"
+                            ? styles.tierHobby
+                            : styles.tierDev
+                        }`}
+                      >
                         {key.tier}
                       </span>
                       <div className={styles.keyUsageGroup}>
                         <span className={styles.usageText}>
-                          {used.toLocaleString()} / {key.limits.requestsPerMonth.toLocaleString()}
+                          {used.toLocaleString()} /{" "}
+                          {key.limits.requestsPerMonth.toLocaleString()}
                         </span>
                         <UsageBar pct={pct} />
                       </div>
@@ -532,32 +616,43 @@ const Dashboard: React.FC = () => {
                           type="button"
                           className={styles.menuDotBtn}
                           aria-label={`More options for ${key.name}`}
-                          onClick={() => setOpenMenu(isMenuOpen ? null : key.keyPrefix)}
+                          onClick={() =>
+                            setOpenMenu(isMenuOpen ? null : key.keyPrefix)
+                          }
                         >
                           •••
                         </button>
                         {isMenuOpen && (
                           <div className={styles.menuDropdown}>
-                            {key.tier !== "HOBBY" && key.keyStatus === "ACTIVE" && (
-                              <>
-                                <button
-                                  type="button"
-                                  className={styles.menuItem}
-                                  disabled={isForgotLoading}
-                                  onClick={() => { void handleForgotApiKey(key.keyPrefix); setOpenMenu(null); }}
-                                >
-                                  Forgot API key
-                                </button>
-                                <button
-                                  type="button"
-                                  className={styles.menuItemDanger}
-                                  disabled={cancelling}
-                                  onClick={() => { void handleCancelSubscription(); setOpenMenu(null); }}
-                                >
-                                  {cancelling ? "Cancelling…" : "Cancel subscription"}
-                                </button>
-                              </>
-                            )}
+                            {key.tier !== "HOBBY" &&
+                              key.keyStatus === "ACTIVE" && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className={styles.menuItem}
+                                    disabled={isForgotLoading}
+                                    onClick={() => {
+                                      void handleForgotApiKey(key.keyPrefix);
+                                      setOpenMenu(null);
+                                    }}
+                                  >
+                                    Forgot API key
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={styles.menuItemDanger}
+                                    disabled={cancelling}
+                                    onClick={() => {
+                                      void handleCancelSubscription();
+                                      setOpenMenu(null);
+                                    }}
+                                  >
+                                    {cancelling
+                                      ? "Cancelling…"
+                                      : "Cancel subscription"}
+                                  </button>
+                                </>
+                              )}
                           </div>
                         )}
                       </div>
@@ -567,25 +662,34 @@ const Dashboard: React.FC = () => {
               })
             )}
           </div>
-
         </div>
 
         {/* Contributions section */}
         {dashboardData.user.approved && (
           <div className={styles.contributionsSection}>
-            <p className={styles.contributionsSectionTitle}>Your contributions</p>
+            <p className={styles.contributionsSectionTitle}>
+              Your contributions
+            </p>
             {contributionsLoading && <p className={styles.muted}>Loading…</p>}
-            {contributionsError && <p className={styles.inlineError}>{contributionsError}</p>}
+            {contributionsError && (
+              <p className={styles.inlineError}>{contributionsError}</p>
+            )}
             {!contributionsLoading && !contributionsError && contributions && (
               <>
                 <p className={styles.muted}>
-                  {contributions.totalAdded} pub{contributions.totalAdded !== 1 ? "s" : ""} added
+                  {contributions.totalAdded} pub
+                  {contributions.totalAdded !== 1 ? "s" : ""} added
                 </p>
                 {contributions.recentPubs.length > 0 && (
                   <ul className={styles.recentPubList}>
                     {contributions.recentPubs.map((pub) => (
                       <li key={pub.id}>
-                        <a href={`/pubs/${pub.id}`} className={styles.recentPubLink}>{pub.name}</a>
+                        <a
+                          href={`/pubs/${pub.id}`}
+                          className={styles.recentPubLink}
+                        >
+                          {pub.name}
+                        </a>
                         <span className={styles.muted}> — {pub.city}</span>
                       </li>
                     ))}
@@ -593,26 +697,52 @@ const Dashboard: React.FC = () => {
                 )}
                 {contributions.editsByPub.length > 0 && (
                   <div className={styles.editsSection}>
-                    <p className={styles.contributionsSectionTitle} style={{ marginTop: "1rem" }}>Recent edits</p>
+                    <p
+                      className={styles.contributionsSectionTitle}
+                      style={{ marginTop: "1rem" }}
+                    >
+                      Recent edits
+                    </p>
                     <ul className={styles.recentPubList}>
                       {contributions.editsByPub.map((entry) => (
                         <li key={entry.pubId} className={styles.editEntry}>
                           <div className={styles.editEntryRow}>
                             <div>
-                              <a href={`/pubs/${entry.pubId}`} className={styles.recentPubLink}>{entry.pubName}</a>
-                              <span className={styles.muted}> — {entry.city}</span>
-                              <span className={styles.muted}> ({entry.editCount} edit{entry.editCount !== 1 ? "s" : ""})</span>
+                              <a
+                                href={`/pubs/${entry.pubId}`}
+                                className={styles.recentPubLink}
+                              >
+                                {entry.pubName}
+                              </a>
+                              <span className={styles.muted}>
+                                {" "}
+                                — {entry.city}
+                              </span>
+                              <span className={styles.muted}>
+                                {" "}
+                                ({entry.editCount} edit
+                                {entry.editCount !== 1 ? "s" : ""})
+                              </span>
                             </div>
                             {entry.editTypes.length > 0 && (
-                              <button type="button" className={styles.toggleButton} onClick={() => toggleEditTypes(entry.pubId)} aria-expanded={expandedEdits.has(entry.pubId)}>
-                                {expandedEdits.has(entry.pubId) ? "Hide" : "Show fields"}
+                              <button
+                                type="button"
+                                className={styles.toggleButton}
+                                onClick={() => toggleEditTypes(entry.pubId)}
+                                aria-expanded={expandedEdits.has(entry.pubId)}
+                              >
+                                {expandedEdits.has(entry.pubId)
+                                  ? "Hide"
+                                  : "Show fields"}
                               </button>
                             )}
                           </div>
                           {expandedEdits.has(entry.pubId) && (
                             <ul className={styles.editTypeList}>
                               {entry.editTypes.map((t) => (
-                                <li key={t} className={styles.editTypePill}>{t}</li>
+                                <li key={t} className={styles.editTypePill}>
+                                  {t}
+                                </li>
                               ))}
                             </ul>
                           )}
@@ -625,7 +755,6 @@ const Dashboard: React.FC = () => {
             )}
           </div>
         )}
-
       </div>
     </>
   );
