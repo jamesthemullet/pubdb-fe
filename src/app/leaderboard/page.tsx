@@ -8,7 +8,7 @@ import styles from "./page.module.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-// type TimePeriod = "7d" | "30d" | "90d" | "all";
+type TimePeriod = "7d" | "30d" | "90d" | "all";
 
 const TIME_PERIODS: { id: TimePeriod; label: string }[] = [
   { id: "7d", label: "Last 7 days" },
