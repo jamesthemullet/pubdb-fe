@@ -104,7 +104,7 @@ function TypeBadge({ type }: { type: string }) {
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("quick-start");
 
-  const scrollTo = (id: string) => {
+  const scrollTo = (id: string): void => {
     setActiveSection(id);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
