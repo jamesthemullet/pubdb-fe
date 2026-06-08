@@ -276,7 +276,7 @@ export default function PubPage() {
       (f) => !editFields[f] || editFields[f]?.toString().trim() === ""
     );
 
-  function copyText(text: string, key: "id" | "code") {
+  function copyText(text: string, key: "id" | "code"): void {
     void navigator.clipboard.writeText(text).then(() => {
       setCopied(key);
       setTimeout(() => setCopied(null), 1500);
@@ -308,7 +308,7 @@ export default function PubPage() {
 
   const jsonPreview = buildJsonPreview(pub);
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<void> => {
     if (!confirm(`Are you sure you want to delete "${pub.name}"? This cannot be undone.`)) return;
     try {
       const token = localStorage.getItem("token");

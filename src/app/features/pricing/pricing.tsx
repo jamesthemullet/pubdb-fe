@@ -100,7 +100,7 @@ const pricingTiers = [
   },
 ];
 
-const Pricing: React.FC = () => {
+const Pricing = (): React.JSX.Element => {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<{
     type: "success" | "error";
