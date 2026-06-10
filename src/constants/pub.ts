@@ -6,8 +6,6 @@ export const PUB_REQUIRED_FIELDS = [
   "country",
 ] as const;
 
-export type PubRequiredField = (typeof PUB_REQUIRED_FIELDS)[number];
-
 export const WEEKDAYS = [
   "Monday",
   "Tuesday",
