@@ -117,7 +117,7 @@ function UsageBar({ pct }: { pct: number }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-const Dashboard: React.FC = () => {
+const Dashboard = (): React.JSX.Element | null => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
   );
