@@ -61,8 +61,54 @@ const AMENITY_ICONS: Partial<
   },
 };
 
-function PubsContent() {
+function pubLocation(pub: Pub): string {
+  const area = pub.area || pub.borough || null;
+  return area ? `${pub.city} · ${area}` : pub.city;
+}
+
+const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
   const router = useRouter();
+  return (
+    <tr
+      className={styles.tableRow}
+      onClick={() => router.push(`/pubs/${pub.id}`)}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          router.push(`/pubs/${pub.id}`);
+        }
+      }}
+    >
+      <td className={styles.tdName}>
+        <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
+          {pub.name}
+        </Link>
+        {(pub.isIndependent || pub.chainName) && (
+          <span className={styles.pubType}>
+            {pub.isIndependent ? "Independent" : pub.chainName}
+          </span>
+        )}
+      </td>
+      <td className={styles.tdLocation}>
+        <span className={styles.pubLocation}>{pubLocation(pub)}</span>
+      </td>
+      <td className={styles.tdArrow}>
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          <path
+            d="M4 8h8M9 5l3 3-3 3"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </td>
+    </tr>
+  );
+});
+
+function PubsContent() {
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
   const [pubs, setPubs] = useState<Pub[]>([]);
@@ -99,17 +145,12 @@ function PubsContent() {
         sorted.sort((a, b) => b.name.localeCompare(a.name));
         break;
       case "newest":
-        sorted.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
+      case "oldest": {
+        const ts = new Map(pubs.map((p) => [p.id, Date.parse(p.createdAt ?? "")]));
+        const dir = sortBy === "newest" ? -1 : 1;
+        sorted.sort((a, b) => dir * ((ts.get(a.id) ?? 0) - (ts.get(b.id) ?? 0)));
         break;
-      case "oldest":
-        sorted.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-        break;
+      }
       default:
         sorted.sort((a, b) => a.name.localeCompare(b.name));
     }
@@ -184,11 +225,6 @@ function PubsContent() {
   const hiddenCount = PUB_AMENITY_FIELDS.length - VISIBLE_FILTER_COUNT;
   const hasActiveFilters =
     debouncedSearchTerm || activeAmenities.size > 0 || sortBy !== "name-asc";
-
-  function pubLocation(pub: Pub): string {
-    const area = pub.area || pub.borough || null;
-    return area ? `${pub.city} · ${area}` : pub.city;
-  }
 
   return (
     <div className={styles.page}>
@@ -483,53 +519,7 @@ function PubsContent() {
             </thead>
             <tbody>
               {filteredPubs.map((pub) => (
-                <tr
-                  key={pub.id}
-                  className={styles.tableRow}
-                  onClick={() => router.push(`/pubs/${pub.id}`)}
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      router.push(`/pubs/${pub.id}`);
-                    }
-                  }}
-                >
-                  <td className={styles.tdName}>
-                    <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
-                      {pub.name}
-                    </Link>
-                    {(pub.isIndependent || pub.chainName) && (
-                      <span className={styles.pubType}>
-                        {pub.isIndependent ? "Independent" : pub.chainName}
-                      </span>
-                    )}
-                  </td>
-                  <td className={styles.tdLocation}>
-                    <span className={styles.pubLocation}>
-                      {pubLocation(pub)}
-                    </span>
-                  </td>
-                  {/* <td className={styles.tdAmenities}>
-                    <AmenityIconCell pub={pub} />
-                  </td> */}
-                  <td className={styles.tdArrow}>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M4 8h8M9 5l3 3-3 3"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </td>
-                </tr>
+                <PubRow key={pub.id} pub={pub} />
               ))}
             </tbody>
           </table>
