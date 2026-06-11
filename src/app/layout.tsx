@@ -2,9 +2,9 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import AccentedInit from "./components/AccentedInit";
 import Sidebar from "./components/sidebar/sidebar";
 import styles from "./layout.module.css";
-import AccentedInit from "./components/AccentedInit";
 
 const inter = Inter({
   variable: "--font-inter",
