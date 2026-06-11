@@ -303,6 +303,12 @@ button.sectionHead:hover {
 }
 
 /* ── Ownership toggle ── */
+.ownershipGroup {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
 .ownershipToggle {
   display: flex;
   border: 1px solid var(--border-color);
