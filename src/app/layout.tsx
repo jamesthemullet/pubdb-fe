@@ -4,6 +4,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Sidebar from "./components/sidebar/sidebar";
 import styles from "./layout.module.css";
+import AccentedInit from "./components/AccentedInit";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -60,6 +61,7 @@ export default function RootLayout({
           </div>
         </div>
         <Analytics />
+        <AccentedInit />
       </body>
     </html>
   );
