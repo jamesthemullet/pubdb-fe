@@ -29,7 +29,11 @@
       "Bash(npx next *)",
       "WebFetch(domain:claude.ai)",
       "Bash(yarn list *)",
-      "Bash(git show *)"
+      "Bash(git show *)",
+      "Bash(Remove-Item *)",
+      "Bash(yarn audit *)",
+      "Bash(gh label *)",
+      "Bash(yarn knip *)"
     ]
   }
 }

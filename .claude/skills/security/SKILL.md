@@ -1,5 +1,5 @@
 ---
-name: security-review
+name: security
 description: Complete a security review of the pending changes on the current branch
 version: 1.0.0
 ---
