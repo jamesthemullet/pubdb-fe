@@ -483,6 +483,23 @@
   overflow: hidden;
 }
 
+@supports (anchor-name: --x) {
+  .keyMenuWrap {
+    position: static;
+  }
+
+  .menuDotBtn {
+    anchor-name: --key-menu-anchor;
+  }
+
+  .menuDropdown {
+    position-anchor: --key-menu-anchor;
+    top: calc(anchor(bottom) + 4px);
+    right: anchor(right);
+    position-try-fallbacks: flip-block;
+  }
+}
+
 .menuDropdown button {
   display: block;
   width: 100%;

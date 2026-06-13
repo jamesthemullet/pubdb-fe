@@ -674,6 +674,7 @@ const Dashboard = (): React.JSX.Element | null => {
                         </span>
                         <UsageBar pct={pct} />
                       </div>
+                      {key.tier !== "HOBBY" && (
                       <div className={styles.keyMenuWrap}>
                         <button
                           type="button"
@@ -685,40 +686,36 @@ const Dashboard = (): React.JSX.Element | null => {
                         >
                           •••
                         </button>
-                        {isMenuOpen && (
+                        {isMenuOpen && key.keyStatus === "ACTIVE" && (
                           <div className={styles.menuDropdown}>
-                            {key.tier !== "HOBBY" &&
-                              key.keyStatus === "ACTIVE" && (
-                                <>
-                                  <button
-                                    type="button"
-                                    className={styles.menuItem}
-                                    disabled={isForgotLoading}
-                                    onClick={() => {
-                                      void handleForgotApiKey(key.keyPrefix);
-                                      setOpenMenu(null);
-                                    }}
-                                  >
-                                    Forgot API key
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className={styles.menuItemDanger}
-                                    disabled={cancelling}
-                                    onClick={() => {
-                                      void handleCancelSubscription();
-                                      setOpenMenu(null);
-                                    }}
-                                  >
-                                    {cancelling
-                                      ? "Cancelling…"
-                                      : "Cancel subscription"}
-                                  </button>
-                                </>
-                              )}
+                            <button
+                              type="button"
+                              className={styles.menuItem}
+                              disabled={isForgotLoading}
+                              onClick={() => {
+                                void handleForgotApiKey(key.keyPrefix);
+                                setOpenMenu(null);
+                              }}
+                            >
+                              Forgot API key
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.menuItemDanger}
+                              disabled={cancelling}
+                              onClick={() => {
+                                void handleCancelSubscription();
+                                setOpenMenu(null);
+                              }}
+                            >
+                              {cancelling
+                                ? "Cancelling…"
+                                : "Cancel subscription"}
+                            </button>
                           </div>
                         )}
                       </div>
+                      )}
                     </div>
                   </div>
                 );
