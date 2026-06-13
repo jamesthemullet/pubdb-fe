@@ -1,7 +1,6 @@
-"use client";
-
-import { useState } from "react";
 import styles from "./page.module.css";
+import DocsCopyButton from "./DocsCopyButton";
+import DocsNav from "./DocsNav";
 
 const CURL_QUICK_START = `curl https://api.thepubdb.com/api/v1/pubs \\
   -H "X-API-Key: $PUBDB_KEY"`;
@@ -32,19 +31,8 @@ const JSON_QUICK_START = `{
 
 const CURL_AUTH = `X-API-Key: pk_developer_xxxx····`;
 
-
 const CURL_FILTER = `curl "https://api.thepubdb.com/api/v1/pubs?hasCaskAle=true" \\
   -H "X-API-Key: $PUBDB_KEY"`;
-
-const NAV_ITEMS = [
-  { id: "quick-start", label: "Quick start" },
-  { id: "authentication", label: "Authentication" },
-  { id: "endpoints", label: "Endpoints" },
-  { id: "filtering", label: "Filtering & search" },
-  { id: "pagination", label: "Pagination" },
-  { id: "rate-limits", label: "Rate limits" },
-  { id: "errors", label: "Errors" },
-];
 
 const ENDPOINTS = [
   { method: "GET", path: "/api/v1/pubs", description: "List all pubs (paginated)" },
@@ -55,7 +43,6 @@ const ENDPOINTS = [
   { method: "GET", path: "/api/v1/stats", description: "Database stats — Developer tier+" },
 ];
 
-
 const AMENITY_TAGS = [
   "isIndependent", "hasFood", "hasCaskAle", "hasBeerGarden",
   "hasDog", "isFamilyFocused", "isDogFriendly",
@@ -63,27 +50,11 @@ const AMENITY_TAGS = [
   "hasLeaderboard", "hasPremierLeague", "isLgbtFriendly",
 ];
 
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <button type="button" className={styles.copyBtn} onClick={handleCopy}>
-      {copied ? "Copied" : "Copy"}
-    </button>
-  );
-}
-
 function CodeBlock({ code, label }: { code: string; label?: string }) {
   return (
     <div className={styles.codeBlock}>
       {label && <span className={styles.codeLabel}>{label}</span>}
-      <CopyButton text={code} />
+      <DocsCopyButton text={code} />
       <pre className={styles.codePre}><code>{code}</code></pre>
     </div>
   );
@@ -102,43 +73,9 @@ function TypeBadge({ type }: { type: string }) {
 }
 
 export default function DocsPage() {
-  const [activeSection, setActiveSection] = useState("quick-start");
-
-  const scrollTo = (id: string): void => {
-    setActiveSection(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <div className={styles.page}>
-      <nav className={styles.docsNav} aria-label="Documentation navigation">
-        <ul className={styles.navList}>
-          {NAV_ITEMS.map(({ id, label }) => (
-            <li key={id}>
-              <button
-                type="button"
-                className={`${styles.navItem} ${activeSection === id ? styles.navItemActive : ""}`}
-                onClick={() => scrollTo(id)}
-              >
-                {label}
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        <div className={styles.needHelp}>
-          <p className={styles.needHelpTitle}>Need help?</p>
-          <p className={styles.needHelpText}>
-            {/* TODO: add /changelog page */}
-            {/* Check the <a href="/changelog" className={styles.needHelpLink}>changelog</a> for
-            recent updates or reach us at{" "} */}
-            Reach us at{" "}
-            <a href="mailto:hello@thepubdb.com" className={styles.needHelpLink}>
-              hello@thepubdb.com
-            </a>
-          </p>
-        </div>
-      </nav>
+      <DocsNav />
 
       <div className={styles.content}>
         <div className={styles.contentHeader}>
@@ -151,16 +88,6 @@ export default function DocsPage() {
               Everything you need to integrate with the Pub DB API — authentication, endpoints,
               filtering, error handling, and SDKs.
             </p>
-          </div>
-          <div className={styles.headerActions}>
-            {/* TODO: add /playground page
-            <a href="/playground" className={styles.headerBtn}>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <polygon points="3,2 11,7 3,12" fill="currentColor" />
-              </svg>
-              Playground
-            </a>
-            */}
           </div>
         </div>
 
@@ -238,7 +165,6 @@ export default function DocsPage() {
               </div>
             ))}
           </div>
-
         </section>
 
         <section id="filtering" className={styles.section}>

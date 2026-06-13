@@ -1,38 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { type LeaderboardEntry, useLeaderboard } from "@/hooks/useLeaderboard";
 import styles from "./page.module.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-
-type TimePeriod = "7d" | "30d" | "90d" | "all";
-
-const TIME_PERIODS: { id: TimePeriod; label: string }[] = [
-  { id: "7d", label: "Last 7 days" },
-  { id: "30d", label: "Last 30 days" },
-  { id: "90d", label: "Last 90 days" },
-  { id: "all", label: "All-time" },
-];
-
-type BadgeVariant = "green" | "orange" | "purple" | "amber" | "blue";
-
-type Badge = {
-  label: string;
-  variant: BadgeVariant;
-};
-
-type MockProfile = {
-  handle: string;
-  location: string;
-  joined: string;
-  badges: Badge[];
-  streak: number;
-  avatarColor: string;
-  activity: number[];
-};
 
 // ── Static decorative data keyed by rank ──────────────────────────────────────
 
@@ -305,10 +279,14 @@ export default function LeaderboardPage() {
     }
   }
 
-  const sortedEntries = [...entries].sort((a, b) =>
-    sortDir === "desc"
-      ? b.totalContributions - a.totalContributions
-      : a.totalContributions - b.totalContributions
+  const sortedEntries = useMemo(
+    () =>
+      [...entries].sort((a, b) =>
+        sortDir === "desc"
+          ? b.totalContributions - a.totalContributions
+          : a.totalContributions - b.totalContributions
+      ),
+    [entries, sortDir]
   );
 
   return (
