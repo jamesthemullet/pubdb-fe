@@ -141,6 +141,8 @@ const Dashboard = (): React.JSX.Element | null => {
     "idle" | "copied" | "error"
   >("idle");
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [createKeyLoading, setCreateKeyLoading] = useState(false);
+  const [createKeyError, setCreateKeyError] = useState<string | null>(null);
   const forgotKeyModalRef = useRef<HTMLDivElement>(null);
   const forgotKeyModalTriggerRef = useRef<HTMLElement | null>(null);
   const createKeyModalRef = useRef<HTMLDivElement>(null);
@@ -303,6 +305,35 @@ const Dashboard = (): React.JSX.Element | null => {
     forgotKeyModalTriggerRef.current?.focus();
   }
 
+  async function handleCreateApiKey() {
+    try {
+      setCreateKeyLoading(true);
+      setCreateKeyError(null);
+      setForgotKeyDetails(null);
+      setShowForgotKeyModal(false);
+      setForgotKeyCopyStatus("idle");
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/payments/subscribe-to-hobby`, {
+        method: "POST",
+        headers: buildAuthHeaders(token),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
+      const keyData: GeneratedApiKeyResponse = data.apiKey ?? data;
+      setForgotKeyDetails(keyData);
+      setShowForgotKeyModal(true);
+      setForgotKeyCopyStatus("idle");
+      const refreshRes = await fetch(`${API_URL}/auth/dashboard`, {
+        headers: buildAuthHeaders(token),
+      });
+      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+    } catch (err: unknown) {
+      setCreateKeyError(getErrorMessage(err, "Failed to create API key"));
+    } finally {
+      setCreateKeyLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (showForgotKeyModal && forgotKeyDetails) {
       forgotKeyModalTriggerRef.current = document.activeElement as HTMLElement;
@@ -462,7 +493,19 @@ const Dashboard = (): React.JSX.Element | null => {
             </p>
           </div>
           <div className={styles.pageActions}>
-            {/* TODO: wire Create API key button to POST /auth/api-keys once endpoint is confirmed */}
+            {dashboardData.apiKeys.length === 0 && (
+              <button
+                type="button"
+                className={styles.btnPrimary}
+                disabled={createKeyLoading}
+                onClick={() => { void handleCreateApiKey(); }}
+              >
+                {createKeyLoading ? "Creating…" : "+ New key"}
+              </button>
+            )}
+            {createKeyError && (
+              <p className={styles.inlineError}>{createKeyError}</p>
+            )}
           </div>
         </div>
 
@@ -532,7 +575,16 @@ const Dashboard = (): React.JSX.Element | null => {
                   {activeKeyCount} active
                 </span>
               </div>
-              {/* TODO: wire + New key button once Create API key is confirmed working */}
+              {dashboardData.apiKeys.length === 0 && (
+                <button
+                  type="button"
+                  className={styles.btnOutline}
+                  disabled={createKeyLoading}
+                  onClick={() => { void handleCreateApiKey(); }}
+                >
+                  {createKeyLoading ? "Creating…" : "+ New key"}
+                </button>
+              )}
             </div>
 
             {cancelError && (
@@ -546,7 +598,18 @@ const Dashboard = (): React.JSX.Element | null => {
 
             {dashboardData.apiKeys.length === 0 ? (
               <div className={styles.emptyKeys}>
-                No API keys yet. Create one to get started.
+                <p>No API keys yet.</p>
+                <button
+                  type="button"
+                  className={styles.btnPrimary}
+                  disabled={createKeyLoading}
+                  onClick={() => { void handleCreateApiKey(); }}
+                >
+                  {createKeyLoading ? "Creating…" : "Create one to get started"}
+                </button>
+                {createKeyError && (
+                  <p className={styles.inlineError}>{createKeyError}</p>
+                )}
               </div>
             ) : (
               dashboardData.apiKeys.map((key) => {

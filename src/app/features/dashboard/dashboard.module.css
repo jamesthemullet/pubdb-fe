@@ -517,6 +517,10 @@
   color: var(--text-muted);
 }
 
+.emptyKeys p {
+  margin-bottom: 0.75rem;
+}
+
 /* ── Top endpoints panel ───────────────────────────────────────────────────── */
 
 .endpointsPanel {

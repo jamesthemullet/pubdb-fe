@@ -158,8 +158,9 @@ describe("Dashboard", () => {
 			render(<Dashboard />);
 
 			await waitFor(() => {
+				expect(screen.getByText("No API keys yet.")).toBeInTheDocument();
 				expect(
-					screen.getByText("No API keys yet. Create one to get started."),
+					screen.getByRole("button", { name: "Create one to get started" }),
 				).toBeInTheDocument();
 			});
 		});
