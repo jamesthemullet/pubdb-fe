@@ -141,6 +141,7 @@ const Dashboard = (): React.JSX.Element | null => {
     "idle" | "copied" | "error"
   >("idle");
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [dismissedNudges, setDismissedNudges] = useState<Set<string>>(new Set());
   const [createKeyLoading, setCreateKeyLoading] = useState(false);
   const [createKeyError, setCreateKeyError] = useState<string | null>(null);
   const forgotKeyModalRef = useRef<HTMLDivElement>(null);
@@ -619,8 +620,14 @@ const Dashboard = (): React.JSX.Element | null => {
                 const isForgotLoading =
                   forgotKeyLoading && forgotKeyTarget === key.keyPrefix;
 
+                const showNudge =
+                  key.tier === "HOBBY" &&
+                  pct >= 75 &&
+                  !dismissedNudges.has(key.keyPrefix);
+
                 return (
-                  <div key={key.keyPrefix} className={styles.keyRow}>
+                  <div key={key.keyPrefix} className={styles.keyCard}>
+                  <div className={styles.keyRow}>
                     <div className={styles.keyLeft}>
                       <span className={styles.keyName}>{key.name}</span>
                       <div className={styles.keyMeta}>
@@ -717,6 +724,34 @@ const Dashboard = (): React.JSX.Element | null => {
                       </div>
                       )}
                     </div>
+                  </div>
+                  {showNudge && (
+                    <div className={styles.upgradeNudge}>
+                      <div className={styles.upgradeNudgeBody}>
+                        <p className={styles.upgradeNudgeHeading}>
+                          You&rsquo;ve used {Math.round(pct)}% of your monthly requests
+                        </p>
+                        <p className={styles.upgradeNudgeDesc}>
+                          {key.remaining.month.toLocaleString()} requests left this month. Upgrade to DEVELOPER to unlock Location Search and Statistics.
+                        </p>
+                      </div>
+                      <div className={styles.upgradeNudgeActions}>
+                        <a href="/#pricing" className={styles.upgradeNudgeCta}>
+                          Upgrade &rarr;
+                        </a>
+                        <button
+                          type="button"
+                          className={styles.upgradeNudgeDismiss}
+                          aria-label="Dismiss upgrade prompt"
+                          onClick={() =>
+                            setDismissedNudges((prev) => new Set([...prev, key.keyPrefix]))
+                          }
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   </div>
                 );
               })
