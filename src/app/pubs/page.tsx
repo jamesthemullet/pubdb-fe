@@ -14,6 +14,11 @@ import styles from "./page.module.css";
 
 type SortOption = "name-asc" | "name-desc" | "newest" | "oldest";
 
+function pubLocation(pub: Pub): string {
+  const area = pub.area || pub.borough || null;
+  return area ? `${pub.city} · ${area}` : pub.city;
+}
+
 const SORT_OPTIONS: SortOption[] = [
   "name-asc",
   "name-desc",
@@ -184,11 +189,6 @@ function PubsContent() {
   const hiddenCount = PUB_AMENITY_FIELDS.length - VISIBLE_FILTER_COUNT;
   const hasActiveFilters =
     debouncedSearchTerm || activeAmenities.size > 0 || sortBy !== "name-asc";
-
-  function pubLocation(pub: Pub): string {
-    const area = pub.area || pub.borough || null;
-    return area ? `${pub.city} · ${area}` : pub.city;
-  }
 
   return (
     <div className={styles.page}>
@@ -481,19 +481,27 @@ function PubsContent() {
                 {/* <th className={styles.thArrow} aria-label="View" /> */}
               </tr>
             </thead>
-            <tbody>
+            <tbody
+              onClick={(e) => {
+                const tr = (e.target as Element).closest("tr[data-id]");
+                if (tr) router.push(`/pubs/${(tr as HTMLElement).dataset.id}`);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  const tr = (e.target as Element).closest("tr[data-id]");
+                  if (tr) {
+                    e.preventDefault();
+                    router.push(`/pubs/${(tr as HTMLElement).dataset.id}`);
+                  }
+                }
+              }}
+            >
               {filteredPubs.map((pub) => (
                 <tr
                   key={pub.id}
+                  data-id={pub.id}
                   className={styles.tableRow}
-                  onClick={() => router.push(`/pubs/${pub.id}`)}
                   tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      router.push(`/pubs/${pub.id}`);
-                    }
-                  }}
                 >
                   <td className={styles.tdName}>
                     <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
