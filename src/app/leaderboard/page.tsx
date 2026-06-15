@@ -1,5 +1,5 @@
-import { getServerApiUrl } from "@/lib/serverApiUrl";
 import { normalizeLeaderboard } from "@/lib/normalizeLeaderboard";
+import { getServerApiUrl } from "@/lib/serverApiUrl";
 import LeaderboardClient from "./LeaderboardClient";
 
 export default async function LeaderboardPage() {

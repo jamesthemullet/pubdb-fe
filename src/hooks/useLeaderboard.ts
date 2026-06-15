@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import {
   type LeaderboardData,
-  type LeaderboardEntry,
   normalizeLeaderboard,
 } from "@/lib/normalizeLeaderboard";
 
-export type { LeaderboardEntry, LeaderboardData };
+export type { LeaderboardData };
 
 export function useLeaderboard(): {
   leaderboard: LeaderboardData | null;
@@ -24,7 +23,9 @@ export function useLeaderboard(): {
       setLeaderboardLoading(true);
       setLeaderboardError(null);
       try {
-        const res = await fetch("/api/leaderboard", { signal: controller.signal });
+        const res = await fetch("/api/leaderboard", {
+          signal: controller.signal,
+        });
         if (!res.ok) {
           throw new Error(`Failed to fetch leaderboard: ${res.status}`);
         }
