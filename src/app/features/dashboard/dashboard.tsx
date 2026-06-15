@@ -159,27 +159,9 @@ const Dashboard = (): React.JSX.Element | null => {
   }
 
   useEffect(() => {
-    const checkAuth = () => {
-      setIsAuthenticated(!!localStorage.getItem("token"));
-    };
-    checkAuth();
-    window.addEventListener("authChanged", checkAuth);
-    window.addEventListener("storage", checkAuth);
-    return () => {
-      window.removeEventListener("authChanged", checkAuth);
-      window.removeEventListener("storage", checkAuth);
-    };
-  }, []);
-
-  useEffect(() => {
-    async function fetchDashboard() {
-      if (!isAuthenticated) {
-        setLoading(false);
-        return;
-      }
+    async function fetchDashboard(token: string) {
       try {
         setError(null);
-        const token = localStorage.getItem("token");
         const res = await fetch(`${API_URL}/auth/dashboard`, {
           headers: buildAuthHeaders(token),
         });
@@ -204,8 +186,31 @@ const Dashboard = (): React.JSX.Element | null => {
         setLoading(false);
       }
     }
-    fetchDashboard();
-  }, [isAuthenticated]);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+    } else {
+      setIsAuthenticated(true);
+      fetchDashboard(token);
+    }
+
+    const handleAuthChange = () => {
+      const t = localStorage.getItem("token");
+      setIsAuthenticated(!!t);
+      if (t) {
+        fetchDashboard(t);
+      } else {
+        setLoading(false);
+      }
+    };
+    window.addEventListener("authChanged", handleAuthChange);
+    window.addEventListener("storage", handleAuthChange);
+    return () => {
+      window.removeEventListener("authChanged", handleAuthChange);
+      window.removeEventListener("storage", handleAuthChange);
+    };
+  }, []);
 
   async function handleCancelSubscription() {
     if (
