@@ -9,7 +9,6 @@ import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import type { BeerGarden, Pub } from "@/types/pub";
 import addPubStyles from "../../add-pub/page.module.css";
@@ -202,7 +201,7 @@ export default function PubPage() {
       }
       body.id = pub.id;
       if (pub.createdAt) body.createdAt = pub.createdAt;
-      const res = await fetch(`${API_URL}/pubs/${pub.id}`, {
+      const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
         body: JSON.stringify(body),
@@ -254,7 +253,7 @@ export default function PubPage() {
         }
         body.id = pub.id;
         if (pub.createdAt) body.createdAt = pub.createdAt;
-        const res = await fetch(`${API_URL}/pubs/${pub.id}`, {
+        const res = await fetch(`/api/pubs/${pub.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
           body: JSON.stringify(body),
@@ -312,7 +311,7 @@ export default function PubPage() {
     if (!confirm(`Are you sure you want to delete "${pub.name}"? This cannot be undone.`)) return;
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/pubs/${pub.id}`, {
+      const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "DELETE",
         headers: buildAuthHeaders(token),
       });
