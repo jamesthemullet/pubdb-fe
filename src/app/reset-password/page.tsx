@@ -8,7 +8,7 @@ import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
 import styles from "./page.module.css";
 
-function ResetPasswordForm() {
+function ResetPasswordForm(): JSX.Element {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -24,7 +24,7 @@ function ResetPasswordForm() {
     }
   }, [token]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
 
     if (password !== confirmPassword) {
@@ -140,7 +140,7 @@ function ResetPasswordForm() {
   );
 }
 
-export default function ResetPasswordPage() {
+export default function ResetPasswordPage(): JSX.Element {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <ResetPasswordForm />

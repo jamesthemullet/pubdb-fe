@@ -579,7 +579,7 @@ export default function PubPage() {
 
 // ─── Tab panels ──────────────────────────────────────────────────────────────
 
-function BeersTab({ pub }: { pub: Pub }) {
+function BeersTab({ pub }: { pub: Pub }): JSX.Element {
   const beerTypeNames = getBeerTypeNames(pub);
   return (
     <div className={styles.tabContent}>
@@ -632,7 +632,7 @@ function checkOpenNow(
   return cur >= open && cur < close;
 }
 
-function HoursTab({ pub }: { pub: Pub }) {
+function HoursTab({ pub }: { pub: Pub }): JSX.Element {
   const now = new Date();
   const jsDayIndex = now.getDay();
   const todayFull = WEEKDAYS[jsDayIndex === 0 ? 6 : jsDayIndex - 1].full;
@@ -713,7 +713,7 @@ function formatSunExposure(s: string): string {
   return s.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function GardenTab({ pub }: { pub: Pub }) {
+function GardenTab({ pub }: { pub: Pub }): JSX.Element {
   if (!pub.beerGardens?.length) {
     return (
       <div className={styles.gardenEmptyCard}>
@@ -830,7 +830,7 @@ function avatarColor(initial: string): { bg: string; fg: string } {
   return AVATAR_COLORS[initial.toUpperCase().charCodeAt(0) % AVATAR_COLORS.length];
 }
 
-function HistoryTab({ pub }: { pub: Pub }) {
+function HistoryTab({ pub }: { pub: Pub }): JSX.Element {
   type HistoryEntry = {
     key: string;
     initial: string;

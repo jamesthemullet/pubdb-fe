@@ -23,7 +23,7 @@ type SubscriptionStatus = {
   };
 };
 
-function SuccessContent() {
+function SuccessContent(): JSX.Element {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const [status, setStatus] = useState<SubscriptionStatus | null>(null);
@@ -200,7 +200,7 @@ function SuccessContent() {
   );
 }
 
-export default function SuccessPage() {
+export default function SuccessPage(): JSX.Element {
   return (
     <Suspense
       fallback={
