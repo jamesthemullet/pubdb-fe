@@ -141,7 +141,9 @@ const Dashboard = (): React.JSX.Element | null => {
     "idle" | "copied" | "error"
   >("idle");
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [dismissedNudges, setDismissedNudges] = useState<Set<string>>(new Set());
+  const [dismissedNudges, setDismissedNudges] = useState<Set<string>>(
+    new Set()
+  );
   const [createKeyLoading, setCreateKeyLoading] = useState(false);
   const [createKeyError, setCreateKeyError] = useState<string | null>(null);
   const forgotKeyModalRef = useRef<HTMLDivElement>(null);
@@ -499,7 +501,9 @@ const Dashboard = (): React.JSX.Element | null => {
                 type="button"
                 className={styles.btnPrimary}
                 disabled={createKeyLoading}
-                onClick={() => { void handleCreateApiKey(); }}
+                onClick={() => {
+                  void handleCreateApiKey();
+                }}
               >
                 {createKeyLoading ? "Creating…" : "+ New key"}
               </button>
@@ -581,7 +585,9 @@ const Dashboard = (): React.JSX.Element | null => {
                   type="button"
                   className={styles.btnOutline}
                   disabled={createKeyLoading}
-                  onClick={() => { void handleCreateApiKey(); }}
+                  onClick={() => {
+                    void handleCreateApiKey();
+                  }}
                 >
                   {createKeyLoading ? "Creating…" : "+ New key"}
                 </button>
@@ -604,7 +610,9 @@ const Dashboard = (): React.JSX.Element | null => {
                   type="button"
                   className={styles.btnPrimary}
                   disabled={createKeyLoading}
-                  onClick={() => { void handleCreateApiKey(); }}
+                  onClick={() => {
+                    void handleCreateApiKey();
+                  }}
                 >
                   {createKeyLoading ? "Creating…" : "Create one to get started"}
                 </button>
@@ -627,131 +635,140 @@ const Dashboard = (): React.JSX.Element | null => {
 
                 return (
                   <div key={key.keyPrefix} className={styles.keyCard}>
-                  <div className={styles.keyRow}>
-                    <div className={styles.keyLeft}>
-                      <span className={styles.keyName}>{key.name}</span>
-                      <div className={styles.keyMeta}>
-                        <code className={styles.keyPrefix}>
-                          {key.keyPrefix} ····
-                        </code>
-                        <span className={styles.keyLastUsed}>
-                          · last used {fmtRelative(key.lastUsed)}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        className={styles.btnOutline}
-                        disabled={isForgotLoading}
-                        onClick={() => handleForgotApiKey(key.keyPrefix)}
-                      >
-                        {isForgotLoading
-                          ? "Regenerating…"
-                          : "Regenerate API key"}
-                      </button>
-                      {forgotKeyTarget === key.keyPrefix && (
-                        <>
-                          {forgotKeyError && (
-                            <p className={styles.inlineError}>
-                              {forgotKeyError}
-                            </p>
-                          )}
-                          {forgotKeyMessage && !showForgotKeyModal && (
-                            <p className={styles.inlineSuccess}>
-                              {forgotKeyMessage}
-                            </p>
-                          )}
-                        </>
-                      )}
-                    </div>
-
-                    <div className={styles.keyRight}>
-                      <span
-                        className={`${styles.tierBadge} ${
-                          key.tier === "HOBBY"
-                            ? styles.tierHobby
-                            : styles.tierDev
-                        }`}
-                      >
-                        {key.tier}
-                      </span>
-                      <div className={styles.keyUsageGroup}>
-                        <span className={styles.usageText}>
-                          {used.toLocaleString()} /{" "}
-                          {key.limits.requestsPerMonth.toLocaleString()}
-                        </span>
-                        <UsageBar pct={pct} />
-                      </div>
-                      {key.tier !== "HOBBY" && (
-                      <div className={styles.keyMenuWrap}>
+                    <div className={styles.keyRow}>
+                      <div className={styles.keyLeft}>
+                        <span className={styles.keyName}>{key.name}</span>
+                        <div className={styles.keyMeta}>
+                          <code className={styles.keyPrefix}>
+                            {key.keyPrefix} ····
+                          </code>
+                          <span className={styles.keyLastUsed}>
+                            · last used {fmtRelative(key.lastUsed)}
+                          </span>
+                        </div>
                         <button
                           type="button"
-                          className={styles.menuDotBtn}
-                          aria-label={`More options for ${key.name}`}
-                          onClick={() =>
-                            setOpenMenu(isMenuOpen ? null : key.keyPrefix)
-                          }
+                          className={styles.btnOutline}
+                          disabled={isForgotLoading}
+                          onClick={() => handleForgotApiKey(key.keyPrefix)}
                         >
-                          •••
+                          {isForgotLoading
+                            ? "Regenerating…"
+                            : "Regenerate API key"}
                         </button>
-                        {isMenuOpen && key.keyStatus === "ACTIVE" && (
-                          <div className={styles.menuDropdown}>
+                        {forgotKeyTarget === key.keyPrefix && (
+                          <>
+                            {forgotKeyError && (
+                              <p className={styles.inlineError}>
+                                {forgotKeyError}
+                              </p>
+                            )}
+                            {forgotKeyMessage && !showForgotKeyModal && (
+                              <p className={styles.inlineSuccess}>
+                                {forgotKeyMessage}
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </div>
+
+                      <div className={styles.keyRight}>
+                        <span
+                          className={`${styles.tierBadge} ${
+                            key.tier === "HOBBY"
+                              ? styles.tierHobby
+                              : styles.tierDev
+                          }`}
+                        >
+                          {key.tier}
+                        </span>
+                        <div className={styles.keyUsageGroup}>
+                          <span className={styles.usageText}>
+                            {used.toLocaleString()} /{" "}
+                            {key.limits.requestsPerMonth.toLocaleString()}
+                          </span>
+                          <UsageBar pct={pct} />
+                        </div>
+                        {key.tier !== "HOBBY" && (
+                          <div className={styles.keyMenuWrap}>
                             <button
                               type="button"
-                              className={styles.menuItem}
-                              disabled={isForgotLoading}
-                              onClick={() => {
-                                void handleForgotApiKey(key.keyPrefix);
-                                setOpenMenu(null);
-                              }}
+                              className={styles.menuDotBtn}
+                              aria-label={`More options for ${key.name}`}
+                              onClick={() =>
+                                setOpenMenu(isMenuOpen ? null : key.keyPrefix)
+                              }
                             >
-                              Forgot API key
+                              •••
                             </button>
-                            <button
-                              type="button"
-                              className={styles.menuItemDanger}
-                              disabled={cancelling}
-                              onClick={() => {
-                                void handleCancelSubscription();
-                                setOpenMenu(null);
-                              }}
-                            >
-                              {cancelling
-                                ? "Cancelling…"
-                                : "Cancel subscription"}
-                            </button>
+                            {isMenuOpen && key.keyStatus === "ACTIVE" && (
+                              <div className={styles.menuDropdown}>
+                                <button
+                                  type="button"
+                                  className={styles.menuItem}
+                                  disabled={isForgotLoading}
+                                  onClick={() => {
+                                    void handleForgotApiKey(key.keyPrefix);
+                                    setOpenMenu(null);
+                                  }}
+                                >
+                                  Forgot API key
+                                </button>
+                                <button
+                                  type="button"
+                                  className={styles.menuItemDanger}
+                                  disabled={cancelling}
+                                  onClick={() => {
+                                    void handleCancelSubscription();
+                                    setOpenMenu(null);
+                                  }}
+                                >
+                                  {cancelling
+                                    ? "Cancelling…"
+                                    : "Cancel subscription"}
+                                </button>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
-                      )}
                     </div>
-                  </div>
-                  {showNudge && (
-                    <div className={styles.upgradeNudge}>
-                      <div className={styles.upgradeNudgeBody}>
-                        <p className={styles.upgradeNudgeHeading}>
-                          You&rsquo;ve used {Math.round(pct)}% of your monthly requests
-                        </p>
-                        <p className={styles.upgradeNudgeDesc}>
-                          {key.remaining.month.toLocaleString()} requests left this month. Upgrade to DEVELOPER to unlock Location Search and Statistics.
-                        </p>
+                    {showNudge && (
+                      <div className={styles.upgradeNudge}>
+                        <div className={styles.upgradeNudgeBody}>
+                          <p className={styles.upgradeNudgeHeading}>
+                            You&rsquo;ve used {Math.round(pct)}% of your monthly
+                            requests
+                          </p>
+                          <p className={styles.upgradeNudgeDesc}>
+                            {key.remaining.month.toLocaleString()} requests left
+                            this month. Upgrade to DEVELOPER to unlock
+                            significantly increased limits, location search and
+                            statistics.
+                          </p>
+                        </div>
+                        <div className={styles.upgradeNudgeActions}>
+                          <a
+                            href="/#pricing"
+                            className={styles.upgradeNudgeCta}
+                          >
+                            Upgrade &rarr;
+                          </a>
+                          <button
+                            type="button"
+                            className={styles.upgradeNudgeDismiss}
+                            aria-label="Dismiss upgrade prompt"
+                            onClick={() =>
+                              setDismissedNudges(
+                                (prev) => new Set([...prev, key.keyPrefix])
+                              )
+                            }
+                          >
+                            &times;
+                          </button>
+                        </div>
                       </div>
-                      <div className={styles.upgradeNudgeActions}>
-                        <a href="/#pricing" className={styles.upgradeNudgeCta}>
-                          Upgrade &rarr;
-                        </a>
-                        <button
-                          type="button"
-                          className={styles.upgradeNudgeDismiss}
-                          aria-label="Dismiss upgrade prompt"
-                          onClick={() =>
-                            setDismissedNudges((prev) => new Set([...prev, key.keyPrefix]))
-                          }
-                        >
-                          &times;
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                    )}
                   </div>
                 );
               })
