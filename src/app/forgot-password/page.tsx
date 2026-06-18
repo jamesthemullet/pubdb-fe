@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className={styles.container}>
-      <Typography variant="headingMedium">Forgot Password</Typography>
+      <Typography variant="headingMedium" as="h1">Forgot Password</Typography>
       <Typography className={styles.description}>
         Enter your email address and we&apos;ll send you a link to reset your
         password.
@@ -70,9 +70,9 @@ export default function ForgotPasswordPage() {
       </form>
 
       {message && (
-        <div className={styles.success}>
+        <output className={styles.success}>
           <Typography>{message}</Typography>
-        </div>
+        </output>
       )}
 
       {error && (
