@@ -27,7 +27,7 @@ const SORT_OPTIONS: SortOption[] = [
 ];
 
 function isSortOption(value: string): value is SortOption {
-  return (SORT_OPTIONS as string[]).includes(value);
+  return SORT_OPTIONS.some((opt) => opt === value);
 }
 
 type PubsApiResponse = { data: Pub[] };
@@ -66,7 +66,7 @@ const AMENITY_ICONS: Partial<
   },
 };
 
-function PubsContent() {
+function PubsContent(): JSX.Element {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
@@ -166,7 +166,7 @@ function PubsContent() {
   const hasNextPage = pubs.length === PAGE_SIZE;
   const hasPrevPage = page > 0;
 
-  function toggleAmenity(key: PubAmenityKey) {
+  function toggleAmenity(key: PubAmenityKey): void {
     setPage(0);
     setActiveAmenities((prev) => {
       const next = new Set(prev);
@@ -176,7 +176,7 @@ function PubsContent() {
     });
   }
 
-  function clearAllFilters() {
+  function clearAllFilters(): void {
     setPage(0);
     setSearchTerm("");
     setActiveAmenities(new Set());
@@ -567,7 +567,7 @@ function PubsContent() {
   );
 }
 
-export default function Pubs() {
+export default function Pubs(): JSX.Element {
   return (
     <Suspense>
       <PubsContent />
