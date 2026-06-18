@@ -264,24 +264,26 @@ export default function AddPubPage() {
           </div>
 
           <div className={styles.fieldBlock}>
-            <p className={styles.fieldLabel}>Ownership</p>
-            <fieldset className={styles.ownershipToggle} aria-label="Ownership type">
-              <button
-                type="button"
-                className={`${styles.ownershipBtn} ${isIndependent ? styles.ownershipBtnActive : ""}`}
-                aria-pressed={isIndependent}
-                onClick={() => setIsIndependent(true)}
-              >
-                <IndependentIcon /> Independent
-              </button>
-              <button
-                type="button"
-                className={`${styles.ownershipBtn} ${!isIndependent ? styles.ownershipBtnActive : ""}`}
-                aria-pressed={!isIndependent}
-                onClick={() => setIsIndependent(false)}
-              >
-                <ChainIcon /> Chain
-              </button>
+            <fieldset className={styles.ownershipGroup}>
+              <legend className={styles.fieldLabel}>Ownership</legend>
+              <div className={styles.ownershipToggle}>
+                <button
+                  type="button"
+                  className={`${styles.ownershipBtn} ${isIndependent ? styles.ownershipBtnActive : ""}`}
+                  aria-pressed={isIndependent}
+                  onClick={() => setIsIndependent(true)}
+                >
+                  <IndependentIcon /> Independent
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.ownershipBtn} ${!isIndependent ? styles.ownershipBtnActive : ""}`}
+                  aria-pressed={!isIndependent}
+                  onClick={() => setIsIndependent(false)}
+                >
+                  <ChainIcon /> Chain
+                </button>
+              </div>
             </fieldset>
           </div>
 

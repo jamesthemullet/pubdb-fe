@@ -295,6 +295,7 @@ function PubsContent() {
           <div className={styles.filterRight}>
             <Dropdown
               id="sort-select"
+              aria-label="Sort pubs by"
               value={sortBy}
               onChange={(e) => {
                 const val = e.target.value;
