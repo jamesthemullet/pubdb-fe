@@ -149,9 +149,9 @@ export default function AuthGate({ context, onLogin }: AuthGateProps) {
           </div>
         )}
         {success && (
-          <div className={styles.successBox}>
+          <output className={styles.successBox}>
             <p>{success}</p>
-          </div>
+          </output>
         )}
 
         <button type="submit" className={styles.submitBtn} disabled={loading}>
