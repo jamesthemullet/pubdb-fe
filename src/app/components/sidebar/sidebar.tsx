@@ -197,7 +197,14 @@ export default function Sidebar() {
               <span className={styles.planName}>{planData.planName}</span>
               <span className={styles.planPct}>{planData.pct}% used</span>
             </div>
-            <div className={styles.planBar}>
+            <div
+              className={styles.planBar}
+              role="progressbar"
+              aria-valuenow={planData.pct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Plan usage"
+            >
               <div className={styles.planBarFill} style={{ width: `${planData.pct}%` }} />
             </div>
             <p className={styles.planRequests}>
