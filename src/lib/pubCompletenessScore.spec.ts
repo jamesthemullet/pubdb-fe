@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
-import { pubCompletenessScore } from "./pubCompletenessScore";
 import type { Pub } from "@/types/pub";
+import { pubCompletenessScore } from "./pubCompletenessScore";
 
 const basePub: Pub = {
   id: "1",
