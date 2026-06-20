@@ -138,6 +138,7 @@ export default function Sidebar() {
                 <Link
                   href={href}
                   className={`${styles.navItem} ${pathname === href ? styles.navItemActive : ""}`}
+                  aria-current={pathname === href ? "page" : undefined}
                   onClick={() => setMenuOpen(false)}
                 >
                   <span className={styles.navLabel}>{label}</span>
@@ -156,6 +157,7 @@ export default function Sidebar() {
                 <Link
                   href={href}
                   className={`${styles.navItem} ${pathname === href ? styles.navItemActive : ""}`}
+                  aria-current={pathname === href ? "page" : undefined}
                   onClick={() => setMenuOpen(false)}
                 >
                   <span className={styles.navLabel}>{label}</span>
@@ -167,6 +169,7 @@ export default function Sidebar() {
                 <Link
                   href="/register"
                   className={`${styles.navItem} ${pathname === "/register" ? styles.navItemActive : ""}`}
+                  aria-current={pathname === "/register" ? "page" : undefined}
                   onClick={() => setMenuOpen(false)}
                 >
                   <span className={styles.navLabel}>Register / Log in</span>
