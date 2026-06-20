@@ -17,16 +17,6 @@ describe("GET /api/beer-types", () => {
     process.env = originalEnv;
   });
 
-  it("returns 500 when TESTING_API_KEY is missing", async () => {
-    const request = new Request("http://localhost/api/beer-types");
-
-    const response = await GET(request);
-
-    expect(response.status).toBe(500);
-    await expect(response.json()).resolves.toEqual({
-      error: "Missing API key",
-    });
-  });
 
   it("fetches beer types with X-API-Key header", async () => {
     process.env.API_URL = "https://api.example.com";

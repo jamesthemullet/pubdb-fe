@@ -32,15 +32,31 @@ export function clearCountriesCache(): void {
   }
 }
 
+type StoredCache = { data: CountryOption[]; timestamp: number };
+
+function isStoredCache(value: unknown): value is StoredCache {
+  if (typeof value !== "object" || value === null) return false;
+  const obj = value as Record<string, unknown>;
+  return (
+    typeof obj.timestamp === "number" &&
+    Array.isArray(obj.data) &&
+    obj.data.every(
+      (item) =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof (item as Record<string, unknown>).name === "string" &&
+        typeof (item as Record<string, unknown>).code === "string"
+    )
+  );
+}
+
 function readStorageCache(): CountryOption[] | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as {
-      data: CountryOption[];
-      timestamp: number;
-    };
+    const parsed: unknown = JSON.parse(raw);
+    if (!isStoredCache(parsed)) return null;
     if (Date.now() - parsed.timestamp > CACHE_TTL_MS) {
       localStorage.removeItem(STORAGE_KEY);
       return null;

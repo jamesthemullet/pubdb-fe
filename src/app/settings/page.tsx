@@ -1,3 +1,5 @@
+// TODO: settings page is not ready — hidden from nav until wired to real API.
+// Re-enable sidebar link in src/app/components/sidebar/sidebar.tsx when done.
 "use client";
 
 import { useState } from "react";
@@ -10,18 +12,14 @@ import styles from "./page.module.css";
 type SettingsTab =
   | "profile"
   | "security"
-  | "api"
   | "notifications"
-  | "team"
   | "appearance"
   | "danger";
 
 const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   { id: "profile", label: "Profile", icon: <ProfileIcon /> },
   { id: "security", label: "Security", icon: <SecurityIcon /> },
-  { id: "api", label: "API preferences", icon: <ApiIcon /> },
   { id: "notifications", label: "Notifications", icon: <BellIcon /> },
-  { id: "team", label: "Team", icon: <TeamIcon /> },
   { id: "appearance", label: "Appearance", icon: <AppearanceIcon /> },
   { id: "danger", label: "Danger zone", icon: <DangerIcon /> },
 ];
@@ -68,9 +66,7 @@ export default function SettingsPage() {
         <div className={styles.content}>
           {activeTab === "profile" && <ProfileTab userEmail={user?.email ?? ""} />}
           {activeTab === "security" && <SecurityTab />}
-          {activeTab === "api" && <ApiTab />}
           {activeTab === "notifications" && <NotificationsTab />}
-          {activeTab === "team" && <TeamTab />}
           {activeTab === "appearance" && <AppearanceTab />}
           {activeTab === "danger" && <DangerTab />}
         </div>
@@ -127,7 +123,6 @@ function SaveBar({ onSave }: { onSave?: () => void }) {
 
 function ProfileTab({ userEmail }: { userEmail: string }) {
   const [displayName, setDisplayName] = useState("Sam Mott");
-  const [username, setUsername] = useState("sammott");
   const [city, setCity] = useState("London");
   const [bio, setBio] = useState("Building Pintly. Probably at a pub right now.");
   const [email, setEmail] = useState(userEmail || "sam@pintly.app");
@@ -151,22 +146,6 @@ function ProfileTab({ userEmail }: { userEmail: string }) {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
           />
-        </FieldRow>
-
-        <FieldRow
-          label="Username"
-          hint="Used in @mentions and your contributor URL."
-        >
-          <div className={styles.prefixInput}>
-            <span className={styles.inputPrefix}>pubdb.io/u/</span>
-            <input
-              className={styles.prefixInputField}
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              spellCheck={false}
-            />
-          </div>
         </FieldRow>
 
         <FieldRow label="Avatar" hint="Recommended 256×256.">
@@ -241,70 +220,6 @@ function SecurityTab() {
         </FieldRow>
       </Card>
 
-      <Card title="Two-factor authentication" description="Add an extra layer of security to your account.">
-        <div className={styles.twoFaRow}>
-          <div>
-            <p className={styles.twoFaStatus}>Not enabled</p>
-            <p className={styles.fieldHint}>Protect your account with an authenticator app.</p>
-          </div>
-          <button type="button" className={styles.saveBtn}>Enable 2FA</button>
-        </div>
-      </Card>
-
-      <Card title="Active sessions" description="Devices currently signed in to your account.">
-        <div className={styles.sessionRow}>
-          <div className={styles.sessionInfo}>
-            <span className={styles.sessionDevice}>Chrome · macOS</span>
-            <span className={styles.fieldHint}>London, UK · Current session</span>
-          </div>
-          <span className={styles.currentSessionBadge}>Current</span>
-        </div>
-      </Card>
-
-      <SaveBar />
-    </>
-  );
-}
-
-// ── API preferences tab ────────────────────────────────────────────────────────
-
-function ApiTab() {
-  const [defaultVersion, setDefaultVersion] = useState("v1");
-  const [rateAlerts, setRateAlerts] = useState(true);
-
-  return (
-    <>
-      <Card title="API defaults" description="Applied to all new API keys and requests by default.">
-        <FieldRow label="Default API version">
-          <select className={styles.selectInput} value={defaultVersion} onChange={(e) => setDefaultVersion(e.target.value)}>
-            <option value="v1">v1 (stable)</option>
-            <option value="v2-beta">v2 (beta)</option>
-          </select>
-        </FieldRow>
-
-        <FieldRow label="Rate limit alerts" hint="Email when usage exceeds 80% of quota.">
-          <label className={styles.toggleLabel}>
-            <input
-              type="checkbox"
-              className={styles.toggleInput}
-              checked={rateAlerts}
-              onChange={(e) => setRateAlerts(e.target.checked)}
-            />
-            <span className={styles.toggleTrack}>
-              <span className={styles.toggleThumb} />
-            </span>
-            <span className={styles.toggleText}>{rateAlerts ? "Enabled" : "Disabled"}</span>
-          </label>
-        </FieldRow>
-
-        <FieldRow label="Response format">
-          <select className={styles.selectInput} defaultValue="json">
-            <option value="json">JSON</option>
-            <option value="json-ld">JSON-LD</option>
-          </select>
-        </FieldRow>
-      </Card>
-
       <SaveBar />
     </>
   );
@@ -354,28 +269,6 @@ function NotificationsTab() {
 
       <SaveBar />
     </>
-  );
-}
-
-// ── Team tab ──────────────────────────────────────────────────────────────────
-
-function TeamTab() {
-  return (
-    <Card title="Team members" description="Invite colleagues to share access to this workspace.">
-      <div className={styles.teamRow}>
-        <span className={styles.teamAvatar} style={{ background: "#d97706" }}>SM</span>
-        <div className={styles.teamInfo}>
-          <span className={styles.teamName}>Sam Mott</span>
-          <span className={styles.fieldHint}>sam@pintly.app · Owner</span>
-        </div>
-        <span className={styles.teamRoleBadge}>Owner</span>
-      </div>
-
-      <div className={styles.inviteRow}>
-        <input className={styles.textInput} type="email" placeholder="colleague@example.com" />
-        <button type="button" className={styles.saveBtn}>Invite</button>
-      </div>
-    </Card>
   );
 }
 
@@ -449,30 +342,11 @@ function SecurityIcon() {
   );
 }
 
-function ApiIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M2 7h10M8 3l4 4-4 4M6 3L2 7l4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 function BellIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
       <path d="M7 1.5A4 4 0 003 5.5v2l-1 2h10l-1-2v-2a4 4 0 00-4-4z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
       <path d="M5.5 11.5a1.5 1.5 0 003 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function TeamIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <circle cx="5" cy="5" r="2" stroke="currentColor" strokeWidth="1.2" />
-      <circle cx="10" cy="5" r="2" stroke="currentColor" strokeWidth="1.2" />
-      <path d="M1 13c0-2.209 1.791-4 4-4s4 1.791 4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-      <path d="M10 9c1.5 0 3 1.2 3 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
     </svg>
   );
 }

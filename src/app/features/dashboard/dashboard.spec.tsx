@@ -158,8 +158,9 @@ describe("Dashboard", () => {
 			render(<Dashboard />);
 
 			await waitFor(() => {
+				expect(screen.getByText("No API keys yet.")).toBeInTheDocument();
 				expect(
-					screen.getByText("No API keys yet. Create one to get started."),
+					screen.getByRole("button", { name: "Create one to get started" }),
 				).toBeInTheDocument();
 			});
 		});
@@ -312,7 +313,7 @@ describe("Dashboard", () => {
 			).toBeInTheDocument();
 		});
 
-		it("does not show cancel option for HOBBY tier", async () => {
+		it("does not show key menu for HOBBY tier", async () => {
 			const data = {
 				...SAMPLE_DASHBOARD_DATA,
 				apiKeys: [{ ...SAMPLE_API_KEY, tier: "HOBBY" }],
@@ -320,10 +321,10 @@ describe("Dashboard", () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
 
 			render(<Dashboard />);
-			await openKeyMenu();
+			await screen.findByText("My Key");
 
 			expect(
-				screen.queryByRole("button", { name: /Cancel subscription/ }),
+				screen.queryByRole("button", { name: /More options for My Key/ }),
 			).not.toBeInTheDocument();
 		});
 

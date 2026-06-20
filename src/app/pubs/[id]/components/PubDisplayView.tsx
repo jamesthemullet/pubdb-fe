@@ -27,7 +27,7 @@ export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineS
   const activeAmenities = new Set(
     PUB_AMENITY_FIELDS.filter(({ key }) => pub[key]).map(({ key }) => key)
   );
-  const inactiveAmenities = PUB_AMENITY_FIELDS.filter(({ key }) => !pub[key]);
+  const inactiveAmenities = PUB_AMENITY_FIELDS.filter(({ key }) => pub[key] === false);
 
   const coordText =
     pub.lat != null && pub.lng != null

@@ -9,10 +9,10 @@ import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import type { BeerGarden, Pub } from "@/types/pub";
 import addPubStyles from "../../add-pub/page.module.css";
+import CompletenessCard from "./components/CompletenessCard";
 import EditButton from "./components/EditButton";
 import PubDisplayView from "./components/PubDisplayView";
 import PubEditView from "./components/PubEditView";
@@ -31,8 +31,8 @@ function pubInitials(name: string): string {
     .toUpperCase();
 }
 
-function pubDisplayId(id: string): string {
-  return `pub_${id.slice(0, 6)}`;
+function pubDisplayId(id: string | undefined): string {
+  return id ? `pub_${id.slice(0, 6)}` : "pub_??????";
 }
 
 export default function PubPage() {
@@ -59,8 +59,14 @@ export default function PubPage() {
   useEffect(() => {
     async function fetchPub() {
       try {
-        const res = await fetch(`${API_URL}/pubs/${id}`);
-        setPub(res.ok ? (await res.json()) || null : null);
+        const res = await fetch(`/api/pubs/${id}`);
+        if (!res.ok) { setPub(null); return; }
+        const raw: unknown = await res.json();
+        const unwrapped =
+          raw && typeof raw === "object" && "data" in raw
+            ? (raw as { data: unknown }).data
+            : raw;
+        setPub((unwrapped as Pub) || null);
       } catch {
         setPub(null);
       } finally {
@@ -73,10 +79,7 @@ export default function PubPage() {
   const handleEditClick = useCallback(() => {
     if (!pub) return;
     const base: Record<string, unknown> = { ...pub };
-    for (const { key } of PUB_AMENITY_FIELDS) {
-      if (base[key] === null) base[key] = false;
-    }
-    if (base.closedDown === null) base.closedDown = false;
+    if (typeof base.openingHours === "string") base.openingHours = undefined;
     setEditFields({
       ...(base as Partial<Pub>),
       beerGardens: pub.beerGardens ? [...pub.beerGardens] : [],
@@ -184,6 +187,7 @@ export default function PubPage() {
       for (const [key, value] of Object.entries(editFields)) {
         if (value === undefined || value === null) continue;
         if (key === "beerType") continue;
+        if (key === "openingHours" && typeof value === "string") continue;
         if (Array.isArray(value)) {
           if (key === "beerGardens") {
             body[key] = value.filter(isBeerGarden).map((g) => sanitizeBeerGarden(g));
@@ -196,7 +200,7 @@ export default function PubPage() {
       }
       body.id = pub.id;
       if (pub.createdAt) body.createdAt = pub.createdAt;
-      const res = await fetch(`${API_URL}/pubs/${pub.id}`, {
+      const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
         body: JSON.stringify(body),
@@ -236,6 +240,7 @@ export default function PubPage() {
         for (const [key, val] of Object.entries(merged)) {
           if (val === undefined || val === null) continue;
           if (key === "beerType") continue;
+          if (key === "openingHours" && typeof val === "string") continue;
           if (Array.isArray(val)) {
             if (key === "beerGardens") {
               body[key] = val.filter(isBeerGarden).map((g) => sanitizeBeerGarden(g));
@@ -248,7 +253,7 @@ export default function PubPage() {
         }
         body.id = pub.id;
         if (pub.createdAt) body.createdAt = pub.createdAt;
-        const res = await fetch(`${API_URL}/pubs/${pub.id}`, {
+        const res = await fetch(`/api/pubs/${pub.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
           body: JSON.stringify(body),
@@ -270,7 +275,7 @@ export default function PubPage() {
       (f) => !editFields[f] || editFields[f]?.toString().trim() === ""
     );
 
-  function copyText(text: string, key: "id" | "code") {
+  function copyText(text: string, key: "id" | "code"): void {
     void navigator.clipboard.writeText(text).then(() => {
       setCopied(key);
       setTimeout(() => setCopied(null), 1500);
@@ -295,18 +300,18 @@ export default function PubPage() {
 
   const displayId = pubDisplayId(pub.id);
   const activeAmenities = PUB_AMENITY_FIELDS.filter(({ key }) => pub[key]);
-  const curlCode = `# Fetch this pub\ncurl https://api.pubdb.io/v1/pubs/${displayId} \\\n     -H "Authorization: Bearer $PUBDB_KEY"`;
-  const nodeCode = `const res = await fetch(\n  'https://api.pubdb.io/v1/pubs/${displayId}',\n  { headers: { Authorization: \`Bearer \${process.env.PUBDB_KEY}\` } }\n);\nconst pub = await res.json();`;
-  const pythonCode = `import requests\nres = requests.get(\n  f'https://api.pubdb.io/v1/pubs/${displayId}',\n  headers={'Authorization': f'Bearer {PUBDB_KEY}'}\n)\npub = res.json()`;
+  const curlCode = `# Fetch this pub\ncurl https://api.thepubdb.com/api/v1/pubs/${pub.id} \\\n     -H "X-API-Key: $PUBDB_KEY"`;
+  const nodeCode = `const res = await fetch(\n  'https://api.thepubdb.com/api/v1/pubs/${pub.id}',\n  { headers: { 'X-API-Key': process.env.PUBDB_KEY } }\n);\nconst pub = await res.json();`;
+  const pythonCode = `import requests\nres = requests.get(\n  f'https://api.thepubdb.com/api/v1/pubs/${pub.id}',\n  headers={'X-API-Key': PUBDB_KEY}\n)\npub = res.json()`;
   const codeByTab: Record<CodeTab, string> = { curl: curlCode, node: nodeCode, python: pythonCode };
 
   const jsonPreview = buildJsonPreview(pub);
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<void> => {
     if (!confirm(`Are you sure you want to delete "${pub.name}"? This cannot be undone.`)) return;
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/pubs/${pub.id}`, {
+      const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "DELETE",
         headers: buildAuthHeaders(token),
       });
@@ -334,7 +339,7 @@ export default function PubPage() {
             <div className={styles.editTitleRow}>
               <h1 className={styles.editHeading}>Edit pub</h1>
               <span className={styles.editPatchBadge}>
-                <code>PATCH /v1/pubs/{displayId}</code>
+                <code>PATCH /v1/pubs/{pub.id}</code>
               </span>
             </div>
             <p className={styles.editSubtitle}>
@@ -394,25 +399,10 @@ export default function PubPage() {
         <div className={styles.pageTitleRow}>
           <h1 className={styles.pubHeading}>{pub.name}</h1>
           <span className={styles.apiBadge}>
-            <code>GET /v1/pubs/{displayId}</code>
+            <code>GET /v1/pubs/{pub.id}</code>
           </span>
         </div>
         <div className={styles.pageActions}>
-          {pub.lat && pub.lng && (
-            <a
-              href={`https://www.google.com/maps?q=${pub.lat},${pub.lng}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.btnOutline}
-              aria-label="Open on map"
-            >
-              <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M8 2a4 4 0 0 1 4 4c0 3-4 8-4 8S4 9 4 6a4 4 0 0 1 4-4z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                <circle cx="8" cy="6" r="1.5" fill="currentColor"/>
-              </svg>
-              Open on map
-            </a>
-          )}
           <button
             type="button"
             className={styles.btnOutline}
@@ -440,6 +430,8 @@ export default function PubPage() {
         </div>
       )}
 
+      <CompletenessCard pub={pub} onEdit={isApproved ? handleEditClick : undefined} />
+
       {/* Two-column body */}
       <div className={styles.body}>
         {/* Left column */}
@@ -458,7 +450,8 @@ export default function PubPage() {
             ) : (
               <div className={styles.imagePlaceholder}>
                 <span className={styles.imageInitials}>{pubInitials(pub.name)}</span>
-                <span className={styles.imageSlotLabel}>image-slot · drag a photo to fill</span>
+                {/* TODO: implement image upload */}
+                <span className={styles.imageSlotLabel}>Image functionality coming soon</span>
               </div>
             )}
           </div>
@@ -489,12 +482,16 @@ export default function PubPage() {
           {/* Tabs */}
           <div className={styles.tabs}>
             <div className={styles.tabList} role="tablist">
-              {(["overview", "beers", "hours", "garden", "history"] as PubTab[]).map((tab) => (
+              {/* TODO: restore history tab once API returns edit history data */}
+              {(["overview", "beers", "hours", "garden"] as PubTab[]).map((tab) => (
                 <button
                   key={tab}
+                  id={`tab-${tab}`}
                   type="button"
                   role="tab"
                   aria-selected={activeTab === tab}
+                  aria-controls="tab-panel"
+                  tabIndex={activeTab === tab ? 0 : -1}
                   className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ""}`}
                   onClick={() => setActiveTab(tab)}
                 >
@@ -503,7 +500,7 @@ export default function PubPage() {
               ))}
             </div>
 
-            <div className={styles.tabPanel} role="tabpanel">
+            <div id="tab-panel" className={styles.tabPanel} role="tabpanel" aria-labelledby={`tab-${activeTab}`}>
               {activeTab === "overview" && (
                 <PubDisplayView
                   pub={pub}
@@ -590,11 +587,11 @@ function BeersTab({ pub }: { pub: Pub }) {
       <dl className={styles.detailList}>
         <div className={styles.detailRow}>
           <dt>Cask ale</dt>
-          <dd>{pub.hasCaskAle ? "Yes" : "No"}</dd>
+          <dd>{pub.hasCaskAle === true ? "Yes" : pub.hasCaskAle === false ? "No" : "—"}</dd>
         </div>
         <div className={styles.detailRow}>
           <dt>Beer-focused</dt>
-          <dd>{pub.isBeerFocused ? "Yes" : "No"}</dd>
+          <dd>{pub.isBeerFocused === true ? "Yes" : pub.isBeerFocused === false ? "No" : "—"}</dd>
         </div>
         <div className={styles.detailRow}>
           <dt>Beer types</dt>
@@ -624,7 +621,7 @@ function checkOpenNow(
   Object.entries(oh).forEach(([k, v]) => { map[k.toLowerCase()] = v; });
   const entry = map[todayFull.toLowerCase()];
   if (!entry || entry.closed || !entry.open || !entry.close) return false;
-  const toMins = (t: string) => {
+  const toMins = (t: string): number => {
     const [h, m] = t.split(":").map(Number);
     return h * 60 + (m ?? 0);
   };
@@ -913,7 +910,7 @@ function HistoryTab({ pub }: { pub: Pub }) {
 
 function buildJsonPreview(pub: Pub): string {
   const preview: Record<string, unknown> = {
-    id: pubDisplayId(pub.id),
+    id: pub.id,
     name: pub.name,
     city: pub.city,
     address: pub.address,

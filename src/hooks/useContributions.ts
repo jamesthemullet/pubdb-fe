@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { buildAuthHeaders } from "@/lib/auth";
 
-export type RecentPub = {
+type RecentPub = {
   id: string;
   name: string;
   city: string;
   createdAt: string;
 };
 
-export type RecentEdit = {
+type RecentEdit = {
   pubId: string;
   pubName: string;
   city: string;
@@ -16,7 +16,7 @@ export type RecentEdit = {
   timestamp: string;
 };
 
-export type EditsByPub = {
+type EditsByPub = {
   pubId: string;
   pubName: string;
   city: string;
@@ -96,9 +96,13 @@ export function useContributions(): {
   contributionsLoading: boolean;
   contributionsError: string | null;
 } {
-  const [contributions, setContributions] = useState<ContributionsData | null>(null);
+  const [contributions, setContributions] = useState<ContributionsData | null>(
+    null
+  );
   const [contributionsLoading, setContributionsLoading] = useState(true);
-  const [contributionsError, setContributionsError] = useState<string | null>(null);
+  const [contributionsError, setContributionsError] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     let ignore = false;

@@ -44,19 +44,30 @@ Make the fix. Keep scope tight — one issue, one or two files. Do not refactor 
 
 After fixing, run `yarn ts-check` to confirm no new type errors were introduced.
 
-### Step 4 — Report
+### Step 4 — Create a PR
 
-Output exactly this structure:
+1. Create a new branch from `main` named `quality/<category-slug>-<short-description>` (e.g. `quality/dead-code-unused-export`, `quality/typing-missing-return-type`).
+2. Stage only the files you changed and commit with a message following this pattern:
+   ```
+   chore(quality): <what was fixed> (<category>)
+   ```
+3. Push the branch and open a PR against `main` using `gh pr create`. Use this body template:
 
-```
-## Quality improvement
+   ```
+   ## Quality improvement
 
-**Category:** <chosen category name>
-**File:** <path:line>
-**Issue:** <one sentence describing the problem>
-**Fix:** <what was changed and why>
-**Next suggestion:** <the next candidate worth tackling in this category, with file path>
-```
+   **Category:** <chosen category name>
+   **File:** <path:line>
+   **Issue:** <one sentence describing the problem>
+   **Fix:** <what was changed and why>
+
+   ---
+   **Next suggestion:** <the next candidate worth tackling in this category, with file path>
+
+   🤖 Generated with [Claude Code](https://claude.com/claude-code)
+   ```
+
+4. Return the PR URL to the user.
 
 ## Known project patterns
 

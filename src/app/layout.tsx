@@ -1,6 +1,8 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import AccentedInit from "./components/AccentedInit";
 import Sidebar from "./components/sidebar/sidebar";
 import styles from "./layout.module.css";
 
@@ -24,6 +26,12 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Pub DB",
+    title: "Pub DB",
+    description:
+      "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
+  },
+  twitter: {
+    card: "summary_large_image",
     title: "Pub DB",
     description:
       "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
@@ -52,6 +60,8 @@ export default function RootLayout({
             </main>
           </div>
         </div>
+        <Analytics />
+        <AccentedInit />
       </body>
     </html>
   );

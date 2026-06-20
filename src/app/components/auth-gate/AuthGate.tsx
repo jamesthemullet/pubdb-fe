@@ -5,12 +5,12 @@ import { useState } from "react";
 import { API_URL } from "@/lib/apiConfig";
 import styles from "./AuthGate.module.css";
 
-interface AuthGateProps {
+type AuthGateProps = {
   /** Shown above the form to explain why sign-in is needed. */
   context?: string;
   /** Called after a successful login so the parent can re-check auth. */
   onLogin?: () => void;
-}
+};
 
 export default function AuthGate({ context, onLogin }: AuthGateProps) {
   const [mode, setMode] = useState<"register" | "login">("login");
@@ -22,7 +22,7 @@ export default function AuthGate({ context, onLogin }: AuthGateProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -52,7 +52,7 @@ export default function AuthGate({ context, onLogin }: AuthGateProps) {
     }
   }
 
-  function switchMode(next: "register" | "login") {
+  function switchMode(next: "register" | "login"): void {
     setMode(next);
     setError(null);
     setSuccess(null);
@@ -161,8 +161,8 @@ export default function AuthGate({ context, onLogin }: AuthGateProps) {
         {mode === "register" && (
           <p className={styles.termsText}>
             By creating an account you agree to our{" "}
-            <span className={styles.termsLink}>Terms of Service</span>{" "}
-            and <span className={styles.termsLink}>Privacy Policy</span>.
+            <Link href="/terms" className={styles.termsLink}>Terms of Service</Link>{" "}
+            and <Link href="/privacy" className={styles.termsLink}>Privacy Policy</Link>.
           </p>
         )}
       </form>
