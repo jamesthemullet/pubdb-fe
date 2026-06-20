@@ -152,10 +152,11 @@
   font-size: 0.875rem;
   color: var(--text-color);
   font-family: var(--font-inter), sans-serif;
-  outline: none;
 }
 
 .searchInput:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-color: var(--text-color);
 }
 
