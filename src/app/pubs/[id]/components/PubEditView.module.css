@@ -174,7 +174,8 @@ button.sectionHead {
 }
 
 .textInput:focus {
-  outline: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-color: var(--accent);
 }
 
@@ -203,7 +204,8 @@ button.sectionHead {
 }
 
 .selectInput:focus {
-  outline: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-color: var(--accent);
 }
 
@@ -223,7 +225,8 @@ button.sectionHead {
 }
 
 .textarea:focus {
-  outline: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-color: var(--accent);
 }
 

@@ -131,7 +131,7 @@ export default function Sidebar() {
         </div>
 
         <nav aria-label="Workspace navigation">
-          <p className={styles.navSection}>WORKSPACE</p>
+          <span className={styles.navSection} aria-hidden="true">WORKSPACE</span>
           <ul className={styles.navList}>
             {WORKSPACE_LINKS.map(({ href, label, badge }) => (
               <li key={label}>
@@ -149,7 +149,7 @@ export default function Sidebar() {
         </nav>
 
         <nav aria-label="Account navigation">
-          <p className={styles.navSection}>ACCOUNT</p>
+          <span className={styles.navSection} aria-hidden="true">ACCOUNT</span>
           <ul className={styles.navList}>
             {ACCOUNT_LINKS.map(({ href, label }) => (
               <li key={label}>
