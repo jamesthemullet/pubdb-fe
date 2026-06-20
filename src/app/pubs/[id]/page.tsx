@@ -12,6 +12,7 @@ import { useCountries } from "@/hooks/useCountries";
 import { buildAuthHeaders } from "@/lib/auth";
 import type { BeerGarden, Pub } from "@/types/pub";
 import addPubStyles from "../../add-pub/page.module.css";
+import CompletenessCard from "./components/CompletenessCard";
 import EditButton from "./components/EditButton";
 import PubDisplayView from "./components/PubDisplayView";
 import PubEditView from "./components/PubEditView";
@@ -78,10 +79,7 @@ export default function PubPage() {
   const handleEditClick = useCallback(() => {
     if (!pub) return;
     const base: Record<string, unknown> = { ...pub };
-    for (const { key } of PUB_AMENITY_FIELDS) {
-      if (base[key] === null) base[key] = false;
-    }
-    if (base.closedDown === null) base.closedDown = false;
+    if (typeof base.openingHours === "string") base.openingHours = undefined;
     setEditFields({
       ...(base as Partial<Pub>),
       beerGardens: pub.beerGardens ? [...pub.beerGardens] : [],
@@ -189,6 +187,7 @@ export default function PubPage() {
       for (const [key, value] of Object.entries(editFields)) {
         if (value === undefined || value === null) continue;
         if (key === "beerType") continue;
+        if (key === "openingHours" && typeof value === "string") continue;
         if (Array.isArray(value)) {
           if (key === "beerGardens") {
             body[key] = value.filter(isBeerGarden).map((g) => sanitizeBeerGarden(g));
@@ -241,6 +240,7 @@ export default function PubPage() {
         for (const [key, val] of Object.entries(merged)) {
           if (val === undefined || val === null) continue;
           if (key === "beerType") continue;
+          if (key === "openingHours" && typeof val === "string") continue;
           if (Array.isArray(val)) {
             if (key === "beerGardens") {
               body[key] = val.filter(isBeerGarden).map((g) => sanitizeBeerGarden(g));
@@ -429,6 +429,8 @@ export default function PubPage() {
           This pub has permanently closed
         </div>
       )}
+
+      <CompletenessCard pub={pub} onEdit={isApproved ? handleEditClick : undefined} />
 
       {/* Two-column body */}
       <div className={styles.body}>
