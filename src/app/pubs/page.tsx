@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { memo, Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import {
   PUB_AMENITY_FIELDS,
@@ -36,35 +36,6 @@ type ApiErrorResponse = { message?: string; error?: string };
 const PAGE_SIZE = 50;
 
 const VISIBLE_FILTER_COUNT = 6;
-
-const AMENITY_ICONS: Partial<
-  Record<PubAmenityKey, { svg: string; title: string }>
-> = {
-  isIndependent: {
-    title: "Independent",
-    svg: '<circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/>',
-  },
-  hasFood: {
-    title: "Food",
-    svg: '<path d="M6 3v4a2 2 0 0 0 2 2 2 2 0 0 0 2-2V3M8 9v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
-  },
-  hasBeerGarden: {
-    title: "Beer garden",
-    svg: '<path d="M8 13V9m0 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM5 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
-  },
-  hasCaskAle: {
-    title: "Cask ale",
-    svg: '<rect x="5" y="3" width="6" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 7h6" stroke="currentColor" stroke-width="1.5"/>',
-  },
-  isBeerFocused: {
-    title: "Beer-focused",
-    svg: '<path d="M6 3h4l1 4H5L6 3z" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="5" y="7" width="6" height="5" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>',
-  },
-  hasSundayRoast: {
-    title: "Sunday roast",
-    svg: '<circle cx="8" cy="9" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M3 9h10" stroke="currentColor" stroke-width="1.5"/>',
-  },
-};
 
 function PubsContent() {
   const router = useRouter();
