@@ -154,9 +154,13 @@ function PubsContent() {
     setSortBy("name-asc");
   }
 
-  const visibleFilters = showAllFilters
-    ? PUB_AMENITY_FIELDS
-    : PUB_AMENITY_FIELDS.slice(0, VISIBLE_FILTER_COUNT);
+  const visibleFilters = useMemo(
+    () =>
+      showAllFilters
+        ? PUB_AMENITY_FIELDS
+        : PUB_AMENITY_FIELDS.slice(0, VISIBLE_FILTER_COUNT),
+    [showAllFilters]
+  );
   const hiddenCount = PUB_AMENITY_FIELDS.length - VISIBLE_FILTER_COUNT;
   const hasActiveFilters =
     debouncedSearchTerm || activeAmenities.size > 0 || sortBy !== "name-asc";
