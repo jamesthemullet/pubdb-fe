@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import type { LeaderboardData, LeaderboardEntry } from "@/lib/normalizeLeaderboard";
 import styles from "./page.module.css";
@@ -138,10 +138,14 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
   const entries = data.leaderboard;
 
   const emailPrefix = user?.email?.split("@")[0]?.toLowerCase() ?? "";
-  const yourEntry = entries.find(
-    (e) =>
-      e.username.toLowerCase() === emailPrefix ||
-      nameInitials(e.displayName ?? "").toLowerCase() === emailPrefix
+  const yourEntry = useMemo(
+    () =>
+      entries.find(
+        (e) =>
+          e.username.toLowerCase() === emailPrefix ||
+          nameInitials(e.displayName ?? "").toLowerCase() === emailPrefix
+      ),
+    [entries, emailPrefix]
   );
 
   const hasPodium = entries.length >= 3;
@@ -149,10 +153,14 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
     ? (entries.slice(0, 3) as [LeaderboardEntry, LeaderboardEntry, LeaderboardEntry])
     : null;
 
-  const sortedEntries = [...entries].sort((a, b) =>
-    sortDir === "desc"
-      ? b.totalContributions - a.totalContributions
-      : a.totalContributions - b.totalContributions
+  const sortedEntries = useMemo(
+    () =>
+      [...entries].sort((a, b) =>
+        sortDir === "desc"
+          ? b.totalContributions - a.totalContributions
+          : a.totalContributions - b.totalContributions
+      ),
+    [entries, sortDir]
   );
 
   async function handleShare() {
