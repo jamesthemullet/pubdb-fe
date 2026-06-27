@@ -43,14 +43,13 @@ describe("useAuth", () => {
     expect(result.current.isAdmin).toBe(false);
   });
 
-  it("falls back to JWT payload when /auth/me throws a network error", async () => {
+  it("returns null user when /auth/me throws a network error", async () => {
     const token = makeJwt({ email: "bob@example.com", approved: false, admin: true });
     localStorage.setItem("token", token);
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network error"));
     const { result } = renderHook(() => useAuth());
-    await waitFor(() => expect(result.current.user).not.toBeNull());
-    expect(result.current.user?.email).toBe("bob@example.com");
-    expect(result.current.isAdmin).toBe(true);
+    await waitFor(() => expect(result.current.user).toBeNull());
+    expect(result.current.isAdmin).toBe(false);
     expect(result.current.isApproved).toBe(false);
   });
 });

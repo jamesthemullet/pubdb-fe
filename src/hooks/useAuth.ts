@@ -37,17 +37,8 @@ export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boole
             return;
           }
         }
-      } catch { /* fall through to JWT decode */ }
-      try {
-        const payload: unknown = JSON.parse(atob(token.split(".")[1]));
-        if (isAuthPayload(payload)) {
-          setUser({ email: payload.email, approved: payload.approved, admin: payload.admin });
-        } else {
-          setUser(null);
-        }
-      } catch {
-        setUser(null);
-      }
+      } catch { /* network error */ }
+      setUser(null);
     }
     void checkAuth();
     window.addEventListener("authChanged", checkAuth);

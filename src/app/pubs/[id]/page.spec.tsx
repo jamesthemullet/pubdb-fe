@@ -320,7 +320,7 @@ describe("PubPage", () => {
 			).toBeInTheDocument();
 		});
 
-		it("falls back to JWT decoding when /auth/me is unavailable", async () => {
+		it("treats user as unauthenticated when /auth/me is unavailable", async () => {
 			const payload = btoa(
 				JSON.stringify({
 					email: "admin@example.com",
@@ -349,9 +349,10 @@ describe("PubPage", () => {
 				},
 			);
 			render(<PubPage />);
+			await screen.findByRole("heading", { level: 1, name: SAMPLE_PUB.name });
 			expect(
-				await screen.findByRole("button", { name: "Edit this pub" }),
-			).toBeInTheDocument();
+				screen.queryByRole("button", { name: "Edit this pub" }),
+			).not.toBeInTheDocument();
 		});
 	});
 
