@@ -264,6 +264,7 @@ function PubsContent() {
           </div>
 
           <div className={styles.filterRight}>
+            <label htmlFor="sort-select" className={styles.srOnly}>Sort by</label>
             <Dropdown
               id="sort-select"
               value={sortBy}
