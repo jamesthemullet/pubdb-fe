@@ -87,9 +87,13 @@ function setupFetchMock({
 }: FetchMockOptions = {}) {
 	return vi
 		.spyOn(globalThis, "fetch")
-		.mockImplementation(async (input, init?) => {
+		.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
 			const url =
-				typeof input === "string" ? input : (input as Request).url;
+				typeof input === "string"
+					? input
+					: input instanceof URL
+						? input.href
+						: input.url;
 
 			if (url.endsWith("/auth/me")) {
 				return authData
@@ -98,7 +102,7 @@ function setupFetchMock({
 			}
 
 			if (/\/pubs\//.test(url)) {
-				if ((init as RequestInit | undefined)?.method === "PATCH") {
+				if (init?.method === "PATCH") {
 					return jsonResponse(patchData ?? pubData, patchStatus);
 				}
 				return jsonResponse(pubData, pubStatus);
