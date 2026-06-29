@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { memo, Suspense, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import {
   PUB_AMENITY_FIELDS,
@@ -36,6 +36,44 @@ type ApiErrorResponse = { message?: string; error?: string };
 const PAGE_SIZE = 50;
 
 const VISIBLE_FILTER_COUNT = 6;
+
+const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
+  return (
+    <tr
+      data-id={pub.id}
+      className={styles.tableRow}
+      tabIndex={0}
+    >
+      <td className={styles.tdName}>
+        <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
+          {pub.name}
+        </Link>
+        {(pub.isIndependent || pub.chainName) && (
+          <span className={styles.pubType}>
+            {pub.isIndependent ? "Independent" : pub.chainName}
+          </span>
+        )}
+      </td>
+      <td className={styles.tdLocation}>
+        <span className={styles.pubLocation}>{pubLocation(pub)}</span>
+      </td>
+      {/* <td className={styles.tdAmenities}>
+        <AmenityIconCell pub={pub} />
+      </td> */}
+      <td className={styles.tdArrow}>
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          <path
+            d="M4 8h8M9 5l3 3-3 3"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </td>
+    </tr>
+  );
+});
 
 function PubsContent() {
   const router = useRouter();
@@ -75,17 +113,12 @@ function PubsContent() {
         sorted.sort((a, b) => b.name.localeCompare(a.name));
         break;
       case "newest":
-        sorted.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
+      case "oldest": {
+        const ts = new Map(pubs.map((p) => [p.id, Date.parse(p.createdAt ?? "")]));
+        const dir = sortBy === "newest" ? -1 : 1;
+        sorted.sort((a, b) => dir * ((ts.get(a.id) ?? 0) - (ts.get(b.id) ?? 0)));
         break;
-      case "oldest":
-        sorted.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-        break;
+      }
       default:
         sorted.sort((a, b) => a.name.localeCompare(b.name));
     }
@@ -469,47 +502,7 @@ function PubsContent() {
               }}
             >
               {filteredPubs.map((pub) => (
-                <tr
-                  key={pub.id}
-                  data-id={pub.id}
-                  className={styles.tableRow}
-                  tabIndex={0}
-                >
-                  <td className={styles.tdName}>
-                    <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
-                      {pub.name}
-                    </Link>
-                    {(pub.isIndependent || pub.chainName) && (
-                      <span className={styles.pubType}>
-                        {pub.isIndependent ? "Independent" : pub.chainName}
-                      </span>
-                    )}
-                  </td>
-                  <td className={styles.tdLocation}>
-                    <span className={styles.pubLocation}>
-                      {pubLocation(pub)}
-                    </span>
-                  </td>
-                  {/* <td className={styles.tdAmenities}>
-                    <AmenityIconCell pub={pub} />
-                  </td> */}
-                  <td className={styles.tdArrow}>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M4 8h8M9 5l3 3-3 3"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </td>
-                </tr>
+                <PubRow key={pub.id} pub={pub} />
               ))}
             </tbody>
           </table>
