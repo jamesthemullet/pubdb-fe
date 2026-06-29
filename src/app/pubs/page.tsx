@@ -14,6 +14,11 @@ import styles from "./page.module.css";
 
 type SortOption = "name-asc" | "name-desc" | "newest" | "oldest";
 
+function pubLocation(pub: Pub): string {
+  const area = pub.area || pub.borough || null;
+  return area ? `${pub.city} · ${area}` : pub.city;
+}
+
 const SORT_OPTIONS: SortOption[] = [
   "name-asc",
   "name-desc",
@@ -32,53 +37,12 @@ const PAGE_SIZE = 50;
 
 const VISIBLE_FILTER_COUNT = 6;
 
-const AMENITY_ICONS: Partial<
-  Record<PubAmenityKey, { svg: string; title: string }>
-> = {
-  isIndependent: {
-    title: "Independent",
-    svg: '<circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/>',
-  },
-  hasFood: {
-    title: "Food",
-    svg: '<path d="M6 3v4a2 2 0 0 0 2 2 2 2 0 0 0 2-2V3M8 9v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
-  },
-  hasBeerGarden: {
-    title: "Beer garden",
-    svg: '<path d="M8 13V9m0 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM5 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
-  },
-  hasCaskAle: {
-    title: "Cask ale",
-    svg: '<rect x="5" y="3" width="6" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 7h6" stroke="currentColor" stroke-width="1.5"/>',
-  },
-  isBeerFocused: {
-    title: "Beer-focused",
-    svg: '<path d="M6 3h4l1 4H5L6 3z" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="5" y="7" width="6" height="5" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>',
-  },
-  hasSundayRoast: {
-    title: "Sunday roast",
-    svg: '<circle cx="8" cy="9" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M3 9h10" stroke="currentColor" stroke-width="1.5"/>',
-  },
-};
-
-function pubLocation(pub: Pub): string {
-  const area = pub.area || pub.borough || null;
-  return area ? `${pub.city} · ${area}` : pub.city;
-}
-
 const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
-  const router = useRouter();
   return (
     <tr
+      data-id={pub.id}
       className={styles.tableRow}
-      onClick={() => router.push(`/pubs/${pub.id}`)}
       tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          router.push(`/pubs/${pub.id}`);
-        }
-      }}
     >
       <td className={styles.tdName}>
         <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
@@ -93,6 +57,9 @@ const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
       <td className={styles.tdLocation}>
         <span className={styles.pubLocation}>{pubLocation(pub)}</span>
       </td>
+      {/* <td className={styles.tdAmenities}>
+        <AmenityIconCell pub={pub} />
+      </td> */}
       <td className={styles.tdArrow}>
         <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
           <path
@@ -109,6 +76,7 @@ const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
 });
 
 function PubsContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
   const [pubs, setPubs] = useState<Pub[]>([]);
@@ -329,6 +297,7 @@ function PubsContent() {
           </div>
 
           <div className={styles.filterRight}>
+            <label htmlFor="sort-select" className={styles.srOnly}>Sort by</label>
             <Dropdown
               id="sort-select"
               value={sortBy}
@@ -517,7 +486,21 @@ function PubsContent() {
                 {/* <th className={styles.thArrow} aria-label="View" /> */}
               </tr>
             </thead>
-            <tbody>
+            <tbody
+              onClick={(e) => {
+                const tr = (e.target as Element).closest("tr[data-id]");
+                if (tr) router.push(`/pubs/${(tr as HTMLElement).dataset.id}`);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  const tr = (e.target as Element).closest("tr[data-id]");
+                  if (tr) {
+                    e.preventDefault();
+                    router.push(`/pubs/${(tr as HTMLElement).dataset.id}`);
+                  }
+                }
+              }}
+            >
               {filteredPubs.map((pub) => (
                 <PubRow key={pub.id} pub={pub} />
               ))}

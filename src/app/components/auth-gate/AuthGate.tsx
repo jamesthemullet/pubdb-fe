@@ -22,7 +22,7 @@ export default function AuthGate({ context, onLogin }: AuthGateProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -52,7 +52,7 @@ export default function AuthGate({ context, onLogin }: AuthGateProps) {
     }
   }
 
-  function switchMode(next: "register" | "login") {
+  function switchMode(next: "register" | "login"): void {
     setMode(next);
     setError(null);
     setSuccess(null);
@@ -149,7 +149,7 @@ export default function AuthGate({ context, onLogin }: AuthGateProps) {
           </div>
         )}
         {success && (
-          <div className={styles.successBox}>
+          <div role="alert" className={styles.successBox}>
             <p>{success}</p>
           </div>
         )}

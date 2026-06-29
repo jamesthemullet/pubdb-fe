@@ -47,7 +47,7 @@ export default function OpeningHoursEditor({
 
   useEffect(() => {
     if (!value) return;
-    setHours((_prev) =>
+    setHours(
       Object.fromEntries(
         DAYS.map((day) => [
           day,

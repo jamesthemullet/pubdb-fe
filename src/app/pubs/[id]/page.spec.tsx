@@ -87,9 +87,13 @@ function setupFetchMock({
 }: FetchMockOptions = {}) {
 	return vi
 		.spyOn(globalThis, "fetch")
-		.mockImplementation(async (input, init?) => {
+		.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
 			const url =
-				typeof input === "string" ? input : (input as Request).url;
+				typeof input === "string"
+					? input
+					: input instanceof URL
+						? input.href
+						: input.url;
 
 			if (url.endsWith("/auth/me")) {
 				return authData
@@ -98,7 +102,7 @@ function setupFetchMock({
 			}
 
 			if (/\/pubs\//.test(url)) {
-				if ((init as RequestInit | undefined)?.method === "PATCH") {
+				if (init?.method === "PATCH") {
 					return jsonResponse(patchData ?? pubData, patchStatus);
 				}
 				return jsonResponse(pubData, pubStatus);
@@ -320,7 +324,7 @@ describe("PubPage", () => {
 			).toBeInTheDocument();
 		});
 
-		it("falls back to JWT decoding when /auth/me is unavailable", async () => {
+		it("treats user as unauthenticated when /auth/me is unavailable", async () => {
 			const payload = btoa(
 				JSON.stringify({
 					email: "admin@example.com",
@@ -349,9 +353,10 @@ describe("PubPage", () => {
 				},
 			);
 			render(<PubPage />);
+			await screen.findByRole("heading", { level: 1, name: SAMPLE_PUB.name });
 			expect(
-				await screen.findByRole("button", { name: "Edit this pub" }),
-			).toBeInTheDocument();
+				screen.queryByRole("button", { name: "Edit this pub" }),
+			).not.toBeInTheDocument();
 		});
 	});
 

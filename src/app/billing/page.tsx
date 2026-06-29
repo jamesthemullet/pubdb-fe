@@ -318,6 +318,7 @@ export default function BillingPage() {
 
   const currencyLabel = billingData?.plan.currency?.toUpperCase() ?? "GBP";
   const acctId = billingData?.stripeCustomerId ?? null;
+  const isHobby = billingData?.plan.tier?.toUpperCase() === "HOBBY";
 
   if (!user) {
     return <AuthGate context="Billing" />;
@@ -337,8 +338,9 @@ export default function BillingPage() {
             )}
           </div>
           <p className={styles.description}>
-            Manage your plan, payment method, and invoices. Usage charges roll
-            up into a single monthly invoice — no surprises mid-cycle.
+            {isHobby
+              ? "You're on the free Hobby plan. Upgrade anytime to unlock higher limits and paid features."
+              : "Manage your plan, payment method, and invoices. Usage charges roll up into a single monthly invoice — no surprises mid-cycle."}
           </p>
         </div>
       </div>
@@ -397,18 +399,20 @@ export default function BillingPage() {
                 >
                   Upgrade plan →
                 </button>
-                <button
-                  type="button"
-                  className={styles.cancelBtn}
-                  disabled={
-                    cancelling || !billingData || billingData.cancelAtPeriodEnd
-                  }
-                  onClick={() => {
-                    void handleCancelSubscription();
-                  }}
-                >
-                  {cancelling ? "Cancelling…" : "Cancel subscription"}
-                </button>
+                {!isHobby && (
+                  <button
+                    type="button"
+                    className={styles.cancelBtn}
+                    disabled={
+                      cancelling || !billingData || billingData.cancelAtPeriodEnd
+                    }
+                    onClick={() => {
+                      void handleCancelSubscription();
+                    }}
+                  >
+                    {cancelling ? "Cancelling…" : "Cancel subscription"}
+                  </button>
+                )}
                 {cancelMessage && (
                   <p className={styles.cancelSuccess}>{cancelMessage}</p>
                 )}
@@ -459,7 +463,7 @@ export default function BillingPage() {
           </div>
 
           {/* Upcoming bill */}
-          <div className={styles.card}>
+          {!isHobby && <div className={styles.card}>
             <div className={styles.billHeader}>
               <div className={styles.billHeaderLeft}>
                 <span className={styles.billTitle}>Upcoming bill</span>
@@ -511,7 +515,7 @@ export default function BillingPage() {
             ) : (
               <p className={styles.usageLoading}>Loading…</p>
             )}
-          </div>
+          </div>}
         </div>
 
         {/* ── Right column ── */}
@@ -542,7 +546,7 @@ export default function BillingPage() {
           </div>
 
           {/* Spend chart */}
-          <div className={styles.card}>
+          {!isHobby && <div className={styles.card}>
             <div className={styles.spendHeader}>
               <span className={styles.spendLabel}>SPEND · LAST 6 INVOICES</span>
               {spendBars.length > 0 && (
@@ -573,9 +577,9 @@ export default function BillingPage() {
             ) : (
               <p className={styles.usageLoading}>Loading…</p>
             )}
-          </div>
+          </div>}
         </div>
-      </div>
+      </div>  {/* body */}
 
       {/* ── Change plan ── */}
       <div id="change-plan" className={styles.pricingSection}>
@@ -583,7 +587,7 @@ export default function BillingPage() {
       </div>
 
       {/* ── Invoices ── */}
-      <div className={styles.section}>
+      {!isHobby && <div className={styles.section}>
         <div className={styles.sectionTopRow}>
           <div className={styles.invoicesHeadingRow}>
             <h2 className={styles.sectionTitle}>Invoices</h2>
@@ -657,12 +661,12 @@ export default function BillingPage() {
             <p className={styles.usageLoading}>Loading invoices…</p>
           )}
         </div>
-      </div>
+      </div>}
 
       {/* ── Billing details + Tax & compliance ── */}
       <div className={styles.bottomGrid}>
         {/* Billing details */}
-        <div className={styles.card}>
+        {!isHobby && <div className={styles.card}>
           <div className={styles.bdHeader}>
             <h2 className={styles.sectionTitle}>Billing details</h2>
           </div>
@@ -695,10 +699,10 @@ export default function BillingPage() {
               <p className={styles.usageLoading}>Loading…</p>
             )}
           </div>
-        </div>
+        </div>}
 
         {/* Tax & compliance */}
-        <div className={styles.card}>
+        {!isHobby && <div className={styles.card}>
           <div className={styles.bdHeader}>
             <h2 className={styles.sectionTitle}>Tax &amp; compliance</h2>
           </div>
@@ -729,7 +733,7 @@ export default function BillingPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );

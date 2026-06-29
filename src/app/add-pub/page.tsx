@@ -131,7 +131,7 @@ export default function AddPubPage() {
   )}`;
 
   useEffect(() => {
-    async function checkAuth() {
+    async function checkAuth(): Promise<void> {
       const token = localStorage.getItem("token");
       if (!token) { setUser(null); return; }
       try {
@@ -146,7 +146,7 @@ export default function AddPubPage() {
     return () => { window.removeEventListener("authChanged", checkAuth); window.removeEventListener("storage", checkAuth); };
   }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     setLoading(true); setError(null); setFormErrors([]); setFieldErrors({}); setSuccess(null); setEditLink(null);
     try {

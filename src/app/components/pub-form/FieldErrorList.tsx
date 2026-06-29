@@ -15,13 +15,17 @@ export default function FieldErrorList({
     return null;
   }
 
-  return errors.map((fieldError) => (
-    <Typography
-      key={`${idPrefix}-error-${fieldError}`}
-      variant="bodySmall"
-      className={className}
-    >
-      {fieldError}
-    </Typography>
-  ));
+  return (
+    <div id={`${idPrefix}-error`}>
+      {errors.map((fieldError) => (
+        <Typography
+          key={`${idPrefix}-error-${fieldError}`}
+          variant="bodySmall"
+          className={className}
+        >
+          {fieldError}
+        </Typography>
+      ))}
+    </div>
+  );
 }
