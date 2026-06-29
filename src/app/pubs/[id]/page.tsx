@@ -102,7 +102,7 @@ export default function PubPage() {
   const handleFieldChange = useCallback(
     (field: keyof Pub, value: Pub[keyof Pub]) => {
       setEditFields((prev) => ({ ...prev, [field]: value }));
-      if (["name", "city", "address", "postcode", "country"].includes(field as string)) {
+      if (["name", "city", "address", "postcode", "country"].includes(field)) {
         setFieldErrors((prev) => ({
           ...prev,
           [`${field}Error`]:
