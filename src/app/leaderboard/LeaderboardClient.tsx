@@ -281,7 +281,6 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
                     <th className={styles.colContributor}>CONTRIBUTOR</th>
                     <th className={styles.colNum}>ADDED</th>
                     <th className={styles.colNum}>EDITS</th>
-                    <th className={styles.colActivity}>ACTIVITY</th>
                     <th className={styles.colNum}>TOTAL</th>
                   </tr>
                 </thead>
