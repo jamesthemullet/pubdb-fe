@@ -110,14 +110,12 @@ const Pricing = (): React.JSX.Element => {
     setFeedbackMessage({ type: "error", text });
 
   const [userTier, setUserTier] = useState<string | null>(null);
-  const [_userHighestTier, _setUserHighestTier] = useState<string | null>(null);
   const [upgradeModal, setUpgradeModal] = useState<null | {
     priceId: string;
     upcoming: UpcomingBill | null;
     tierName: string;
   }>(null);
 
-  const [_estimateLoading, setEstimateLoading] = useState(false);
   const [performingUpgrade, setPerformingUpgrade] = useState(false);
   const [apiKey, setApiKey] = useState<ApiKey | null>(null);
   const upgradeModalRef = useRef<HTMLDivElement>(null);
@@ -283,7 +281,6 @@ const Pricing = (): React.JSX.Element => {
   };
 
   const requestUpgradeEstimate = async (priceId: string, tierName: string) => {
-    setEstimateLoading(true);
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/payments/upgrade-estimate`, {
@@ -313,8 +310,6 @@ const Pricing = (): React.JSX.Element => {
       setError(
         err instanceof Error ? err.message : "Failed to estimate upgrade"
       );
-    } finally {
-      setEstimateLoading(false);
     }
   };
 
