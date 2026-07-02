@@ -479,8 +479,8 @@ function PubsContent() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th className={styles.thName}>NAME</th>
-                <th className={styles.thLocation}>LOCATION</th>
+                <th className={styles.thName} scope="col">NAME</th>
+                <th className={styles.thLocation} scope="col">LOCATION</th>
                 {/* TODO: improve amenity display (icons unclear, title tooltip unreliable) before re-enabling */}
                 {/* <th className={styles.thAmenities}>AMENITIES</th> */}
                 {/* <th className={styles.thArrow} aria-label="View" /> */}
