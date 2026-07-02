@@ -145,6 +145,7 @@ export default function OpeningHoursEditor({
           value={bulkOpen}
           onChange={(e) => setBulkOpen(e.target.value)}
           className={styles.timeInput}
+          aria-label="Apply to all: opening time"
         />
         <Typography as="span">-</Typography>
         <Input
@@ -152,6 +153,7 @@ export default function OpeningHoursEditor({
           value={bulkClose}
           onChange={(e) => setBulkClose(e.target.value)}
           className={styles.timeInput}
+          aria-label="Apply to all: closing time"
         />
         <Button
           type="button"
@@ -175,6 +177,7 @@ export default function OpeningHoursEditor({
               disabled={d.closed}
               onChange={(e) => update(day, { open: e.target.value })}
               className={styles.timeInput}
+              aria-label={`${day} opening time`}
             />
 
             <Typography as="span">-</Typography>
@@ -185,6 +188,7 @@ export default function OpeningHoursEditor({
               disabled={d.closed}
               onChange={(e) => update(day, { close: e.target.value })}
               className={styles.timeInput}
+              aria-label={`${day} closing time`}
             />
 
             <label htmlFor={`${day}-closed`} className={styles.closedLabel}>

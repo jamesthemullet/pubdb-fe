@@ -270,18 +270,19 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
                   onClick={() =>
                     setSortDir((d) => (d === "desc" ? "asc" : "desc"))
                   }
+                  aria-label={`Sort by total contributions, currently ${sortDir === "desc" ? "descending" : "ascending"}`}
                 >
-                  Total contributions {sortDir === "desc" ? "↓" : "↑"}
+                  Total contributions <span aria-hidden="true">{sortDir === "desc" ? "↓" : "↑"}</span>
                 </button>
               </div>
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th className={styles.colRank}>#</th>
-                    <th className={styles.colContributor}>CONTRIBUTOR</th>
-                    <th className={styles.colNum}>ADDED</th>
-                    <th className={styles.colNum}>EDITS</th>
-                    <th className={styles.colNum}>TOTAL</th>
+                    <th className={styles.colRank} scope="col">#</th>
+                    <th className={styles.colContributor} scope="col">CONTRIBUTOR</th>
+                    <th className={styles.colNum} scope="col">ADDED</th>
+                    <th className={styles.colNum} scope="col">EDITS</th>
+                    <th className={styles.colNum} scope="col">TOTAL</th>
                   </tr>
                 </thead>
                 <tbody>
