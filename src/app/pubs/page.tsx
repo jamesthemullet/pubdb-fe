@@ -300,6 +300,7 @@ function PubsContent() {
             <label htmlFor="sort-select" className={styles.srOnly}>Sort by</label>
             <Dropdown
               id="sort-select"
+              aria-label="Sort pubs by"
               value={sortBy}
               onChange={(e) => {
                 const val = e.target.value;

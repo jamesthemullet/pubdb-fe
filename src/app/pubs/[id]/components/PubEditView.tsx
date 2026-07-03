@@ -122,31 +122,33 @@ export default function PubEditView({
         </div>
 
         <div className={styles.fieldBlock}>
-          <p className={styles.fieldLabel}>Ownership</p>
-          <div className={styles.ownershipToggle}>
-            <button
-              type="button"
-              className={`${styles.ownershipBtn} ${editFields.isIndependent !== false ? styles.ownershipBtnActive : ""}`}
-              onClick={() => onFieldChange("isIndependent", true)}
-              aria-pressed={editFields.isIndependent !== false}
-            >
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M1 7L7 1.5 13 7v6H9v-3.5H5V13H1V7z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-              </svg>
-              Independent
-            </button>
-            <button
-              type="button"
-              className={`${styles.ownershipBtn} ${editFields.isIndependent === false ? styles.ownershipBtnActive : ""}`}
-              onClick={() => onFieldChange("isIndependent", false)}
-              aria-pressed={editFields.isIndependent === false}
-            >
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M5 7a2 2 0 002 2h4a2 2 0 000-4H9M9 7a2 2 0 00-2-2H3a2 2 0 000 4h2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-              </svg>
-              Chain
-            </button>
-          </div>
+          <fieldset className={styles.ownershipGroup}>
+            <legend className={styles.fieldLabel}>Ownership</legend>
+            <div className={styles.ownershipToggle}>
+              <button
+                type="button"
+                className={`${styles.ownershipBtn} ${editFields.isIndependent !== false ? styles.ownershipBtnActive : ""}`}
+                aria-pressed={editFields.isIndependent !== false}
+                onClick={() => onFieldChange("isIndependent", true)}
+              >
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M1 7L7 1.5 13 7v6H9v-3.5H5V13H1V7z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+                </svg>
+                Independent
+              </button>
+              <button
+                type="button"
+                className={`${styles.ownershipBtn} ${editFields.isIndependent === false ? styles.ownershipBtnActive : ""}`}
+                aria-pressed={editFields.isIndependent === false}
+                onClick={() => onFieldChange("isIndependent", false)}
+              >
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M5 7a2 2 0 002 2h4a2 2 0 000-4H9M9 7a2 2 0 00-2-2H3a2 2 0 000 4h2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                </svg>
+                Chain
+              </button>
+            </div>
+          </fieldset>
         </div>
 
         {editFields.isIndependent === false && (

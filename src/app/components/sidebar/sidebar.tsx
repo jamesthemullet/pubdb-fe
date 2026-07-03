@@ -104,10 +104,10 @@ export default function Sidebar() {
       )}
 
       <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ""}`}>
-        <div className={styles.logoRow}>
+        <Link href="/" className={styles.logoRow} onClick={() => setMenuOpen(false)}>
           <div className={styles.logoIcon}>P</div>
           <span className={styles.logoText}>Pub DB</span>
-        </div>
+        </Link>
 
         <div className={styles.searchWrap}>
           <svg className={styles.searchIcon} width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
