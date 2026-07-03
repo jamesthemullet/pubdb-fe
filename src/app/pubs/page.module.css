@@ -3,6 +3,18 @@
   max-width: 1200px;
 }
 
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ── Page header ── */
 .pageHeader {
   display: flex;
@@ -152,10 +164,11 @@
   font-size: 0.875rem;
   color: var(--text-color);
   font-family: var(--font-inter), sans-serif;
-  outline: none;
 }
 
 .searchInput:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-color: var(--text-color);
 }
 

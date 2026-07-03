@@ -1,10 +1,9 @@
 import { expect, test } from "@playwright/test";
 import { makeFakeJwt } from "../fixtures/auth";
 
-// The detail page fetches from localhost:4000/pubs/42 (the API),
-// while the browser navigates to localhost:3000/pubs/42 (Next.js).
-// Matching on port 4000 prevents us from intercepting the page navigation.
-const PUB_API = (url: URL) => url.port === "4000" && url.pathname === "/pubs/42";
+// The detail page fetches from the Next.js proxy route /api/pubs/42 (port 3000).
+// useAuth calls the backend directly at localhost:4000/auth/me from the browser.
+const PUB_API = (url: URL) => url.pathname === "/api/pubs/42";
 const AUTH_ME_API = (url: URL) => url.port === "4000" && url.pathname === "/auth/me";
 const COUNTRIES_API = (url: URL) => url.href.includes("restcountries.com");
 const BEER_TYPES_API = (url: URL) => url.pathname === "/api/beer-types";

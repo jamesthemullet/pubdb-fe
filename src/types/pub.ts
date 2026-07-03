@@ -17,7 +17,7 @@ export type BeerType = {
   isActive?: boolean;
 };
 
-export type PubBeerType = {
+type PubBeerType = {
   beerTypeId: string;
   beerType?: BeerType | null;
 };

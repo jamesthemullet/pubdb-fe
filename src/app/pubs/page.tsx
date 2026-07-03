@@ -14,6 +14,11 @@ import styles from "./page.module.css";
 
 type SortOption = "name-asc" | "name-desc" | "newest" | "oldest";
 
+function pubLocation(pub: Pub): string {
+  const area = pub.area || pub.borough || null;
+  return area ? `${pub.city} · ${area}` : pub.city;
+}
+
 const SORT_OPTIONS: SortOption[] = [
   "name-asc",
   "name-desc",
@@ -32,34 +37,43 @@ const PAGE_SIZE = 50;
 
 const VISIBLE_FILTER_COUNT = 6;
 
-const AMENITY_ICONS: Partial<
-  Record<PubAmenityKey, { svg: string; title: string }>
-> = {
-  isIndependent: {
-    title: "Independent",
-    svg: '<circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="8" cy="8" r="2.5" fill="currentColor"/>',
-  },
-  hasFood: {
-    title: "Food",
-    svg: '<path d="M6 3v4a2 2 0 0 0 2 2 2 2 0 0 0 2-2V3M8 9v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
-  },
-  hasBeerGarden: {
-    title: "Beer garden",
-    svg: '<path d="M8 13V9m0 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM5 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
-  },
-  hasCaskAle: {
-    title: "Cask ale",
-    svg: '<rect x="5" y="3" width="6" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 7h6" stroke="currentColor" stroke-width="1.5"/>',
-  },
-  isBeerFocused: {
-    title: "Beer-focused",
-    svg: '<path d="M6 3h4l1 4H5L6 3z" stroke="currentColor" stroke-width="1.3" fill="none"/><rect x="5" y="7" width="6" height="5" rx="1" stroke="currentColor" stroke-width="1.3" fill="none"/>',
-  },
-  hasSundayRoast: {
-    title: "Sunday roast",
-    svg: '<circle cx="8" cy="9" r="5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M3 9h10" stroke="currentColor" stroke-width="1.5"/>',
-  },
-};
+const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
+  return (
+    <tr
+      data-id={pub.id}
+      className={styles.tableRow}
+      tabIndex={0}
+    >
+      <td className={styles.tdName}>
+        <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
+          {pub.name}
+        </Link>
+        {(pub.isIndependent || pub.chainName) && (
+          <span className={styles.pubType}>
+            {pub.isIndependent ? "Independent" : pub.chainName}
+          </span>
+        )}
+      </td>
+      <td className={styles.tdLocation}>
+        <span className={styles.pubLocation}>{pubLocation(pub)}</span>
+      </td>
+      {/* <td className={styles.tdAmenities}>
+        <AmenityIconCell pub={pub} />
+      </td> */}
+      <td className={styles.tdArrow}>
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          <path
+            d="M4 8h8M9 5l3 3-3 3"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </td>
+    </tr>
+  );
+});
 
 function PubsContent() {
   const router = useRouter();
@@ -99,17 +113,12 @@ function PubsContent() {
         sorted.sort((a, b) => b.name.localeCompare(a.name));
         break;
       case "newest":
-        sorted.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
+      case "oldest": {
+        const ts = new Map(pubs.map((p) => [p.id, Date.parse(p.createdAt ?? "")]));
+        const dir = sortBy === "newest" ? -1 : 1;
+        sorted.sort((a, b) => dir * ((ts.get(a.id) ?? 0) - (ts.get(b.id) ?? 0)));
         break;
-      case "oldest":
-        sorted.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-        break;
+      }
       default:
         sorted.sort((a, b) => a.name.localeCompare(b.name));
     }
@@ -184,11 +193,6 @@ function PubsContent() {
   const hiddenCount = PUB_AMENITY_FIELDS.length - VISIBLE_FILTER_COUNT;
   const hasActiveFilters =
     debouncedSearchTerm || activeAmenities.size > 0 || sortBy !== "name-asc";
-
-  function pubLocation(pub: Pub): string {
-    const area = pub.area || pub.borough || null;
-    return area ? `${pub.city} · ${area}` : pub.city;
-  }
 
   return (
     <div className={styles.page}>
@@ -293,6 +297,7 @@ function PubsContent() {
           </div>
 
           <div className={styles.filterRight}>
+            <label htmlFor="sort-select" className={styles.srOnly}>Sort by</label>
             <Dropdown
               id="sort-select"
               aria-label="Sort pubs by"
@@ -475,62 +480,30 @@ function PubsContent() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th className={styles.thName}>NAME</th>
-                <th className={styles.thLocation}>LOCATION</th>
+                <th className={styles.thName} scope="col">NAME</th>
+                <th className={styles.thLocation} scope="col">LOCATION</th>
                 {/* TODO: improve amenity display (icons unclear, title tooltip unreliable) before re-enabling */}
                 {/* <th className={styles.thAmenities}>AMENITIES</th> */}
                 {/* <th className={styles.thArrow} aria-label="View" /> */}
               </tr>
             </thead>
-            <tbody>
+            <tbody
+              onClick={(e) => {
+                const tr = (e.target as Element).closest("tr[data-id]");
+                if (tr) router.push(`/pubs/${(tr as HTMLElement).dataset.id}`);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  const tr = (e.target as Element).closest("tr[data-id]");
+                  if (tr) {
+                    e.preventDefault();
+                    router.push(`/pubs/${(tr as HTMLElement).dataset.id}`);
+                  }
+                }
+              }}
+            >
               {filteredPubs.map((pub) => (
-                <tr
-                  key={pub.id}
-                  className={styles.tableRow}
-                  onClick={() => router.push(`/pubs/${pub.id}`)}
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      router.push(`/pubs/${pub.id}`);
-                    }
-                  }}
-                >
-                  <td className={styles.tdName}>
-                    <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
-                      {pub.name}
-                    </Link>
-                    {(pub.isIndependent || pub.chainName) && (
-                      <span className={styles.pubType}>
-                        {pub.isIndependent ? "Independent" : pub.chainName}
-                      </span>
-                    )}
-                  </td>
-                  <td className={styles.tdLocation}>
-                    <span className={styles.pubLocation}>
-                      {pubLocation(pub)}
-                    </span>
-                  </td>
-                  {/* <td className={styles.tdAmenities}>
-                    <AmenityIconCell pub={pub} />
-                  </td> */}
-                  <td className={styles.tdArrow}>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M4 8h8M9 5l3 3-3 3"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </td>
-                </tr>
+                <PubRow key={pub.id} pub={pub} />
               ))}
             </tbody>
           </table>

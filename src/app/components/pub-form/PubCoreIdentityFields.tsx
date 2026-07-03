@@ -79,6 +79,7 @@ export default function PubCoreIdentityFields({
           required
           autoComplete={`${namePrefix}-name`}
           placeholder={showPlaceholders ? "Enter pub name" : undefined}
+          aria-describedby={fieldErrors?.name ? "name-error" : undefined}
         />
         <FieldErrorList
           errors={fieldErrors?.name}
@@ -104,6 +105,7 @@ export default function PubCoreIdentityFields({
           required
           autoComplete={`${namePrefix}-city`}
           placeholder={showPlaceholders ? "Enter city" : undefined}
+          aria-describedby={fieldErrors?.city ? "city-error" : undefined}
         />
         <FieldErrorList
           errors={fieldErrors?.city}
@@ -128,6 +130,7 @@ export default function PubCoreIdentityFields({
           onChange={(e) => onFieldChange("country", e.target.value)}
           required
           disabled={!!countriesError}
+          aria-describedby={fieldErrors?.country ? "country-error" : undefined}
         >
           <option value="">
             {countriesLoading && countries.length === 0
@@ -171,6 +174,7 @@ export default function PubCoreIdentityFields({
           required
           autoComplete={`${namePrefix}-address`}
           placeholder={showPlaceholders ? "Enter address" : undefined}
+          aria-describedby={fieldErrors?.address ? "address-error" : undefined}
         />
         <FieldErrorList
           errors={fieldErrors?.address}
@@ -196,6 +200,7 @@ export default function PubCoreIdentityFields({
           required
           autoComplete={`${namePrefix}-postcode`}
           placeholder={showPlaceholders ? "Enter postcode" : undefined}
+          aria-describedby={fieldErrors?.postcode ? "postcode-error" : undefined}
         />
         <FieldErrorList
           errors={fieldErrors?.postcode}
@@ -218,6 +223,7 @@ export default function PubCoreIdentityFields({
           }
           type="number"
           step="any"
+          aria-describedby={fieldErrors?.lat ? "lat-error" : undefined}
         />
         <FieldErrorList
           errors={fieldErrors?.lat}
@@ -240,6 +246,7 @@ export default function PubCoreIdentityFields({
           }
           type="number"
           step="any"
+          aria-describedby={fieldErrors?.lng ? "lng-error" : undefined}
         />
         <FieldErrorList
           errors={fieldErrors?.lng}

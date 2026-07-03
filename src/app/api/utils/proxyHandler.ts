@@ -35,15 +35,8 @@ export function createApiProxyHandler(
 
       return NextResponse.json(data, { status: response.status });
     } catch (error) {
-      return NextResponse.json(
-        {
-          error:
-            error instanceof Error
-              ? error.message
-              : `Failed to fetch ${options?.resourceName}`,
-        },
-        { status: 500 }
-      );
+      console.error(`Proxy error for ${endpointPath}:`, error);
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
   };
 }
