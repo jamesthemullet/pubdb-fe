@@ -92,7 +92,7 @@ describe("GET /api/pubs", () => {
     });
   });
 
-  it("returns 500 with thrown error message when fetch throws", async () => {
+  it("returns 500 with a generic message when fetch throws", async () => {
     process.env.TESTING_API_KEY = "test-key";
 
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network down"));
@@ -100,10 +100,10 @@ describe("GET /api/pubs", () => {
     const response = await GET(new Request("http://localhost/api/pubs"));
 
     expect(response.status).toBe(500);
-    await expect(response.json()).resolves.toEqual({ error: "Network down" });
+    await expect(response.json()).resolves.toEqual({ error: "Internal server error" });
   });
 
-  it("returns default error message when fetch throws a non-Error", async () => {
+  it("returns 500 with a generic message when fetch throws a non-Error", async () => {
     process.env.TESTING_API_KEY = "test-key";
 
     vi.spyOn(globalThis, "fetch").mockRejectedValue("boom");
@@ -112,7 +112,7 @@ describe("GET /api/pubs", () => {
 
     expect(response.status).toBe(500);
     await expect(response.json()).resolves.toEqual({
-      error: "Failed to fetch pubs",
+      error: "Internal server error",
     });
   });
 

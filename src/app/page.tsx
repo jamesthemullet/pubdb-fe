@@ -73,7 +73,7 @@ export default function Home() {
         ))}
       </div> */}
 
-      <div className={styles.contributeSection}>
+      <section className={styles.contributeSection} aria-label="Contribute to Pub DB">
         <div className={styles.contributeContent}>
           <h2 className={styles.contributeHeading}>Most pubs are in — but the details aren&apos;t.</h2>
           <p className={styles.contributeText}>
@@ -89,11 +89,11 @@ export default function Home() {
             </Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className={styles.pricingSection}>
+      <section className={styles.pricingSection} aria-label="Pricing">
         <Pricing />
-      </div>
+      </section>
     </div>
   );
 }

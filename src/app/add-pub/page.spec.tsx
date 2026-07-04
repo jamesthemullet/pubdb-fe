@@ -35,7 +35,7 @@ async function renderApprovedPageWithSubmitResult(
 ): Promise<void> {
   localStorage.setItem("token", "test-token");
 
-  vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = toUrl(input);
 
     if (url.endsWith("/auth/me")) {
@@ -112,7 +112,7 @@ describe("AddPubPage", () => {
   });
 
   it("shows login prompt when no user is authenticated", async () => {
-    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
       const url = toUrl(input);
       if (url.includes("restcountries.com")) {
         return jsonResponse([
@@ -133,7 +133,7 @@ describe("AddPubPage", () => {
   it("shows approval guidance and includes the user email in the mailto link", async () => {
     localStorage.setItem("token", "test-token");
 
-    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
       const url = toUrl(input);
 
       if (url.endsWith("/auth/me")) {
@@ -202,7 +202,7 @@ describe("AddPubPage", () => {
 
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")
-      .mockImplementation(async (input, init) => {
+      .mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = toUrl(input);
 
         if (url.endsWith("/auth/me")) {
@@ -361,7 +361,7 @@ describe("AddPubPage", () => {
   it("shows login prompt when auth check returns non-OK status", async () => {
     localStorage.setItem("token", "test-token");
 
-    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
       const url = toUrl(input);
 
       if (url.endsWith("/auth/me")) {
@@ -387,7 +387,7 @@ describe("AddPubPage", () => {
   it("shows login prompt when auth check throws", async () => {
     localStorage.setItem("token", "test-token");
 
-    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
       const url = toUrl(input);
 
       if (url.endsWith("/auth/me")) {
@@ -415,7 +415,7 @@ describe("AddPubPage", () => {
 
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
       const url = toUrl(input);
 
       if (url.endsWith("/auth/me")) {
@@ -443,7 +443,7 @@ describe("AddPubPage", () => {
   it("shows Loading placeholder while countries are still fetching", async () => {
     localStorage.setItem("token", "test-token");
 
-    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
       const url = toUrl(input);
 
       if (url.endsWith("/auth/me")) {
@@ -472,7 +472,7 @@ describe("AddPubPage", () => {
 
     let submittedBody: Record<string, unknown> | null = null;
 
-    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = toUrl(input);
 
       if (url.endsWith("/auth/me")) {

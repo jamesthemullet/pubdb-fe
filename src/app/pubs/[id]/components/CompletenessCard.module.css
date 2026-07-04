@@ -1,0 +1,106 @@
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--surface);
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.score {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.barTrack {
+  width: 100%;
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--text-color);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.missingRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.missingLabel {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.missingChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--background);
+  white-space: nowrap;
+}
+
+.missingMore {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.improveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  background: var(--surface);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: var(--font-inter), sans-serif;
+  transition: background 0.1s;
+  flex-shrink: 0;
+}
+
+.improveBtn:hover {
+  background: var(--surface-alt);
+}

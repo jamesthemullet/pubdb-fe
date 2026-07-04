@@ -1,6 +1,6 @@
+import { CopyButton } from "./CopyButton";
+import { DocNav } from "./DocNav";
 import styles from "./page.module.css";
-import DocsCopyButton from "./DocsCopyButton";
-import DocsNav from "./DocsNav";
 
 const CURL_QUICK_START = `curl https://api.thepubdb.com/api/v1/pubs \\
   -H "X-API-Key: $PUBDB_KEY"`;
@@ -54,7 +54,7 @@ function CodeBlock({ code, label }: { code: string; label?: string }) {
   return (
     <div className={styles.codeBlock}>
       {label && <span className={styles.codeLabel}>{label}</span>}
-      <DocsCopyButton text={code} />
+      <CopyButton text={code} />
       <pre className={styles.codePre}><code>{code}</code></pre>
     </div>
   );
@@ -75,7 +75,7 @@ function TypeBadge({ type }: { type: string }) {
 export default function DocsPage() {
   return (
     <div className={styles.page}>
-      <DocsNav />
+      <DocNav />
 
       <div className={styles.content}>
         <div className={styles.contentHeader}>
@@ -104,6 +104,7 @@ export default function DocsPage() {
             <code className={styles.inlineCode}>pagination</code> object for page metadata.
           </p>
           <CodeBlock code={JSON_QUICK_START} />
+
           <div className={styles.baseUrlBar}>
             <span className={styles.baseUrlIcon} aria-hidden="true">◎</span>
             <span>

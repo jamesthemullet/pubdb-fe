@@ -13,6 +13,10 @@
   margin-bottom: 0.25rem;
 }
 
+.sectionLabelSpaced {
+  margin-top: 1.75rem;
+}
+
 /* ── Detail rows ── */
 .detailRows {
   display: flex;
