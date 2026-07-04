@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
@@ -70,11 +70,11 @@ export default function Sidebar() {
       .catch(() => setPlanData(null));
   }, [user]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
     window.dispatchEvent(new Event("authChanged"));
     setMenuOpen(false);
-  };
+  }, []);
 
   const userInitials = user?.email.slice(0, 2).toUpperCase() ?? null;
 

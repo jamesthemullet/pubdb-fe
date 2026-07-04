@@ -31,7 +31,6 @@ const JSON_QUICK_START = `{
 
 const CURL_AUTH = `X-API-Key: pk_developer_xxxx····`;
 
-
 const CURL_FILTER = `curl "https://api.thepubdb.com/api/v1/pubs?hasCaskAle=true" \\
   -H "X-API-Key: $PUBDB_KEY"`;
 
@@ -43,7 +42,6 @@ const ENDPOINTS = [
   { method: "GET", path: "/api/v1/contributors/leaderboard", description: "Contributor leaderboard" },
   { method: "GET", path: "/api/v1/stats", description: "Database stats — Developer tier+" },
 ];
-
 
 const AMENITY_TAGS = [
   "isIndependent", "hasFood", "hasCaskAle", "hasBeerGarden",
@@ -90,16 +88,6 @@ export default function DocsPage() {
               Everything you need to integrate with the Pub DB API — authentication, endpoints,
               filtering, error handling, and SDKs.
             </p>
-          </div>
-          <div className={styles.headerActions}>
-            {/* TODO: add /playground page
-            <a href="/playground" className={styles.headerBtn}>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <polygon points="3,2 11,7 3,12" fill="currentColor" />
-              </svg>
-              Playground
-            </a>
-            */}
           </div>
         </div>
 
@@ -178,7 +166,6 @@ export default function DocsPage() {
               </div>
             ))}
           </div>
-
         </section>
 
         <section id="filtering" className={styles.section}>
