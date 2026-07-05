@@ -86,11 +86,15 @@ export default function HeroCodeBlock() {
 
   return (
     <div className={styles.codeBlock}>
-      <div className={styles.tabs}>
+      <div className={styles.tabs} role="tablist" aria-label="Code language">
         {LANGS.map((lang) => (
           <button
             key={lang}
             type="button"
+            role="tab"
+            aria-selected={activeTab === lang}
+            id={`hero-tab-${lang}`}
+            aria-controls="hero-code-panel"
             className={`${styles.tab} ${
               activeTab === lang ? styles.tabActive : ""
             }`}
@@ -101,7 +105,12 @@ export default function HeroCodeBlock() {
         ))}
       </div>
 
-      <pre className={styles.requestCode}>
+      <pre
+        id="hero-code-panel"
+        role="tabpanel"
+        aria-labelledby={`hero-tab-${activeTab}`}
+        className={styles.requestCode}
+      >
         <code>{CODE_EXAMPLES[activeTab]}</code>
       </pre>
 

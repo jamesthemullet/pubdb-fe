@@ -117,7 +117,7 @@ function ResetPasswordForm() {
       </form>
 
       {message && (
-        <div className={styles.success}>
+        <div className={styles.success} role="status">
           <Typography>{message}</Typography>
           <div className={styles.successLink}>
             <Link href="/register">Go to Login</Link>
@@ -142,7 +142,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div role="status">Loading…</div>}>
       <ResetPasswordForm />
     </Suspense>
   );

@@ -42,7 +42,6 @@ const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
     <tr
       data-id={pub.id}
       className={styles.tableRow}
-      tabIndex={0}
     >
       <td className={styles.tdName}>
         <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
@@ -282,7 +281,7 @@ function PubsContent() {
                 className={styles.chipMore}
                 onClick={() => setShowAllFilters(true)}
               >
-                + {hiddenCount} more
+                Show {hiddenCount} more filters
               </button>
             )}
             {showAllFilters && (
@@ -472,7 +471,7 @@ function PubsContent() {
           </button>
         </div>
       ) : filteredPubs.length === 0 ? (
-        <div className={styles.stateMsg}>
+        <div className={styles.stateMsg} role="status">
           No pubs found{debouncedSearchTerm ? " matching your search" : ""}.
         </div>
       ) : (
