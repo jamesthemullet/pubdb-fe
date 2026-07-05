@@ -117,12 +117,12 @@ function ResetPasswordForm() {
       </form>
 
       {message && (
-        <div className={styles.success}>
+        <output className={styles.success}>
           <Typography>{message}</Typography>
           <div className={styles.successLink}>
             <Link href="/register">Go to Login</Link>
           </div>
-        </div>
+        </output>
       )}
 
       {error && (
@@ -142,7 +142,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<output>Loading…</output>}>
       <ResetPasswordForm />
     </Suspense>
   );

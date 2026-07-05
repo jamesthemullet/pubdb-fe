@@ -530,11 +530,15 @@ export default function PubPage() {
           {/* Code block */}
           <div className={styles.codePanel}>
             <div className={styles.codePanelHeader}>
-              <div className={styles.codeTabs}>
+              <div className={styles.codeTabs} role="tablist" aria-label="Code language">
                 {(["curl", "node", "python"] as CodeTab[]).map((t) => (
                   <button
                     key={t}
                     type="button"
+                    role="tab"
+                    aria-selected={codeTab === t}
+                    id={`pub-code-tab-${t}`}
+                    aria-controls="pub-code-panel"
                     className={`${styles.codeTab} ${codeTab === t ? styles.codeTabActive : ""}`}
                     onClick={() => setCodeTab(t)}
                   >
@@ -545,12 +549,18 @@ export default function PubPage() {
               <button
                 type="button"
                 className={styles.codeCopyBtn}
+                aria-label="Copy code"
                 onClick={() => copyText(codeByTab[codeTab], "code")}
               >
                 {copied === "code" ? "Copied!" : "Copy"}
               </button>
             </div>
-            <pre className={styles.codeBlock}><code>{codeByTab[codeTab]}</code></pre>
+            <pre
+              id="pub-code-panel"
+              role="tabpanel"
+              aria-labelledby={`pub-code-tab-${codeTab}`}
+              className={styles.codeBlock}
+            ><code>{codeByTab[codeTab]}</code></pre>
           </div>
 
           {/* Raw response */}
@@ -791,7 +801,7 @@ function GardenTab({ pub }: { pub: Pub }) {
                 {g.imageUrl ? (
                   <Image
                     src={g.imageUrl}
-                    alt={g.name}
+                    alt={g.name || `Beer garden ${i + 1}`}
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
                     className={styles.gardenImage}
