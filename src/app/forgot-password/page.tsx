@@ -70,9 +70,9 @@ export default function ForgotPasswordPage() {
       </form>
 
       {message && (
-        <div className={styles.success} role="status">
+        <output className={styles.success}>
           <Typography>{message}</Typography>
-        </div>
+        </output>
       )}
 
       {error && (

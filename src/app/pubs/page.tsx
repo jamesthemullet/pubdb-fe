@@ -471,9 +471,9 @@ function PubsContent() {
           </button>
         </div>
       ) : filteredPubs.length === 0 ? (
-        <div className={styles.stateMsg} role="status">
+        <output className={styles.stateMsg}>
           No pubs found{debouncedSearchTerm ? " matching your search" : ""}.
-        </div>
+        </output>
       ) : (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
