@@ -149,7 +149,7 @@ export default function AuthGate({ context, onLogin }: AuthGateProps) {
           </div>
         )}
         {success && (
-          <div className={styles.successBox}>
+          <div role="alert" className={styles.successBox}>
             <p>{success}</p>
           </div>
         )}

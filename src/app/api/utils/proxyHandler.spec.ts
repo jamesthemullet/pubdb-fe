@@ -150,7 +150,7 @@ describe("createApiProxyHandler", () => {
     });
   });
 
-  it("returns 500 with the error message when fetch throws an Error", async () => {
+  it("returns 500 with a generic message when fetch throws an Error", async () => {
     process.env.TESTING_API_KEY = "test-key";
 
     vi.spyOn(globalThis, "fetch").mockRejectedValue(
@@ -162,11 +162,11 @@ describe("createApiProxyHandler", () => {
 
     expect(response.status).toBe(500);
     await expect(response.json()).resolves.toEqual({
-      error: "Connection refused",
+      error: "Internal server error",
     });
   });
 
-  it("returns 500 with default error message when fetch throws a non-Error", async () => {
+  it("returns 500 with a generic message when fetch throws a non-Error", async () => {
     process.env.TESTING_API_KEY = "test-key";
 
     vi.spyOn(globalThis, "fetch").mockRejectedValue("boom");
@@ -178,7 +178,7 @@ describe("createApiProxyHandler", () => {
 
     expect(response.status).toBe(500);
     await expect(response.json()).resolves.toEqual({
-      error: "Failed to fetch things",
+      error: "Internal server error",
     });
   });
 

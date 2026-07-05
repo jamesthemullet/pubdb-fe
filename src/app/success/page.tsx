@@ -115,9 +115,7 @@ function SuccessContent() {
         <Typography variant="headingMedium" className={styles.subheading}>Verification Failed</Typography>
         <Typography>{error}</Typography>
         <div className={styles.actionLink}>
-          <Link href="/">
-            <button type="button">Return to Home</button>
-          </Link>
+          <Link href="/" className={styles.btn}>Return to Home</Link>
         </div>
       </div>
     );
@@ -128,9 +126,7 @@ function SuccessContent() {
       <div className={styles.centered}>
         <Typography variant="headingMedium">No subscription data found</Typography>
         <div className={styles.actionLink}>
-          <Link href="/">
-            <button type="button">Return to Home</button>
-          </Link>
+          <Link href="/" className={styles.btn}>Return to Home</Link>
         </div>
       </div>
     );
@@ -170,13 +166,9 @@ function SuccessContent() {
           )}
 
           <div className={styles.actions}>
-            <Link href="/">
-              <button type="button">View Dashboard</button>
-            </Link>
-            {/* <Link href="/api-docs">
-              <button type="button" className="secondary">
-                API Documentation
-              </button>
+            <Link href="/" className={styles.btn}>View Dashboard</Link>
+            {/* <Link href="/api-docs" className={styles.btn}>
+              API Documentation
             </Link> */}
           </div>
         </>
@@ -187,12 +179,8 @@ function SuccessContent() {
           <Typography className={styles.message}>{status.message}</Typography>
 
           <div className={styles.actions}>
-            <Link href="/">
-              <button type="button">Try Again</button>
-            </Link>
-            <a href="mailto:support@thepubdb.com">
-              <button type="button" className="secondary">Contact Support</button>
-            </a>
+            <Link href="/" className={styles.btn}>Try Again</Link>
+            <a href="mailto:support@thepubdb.com" className={`${styles.btn} ${styles.btnSecondary}`}>Contact Support</a>
           </div>
         </>
       )}

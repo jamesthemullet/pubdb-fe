@@ -348,17 +348,20 @@
   background: var(--surface-alt);
 }
 
+.keyCard {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.keyCard:last-child {
+  border-bottom: none;
+}
+
 .keyRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-color);
   gap: 1rem;
-}
-
-.keyRow:last-child {
-  border-bottom: none;
 }
 
 .keyLeft {
@@ -733,6 +736,78 @@
 .errorText {
   font-size: 0.875rem;
   color: #dc2626;
+}
+
+/* ── Upgrade nudge ─────────────────────────────────────────────────────────── */
+
+.upgradeNudge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.625rem 1rem 0.75rem;
+  background: #eff6ff;
+  border-top: 1px solid #bfdbfe;
+}
+
+.upgradeNudgeBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.upgradeNudgeHeading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.upgradeNudgeDesc {
+  font-size: 0.75rem;
+  color: #3b5fc0;
+  line-height: 1.4;
+}
+
+.upgradeNudgeActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.upgradeNudgeCta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--accent, #2563eb);
+  color: #ffffff;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background 0.12s;
+}
+
+.upgradeNudgeCta:hover {
+  background: var(--accent-hover, #1d4ed8);
+}
+
+.upgradeNudgeDismiss {
+  background: transparent;
+  border: none;
+  color: #93c5fd;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.15rem 0.3rem;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: color 0.1s;
+}
+
+.upgradeNudgeDismiss:hover {
+  color: #1e40af;
+  background: transparent;
 }
 
 /* ── Modal ─────────────────────────────────────────────────────────────────── */
