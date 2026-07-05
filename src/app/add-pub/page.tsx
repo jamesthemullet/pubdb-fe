@@ -258,7 +258,6 @@ export default function AddPubPage() {
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. The Crown & Anchor"
               required
-              autoComplete="pub-name"
             />
             <FieldErrorList errors={fieldErrors.name} className={styles.errorText} idPrefix="name" />
           </div>
@@ -323,7 +322,6 @@ export default function AddPubPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+44 20 7946 0958"
-                autoComplete="pub-phone"
               />
               <FieldErrorList errors={fieldErrors.phone} className={styles.errorText} idPrefix="phone" />
             </div>
@@ -390,7 +388,6 @@ export default function AddPubPage() {
               onChange={(e) => setAddress(e.target.value)}
               placeholder="e.g. 44 Dean Street"
               required
-              autoComplete="pub-address"
             />
             <FieldErrorList errors={fieldErrors.address} className={styles.errorText} idPrefix="address" />
           </div>
@@ -409,7 +406,6 @@ export default function AddPubPage() {
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="e.g. London"
                 required
-                autoComplete="pub-city"
               />
               <FieldErrorList errors={fieldErrors.city} className={styles.errorText} idPrefix="city" />
             </div>
@@ -422,7 +418,6 @@ export default function AddPubPage() {
                 value={area}
                 onChange={(e) => setArea(e.target.value)}
                 placeholder="e.g. Soho"
-                autoComplete="pub-area"
               />
             </div>
           </div>
@@ -441,7 +436,6 @@ export default function AddPubPage() {
                 onChange={(e) => setPostcode(e.target.value)}
                 placeholder="e.g. W1D 4PX"
                 required
-                autoComplete="pub-postcode"
               />
               <FieldErrorList errors={fieldErrors.postcode} className={styles.errorText} idPrefix="postcode" />
             </div>

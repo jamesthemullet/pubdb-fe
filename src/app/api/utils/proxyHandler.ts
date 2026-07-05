@@ -35,7 +35,7 @@ export function createApiProxyHandler(
 
       return NextResponse.json(data, { status: response.status });
     } catch (error) {
-      // biome-ignore lint/suspicious/noConsole: server-side error logging
+      // biome-ignore lint/suspicious/noConsole: server-side error logging for the proxy
       console.error(`Proxy error for ${endpointPath}:`, error);
       return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
