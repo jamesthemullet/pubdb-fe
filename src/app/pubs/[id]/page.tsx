@@ -35,7 +35,7 @@ function pubDisplayId(id: string | undefined): string {
   return id ? `pub_${id.slice(0, 6)}` : "pub_??????";
 }
 
-export default function PubPage() {
+export default function PubPage(): React.JSX.Element {
   const { id } = useParams();
   const [pub, setPub] = useState<Pub | null>(null);
   const [loading, setLoading] = useState(true);

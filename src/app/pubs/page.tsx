@@ -74,7 +74,7 @@ const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
   );
 });
 
-function PubsContent() {
+function PubsContent(): React.JSX.Element {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
@@ -532,7 +532,7 @@ function PubsContent() {
   );
 }
 
-export default function Pubs() {
+export default function Pubs(): React.JSX.Element {
   return (
     <Suspense>
       <PubsContent />

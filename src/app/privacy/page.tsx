@@ -2,7 +2,7 @@ import Link from "next/link";
 import Typography from "@/app/components/typography/typography";
 import styles from "./page.module.css";
 
-export default function PrivacyPage() {
+export default function PrivacyPage(): React.JSX.Element {
   return (
     <div className={styles.container}>
       <Typography variant="headingMedium">Privacy Policy</Typography>
