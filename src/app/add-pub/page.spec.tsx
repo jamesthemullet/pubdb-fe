@@ -174,7 +174,7 @@ describe("AddPubPage", () => {
 
     await waitFor(() => {
       expect(fetchSpy).toHaveBeenCalledWith(
-        "http://localhost:4000/pubs",
+        "/api/pubs",
         expect.objectContaining({
           method: "POST",
           headers: expect.objectContaining({
@@ -230,7 +230,7 @@ describe("AddPubPage", () => {
 
     await waitFor(() => {
       expect(fetchSpy).toHaveBeenCalledWith(
-        "http://localhost:4000/pubs",
+        "/api/pubs",
         expect.objectContaining({
           method: "POST",
           headers: {

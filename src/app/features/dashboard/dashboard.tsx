@@ -4,7 +4,6 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useContributions } from "@/hooks/useContributions";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import { getErrorMessage, isHttpErrorObject } from "@/lib/errors";
 import styles from "./dashboard.module.css";
@@ -161,7 +160,7 @@ const Dashboard = (): React.JSX.Element | null => {
     async function fetchDashboard(token: string) {
       try {
         setError(null);
-        const res = await fetch(`${API_URL}/auth/dashboard`, {
+        const res = await fetch("/api/auth/dashboard", {
           headers: buildAuthHeaders(token),
         });
         if (!res.ok) {
@@ -223,7 +222,7 @@ const Dashboard = (): React.JSX.Element | null => {
       setCancelError(null);
       setCancelMessage(null);
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/payments/cancel-subscription`, {
+      const res = await fetch("/api/payments/cancel-subscription", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -260,7 +259,7 @@ const Dashboard = (): React.JSX.Element | null => {
       setForgotKeyCopyStatus("idle");
       setForgotKeyTarget(keyPrefix);
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/auth/forgot-api-key`, {
+      const res = await fetch("/api/auth/forgot-api-key", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -320,7 +319,7 @@ const Dashboard = (): React.JSX.Element | null => {
       setShowForgotKeyModal(false);
       setForgotKeyCopyStatus("idle");
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/payments/subscribe-to-hobby`, {
+      const res = await fetch("/api/payments/subscribe-to-hobby", {
         method: "POST",
         headers: buildAuthHeaders(token),
       });
@@ -330,7 +329,7 @@ const Dashboard = (): React.JSX.Element | null => {
       setForgotKeyDetails(keyData);
       setShowForgotKeyModal(true);
       setForgotKeyCopyStatus("idle");
-      const refreshRes = await fetch(`${API_URL}/auth/dashboard`, {
+      const refreshRes = await fetch("/api/auth/dashboard", {
         headers: buildAuthHeaders(token),
       });
       if (refreshRes.ok) setDashboardData(await refreshRes.json());
