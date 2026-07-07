@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { API_URL } from "@/lib/apiConfig";
 
 export type AuthUser = {
   email: string;
@@ -27,7 +26,7 @@ export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boole
         return;
       }
       try {
-        const res = await fetch(`${API_URL}/auth/me`, {
+        const res = await fetch("/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {

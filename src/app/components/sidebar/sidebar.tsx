@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./sidebar.module.css";
 
@@ -56,7 +55,7 @@ export default function Sidebar() {
   useEffect(() => {
     if (!user) { setPlanData(null); return; }
     const token = localStorage.getItem("token");
-    fetch(`${API_URL}/auth/dashboard`, { headers: buildAuthHeaders(token) })
+    fetch("/api/auth/dashboard", { headers: buildAuthHeaders(token) })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data: { apiKeys: ApiKey[] }) => {
         const keys = data.apiKeys ?? [];

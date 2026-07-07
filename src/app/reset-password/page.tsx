@@ -5,7 +5,6 @@ import { Suspense, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
-import { API_URL } from "@/lib/apiConfig";
 import styles from "./page.module.css";
 
 function ResetPasswordForm() {
@@ -42,8 +41,7 @@ function ResetPasswordForm() {
     setMessage(null);
 
     try {
-      const apiUrl = API_URL;
-      const res = await fetch(`${apiUrl}/auth/reset-password`, {
+      const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

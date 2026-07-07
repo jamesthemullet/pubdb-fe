@@ -158,7 +158,7 @@ describe("EditButton", () => {
     await waitFor(() => {
       expect(fetchSpy).toHaveBeenNthCalledWith(
         2,
-        "http://localhost:4000/pubs/pub-1",
+        "/api/pubs/pub-1",
         {
           method: "DELETE",
           headers: { Authorization: "Bearer header.payload.signature" },
