@@ -23,7 +23,7 @@ describe("PATCH /api/pubs/[id]", () => {
 		process.env = originalEnv;
 	});
 
-	it("forwards request body, auth header, and X-API-Key to the upstream API and returns the result", async () => {
+	it("forwards request body and auth header to the upstream API and returns the result", async () => {
 		const upstreamData = { id: "42", name: "Updated Pub" };
 		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(upstreamData, 200));
 
@@ -39,11 +39,10 @@ describe("PATCH /api/pubs/[id]", () => {
 			"https://api.example.com/pubs/42",
 			expect.objectContaining({
 				method: "PATCH",
-				headers: expect.objectContaining({
-					"X-API-Key": "test-key",
+				headers: {
 					Authorization: "Bearer user-token",
 					"Content-Type": "application/json",
-				}),
+				},
 			}),
 		);
 		expect(response.status).toBe(200);

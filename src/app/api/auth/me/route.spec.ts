@@ -36,7 +36,7 @@ describe("GET /api/auth/me", () => {
 		expect(fetchMock).toHaveBeenCalledWith(
 			"https://api.example.com/auth/me",
 			{
-				headers: { "X-API-Key": "test-key", Authorization: "Bearer user-token" },
+				headers: { Authorization: "Bearer user-token" },
 				cache: "no-store",
 			},
 		);
@@ -51,7 +51,7 @@ describe("GET /api/auth/me", () => {
 
 		expect(fetchMock).toHaveBeenCalledWith(
 			"https://api.example.com/auth/me",
-			{ headers: { "X-API-Key": "test-key" }, cache: "no-store" },
+			{ headers: {}, cache: "no-store" },
 		);
 	});
 });
