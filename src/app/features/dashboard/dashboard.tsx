@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useContributions } from "@/hooks/useContributions";
 import { buildAuthHeaders } from "@/lib/auth";
@@ -372,6 +372,30 @@ const Dashboard = (): React.JSX.Element | null => {
     }
   }
 
+  const totalUsed = useMemo(
+    () =>
+      dashboardData?.apiKeys.reduce(
+        (sum, k) => sum + (k.limits.requestsPerMonth - k.remaining.month),
+        0
+      ) ?? 0,
+    [dashboardData]
+  );
+  const totalLimit = useMemo(
+    () =>
+      dashboardData?.apiKeys.reduce(
+        (sum, k) => sum + k.limits.requestsPerMonth,
+        0
+      ) ?? 0,
+    [dashboardData]
+  );
+  const activeKeyCount = useMemo(
+    () =>
+      dashboardData?.apiKeys.filter(
+        (k) => k.keyStatus === "ACTIVE" || k.isActive
+      ).length ?? 0,
+    [dashboardData]
+  );
+
   if (!isAuthenticated) {
     return <AuthGate context="API keys" />;
   }
@@ -401,18 +425,6 @@ const Dashboard = (): React.JSX.Element | null => {
   }
 
   if (!dashboardData) return null;
-
-  const totalUsed = dashboardData.apiKeys.reduce(
-    (sum, k) => sum + (k.limits.requestsPerMonth - k.remaining.month),
-    0
-  );
-  const totalLimit = dashboardData.apiKeys.reduce(
-    (sum, k) => sum + k.limits.requestsPerMonth,
-    0
-  );
-  const activeKeyCount = dashboardData.apiKeys.filter(
-    (k) => k.keyStatus === "ACTIVE" || k.isActive
-  ).length;
 
   return (
     <>
