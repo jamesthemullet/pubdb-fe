@@ -3,14 +3,14 @@ import { getServerApiUrl } from "@/lib/serverApiUrl";
 
 export function createApiProxyHandler(
   endpointPath: string,
-  options?: { forwardAuth?: boolean; resourceName?: string }
+  options?: { forwardAuth?: boolean; resourceName?: string; includeApiKey?: boolean }
 ): (request: Request) => Promise<NextResponse> {
   return async (request: Request) => {
     const apiUrl = getServerApiUrl();
     const apiKey = process.env.TESTING_API_KEY;
 
     const headers: Record<string, string> = {};
-    if (apiKey) headers["X-API-Key"] = apiKey;
+    if (apiKey && options?.includeApiKey !== false) headers["X-API-Key"] = apiKey;
     if (options?.forwardAuth) {
       const authHeader = request.headers.get("authorization");
       if (authHeader) {

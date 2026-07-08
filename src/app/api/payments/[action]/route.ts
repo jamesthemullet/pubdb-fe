@@ -3,8 +3,6 @@ import { getServerApiUrl } from "@/lib/serverApiUrl";
 
 function buildHeaders(request: Request, includeContentType: boolean): Record<string, string> {
   const headers: Record<string, string> = {};
-  const apiKey = process.env.TESTING_API_KEY;
-  if (apiKey) headers["X-API-Key"] = apiKey;
   if (includeContentType) headers["Content-Type"] = "application/json";
   const authHeader = request.headers.get("authorization");
   if (authHeader) headers.Authorization = authHeader;

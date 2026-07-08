@@ -34,7 +34,7 @@ describe("GET /api/pubs", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.example.com/pubs",
-      { headers: { "X-API-Key": "test-key" }, cache: "no-store" }
+      { headers: {}, cache: "no-store" }
     );
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual(payload);
@@ -55,7 +55,7 @@ describe("GET /api/pubs", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://public-api.example.com/pubs",
-      { headers: { "X-API-Key": "public-key" }, cache: "no-store" }
+      { headers: {}, cache: "no-store" }
     );
   });
 
@@ -130,7 +130,7 @@ describe("GET /api/pubs", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:4000/pubs",
-      { headers: { "X-API-Key": "test-key" }, cache: "no-store" }
+      { headers: {}, cache: "no-store" }
     );
   });
 });
