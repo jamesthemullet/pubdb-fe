@@ -79,6 +79,23 @@
   text-decoration: underline;
 }
 
+.inlineCode {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.8125rem;
+  background: var(--surface-alt);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+  color: var(--text-color);
+}
+
+.keyPickerNote {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
 .endpointList {
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -141,11 +158,100 @@
   cursor: not-allowed;
 }
 
+.tryBtn:not(:disabled) {
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+.tryBtn:not(:disabled):hover {
+  background: var(--surface);
+}
+
 .comingSoon {
   margin-top: 1rem;
   font-size: 0.8125rem;
   color: var(--text-muted);
   font-style: italic;
+}
+
+.resultError {
+  margin-top: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
+  color: #991b1b;
+}
+
+.resultBlock {
+  position: relative;
+  margin-top: 1.5rem;
+  background: #111111;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.resultHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #1f2937;
+}
+
+.resultStatus {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 0.15rem 0.45rem;
+}
+
+.resultStatusOk {
+  background: #052e1f;
+  color: #6ee7b7;
+}
+
+.resultStatusError {
+  background: #450a0a;
+  color: #fca5a5;
+}
+
+.resultLatency {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.copyBtn {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid #374151;
+  border-radius: 4px;
+  color: #9ca3af;
+  font-size: 0.6875rem;
+  font-family: var(--font-inter), sans-serif;
+  padding: 0.2rem 0.55rem;
+  cursor: pointer;
+}
+
+.copyBtn:hover {
+  color: #e5e7eb;
+  border-color: #6b7280;
+}
+
+.resultPre {
+  padding: 1rem;
+  margin: 0;
+  overflow-x: auto;
+  max-height: 420px;
+  overflow-y: auto;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: #e5e7eb;
+  white-space: pre;
 }
 
 @media (max-width: 900px) {

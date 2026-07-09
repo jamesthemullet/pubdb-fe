@@ -40,16 +40,21 @@ the browser. See "Risk notes" at the bottom for why.
 
 Pick `GET /pubs` first (simplest, no required params).
 
-- Add `src/app/api/playground/route.ts` that takes
-  `{ keyId, endpoint, params }` from the authenticated session, looks up
-  the real key server-side (never sent from/to the client), forwards the
-  request to `https://api.thepubdb.com/api/v1/...` with
-  `X-API-Key: <raw key>`, and returns the response. Mirrors the existing
-  `proxyHandler.ts` pattern used by the other `/api/*` routes.
-- Render response as pretty-printed JSON in a `CodeBlock`, plus status
-  code and latency.
-- Basic error states: 401 (bad/revoked key), 429 (rate limit), network
-  error.
+**Auth mechanism change from the original plan:** the backend has no way to
+look up a raw key secret after creation — `GET /api/auth/dashboard` only
+ever returns `keyPrefix`/`name`/`tier`, and the only "re-fetch" path
+(`forgot-api-key`) actually rotates/invalidates the key, so it can't be
+used for this. Given that, `src/app/api/playground/pubs/route.ts` forwards
+the signed-in user's Bearer token instead (`forwardAuth: true,
+includeApiKey: false`, mirroring `pubs/route.ts`/`auth/me/route.ts`). The
+key picker from Stage 2 is informational — it shows which key/tier the
+account is on — rather than literally selecting a distinct secret per
+request. Still satisfies the core goal: no raw key ever reaches the
+browser.
+- Render response as pretty-printed JSON, plus status code and latency.
+- Basic error states so far: network error, non-2xx status shown inline.
+  429/401-specific messaging can follow once real backend responses are
+  observed in Stage 4.
 
 ## Stage 4 — Remaining endpoints + query param inputs (PR 4)
 
@@ -81,6 +86,8 @@ If the raw key were sent to/used from the browser instead:
 - Keys are tier/quota-based, so a leaked key costs the owner real quota,
   not just "read access to public data."
 
-The proxy (Stage 3) avoids all of the above: the client only ever sends
-`keyId`, never the raw secret, and the server looks up/attaches the real
-key before forwarding to the public API.
+The proxy (Stage 3) avoids all of the above: the client never handles a
+raw key at all — it authenticates via the existing Bearer session, and
+the server forwards that to the public API (see the auth mechanism note
+under Stage 3 above for why this differs from the original per-key
+lookup idea).
