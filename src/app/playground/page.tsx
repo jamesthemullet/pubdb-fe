@@ -22,6 +22,7 @@ type ParamSpec = {
   label: string;
   required?: boolean;
   placeholder?: string;
+  options?: string[];
 };
 
 type EndpointDef = {
@@ -49,7 +50,7 @@ const ENDPOINTS: EndpointDef[] = [
     proxyUrl: "/api/playground/pubs",
     queryParams: [
       { name: "page", label: "page", placeholder: "1" },
-      { name: "limit", label: "limit", placeholder: "50" },
+      { name: "limit", label: "limit", options: ["10", "25", "50"] },
     ],
   },
   {
@@ -175,7 +176,12 @@ export default function PlaygroundPage() {
       return;
     }
     setExpandedPath((prev) => (prev === endpoint.path ? null : endpoint.path));
-    setParamValues({});
+    const allParams = [...(endpoint.pathParams ?? []), ...(endpoint.queryParams ?? [])];
+    const defaults: Record<string, string> = {};
+    for (const p of allParams) {
+      if (p.options?.length) defaults[p.name] = p.options[0];
+    }
+    setParamValues(defaults);
   }
 
   async function handleSend(endpoint: EndpointDef, values: Record<string, string>) {
@@ -305,16 +311,33 @@ export default function PlaygroundPage() {
                             {p.label}
                             {p.required && <span className={styles.requiredMark}> *</span>}
                           </label>
-                          <input
-                            id={`param-${endpoint.path}-${p.name}`}
-                            className={styles.paramInput}
-                            type="text"
-                            placeholder={p.placeholder}
-                            value={paramValues[p.name] ?? ""}
-                            onChange={(e) =>
-                              setParamValues((prev) => ({ ...prev, [p.name]: e.target.value }))
-                            }
-                          />
+                          {p.options ? (
+                            <select
+                              id={`param-${endpoint.path}-${p.name}`}
+                              className={styles.paramInput}
+                              value={paramValues[p.name] ?? p.options[0]}
+                              onChange={(e) =>
+                                setParamValues((prev) => ({ ...prev, [p.name]: e.target.value }))
+                              }
+                            >
+                              {p.options.map((opt) => (
+                                <option key={opt} value={opt}>
+                                  {opt}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              id={`param-${endpoint.path}-${p.name}`}
+                              className={styles.paramInput}
+                              type="text"
+                              placeholder={p.placeholder}
+                              value={paramValues[p.name] ?? ""}
+                              onChange={(e) =>
+                                setParamValues((prev) => ({ ...prev, [p.name]: e.target.value }))
+                              }
+                            />
+                          )}
                         </div>
                       ))}
                       <button
