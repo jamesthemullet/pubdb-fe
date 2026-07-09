@@ -89,6 +89,15 @@ export default function DocsPage() {
               filtering, error handling, and SDKs.
             </p>
           </div>
+
+          <div className={styles.headerActions}>
+            <a href="/playground" className={styles.headerBtn}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <polygon points="3,2 11,7 3,12" fill="currentColor" />
+              </svg>
+              Playground
+            </a>
+          </div>
         </div>
 
         <section id="quick-start" className={styles.section}>
