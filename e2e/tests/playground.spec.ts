@@ -67,6 +67,7 @@ test.describe("Playground page (/playground)", () => {
     });
 
     test("Try it on GET /pubs shows a live response", async ({ page }) => {
+      // /api/v1/pubs is the default active endpoint on load, so no row click needed.
       await page.route(PLAYGROUND_PUBS_API, (route) =>
         route.fulfill({
           status: 200,
@@ -75,9 +76,7 @@ test.describe("Playground page (/playground)", () => {
         })
       );
 
-      const pubsRow = page.getByText("/api/v1/pubs", { exact: true }).locator("..");
-      await pubsRow.getByRole("button", { name: "Configure →" }).click();
-      await page.getByRole("button", { name: "Send request →" }).click();
+      await page.getByRole("button", { name: "Send" }).click();
 
       await expect(page.getByText("200", { exact: true })).toBeVisible();
       await expect(page.getByText(/The Crown/)).toBeVisible();
@@ -92,19 +91,31 @@ test.describe("Playground page (/playground)", () => {
         })
       );
 
-      const pubsRow = page.getByText("/api/v1/pubs", { exact: true }).locator("..");
-      await pubsRow.getByRole("button", { name: "Configure →" }).click();
-      await page.getByRole("button", { name: "Send request →" }).click();
+      await page.getByRole("button", { name: "Send" }).click();
 
       await expect(page.getByText("404", { exact: true })).toBeVisible();
       await expect(page.getByText(/API key not found/)).toBeVisible();
     });
 
-    test("Configuring pubs/near requires lat and lng before sending", async ({ page }) => {
-      const nearRow = page.getByText("/api/v1/pubs/near", { exact: true }).locator("..");
-      await nearRow.getByRole("button", { name: "Configure →" }).click();
+    test("Selecting an endpoint loads it into the request bar", async ({ page }) => {
+      await expect(
+        page.getByText("https://api.thepubdb.com/api/v1/pubs?limit=10", { exact: true })
+      ).toBeVisible();
 
-      const sendBtn = page.getByRole("button", { name: "Send request →" });
+      await page.getByText("/api/v1/beer-types", { exact: true }).click();
+
+      await expect(
+        page.getByText("https://api.thepubdb.com/api/v1/beer-types", { exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByText("https://api.thepubdb.com/api/v1/pubs?limit=10", { exact: true })
+      ).not.toBeVisible();
+    });
+
+    test("Selecting pubs/near requires lat and lng before sending", async ({ page }) => {
+      await page.getByText("/api/v1/pubs/near", { exact: true }).click();
+
+      const sendBtn = page.getByRole("button", { name: "Send" });
       await expect(sendBtn).toBeDisabled();
 
       await page.getByPlaceholder("51.5074").fill("51.5");
