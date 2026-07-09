@@ -40,16 +40,33 @@ the browser. See "Risk notes" at the bottom for why.
 
 Pick `GET /pubs` first (simplest, no required params).
 
-- Add `src/app/api/playground/route.ts` that takes
-  `{ keyId, endpoint, params }` from the authenticated session, looks up
-  the real key server-side (never sent from/to the client), forwards the
-  request to `https://api.thepubdb.com/api/v1/...` with
-  `X-API-Key: <raw key>`, and returns the response. Mirrors the existing
-  `proxyHandler.ts` pattern used by the other `/api/*` routes.
-- Render response as pretty-printed JSON in a `CodeBlock`, plus status
-  code and latency.
-- Basic error states: 401 (bad/revoked key), 429 (rate limit), network
-  error.
+**Final auth mechanism (backend now supports this properly):** the
+public `/api/v1/*` endpoints strictly require `X-API-Key` — forwarding
+the user's Bearer session alone (an earlier attempt) 401s against the
+real backend, since Bearer and API-key auth are separate mechanisms
+there. A shared `TESTING_API_KEY` was considered and rejected — it
+doesn't belong in a customer-facing feature and shouldn't be relied on
+elsewhere either (follow-up needed for `beer-types`/`leaderboard`/`pubs`,
+which currently do use it).
+
+The backend now exposes `POST /auth/keys/:keyPrefix/playground-token`
+(Bearer-authenticated, ownership-checked, 30/hour/IP rate limited) which
+mints a short-lived (5 minute) scoped token — `pgt_<jwt>` — carrying that
+key's tier/permissions/quota. `src/app/api/playground/pubs/route.ts`:
+1. Forwards the user's Bearer token to mint a playground token for the
+   selected `keyPrefix`.
+2. Uses the returned `token` as `X-API-Key` on the real
+   `GET /api/v1/pubs` call.
+3. Returns that response to the client.
+
+The raw permanent key secret never leaves the backend, and the token
+itself is scoped, short-lived, and burns the *real* key's rate limit
+(handled backend-side, not duplicated here) — the key picker in the UI
+now genuinely selects which key's quota/tier a request uses.
+- Errors from token minting pass straight through: 401 (no/bad session),
+  404 (key not found or not owned — deliberately not distinguished, to
+  avoid leaking which prefixes exist), 429 (mint rate limit).
+- Render response as pretty-printed JSON, plus status code and latency.
 
 ## Stage 4 — Remaining endpoints + query param inputs (PR 4)
 
@@ -81,6 +98,7 @@ If the raw key were sent to/used from the browser instead:
 - Keys are tier/quota-based, so a leaked key costs the owner real quota,
   not just "read access to public data."
 
-The proxy (Stage 3) avoids all of the above: the client only ever sends
-`keyId`, never the raw secret, and the server looks up/attaches the real
-key before forwarding to the public API.
+The proxy (Stage 3) avoids all of the above: the client never handles a
+raw key or a shared testing key — it mints a short-lived, scoped token
+server-side via the backend's `playground-token` endpoint and uses that
+for the real request (see the Stage 3 section above).
