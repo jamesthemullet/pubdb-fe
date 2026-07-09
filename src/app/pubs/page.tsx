@@ -367,7 +367,7 @@ function PubsContent(): ReactElement {
             <label htmlFor="sort-select" className={styles.srOnly}>Sort by</label>
             <Dropdown
               id="sort-select"
-              aria-label="Sort pubs by"
+              aria-label="Sort pubs"
               value={coords ? "distance" : sortBy}
               disabled={!!coords}
               onChange={(e) => {
