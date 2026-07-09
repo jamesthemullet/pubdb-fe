@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import type { ReactElement } from "react";
 import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
@@ -23,7 +24,7 @@ type SubscriptionStatus = {
   };
 };
 
-function SuccessContent(): JSX.Element {
+function SuccessContent(): ReactElement {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const [status, setStatus] = useState<SubscriptionStatus | null>(null);
@@ -200,7 +201,7 @@ function SuccessContent(): JSX.Element {
   );
 }
 
-export default function SuccessPage(): JSX.Element {
+export default function SuccessPage(): ReactElement {
   return (
     <Suspense
       fallback={

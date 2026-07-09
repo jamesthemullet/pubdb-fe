@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { memo, Suspense, useEffect, useMemo, useState } from "react";
+import type { ReactElement } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import {
   PUB_AMENITY_FIELDS,
@@ -61,7 +62,7 @@ const AMENITY_ICONS: Partial<
   },
 };
 
-function PubsContent(): JSX.Element {
+function PubsContent(): ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
@@ -559,7 +560,7 @@ function PubsContent(): JSX.Element {
   );
 }
 
-export default function Pubs(): JSX.Element {
+export default function Pubs(): ReactElement {
   return (
     <Suspense>
       <PubsContent />

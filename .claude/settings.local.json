@@ -33,7 +33,8 @@
       "Bash(Remove-Item *)",
       "Bash(yarn audit *)",
       "Bash(gh label *)",
-      "Bash(yarn knip *)"
+      "Bash(yarn knip *)",
+      "Bash(yarn run *)"
     ]
   }
 }

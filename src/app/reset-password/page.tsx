@@ -2,13 +2,14 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import type { ReactElement } from "react";
 import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
 import styles from "./page.module.css";
 
-function ResetPasswordForm(): JSX.Element {
+function ResetPasswordForm(): ReactElement {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -140,7 +141,7 @@ function ResetPasswordForm(): JSX.Element {
   );
 }
 
-export default function ResetPasswordPage(): JSX.Element {
+export default function ResetPasswordPage(): ReactElement {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <ResetPasswordForm />
