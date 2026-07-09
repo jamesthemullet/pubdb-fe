@@ -91,12 +91,22 @@ Done. Extended to `/pubs/:id`, `/pubs/near` (lat/lng/radius inputs),
   placeholder header, not the actual scoped token) and the existing
   JSON-body copy.
 
-## Stage 5 — Polish (PR 5, optional/nice-to-have)
+## Stage 5 — Polish (PR 5)
 
-- Request history within the session (last N requests, collapsible).
-- Rate-limit / tier awareness: show remaining quota if the API returns it
-  in headers.
-- Mask the key in any UI that displays it (show last 4 chars only).
+Done.
+
+- Request history: last 5 requests kept in page state, shown behind a
+  "Show history (n)" toggle; clicking a past entry re-displays it in the
+  main result panel (no re-fetch).
+- Rate-limit awareness: `playgroundProxyHandler.ts` now forwards
+  `X-RateLimit-Remaining`/`-Limit`/`-Reset` from the upstream response as
+  response headers (not baked into the JSON body, so it doesn't change
+  the shape callers already depend on). The result panel shows
+  "`remaining/limit left`" when present.
+- Key masking: already covered since Stage 2 — the UI only ever receives
+  `keyPrefix` from the backend (e.g. `pk_dev_ab12`) and displays it as
+  `{keyPrefix}····`; the full secret is never fetched to mask in the
+  first place.
 
 ## Risk notes — why server-side proxy over client-side key
 

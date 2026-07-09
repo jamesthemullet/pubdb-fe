@@ -272,6 +272,13 @@
   color: #9ca3af;
 }
 
+.resultQuota {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.75rem;
+  color: #fbbf24;
+  white-space: nowrap;
+}
+
 .copyBtn {
   margin-left: auto;
   background: transparent;
@@ -300,6 +307,57 @@
   line-height: 1.65;
   color: #e5e7eb;
   white-space: pre;
+}
+
+.historyBlock {
+  margin-top: 1rem;
+}
+
+.historyToggle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.historyList {
+  margin-top: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.historyRow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.historyRow:last-child {
+  border-bottom: none;
+}
+
+.historyRow:hover {
+  background: var(--surface-alt);
+}
+
+.historyRequestLine {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.75rem;
+  color: var(--text-color);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 900px) {
