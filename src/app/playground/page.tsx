@@ -17,26 +17,78 @@ type DashboardData = {
   apiKeys: ApiKey[];
 };
 
+type ParamSpec = {
+  name: string;
+  label: string;
+  required?: boolean;
+  placeholder?: string;
+};
+
+type EndpointDef = {
+  method: string;
+  path: string;
+  description: string;
+  proxyUrl: string;
+  pathParams?: ParamSpec[];
+  queryParams?: ParamSpec[];
+};
+
 type TryResult = {
+  requestLabel: string;
+  publicUrl: string;
   status: number;
   latencyMs: number;
   body: unknown;
 };
 
-const ENDPOINTS = [
-  { method: "GET", path: "/api/v1/pubs", description: "List all pubs (paginated)" },
-  { method: "GET", path: "/api/v1/pubs/:id", description: "Get a single pub by ID" },
-  { method: "GET", path: "/api/v1/pubs/near", description: "Geo search — Developer tier+" },
-  { method: "GET", path: "/api/v1/beer-types", description: "List tracked beer types" },
-  { method: "GET", path: "/api/v1/contributors/leaderboard", description: "Contributor leaderboard" },
-  { method: "GET", path: "/api/v1/stats", description: "Database stats — Developer tier+" },
+const ENDPOINTS: EndpointDef[] = [
+  {
+    method: "GET",
+    path: "/api/v1/pubs",
+    description: "List all pubs (paginated)",
+    proxyUrl: "/api/playground/pubs",
+    queryParams: [
+      { name: "page", label: "page", placeholder: "1" },
+      { name: "limit", label: "limit", placeholder: "50" },
+    ],
+  },
+  {
+    method: "GET",
+    path: "/api/v1/pubs/:id",
+    description: "Get a single pub by ID",
+    proxyUrl: "/api/playground/pubs",
+    pathParams: [{ name: "id", label: "id", required: true, placeholder: "pub_0f1a3b" }],
+  },
+  {
+    method: "GET",
+    path: "/api/v1/pubs/near",
+    description: "Geo search — Developer tier+",
+    proxyUrl: "/api/playground/pubs/near",
+    queryParams: [
+      { name: "lat", label: "lat", required: true, placeholder: "51.5074" },
+      { name: "lng", label: "lng", required: true, placeholder: "-0.1278" },
+      { name: "radius", label: "radius (km)", placeholder: "5" },
+    ],
+  },
+  {
+    method: "GET",
+    path: "/api/v1/beer-types",
+    description: "List tracked beer types",
+    proxyUrl: "/api/playground/beer-types",
+  },
+  {
+    method: "GET",
+    path: "/api/v1/contributors/leaderboard",
+    description: "Contributor leaderboard",
+    proxyUrl: "/api/playground/leaderboard",
+  },
+  {
+    method: "GET",
+    path: "/api/v1/stats",
+    description: "Database stats — Developer tier+",
+    proxyUrl: "/api/playground/stats",
+  },
 ];
-
-// Only endpoints with an entry here have a live proxy route wired up (Stage 3).
-// The rest stay disabled until Stage 4.
-const PROXY_ROUTES: Record<string, string> = {
-  "/api/v1/pubs": "/api/playground/pubs",
-};
 
 function MethodBadge({ method }: { method: string }) {
   return (
@@ -46,7 +98,7 @@ function MethodBadge({ method }: { method: string }) {
   );
 }
 
-function CopyButton({ text }: { text: string }) {
+function CopyButton({ text, label }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -57,9 +109,34 @@ function CopyButton({ text }: { text: string }) {
 
   return (
     <button type="button" className={styles.copyBtn} onClick={handleCopy}>
-      {copied ? "Copied" : "Copy"}
+      {copied ? "Copied" : (label ?? "Copy")}
     </button>
   );
+}
+
+function buildProxyRequest(
+  endpoint: EndpointDef,
+  values: Record<string, string>,
+  keyPrefix: string
+): { proxyUrl: string; publicPath: string } {
+  const pathSegment = (endpoint.pathParams ?? [])
+    .map((p) => `/${encodeURIComponent(values[p.name] ?? "")}`)
+    .join("");
+  const basePath = endpoint.path.replace(/\/:\w+/g, "");
+
+  const queryParams = new URLSearchParams();
+  for (const q of endpoint.queryParams ?? []) {
+    const value = values[q.name]?.trim();
+    if (value) queryParams.set(q.name, value);
+  }
+
+  const publicQuery = queryParams.toString();
+  const publicPath = `${basePath}${pathSegment}${publicQuery ? `?${publicQuery}` : ""}`;
+
+  queryParams.set("keyPrefix", keyPrefix);
+  const proxyUrl = `${endpoint.proxyUrl}${pathSegment}?${queryParams.toString()}`;
+
+  return { proxyUrl, publicPath };
 }
 
 export default function PlaygroundPage() {
@@ -67,6 +144,8 @@ export default function PlaygroundPage() {
   const [apiKeys, setApiKeys] = useState<ApiKey[] | null>(null);
   const [keysError, setKeysError] = useState<string | null>(null);
   const [selectedKeyPrefix, setSelectedKeyPrefix] = useState<string>("");
+  const [expandedPath, setExpandedPath] = useState<string | null>(null);
+  const [paramValues, setParamValues] = useState<Record<string, string>>({});
   const [tryingPath, setTryingPath] = useState<string | null>(null);
   const [result, setResult] = useState<TryResult | null>(null);
   const [resultError, setResultError] = useState<string | null>(null);
@@ -89,23 +168,41 @@ export default function PlaygroundPage() {
     return <AuthGate context="Playground" />;
   }
 
-  async function handleTryIt(path: string) {
-    const proxyUrl = PROXY_ROUTES[path];
-    if (!proxyUrl || !selectedKeyPrefix) return;
+  function toggleExpanded(endpoint: EndpointDef) {
+    const hasParams = (endpoint.pathParams?.length ?? 0) > 0 || (endpoint.queryParams?.length ?? 0) > 0;
+    if (!hasParams) {
+      void handleSend(endpoint, {});
+      return;
+    }
+    setExpandedPath((prev) => (prev === endpoint.path ? null : endpoint.path));
+    setParamValues({});
+  }
 
-    setTryingPath(path);
+  async function handleSend(endpoint: EndpointDef, values: Record<string, string>) {
+    if (!selectedKeyPrefix) return;
+    const missingRequired = [...(endpoint.pathParams ?? []), ...(endpoint.queryParams ?? [])].some(
+      (p) => p.required && !values[p.name]?.trim()
+    );
+    if (missingRequired) return;
+
+    setTryingPath(endpoint.path);
     setResult(null);
     setResultError(null);
 
+    const { proxyUrl, publicPath } = buildProxyRequest(endpoint, values, selectedKeyPrefix);
     const token = localStorage.getItem("token");
     const start = performance.now();
     try {
-      const res = await fetch(`${proxyUrl}?keyPrefix=${encodeURIComponent(selectedKeyPrefix)}`, {
-        headers: buildAuthHeaders(token),
-      });
+      const res = await fetch(proxyUrl, { headers: buildAuthHeaders(token) });
       const latencyMs = Math.round(performance.now() - start);
       const body = await res.json().catch(() => null);
-      setResult({ status: res.status, latencyMs, body });
+      setResult({
+        requestLabel: `${endpoint.method} ${publicPath}`,
+        publicUrl: `https://api.thepubdb.com${publicPath}`,
+        status: res.status,
+        latencyMs,
+        body,
+      });
     } catch {
       setResultError("Network error — couldn't reach the API.");
     } finally {
@@ -177,30 +274,63 @@ export default function PlaygroundPage() {
           </p>
 
           <div className={styles.endpointList}>
-            {ENDPOINTS.map(({ method, path, description }) => {
-              const isLive = path in PROXY_ROUTES;
+            {ENDPOINTS.map((endpoint) => {
+              const allParams = [...(endpoint.pathParams ?? []), ...(endpoint.queryParams ?? [])];
+              const hasParams = allParams.length > 0;
+              const isExpanded = expandedPath === endpoint.path;
+              const isRunning = tryingPath === endpoint.path;
+              const missingRequired = allParams.some((p) => p.required && !paramValues[p.name]?.trim());
+
               return (
-                <div key={path} className={styles.endpointRow}>
-                  <MethodBadge method={method} />
-                  <code className={styles.endpointPath}>{path}</code>
-                  <span className={styles.endpointDesc}>{description}</span>
-                  <button
-                    type="button"
-                    className={styles.tryBtn}
-                    disabled={!isLive || !selectedKeyPrefix || tryingPath === path}
-                    onClick={() => handleTryIt(path)}
-                  >
-                    {tryingPath === path ? "Running…" : "Try it →"}
-                  </button>
+                <div key={endpoint.path} className={styles.endpointGroup}>
+                  <div className={styles.endpointRow}>
+                    <MethodBadge method={endpoint.method} />
+                    <code className={styles.endpointPath}>{endpoint.path}</code>
+                    <span className={styles.endpointDesc}>{endpoint.description}</span>
+                    <button
+                      type="button"
+                      className={styles.tryBtn}
+                      disabled={!selectedKeyPrefix || isRunning}
+                      onClick={() => toggleExpanded(endpoint)}
+                    >
+                      {isRunning ? "Running…" : hasParams ? (isExpanded ? "Close" : "Configure →") : "Try it →"}
+                    </button>
+                  </div>
+
+                  {isExpanded && (
+                    <div className={styles.paramForm}>
+                      {allParams.map((p) => (
+                        <div key={p.name} className={styles.paramField}>
+                          <label className={styles.paramLabel} htmlFor={`param-${endpoint.path}-${p.name}`}>
+                            {p.label}
+                            {p.required && <span className={styles.requiredMark}> *</span>}
+                          </label>
+                          <input
+                            id={`param-${endpoint.path}-${p.name}`}
+                            className={styles.paramInput}
+                            type="text"
+                            placeholder={p.placeholder}
+                            value={paramValues[p.name] ?? ""}
+                            onChange={(e) =>
+                              setParamValues((prev) => ({ ...prev, [p.name]: e.target.value }))
+                            }
+                          />
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        className={styles.sendBtn}
+                        disabled={isRunning || !selectedKeyPrefix || missingRequired}
+                        onClick={() => handleSend(endpoint, paramValues)}
+                      >
+                        {isRunning ? "Sending…" : "Send request →"}
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
-
-          <p className={styles.comingSoon}>
-            Only <code className={styles.inlineCode}>GET /api/v1/pubs</code> is wired up to
-            live requests so far — the rest are coming in later PRs.
-          </p>
 
           {resultError && (
             <div role="alert" className={styles.resultError}>
@@ -211,6 +341,7 @@ export default function PlaygroundPage() {
           {result && (
             <div className={styles.resultBlock}>
               <div className={styles.resultHeader}>
+                <span className={styles.resultRequestLine}>{result.requestLabel}</span>
                 <span
                   className={`${styles.resultStatus} ${
                     result.status < 400 ? styles.resultStatusOk : styles.resultStatusError
@@ -219,6 +350,10 @@ export default function PlaygroundPage() {
                   {result.status}
                 </span>
                 <span className={styles.resultLatency}>{result.latencyMs}ms</span>
+                <CopyButton
+                  text={`curl "${result.publicUrl}" \\\n  -H "X-API-Key: $PUBDB_KEY"`}
+                  label="Copy as curl"
+                />
                 <CopyButton text={JSON.stringify(result.body, null, 2)} />
               </div>
               <pre className={styles.resultPre}>

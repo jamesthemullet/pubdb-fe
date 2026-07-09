@@ -79,16 +79,6 @@
   text-decoration: underline;
 }
 
-.inlineCode {
-  font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 0.8125rem;
-  background: var(--surface-alt);
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  padding: 0.1em 0.35em;
-  color: var(--text-color);
-}
-
 .keyPickerNote {
   margin-top: 0.5rem;
   font-size: 0.75rem;
@@ -102,17 +92,20 @@
   overflow: hidden;
 }
 
+.endpointGroup {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.endpointGroup:last-child {
+  border-bottom: none;
+}
+
 .endpointRow {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.65rem 1rem;
-  border-bottom: 1px solid var(--border-color);
   font-size: 0.8125rem;
-}
-
-.endpointRow:last-child {
-  border-bottom: none;
 }
 
 .methodBadge {
@@ -167,11 +160,66 @@
   background: var(--surface);
 }
 
-.comingSoon {
-  margin-top: 1rem;
-  font-size: 0.8125rem;
+.paramForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding: 0 1rem 0.85rem;
+  background: var(--surface-alt);
+}
+
+.paramField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.paramLabel {
+  font-size: 0.6875rem;
   color: var(--text-muted);
-  font-style: italic;
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+.requiredMark {
+  color: #c2410c;
+}
+
+.paramInput {
+  font-size: 0.8125rem;
+  font-family: var(--font-jetbrains-mono), monospace;
+  color: var(--text-color);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+  width: 150px;
+}
+
+.sendBtn {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #fff;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 0.4rem 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sendBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resultRequestLine {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.75rem;
+  color: #d1d5db;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .resultError {
