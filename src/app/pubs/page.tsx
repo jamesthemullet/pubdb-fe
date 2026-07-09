@@ -623,7 +623,7 @@ function PubsContent() {
                 )}
                 {/* TODO: improve amenity display (icons unclear, title tooltip unreliable) before re-enabling */}
                 {/* <th className={styles.thAmenities}>AMENITIES</th> */}
-                {/* <th className={styles.thArrow} aria-label="View" /> */}
+                <th className={styles.thArrow} aria-label="View" />
               </tr>
             </thead>
             <tbody

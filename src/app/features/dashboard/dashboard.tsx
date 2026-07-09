@@ -102,13 +102,21 @@ function fmtRelative(iso: string | null): string {
 
 // function BarChart() { ... } // TODO: restore with real time-series data
 
-function UsageBar({ pct }: { pct: number }) {
+function UsageBar({ pct, label }: { pct: number; label: string }) {
   const fill = pct > 90 ? "#ef4444" : pct > 75 ? "#f59e0b" : "#555555";
+  const clamped = Math.min(pct, 100);
   return (
-    <div className={styles.usageBarTrack}>
+    <div
+      className={styles.usageBarTrack}
+      role="progressbar"
+      aria-valuenow={Math.round(clamped)}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`${label} usage: ${Math.round(clamped)}%`}
+    >
       <div
         className={styles.usageBarFill}
-        style={{ width: `${Math.min(pct, 100)}%`, background: fill }}
+        style={{ width: `${clamped}%`, background: fill }}
       />
     </div>
   );
@@ -690,7 +698,7 @@ const Dashboard = (): React.JSX.Element | null => {
                             {used.toLocaleString()} /{" "}
                             {key.limits.requestsPerMonth.toLocaleString()}
                           </span>
-                          <UsageBar pct={pct} />
+                          <UsageBar pct={pct} label={key.name} />
                         </div>
                         {key.tier !== "HOBBY" && (
                           <div className={styles.keyMenuWrap}>
