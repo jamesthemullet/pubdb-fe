@@ -102,7 +102,7 @@ function fmtRelative(iso: string | null): string {
 
 // function BarChart() { ... } // TODO: restore with real time-series data
 
-function UsageBar({ pct }: { pct: number }) {
+function UsageBar({ pct }: { pct: number }): React.JSX.Element {
   const fill = pct > 90 ? "#ef4444" : pct > 75 ? "#f59e0b" : "#555555";
   return (
     <div className={styles.usageBarTrack}>
@@ -148,7 +148,7 @@ const Dashboard = (): React.JSX.Element | null => {
   const forgotKeyModalRef = useRef<HTMLDivElement>(null);
   const forgotKeyModalTriggerRef = useRef<HTMLElement | null>(null);
 
-  function toggleEditTypes(pubId: string) {
+  function toggleEditTypes(pubId: string): void {
     setExpandedEdits((prev) => {
       const next = new Set(prev);
       next.has(pubId) ? next.delete(pubId) : next.add(pubId);
