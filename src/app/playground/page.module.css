@@ -35,11 +35,43 @@
   margin-bottom: 3.5rem;
 }
 
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-color);
+  letter-spacing: -0.015em;
+  margin-bottom: 0.875rem;
+}
+
 .sectionText {
   font-size: 0.875rem;
   color: #374151;
   line-height: 1.7;
   margin-bottom: 1rem;
+}
+
+.keyPickerRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.keyPickerLabel {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.keyPicker {
+  flex: 1;
+  max-width: 360px;
+  font-size: 0.8125rem;
+  font-family: var(--font-jetbrains-mono), monospace;
+  color: var(--text-color);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
 }
 
 .inlineLink {
