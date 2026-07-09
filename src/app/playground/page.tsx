@@ -91,7 +91,7 @@ export default function PlaygroundPage() {
 
   async function handleTryIt(path: string) {
     const proxyUrl = PROXY_ROUTES[path];
-    if (!proxyUrl) return;
+    if (!proxyUrl || !selectedKeyPrefix) return;
 
     setTryingPath(path);
     setResult(null);
@@ -100,7 +100,9 @@ export default function PlaygroundPage() {
     const token = localStorage.getItem("token");
     const start = performance.now();
     try {
-      const res = await fetch(proxyUrl, { headers: buildAuthHeaders(token) });
+      const res = await fetch(`${proxyUrl}?keyPrefix=${encodeURIComponent(selectedKeyPrefix)}`, {
+        headers: buildAuthHeaders(token),
+      });
       const latencyMs = Math.round(performance.now() - start);
       const body = await res.json().catch(() => null);
       setResult({ status: res.status, latencyMs, body });
@@ -160,8 +162,8 @@ export default function PlaygroundPage() {
                 </select>
               </div>
               <p className={styles.keyPickerNote}>
-                Requests run using your signed-in account, not the raw key secret — your key
-                is never sent to or stored in the browser.
+                Requests use a short-lived (5 minute) token scoped to this key — your
+                permanent key secret is never sent to or stored in the browser.
               </p>
             </>
           )}
@@ -185,7 +187,7 @@ export default function PlaygroundPage() {
                   <button
                     type="button"
                     className={styles.tryBtn}
-                    disabled={!isLive || tryingPath === path}
+                    disabled={!isLive || !selectedKeyPrefix || tryingPath === path}
                     onClick={() => handleTryIt(path)}
                   >
                     {tryingPath === path ? "Running…" : "Try it →"}

@@ -40,21 +40,33 @@ the browser. See "Risk notes" at the bottom for why.
 
 Pick `GET /pubs` first (simplest, no required params).
 
-**Auth mechanism change from the original plan:** the backend has no way to
-look up a raw key secret after creation — `GET /api/auth/dashboard` only
-ever returns `keyPrefix`/`name`/`tier`, and the only "re-fetch" path
-(`forgot-api-key`) actually rotates/invalidates the key, so it can't be
-used for this. Given that, `src/app/api/playground/pubs/route.ts` forwards
-the signed-in user's Bearer token instead (`forwardAuth: true,
-includeApiKey: false`, mirroring `pubs/route.ts`/`auth/me/route.ts`). The
-key picker from Stage 2 is informational — it shows which key/tier the
-account is on — rather than literally selecting a distinct secret per
-request. Still satisfies the core goal: no raw key ever reaches the
-browser.
+**Final auth mechanism (backend now supports this properly):** the
+public `/api/v1/*` endpoints strictly require `X-API-Key` — forwarding
+the user's Bearer session alone (an earlier attempt) 401s against the
+real backend, since Bearer and API-key auth are separate mechanisms
+there. A shared `TESTING_API_KEY` was considered and rejected — it
+doesn't belong in a customer-facing feature and shouldn't be relied on
+elsewhere either (follow-up needed for `beer-types`/`leaderboard`/`pubs`,
+which currently do use it).
+
+The backend now exposes `POST /auth/keys/:keyPrefix/playground-token`
+(Bearer-authenticated, ownership-checked, 30/hour/IP rate limited) which
+mints a short-lived (5 minute) scoped token — `pgt_<jwt>` — carrying that
+key's tier/permissions/quota. `src/app/api/playground/pubs/route.ts`:
+1. Forwards the user's Bearer token to mint a playground token for the
+   selected `keyPrefix`.
+2. Uses the returned `token` as `X-API-Key` on the real
+   `GET /api/v1/pubs` call.
+3. Returns that response to the client.
+
+The raw permanent key secret never leaves the backend, and the token
+itself is scoped, short-lived, and burns the *real* key's rate limit
+(handled backend-side, not duplicated here) — the key picker in the UI
+now genuinely selects which key's quota/tier a request uses.
+- Errors from token minting pass straight through: 401 (no/bad session),
+  404 (key not found or not owned — deliberately not distinguished, to
+  avoid leaking which prefixes exist), 429 (mint rate limit).
 - Render response as pretty-printed JSON, plus status code and latency.
-- Basic error states so far: network error, non-2xx status shown inline.
-  429/401-specific messaging can follow once real backend responses are
-  observed in Stage 4.
 
 ## Stage 4 — Remaining endpoints + query param inputs (PR 4)
 
@@ -87,7 +99,6 @@ If the raw key were sent to/used from the browser instead:
   not just "read access to public data."
 
 The proxy (Stage 3) avoids all of the above: the client never handles a
-raw key at all — it authenticates via the existing Bearer session, and
-the server forwards that to the public API (see the auth mechanism note
-under Stage 3 above for why this differs from the original per-key
-lookup idea).
+raw key or a shared testing key — it mints a short-lived, scoped token
+server-side via the backend's `playground-token` endpoint and uses that
+for the real request (see the Stage 3 section above).
