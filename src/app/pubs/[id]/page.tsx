@@ -10,10 +10,10 @@ import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import type { BeerGarden, Pub } from "@/types/pub";
 import addPubStyles from "../../add-pub/page.module.css";
+import CompletenessCard from "./components/CompletenessCard";
 import EditButton from "./components/EditButton";
 import PubDisplayView from "./components/PubDisplayView";
 import PubEditView from "./components/PubEditView";
@@ -80,10 +80,7 @@ export default function PubPage() {
   const handleEditClick = useCallback(() => {
     if (!pub) return;
     const base: Record<string, unknown> = { ...pub };
-    for (const { key } of PUB_AMENITY_FIELDS) {
-      if (base[key] === null) base[key] = false;
-    }
-    if (base.closedDown === null) base.closedDown = false;
+    if (typeof base.openingHours === "string") base.openingHours = undefined;
     setEditFields({
       ...(base as Partial<Pub>),
       beerGardens: pub.beerGardens ? [...pub.beerGardens] : [],
@@ -106,7 +103,7 @@ export default function PubPage() {
   const handleFieldChange = useCallback(
     (field: keyof Pub, value: Pub[keyof Pub]) => {
       setEditFields((prev) => ({ ...prev, [field]: value }));
-      if (["name", "city", "address", "postcode", "country"].includes(field as string)) {
+      if (["name", "city", "address", "postcode", "country"].includes(field)) {
         setFieldErrors((prev) => ({
           ...prev,
           [`${field}Error`]:
@@ -191,6 +188,7 @@ export default function PubPage() {
       for (const [key, value] of Object.entries(editFields)) {
         if (value === undefined || value === null) continue;
         if (key === "beerType") continue;
+        if (key === "openingHours" && typeof value === "string") continue;
         if (Array.isArray(value)) {
           if (key === "beerGardens") {
             body[key] = value.filter(isBeerGarden).map((g) => sanitizeBeerGarden(g));
@@ -203,7 +201,7 @@ export default function PubPage() {
       }
       body.id = pub.id;
       if (pub.createdAt) body.createdAt = pub.createdAt;
-      const res = await fetch(`${API_URL}/pubs/${pub.id}`, {
+      const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
         body: JSON.stringify(body),
@@ -243,6 +241,7 @@ export default function PubPage() {
         for (const [key, val] of Object.entries(merged)) {
           if (val === undefined || val === null) continue;
           if (key === "beerType") continue;
+          if (key === "openingHours" && typeof val === "string") continue;
           if (Array.isArray(val)) {
             if (key === "beerGardens") {
               body[key] = val.filter(isBeerGarden).map((g) => sanitizeBeerGarden(g));
@@ -255,7 +254,7 @@ export default function PubPage() {
         }
         body.id = pub.id;
         if (pub.createdAt) body.createdAt = pub.createdAt;
-        const res = await fetch(`${API_URL}/pubs/${pub.id}`, {
+        const res = await fetch(`/api/pubs/${pub.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
           body: JSON.stringify(body),
@@ -313,7 +312,7 @@ export default function PubPage() {
     if (!confirm(`Are you sure you want to delete "${pub.name}"? This cannot be undone.`)) return;
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/pubs/${pub.id}`, {
+      const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "DELETE",
         headers: buildAuthHeaders(token),
       });
@@ -432,6 +431,8 @@ export default function PubPage() {
         </div>
       )}
 
+      <CompletenessCard pub={pub} onEdit={isApproved ? handleEditClick : undefined} />
+
       {/* Two-column body */}
       <div className={styles.body}>
         {/* Left column */}
@@ -530,11 +531,15 @@ export default function PubPage() {
           {/* Code block */}
           <div className={styles.codePanel}>
             <div className={styles.codePanelHeader}>
-              <div className={styles.codeTabs}>
+              <div className={styles.codeTabs} role="tablist" aria-label="Code language">
                 {(["curl", "node", "python"] as CodeTab[]).map((t) => (
                   <button
                     key={t}
                     type="button"
+                    role="tab"
+                    aria-selected={codeTab === t}
+                    id={`pub-code-tab-${t}`}
+                    aria-controls="pub-code-panel"
                     className={`${styles.codeTab} ${codeTab === t ? styles.codeTabActive : ""}`}
                     onClick={() => setCodeTab(t)}
                   >
@@ -545,12 +550,18 @@ export default function PubPage() {
               <button
                 type="button"
                 className={styles.codeCopyBtn}
+                aria-label="Copy code"
                 onClick={() => copyText(codeByTab[codeTab], "code")}
               >
                 {copied === "code" ? "Copied!" : "Copy"}
               </button>
             </div>
-            <pre className={styles.codeBlock}><code>{codeByTab[codeTab]}</code></pre>
+            <pre
+              id="pub-code-panel"
+              role="tabpanel"
+              aria-labelledby={`pub-code-tab-${codeTab}`}
+              className={styles.codeBlock}
+            ><code>{codeByTab[codeTab]}</code></pre>
           </div>
 
           {/* Raw response */}
@@ -791,7 +802,7 @@ function GardenTab({ pub }: { pub: Pub }): ReactElement {
                 {g.imageUrl ? (
                   <Image
                     src={g.imageUrl}
-                    alt={g.name}
+                    alt={g.name || `Beer garden ${i + 1}`}
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
                     className={styles.gardenImage}

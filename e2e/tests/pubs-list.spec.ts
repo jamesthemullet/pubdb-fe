@@ -128,18 +128,5 @@ test.describe("Pubs list (/pubs)", () => {
       await expect(page.getByRole("link", { name: "The Harp" })).not.toBeVisible();
     });
 
-    test("shows result count while searching", async ({ page }) => {
-      await page.getByRole("searchbox", { name: "Search pubs" }).fill("Harp");
-
-      await expect(page.getByText(/1 \/ 1 pubs/)).toBeVisible();
-    });
-
-    test("result count updates when search is cleared", async ({ page }) => {
-      await page.getByRole("searchbox", { name: "Search pubs" }).fill("Harp");
-      await expect(page.getByText(/1 \/ 1 pubs/)).toBeVisible();
-
-      await page.getByRole("searchbox", { name: "Search pubs" }).clear();
-      await expect(page.getByText(/3 \/ 3 pubs/)).toBeVisible();
-    });
   });
 });

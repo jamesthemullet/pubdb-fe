@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import Pricing from "@/app/features/pricing/pricing";
 import { useAuth } from "@/hooks/useAuth";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import { getErrorMessage } from "@/lib/errors";
 import styles from "./page.module.css";
@@ -183,13 +182,13 @@ export default function BillingPage() {
     if (!user) return;
     const token = localStorage.getItem("token");
     const headers = buildAuthHeaders(token);
-    fetch(`${API_URL}/auth/dashboard`, { headers })
+    fetch("/api/auth/dashboard", { headers })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data) setDashboardData(data);
       })
       .catch(() => {});
-    fetch(`${API_URL}/payments/billing`, { headers })
+    fetch("/api/payments/billing", { headers })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data) setBillingData(data);
@@ -209,7 +208,7 @@ export default function BillingPage() {
       setCancelError(null);
       setCancelMessage(null);
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/payments/cancel-subscription`, {
+      const res = await fetch("/api/payments/cancel-subscription", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

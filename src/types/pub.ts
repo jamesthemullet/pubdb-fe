@@ -79,4 +79,5 @@ export type Pub = {
   beerTypes?: Array<BeerType | PubBeerType>;
   beerTypeIds?: string[];
   beerType?: BeerType | string | null;
+  distance?: number;
 };
