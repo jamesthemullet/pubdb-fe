@@ -12,10 +12,8 @@ export function GET(request: Request, { params }: { params: Promise<{ id: string
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }): Promise<Response> {
   const { id } = await params;
   const apiUrl = getServerApiUrl();
-  const apiKey = process.env.TESTING_API_KEY;
 
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (apiKey) headers["X-API-Key"] = apiKey;
   const authHeader = request.headers.get("authorization");
   if (authHeader) headers.Authorization = authHeader;
 
@@ -39,10 +37,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }): Promise<Response> {
   const { id } = await params;
   const apiUrl = getServerApiUrl();
-  const apiKey = process.env.TESTING_API_KEY;
 
   const headers: Record<string, string> = {};
-  if (apiKey) headers["X-API-Key"] = apiKey;
   const authHeader = request.headers.get("authorization");
   if (authHeader) headers.Authorization = authHeader;
 

@@ -1,14 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import type { ReactElement } from "react";
 import { Suspense, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
-import { API_URL } from "@/lib/apiConfig";
 import styles from "./page.module.css";
 
-function ResetPasswordForm() {
+function ResetPasswordForm(): ReactElement {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -24,7 +24,7 @@ function ResetPasswordForm() {
     }
   }, [token]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
 
     if (password !== confirmPassword) {
@@ -42,8 +42,7 @@ function ResetPasswordForm() {
     setMessage(null);
 
     try {
-      const apiUrl = API_URL;
-      const res = await fetch(`${apiUrl}/auth/reset-password`, {
+      const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -117,12 +116,12 @@ function ResetPasswordForm() {
       </form>
 
       {message && (
-        <div className={styles.success}>
+        <output className={styles.success}>
           <Typography>{message}</Typography>
           <div className={styles.successLink}>
             <Link href="/register">Go to Login</Link>
           </div>
-        </div>
+        </output>
       )}
 
       {error && (
@@ -140,9 +139,9 @@ function ResetPasswordForm() {
   );
 }
 
-export default function ResetPasswordPage() {
+export default function ResetPasswordPage(): ReactElement {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<output>Loading…</output>}>
       <ResetPasswordForm />
     </Suspense>
   );

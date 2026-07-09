@@ -7,7 +7,6 @@ import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
 import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-editor";
 import { PUB_AMENITY_FIELDS, type PubAmenityKey } from "@/constants/pubFormFields";
 import { useCountries } from "@/hooks/useCountries";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import type { OpeningHoursMap } from "@/types/pub";
 import styles from "./page.module.css";
@@ -135,7 +134,7 @@ export default function AddPubPage() {
       const token = localStorage.getItem("token");
       if (!token) { setUser(null); return; }
       try {
-        const res = await fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } });
         if (res.ok) { const d = await res.json(); setUser({ email: d.email, approved: d.approved }); }
         else setUser(null);
       } catch { setUser(null); }
@@ -165,7 +164,7 @@ export default function AddPubPage() {
         isIndependent,
         ...amenities,
       };
-      const res = await fetch(`${API_URL}/pubs`, {
+      const res = await fetch("/api/pubs", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
         body: JSON.stringify(body),
@@ -258,30 +257,32 @@ export default function AddPubPage() {
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. The Crown & Anchor"
               required
-              autoComplete="pub-name"
+              autoComplete="off"
             />
             <FieldErrorList errors={fieldErrors.name} className={styles.errorText} idPrefix="name" />
           </div>
 
           <div className={styles.fieldBlock}>
-            <p className={styles.fieldLabel}>Ownership</p>
-            <fieldset className={styles.ownershipToggle} aria-label="Ownership type">
-              <button
-                type="button"
-                className={`${styles.ownershipBtn} ${isIndependent ? styles.ownershipBtnActive : ""}`}
-                aria-pressed={isIndependent}
-                onClick={() => setIsIndependent(true)}
-              >
-                <IndependentIcon /> Independent
-              </button>
-              <button
-                type="button"
-                className={`${styles.ownershipBtn} ${!isIndependent ? styles.ownershipBtnActive : ""}`}
-                aria-pressed={!isIndependent}
-                onClick={() => setIsIndependent(false)}
-              >
-                <ChainIcon /> Chain
-              </button>
+            <fieldset className={styles.ownershipGroup}>
+              <legend className={styles.fieldLabel}>Ownership</legend>
+              <div className={styles.ownershipToggle}>
+                <button
+                  type="button"
+                  className={`${styles.ownershipBtn} ${isIndependent ? styles.ownershipBtnActive : ""}`}
+                  aria-pressed={isIndependent}
+                  onClick={() => setIsIndependent(true)}
+                >
+                  <IndependentIcon /> Independent
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.ownershipBtn} ${!isIndependent ? styles.ownershipBtnActive : ""}`}
+                  aria-pressed={!isIndependent}
+                  onClick={() => setIsIndependent(false)}
+                >
+                  <ChainIcon /> Chain
+                </button>
+              </div>
             </fieldset>
           </div>
 
@@ -321,7 +322,7 @@ export default function AddPubPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+44 20 7946 0958"
-                autoComplete="pub-phone"
+                autoComplete="off"
               />
               <FieldErrorList errors={fieldErrors.phone} className={styles.errorText} idPrefix="phone" />
             </div>
@@ -388,7 +389,7 @@ export default function AddPubPage() {
               onChange={(e) => setAddress(e.target.value)}
               placeholder="e.g. 44 Dean Street"
               required
-              autoComplete="pub-address"
+              autoComplete="off"
             />
             <FieldErrorList errors={fieldErrors.address} className={styles.errorText} idPrefix="address" />
           </div>
@@ -407,7 +408,7 @@ export default function AddPubPage() {
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="e.g. London"
                 required
-                autoComplete="pub-city"
+                autoComplete="off"
               />
               <FieldErrorList errors={fieldErrors.city} className={styles.errorText} idPrefix="city" />
             </div>
@@ -420,7 +421,7 @@ export default function AddPubPage() {
                 value={area}
                 onChange={(e) => setArea(e.target.value)}
                 placeholder="e.g. Soho"
-                autoComplete="pub-area"
+                autoComplete="off"
               />
             </div>
           </div>
@@ -439,7 +440,7 @@ export default function AddPubPage() {
                 onChange={(e) => setPostcode(e.target.value)}
                 placeholder="e.g. W1D 4PX"
                 required
-                autoComplete="pub-postcode"
+                autoComplete="off"
               />
               <FieldErrorList errors={fieldErrors.postcode} className={styles.errorText} idPrefix="postcode" />
             </div>

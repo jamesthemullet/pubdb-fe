@@ -132,7 +132,7 @@ describe("RegisterLoginPage", () => {
       await waitFor(() => expect(fetchSpy).toHaveBeenCalled());
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        "http://localhost:4000/auth/login",
+        "/api/auth/login",
         expect.objectContaining({
           body: JSON.stringify({ email: "me@example.com", password: "pass" }),
         })
@@ -193,7 +193,7 @@ describe("RegisterLoginPage", () => {
       );
 
       expect(fetchSpy).toHaveBeenCalledWith(
-        "http://localhost:4000/auth/register",
+        "/api/auth/register",
         expect.objectContaining({
           method: "POST",
           body: JSON.stringify({
