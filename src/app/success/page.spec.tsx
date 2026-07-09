@@ -172,7 +172,7 @@ describe("SuccessPage", () => {
 
 			await waitFor(() => {
 				expect(fetchSpy).toHaveBeenCalledWith(
-					"http://localhost:4000/payments/verify-session",
+					"/api/payments/verify-session",
 					expect.objectContaining({
 						method: "POST",
 						body: JSON.stringify({ sessionId: "cs_test_abc123" }),

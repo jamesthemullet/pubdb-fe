@@ -13,8 +13,8 @@ export default function Pubs() {
     async function fetchPubs() {
       try {
         const res = await fetch("/api/pubs");
-        const data = await res.json() as Pub[];
-        setPubs(data);
+        const raw: unknown = await res.json();
+        setPubs(Array.isArray(raw) ? (raw as Pub[]) : []);
       } catch (_error) {
       } finally {
         setLoading(false);

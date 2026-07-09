@@ -3,14 +3,14 @@ import { getServerApiUrl } from "@/lib/serverApiUrl";
 
 export function createApiProxyHandler(
   endpointPath: string,
-  options?: { forwardAuth?: boolean; resourceName?: string }
+  options?: { forwardAuth?: boolean; resourceName?: string; includeApiKey?: boolean }
 ): (request: Request) => Promise<NextResponse> {
   return async (request: Request) => {
     const apiUrl = getServerApiUrl();
     const apiKey = process.env.TESTING_API_KEY;
 
     const headers: Record<string, string> = {};
-    if (apiKey) headers["X-API-Key"] = apiKey;
+    if (apiKey && options?.includeApiKey !== false) headers["X-API-Key"] = apiKey;
     if (options?.forwardAuth) {
       const authHeader = request.headers.get("authorization");
       if (authHeader) {
@@ -35,15 +35,9 @@ export function createApiProxyHandler(
 
       return NextResponse.json(data, { status: response.status });
     } catch (error) {
-      return NextResponse.json(
-        {
-          error:
-            error instanceof Error
-              ? error.message
-              : `Failed to fetch ${options?.resourceName}`,
-        },
-        { status: 500 }
-      );
+      // biome-ignore lint/suspicious/noConsole: server-side error logging for the proxy
+      console.error(`Proxy error for ${endpointPath}:`, error);
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
   };
 }

@@ -50,7 +50,7 @@ export default function Home() {
           </p>
           <div className={styles.heroCtas}>
             <Link href="/register" className={styles.ctaPrimary}>
-              Get an API key →
+              Get an API key <span aria-hidden="true">→</span>
             </Link>
             <Link href="/pubs" className={styles.ctaSecondary}>
               Browse pubs
@@ -73,7 +73,7 @@ export default function Home() {
         ))}
       </div> */}
 
-      <div className={styles.contributeSection}>
+      <section className={styles.contributeSection} aria-label="Contribute to Pub DB">
         <div className={styles.contributeContent}>
           <h2 className={styles.contributeHeading}>Most pubs are in — but the details aren&apos;t.</h2>
           <p className={styles.contributeText}>
@@ -82,18 +82,18 @@ export default function Home() {
           </p>
           <div className={styles.contributeCtas}>
             <Link href="/pubs" className={styles.ctaPrimary}>
-              Find your local →
+              Find your local <span aria-hidden="true">→</span>
             </Link>
             <Link href="/add-pub" className={styles.ctaSecondary}>
               Add a missing pub
             </Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className={styles.pricingSection}>
+      <section className={styles.pricingSection} aria-label="Pricing">
         <Pricing />
-      </div>
+      </section>
     </div>
   );
 }

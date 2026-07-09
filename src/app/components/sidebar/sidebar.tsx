@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./sidebar.module.css";
 
@@ -56,7 +55,7 @@ export default function Sidebar() {
   useEffect(() => {
     if (!user) { setPlanData(null); return; }
     const token = localStorage.getItem("token");
-    fetch(`${API_URL}/auth/dashboard`, { headers: buildAuthHeaders(token) })
+    fetch("/api/auth/dashboard", { headers: buildAuthHeaders(token) })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data: { apiKeys: ApiKey[] }) => {
         const keys = data.apiKeys ?? [];
@@ -70,11 +69,11 @@ export default function Sidebar() {
       .catch(() => setPlanData(null));
   }, [user]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
     window.dispatchEvent(new Event("authChanged"));
     setMenuOpen(false);
-  };
+  }, []);
 
   const userInitials = user?.email.slice(0, 2).toUpperCase() ?? null;
 
@@ -104,10 +103,10 @@ export default function Sidebar() {
       )}
 
       <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ""}`}>
-        <div className={styles.logoRow}>
+        <Link href="/" className={styles.logoRow} onClick={() => setMenuOpen(false)}>
           <div className={styles.logoIcon}>P</div>
           <span className={styles.logoText}>Pub DB</span>
-        </div>
+        </Link>
 
         <div className={styles.searchWrap}>
           <svg className={styles.searchIcon} width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -131,13 +130,14 @@ export default function Sidebar() {
         </div>
 
         <nav aria-label="Workspace navigation">
-          <p className={styles.navSection}>WORKSPACE</p>
+          <span className={styles.navSection} aria-hidden="true">WORKSPACE</span>
           <ul className={styles.navList}>
             {WORKSPACE_LINKS.map(({ href, label, badge }) => (
               <li key={label}>
                 <Link
                   href={href}
                   className={`${styles.navItem} ${pathname === href ? styles.navItemActive : ""}`}
+                  aria-current={pathname === href ? "page" : undefined}
                   onClick={() => setMenuOpen(false)}
                 >
                   <span className={styles.navLabel}>{label}</span>
@@ -149,13 +149,14 @@ export default function Sidebar() {
         </nav>
 
         <nav aria-label="Account navigation">
-          <p className={styles.navSection}>ACCOUNT</p>
+          <span className={styles.navSection} aria-hidden="true">ACCOUNT</span>
           <ul className={styles.navList}>
             {ACCOUNT_LINKS.map(({ href, label }) => (
               <li key={label}>
                 <Link
                   href={href}
                   className={`${styles.navItem} ${pathname === href ? styles.navItemActive : ""}`}
+                  aria-current={pathname === href ? "page" : undefined}
                   onClick={() => setMenuOpen(false)}
                 >
                   <span className={styles.navLabel}>{label}</span>
@@ -167,6 +168,7 @@ export default function Sidebar() {
                 <Link
                   href="/register"
                   className={`${styles.navItem} ${pathname === "/register" ? styles.navItemActive : ""}`}
+                  aria-current={pathname === "/register" ? "page" : undefined}
                   onClick={() => setMenuOpen(false)}
                 >
                   <span className={styles.navLabel}>Register / Log in</span>
@@ -194,7 +196,14 @@ export default function Sidebar() {
               <span className={styles.planName}>{planData.planName}</span>
               <span className={styles.planPct}>{planData.pct}% used</span>
             </div>
-            <div className={styles.planBar}>
+            <div
+              className={styles.planBar}
+              role="progressbar"
+              aria-valuenow={planData.pct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Plan usage"
+            >
               <div className={styles.planBarFill} style={{ width: `${planData.pct}%` }} />
             </div>
             <p className={styles.planRequests}>

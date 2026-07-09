@@ -4,7 +4,6 @@ import { useState } from "react";
 import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
-import { API_URL } from "@/lib/apiConfig";
 import styles from "./page.module.css";
 
 export default function ForgotPasswordPage() {
@@ -20,8 +19,7 @@ export default function ForgotPasswordPage() {
     setMessage(null);
 
     try {
-      const apiUrl = API_URL;
-      const res = await fetch(`${apiUrl}/auth/forgot-password`, {
+      const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
