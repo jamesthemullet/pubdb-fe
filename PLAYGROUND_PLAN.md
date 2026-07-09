@@ -70,11 +70,26 @@ now genuinely selects which key's quota/tier a request uses.
 
 ## Stage 4 — Remaining endpoints + query param inputs (PR 4)
 
-- Extend to `/pubs/:id`, `/pubs/near` (lat/lng/radius inputs), `/beer-types`,
-  `/contributors/leaderboard`, `/stats`.
-- Generic form-builder per endpoint (path params, query params) instead of
-  bespoke forms per endpoint, to keep this maintainable.
-- Copy-as-curl button next to each response (reuse `CopyButton`).
+Done. Extended to `/pubs/:id`, `/pubs/near` (lat/lng/radius inputs),
+`/beer-types`, `/contributors/leaderboard`, `/stats`.
+
+- Backend proxying is now generic: `src/app/api/playground/utils/playgroundProxyHandler.ts`
+  holds the shared token-mint-then-forward logic (previously duplicated
+  in the Stage 3 `pubs/route.ts`); each endpoint route
+  (`pubs/route.ts`, `pubs/[id]/route.ts`, `pubs/near/route.ts`,
+  `beer-types/route.ts`, `leaderboard/route.ts`, `stats/route.ts`) just
+  supplies a function that builds its upstream path from the forwarded
+  query params.
+- Frontend is a data-driven form-builder: each `ENDPOINTS` entry declares
+  optional `pathParams`/`queryParams` (name, label, required, placeholder).
+  Endpoints with no params send immediately on "Try it"; endpoints with
+  params expand an inline form ("Configure →" / "Send request →") instead
+  of having bespoke per-endpoint JSX.
+- Response panel now shows the resolved request line (method + public
+  path) and has two copy actions: "Copy as curl" (reconstructs the public
+  `https://api.thepubdb.com/...` URL with a `X-API-Key: $PUBDB_KEY`
+  placeholder header, not the actual scoped token) and the existing
+  JSON-body copy.
 
 ## Stage 5 — Polish (PR 5, optional/nice-to-have)
 
