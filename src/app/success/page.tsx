@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
 import type { ReactElement } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Typography from "@/app/components/typography/typography";
 import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";

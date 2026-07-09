@@ -145,7 +145,6 @@ const Dashboard = (): React.JSX.Element | null => {
   const [createKeyError, setCreateKeyError] = useState<string | null>(null);
   const forgotKeyModalRef = useRef<HTMLDivElement>(null);
   const forgotKeyModalTriggerRef = useRef<HTMLElement | null>(null);
-  const createKeyModalRef = useRef<HTMLDivElement>(null);
 
   function toggleEditTypes(pubId: string): void {
     setExpandedEdits((prev) => {

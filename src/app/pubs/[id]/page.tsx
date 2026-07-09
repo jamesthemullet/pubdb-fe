@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
 import type { ReactElement } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Typography from "@/app/components/typography/typography";
 import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
