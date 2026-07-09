@@ -40,6 +40,8 @@ type TryResult = {
   status: number;
   latencyMs: number;
   body: unknown;
+  rateLimitRemaining: string | null;
+  rateLimitLimit: string | null;
 };
 
 const ENDPOINTS: EndpointDef[] = [
@@ -150,6 +152,8 @@ export default function PlaygroundPage() {
   const [tryingPath, setTryingPath] = useState<string | null>(null);
   const [result, setResult] = useState<TryResult | null>(null);
   const [resultError, setResultError] = useState<string | null>(null);
+  const [history, setHistory] = useState<TryResult[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -202,13 +206,17 @@ export default function PlaygroundPage() {
       const res = await fetch(proxyUrl, { headers: buildAuthHeaders(token) });
       const latencyMs = Math.round(performance.now() - start);
       const body = await res.json().catch(() => null);
-      setResult({
+      const entry: TryResult = {
         requestLabel: `${endpoint.method} ${publicPath}`,
         publicUrl: `https://api.thepubdb.com${publicPath}`,
         status: res.status,
         latencyMs,
         body,
-      });
+        rateLimitRemaining: res.headers.get("x-ratelimit-remaining"),
+        rateLimitLimit: res.headers.get("x-ratelimit-limit"),
+      };
+      setResult(entry);
+      setHistory((prev) => [entry, ...prev].slice(0, 5));
     } catch {
       setResultError("Network error — couldn't reach the API.");
     } finally {
@@ -373,6 +381,12 @@ export default function PlaygroundPage() {
                   {result.status}
                 </span>
                 <span className={styles.resultLatency}>{result.latencyMs}ms</span>
+                {result.rateLimitRemaining && (
+                  <span className={styles.resultQuota}>
+                    {result.rateLimitRemaining}
+                    {result.rateLimitLimit ? `/${result.rateLimitLimit}` : ""} left
+                  </span>
+                )}
                 <CopyButton
                   text={`curl "${result.publicUrl}" \\\n  -H "X-API-Key: $PUBDB_KEY"`}
                   label="Copy as curl"
@@ -382,6 +396,41 @@ export default function PlaygroundPage() {
               <pre className={styles.resultPre}>
                 <code>{JSON.stringify(result.body, null, 2)}</code>
               </pre>
+            </div>
+          )}
+
+          {history.length > 0 && (
+            <div className={styles.historyBlock}>
+              <button
+                type="button"
+                className={styles.historyToggle}
+                onClick={() => setHistoryOpen((prev) => !prev)}
+              >
+                {historyOpen ? "Hide" : "Show"} history ({history.length})
+              </button>
+              {historyOpen && (
+                <div className={styles.historyList}>
+                  {history.map((entry, i) => (
+                    <button
+                      // biome-ignore lint/suspicious/noArrayIndexKey: entries can repeat the same request
+                      key={i}
+                      type="button"
+                      className={styles.historyRow}
+                      onClick={() => setResult(entry)}
+                    >
+                      <span
+                        className={`${styles.resultStatus} ${
+                          entry.status < 400 ? styles.resultStatusOk : styles.resultStatusError
+                        }`}
+                      >
+                        {entry.status}
+                      </span>
+                      <span className={styles.historyRequestLine}>{entry.requestLabel}</span>
+                      <span className={styles.resultLatency}>{entry.latencyMs}ms</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>

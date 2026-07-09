@@ -3,6 +3,8 @@ import { getServerApiUrl } from "@/lib/serverApiUrl";
 
 type PlaygroundTokenResponse = { token: string; tier?: string; expiresIn?: number };
 
+const RATE_LIMIT_HEADERS = ["x-ratelimit-remaining", "x-ratelimit-limit", "x-ratelimit-reset"];
+
 function isPlaygroundTokenResponse(value: unknown): value is PlaygroundTokenResponse {
   return (
     typeof value === "object" &&
@@ -56,7 +58,14 @@ export function createPlaygroundProxyHandler(
         cache: "no-store",
       });
       const data: unknown = await response.json().catch(() => null);
-      return NextResponse.json(data, { status: response.status });
+
+      const headers: Record<string, string> = {};
+      for (const header of RATE_LIMIT_HEADERS) {
+        const value = response.headers.get(header);
+        if (value) headers[header] = value;
+      }
+
+      return NextResponse.json(data, { status: response.status, headers });
     } catch {
       return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }

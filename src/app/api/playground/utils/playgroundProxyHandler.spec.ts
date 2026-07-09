@@ -72,6 +72,33 @@ describe("createPlaygroundProxyHandler", () => {
     await expect(response.json()).resolves.toEqual({ success: true, data: [{ id: "pub_1" }] });
   });
 
+  it("forwards rate-limit headers from the upstream response", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse({ token: "pgt_abc123" }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ success: true }), {
+          status: 200,
+          headers: {
+            "content-type": "application/json",
+            "x-ratelimit-remaining": "42",
+            "x-ratelimit-limit": "100",
+            "x-ratelimit-reset": "1700000000",
+          },
+        })
+      );
+
+    const handler = createPlaygroundProxyHandler(() => "/api/v1/things");
+    const request = new Request("http://localhost/api/playground/things?keyPrefix=pk_dev_abc", {
+      headers: { authorization: "Bearer user-token" },
+    });
+
+    const response = await handler(request);
+
+    expect(response.headers.get("x-ratelimit-remaining")).toBe("42");
+    expect(response.headers.get("x-ratelimit-limit")).toBe("100");
+    expect(response.headers.get("x-ratelimit-reset")).toBe("1700000000");
+  });
+
   it("passes through the upstream error when minting the token fails", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
       jsonResponse({ error: "API key not found" }, 404)
