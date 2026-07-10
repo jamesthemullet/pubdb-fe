@@ -20,6 +20,7 @@ type DashboardData = {
 type ParamSpec = {
   name: string;
   label: string;
+  kind: "path" | "query";
   required?: boolean;
   placeholder?: string;
   options?: string[];
@@ -30,8 +31,7 @@ type EndpointDef = {
   path: string;
   description: string;
   proxyUrl: string;
-  pathParams?: ParamSpec[];
-  queryParams?: ParamSpec[];
+  params: ParamSpec[];
 };
 
 type TryResult = {
@@ -50,9 +50,9 @@ const ENDPOINTS: EndpointDef[] = [
     path: "/api/v1/pubs",
     description: "List all pubs (paginated)",
     proxyUrl: "/api/playground/pubs",
-    queryParams: [
-      { name: "page", label: "page", placeholder: "1" },
-      { name: "limit", label: "limit", options: ["10", "25", "50"] },
+    params: [
+      { name: "page", label: "page", kind: "query", placeholder: "1" },
+      { name: "limit", label: "limit", kind: "query", options: ["10", "25", "50"] },
     ],
   },
   {
@@ -60,17 +60,17 @@ const ENDPOINTS: EndpointDef[] = [
     path: "/api/v1/pubs/:id",
     description: "Get a single pub by ID",
     proxyUrl: "/api/playground/pubs",
-    pathParams: [{ name: "id", label: "id", required: true, placeholder: "pub_0f1a3b" }],
+    params: [{ name: "id", label: "id", kind: "path", required: true, placeholder: "pub_0f1a3b" }],
   },
   {
     method: "GET",
     path: "/api/v1/pubs/near",
     description: "Geo search — Developer tier+",
     proxyUrl: "/api/playground/pubs/near",
-    queryParams: [
-      { name: "lat", label: "lat", required: true, placeholder: "51.5074" },
-      { name: "lng", label: "lng", required: true, placeholder: "-0.1278" },
-      { name: "radius", label: "radius (km)", placeholder: "5" },
+    params: [
+      { name: "lat", label: "lat", kind: "query", required: true, placeholder: "51.5074" },
+      { name: "lng", label: "lng", kind: "query", required: true, placeholder: "-0.1278" },
+      { name: "radius", label: "radius (km)", kind: "query", placeholder: "5" },
     ],
   },
   {
@@ -78,18 +78,21 @@ const ENDPOINTS: EndpointDef[] = [
     path: "/api/v1/beer-types",
     description: "List tracked beer types",
     proxyUrl: "/api/playground/beer-types",
+    params: [],
   },
   {
     method: "GET",
     path: "/api/v1/contributors/leaderboard",
     description: "Contributor leaderboard",
     proxyUrl: "/api/playground/leaderboard",
+    params: [],
   },
   {
     method: "GET",
     path: "/api/v1/stats",
     description: "Database stats — Developer tier+",
     proxyUrl: "/api/playground/stats",
+    params: [],
   },
 ];
 
@@ -117,29 +120,52 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
   );
 }
 
-function buildProxyRequest(
-  endpoint: EndpointDef,
-  values: Record<string, string>,
-  keyPrefix: string
-): { proxyUrl: string; publicPath: string } {
-  const pathSegment = (endpoint.pathParams ?? [])
+function defaultParamValues(endpoint: EndpointDef): Record<string, string> {
+  const defaults: Record<string, string> = {};
+  for (const p of endpoint.params) {
+    if (p.options?.length) defaults[p.name] = p.options[0];
+  }
+  return defaults;
+}
+
+function buildPublicPath(endpoint: EndpointDef, values: Record<string, string>): string {
+  const pathSegment = endpoint.params
+    .filter((p) => p.kind === "path")
     .map((p) => `/${encodeURIComponent(values[p.name] ?? "")}`)
     .join("");
   const basePath = endpoint.path.replace(/\/:\w+/g, "");
 
   const queryParams = new URLSearchParams();
-  for (const q of endpoint.queryParams ?? []) {
+  for (const q of endpoint.params.filter((p) => p.kind === "query")) {
     const value = values[q.name]?.trim();
     if (value) queryParams.set(q.name, value);
   }
-
   const publicQuery = queryParams.toString();
-  const publicPath = `${basePath}${pathSegment}${publicQuery ? `?${publicQuery}` : ""}`;
 
+  return `${basePath}${pathSegment}${publicQuery ? `?${publicQuery}` : ""}`;
+}
+
+function buildProxyRequest(
+  endpoint: EndpointDef,
+  values: Record<string, string>,
+  keyPrefix: string
+): { proxyUrl: string; publicPath: string } {
+  const pathSegment = endpoint.params
+    .filter((p) => p.kind === "path")
+    .map((p) => `/${encodeURIComponent(values[p.name] ?? "")}`)
+    .join("");
+
+  const queryParams = new URLSearchParams();
+  for (const q of endpoint.params.filter((p) => p.kind === "query")) {
+    const value = values[q.name]?.trim();
+    if (value) queryParams.set(q.name, value);
+  }
   queryParams.set("keyPrefix", keyPrefix);
-  const proxyUrl = `${endpoint.proxyUrl}${pathSegment}?${queryParams.toString()}`;
 
-  return { proxyUrl, publicPath };
+  return {
+    proxyUrl: `${endpoint.proxyUrl}${pathSegment}?${queryParams.toString()}`,
+    publicPath: buildPublicPath(endpoint, values),
+  };
 }
 
 export default function PlaygroundPage() {
@@ -147,9 +173,11 @@ export default function PlaygroundPage() {
   const [apiKeys, setApiKeys] = useState<ApiKey[] | null>(null);
   const [keysError, setKeysError] = useState<string | null>(null);
   const [selectedKeyPrefix, setSelectedKeyPrefix] = useState<string>("");
-  const [expandedPath, setExpandedPath] = useState<string | null>(null);
-  const [paramValues, setParamValues] = useState<Record<string, string>>({});
-  const [tryingPath, setTryingPath] = useState<string | null>(null);
+  const [activeEndpoint, setActiveEndpoint] = useState<EndpointDef>(ENDPOINTS[0]);
+  const [paramValues, setParamValues] = useState<Record<string, string>>(() =>
+    defaultParamValues(ENDPOINTS[0])
+  );
+  const [sending, setSending] = useState(false);
   const [result, setResult] = useState<TryResult | null>(null);
   const [resultError, setResultError] = useState<string | null>(null);
   const [history, setHistory] = useState<TryResult[]>([]);
@@ -173,33 +201,27 @@ export default function PlaygroundPage() {
     return <AuthGate context="Playground" />;
   }
 
-  function toggleExpanded(endpoint: EndpointDef) {
-    const hasParams = (endpoint.pathParams?.length ?? 0) > 0 || (endpoint.queryParams?.length ?? 0) > 0;
-    if (!hasParams) {
-      void handleSend(endpoint, {});
-      return;
-    }
-    setExpandedPath((prev) => (prev === endpoint.path ? null : endpoint.path));
-    const allParams = [...(endpoint.pathParams ?? []), ...(endpoint.queryParams ?? [])];
-    const defaults: Record<string, string> = {};
-    for (const p of allParams) {
-      if (p.options?.length) defaults[p.name] = p.options[0];
-    }
-    setParamValues(defaults);
+  function selectEndpoint(endpoint: EndpointDef) {
+    setActiveEndpoint(endpoint);
+    setParamValues(defaultParamValues(endpoint));
+    setResult(null);
+    setResultError(null);
   }
 
-  async function handleSend(endpoint: EndpointDef, values: Record<string, string>) {
-    if (!selectedKeyPrefix) return;
-    const missingRequired = [...(endpoint.pathParams ?? []), ...(endpoint.queryParams ?? [])].some(
-      (p) => p.required && !values[p.name]?.trim()
-    );
-    if (missingRequired) return;
+  const missingRequired = activeEndpoint.params.some(
+    (p) => p.required && !paramValues[p.name]?.trim()
+  );
+  const canSend = !!selectedKeyPrefix && !missingRequired && !sending;
+  const curlText = `curl "https://api.thepubdb.com${buildPublicPath(activeEndpoint, paramValues)}" \\\n  -H "X-API-Key: $PUBDB_KEY"`;
 
-    setTryingPath(endpoint.path);
+  async function handleSend() {
+    if (!canSend) return;
+
+    setSending(true);
     setResult(null);
     setResultError(null);
 
-    const { proxyUrl, publicPath } = buildProxyRequest(endpoint, values, selectedKeyPrefix);
+    const { proxyUrl, publicPath } = buildProxyRequest(activeEndpoint, paramValues, selectedKeyPrefix);
     const token = localStorage.getItem("token");
     const start = performance.now();
     try {
@@ -207,7 +229,7 @@ export default function PlaygroundPage() {
       const latencyMs = Math.round(performance.now() - start);
       const body = await res.json().catch(() => null);
       const entry: TryResult = {
-        requestLabel: `${endpoint.method} ${publicPath}`,
+        requestLabel: `${activeEndpoint.method} ${publicPath}`,
         publicUrl: `https://api.thepubdb.com${publicPath}`,
         status: res.status,
         latencyMs,
@@ -220,47 +242,68 @@ export default function PlaygroundPage() {
     } catch {
       setResultError("Network error — couldn't reach the API.");
     } finally {
-      setTryingPath(null);
+      setSending(false);
     }
   }
 
   return (
     <div className={styles.page}>
-      <div className={styles.content}>
-        <div className={styles.contentHeader}>
-          <div>
+      <div className={styles.contentHeader}>
+        <div>
+          <div className={styles.titleRow}>
             <h1 className={styles.pageTitle}>Playground</h1>
-            <p className={styles.pageSubtitle}>
-              Try live requests against the Pub DB API using one of your own API keys.
-            </p>
+            <span className={styles.interactiveBadge}>interactive</span>
           </div>
+          <p className={styles.pageSubtitle}>
+            Build and test requests against the live Pub DB API using one of your own API
+            keys.
+          </p>
         </div>
+        <div className={styles.headerActions}>
+          <a href="/docs" className={styles.headerBtn}>
+            View docs
+          </a>
+          <CopyButton text={curlText} label="Copy as cURL" />
+        </div>
+      </div>
 
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>API key</h2>
+      <div className={styles.layoutGrid}>
+        <div className={styles.leftCol}>
+          <div className={styles.requestBar}>
+            <div className={styles.requestBarMethod}>
+              <MethodBadge method={activeEndpoint.method} />
+              <code className={styles.requestBarPath}>{activeEndpoint.path}</code>
+            </div>
+            <code className={styles.requestBarUrl}>
+              https://api.thepubdb.com{buildPublicPath(activeEndpoint, paramValues)}
+            </code>
+            <button type="button" className={styles.sendBtn} disabled={!canSend} onClick={handleSend}>
+              {sending ? "Sending…" : "Send"}
+            </button>
+          </div>
 
-          {keysError && <p className={styles.sectionText}>{keysError}</p>}
+          <div className={styles.card}>
+            <div className={styles.cardHeaderRow}>
+              <span className={styles.cardHeaderLabel}>Authorization</span>
+              <span className={styles.authBadge}>API Key</span>
+            </div>
 
-          {apiKeys === null && !keysError && (
-            <p className={styles.sectionText}>Loading your API keys…</p>
-          )}
-
-          {apiKeys?.length === 0 && (
-            <p className={styles.sectionText}>
-              You don&apos;t have an API key yet. Create one from the{" "}
-              <a href="/profile" className={styles.inlineLink}>dashboard</a> to use the
-              playground.
-            </p>
-          )}
-
-          {apiKeys && apiKeys.length > 0 && (
-            <>
-              <div className={styles.keyPickerRow}>
-                <label className={styles.keyPickerLabel} htmlFor="playground-key">
-                  Using key
-                </label>
+            {keysError && <p className={styles.sectionText}>{keysError}</p>}
+            {apiKeys === null && !keysError && (
+              <p className={styles.sectionText}>Loading your API keys…</p>
+            )}
+            {apiKeys?.length === 0 && (
+              <p className={styles.sectionText}>
+                You don&apos;t have an API key yet. Create one from the{" "}
+                <a href="/profile" className={styles.inlineLink}>dashboard</a> to use the
+                playground.
+              </p>
+            )}
+            {apiKeys && apiKeys.length > 0 && (
+              <>
+                <span className={styles.fieldLabel}>API KEY</span>
                 <select
-                  id="playground-key"
+                  aria-label="Using key"
                   className={styles.keyPicker}
                   value={selectedKeyPrefix}
                   onChange={(e) => setSelectedKeyPrefix(e.target.value)}
@@ -271,101 +314,95 @@ export default function PlaygroundPage() {
                     </option>
                   ))}
                 </select>
-              </div>
-              <p className={styles.keyPickerNote}>
-                Requests use a short-lived (5 minute) token scoped to this key — your
-                permanent key secret is never sent to or stored in the browser.
-              </p>
-            </>
-          )}
-        </section>
-
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Endpoints</h2>
-          <p className={styles.sectionText}>
-            Pick an endpoint below to build a request and see a live response. Manage your
-            keys from the <a href="/profile" className={styles.inlineLink}>dashboard</a>.
-          </p>
-
-          <div className={styles.endpointList}>
-            {ENDPOINTS.map((endpoint) => {
-              const allParams = [...(endpoint.pathParams ?? []), ...(endpoint.queryParams ?? [])];
-              const hasParams = allParams.length > 0;
-              const isExpanded = expandedPath === endpoint.path;
-              const isRunning = tryingPath === endpoint.path;
-              const missingRequired = allParams.some((p) => p.required && !paramValues[p.name]?.trim());
-
-              return (
-                <div key={endpoint.path} className={styles.endpointGroup}>
-                  <div className={styles.endpointRow}>
-                    <MethodBadge method={endpoint.method} />
-                    <code className={styles.endpointPath}>{endpoint.path}</code>
-                    <span className={styles.endpointDesc}>{endpoint.description}</span>
-                    <button
-                      type="button"
-                      className={styles.tryBtn}
-                      disabled={!selectedKeyPrefix || isRunning}
-                      onClick={() => toggleExpanded(endpoint)}
-                    >
-                      {isRunning ? "Running…" : hasParams ? (isExpanded ? "Close" : "Configure →") : "Try it →"}
-                    </button>
-                  </div>
-
-                  {isExpanded && (
-                    <div className={styles.paramForm}>
-                      {allParams.map((p) => (
-                        <div key={p.name} className={styles.paramField}>
-                          <label className={styles.paramLabel} htmlFor={`param-${endpoint.path}-${p.name}`}>
-                            {p.label}
-                            {p.required && <span className={styles.requiredMark}> *</span>}
-                          </label>
-                          {p.options ? (
-                            <select
-                              id={`param-${endpoint.path}-${p.name}`}
-                              className={styles.paramInput}
-                              value={paramValues[p.name] ?? p.options[0]}
-                              onChange={(e) =>
-                                setParamValues((prev) => ({ ...prev, [p.name]: e.target.value }))
-                              }
-                            >
-                              {p.options.map((opt) => (
-                                <option key={opt} value={opt}>
-                                  {opt}
-                                </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <input
-                              id={`param-${endpoint.path}-${p.name}`}
-                              className={styles.paramInput}
-                              type="text"
-                              placeholder={p.placeholder}
-                              value={paramValues[p.name] ?? ""}
-                              onChange={(e) =>
-                                setParamValues((prev) => ({ ...prev, [p.name]: e.target.value }))
-                              }
-                            />
-                          )}
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        className={styles.sendBtn}
-                        disabled={isRunning || !selectedKeyPrefix || missingRequired}
-                        onClick={() => handleSend(endpoint, paramValues)}
-                      >
-                        {isRunning ? "Sending…" : "Send request →"}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                <p className={styles.keyPickerNote}>
+                  Requests use a short-lived (5 minute) token scoped to this key — your
+                  permanent key secret is never sent to or stored in the browser.
+                </p>
+              </>
+            )}
           </div>
 
+          <div className={styles.card}>
+            <div className={styles.cardHeaderRow}>
+              <span className={styles.cardHeaderLabel}>
+                Parameters <span className={styles.cardHeaderCount}>{activeEndpoint.params.length} params</span>
+              </span>
+            </div>
+            {activeEndpoint.params.length === 0 ? (
+              <p className={styles.sectionText}>This endpoint takes no parameters.</p>
+            ) : (
+              <div className={styles.paramTable}>
+                {activeEndpoint.params.map((p) => (
+                  <div key={p.name} className={styles.paramTableRow}>
+                    <span className={styles.paramName}>
+                      {p.label}
+                      {p.required && <span className={styles.requiredMark}> *</span>}
+                    </span>
+                    {p.options ? (
+                      <select
+                        aria-label={p.label}
+                        className={styles.paramInput}
+                        value={paramValues[p.name] ?? p.options[0]}
+                        onChange={(e) => setParamValues((prev) => ({ ...prev, [p.name]: e.target.value }))}
+                      >
+                        {p.options.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        aria-label={p.label}
+                        className={styles.paramInput}
+                        type="text"
+                        placeholder={p.placeholder}
+                        value={paramValues[p.name] ?? ""}
+                        onChange={(e) => setParamValues((prev) => ({ ...prev, [p.name]: e.target.value }))}
+                      />
+                    )}
+                    <span className={styles.paramKindBadge}>{p.kind.toUpperCase()}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className={styles.card}>
+            <div className={styles.cardHeaderRow}>
+              <span className={styles.cardHeaderLabel}>Endpoints</span>
+            </div>
+            <div className={styles.endpointList}>
+              {ENDPOINTS.map((endpoint) => (
+                <button
+                  key={endpoint.path}
+                  type="button"
+                  className={`${styles.endpointRow} ${
+                    activeEndpoint.path === endpoint.path ? styles.endpointRowActive : ""
+                  }`}
+                  onClick={() => selectEndpoint(endpoint)}
+                >
+                  <MethodBadge method={endpoint.method} />
+                  <code className={styles.endpointPath}>{endpoint.path}</code>
+                  <span className={styles.endpointDesc}>{endpoint.description}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.rightCol}>
           {resultError && (
             <div role="alert" className={styles.resultError}>
               {resultError}
+            </div>
+          )}
+
+          {!result && !resultError && (
+            <div className={styles.emptyResponse}>
+              <span className={styles.emptyResponseIcon} aria-hidden="true">⚡</span>
+              <p className={styles.emptyResponseTitle}>No response yet</p>
+              <p className={styles.emptyResponseText}>Select an endpoint and click Send to make a request.</p>
             </div>
           )}
 
@@ -387,10 +424,6 @@ export default function PlaygroundPage() {
                     {result.rateLimitLimit ? `/${result.rateLimitLimit}` : ""} left
                   </span>
                 )}
-                <CopyButton
-                  text={`curl "${result.publicUrl}" \\\n  -H "X-API-Key: $PUBDB_KEY"`}
-                  label="Copy as curl"
-                />
                 <CopyButton text={JSON.stringify(result.body, null, 2)} />
               </div>
               <pre className={styles.resultPre}>
@@ -433,7 +466,7 @@ export default function PlaygroundPage() {
               )}
             </div>
           )}
-        </section>
+        </div>
       </div>
     </div>
   );
