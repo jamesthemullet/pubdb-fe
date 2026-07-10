@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import type { LeaderboardData, LeaderboardEntry } from "@/lib/normalizeLeaderboard";
 import styles from "./page.module.css";
@@ -138,10 +138,14 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
   const entries = data.leaderboard;
 
   const emailPrefix = user?.email?.split("@")[0]?.toLowerCase() ?? "";
-  const yourEntry = entries.find(
-    (e) =>
-      e.username.toLowerCase() === emailPrefix ||
-      nameInitials(e.displayName ?? "").toLowerCase() === emailPrefix
+  const yourEntry = useMemo(
+    () =>
+      entries.find(
+        (e) =>
+          e.username.toLowerCase() === emailPrefix ||
+          nameInitials(e.displayName ?? "").toLowerCase() === emailPrefix
+      ),
+    [entries, emailPrefix]
   );
 
   const hasPodium = entries.length >= 3;
@@ -149,10 +153,14 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
     ? (entries.slice(0, 3) as [LeaderboardEntry, LeaderboardEntry, LeaderboardEntry])
     : null;
 
-  const sortedEntries = [...entries].sort((a, b) =>
-    sortDir === "desc"
-      ? b.totalContributions - a.totalContributions
-      : a.totalContributions - b.totalContributions
+  const sortedEntries = useMemo(
+    () =>
+      [...entries].sort((a, b) =>
+        sortDir === "desc"
+          ? b.totalContributions - a.totalContributions
+          : a.totalContributions - b.totalContributions
+      ),
+    [entries, sortDir]
   );
 
   async function handleShare() {
@@ -262,19 +270,19 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
                   onClick={() =>
                     setSortDir((d) => (d === "desc" ? "asc" : "desc"))
                   }
+                  aria-label={`Sort by total contributions, currently ${sortDir === "desc" ? "descending" : "ascending"}`}
                 >
-                  Total contributions {sortDir === "desc" ? "↓" : "↑"}
+                  Total contributions <span aria-hidden="true">{sortDir === "desc" ? "↓" : "↑"}</span>
                 </button>
               </div>
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th className={styles.colRank}>#</th>
-                    <th className={styles.colContributor}>CONTRIBUTOR</th>
-                    <th className={styles.colNum}>ADDED</th>
-                    <th className={styles.colNum}>EDITS</th>
-                    <th className={styles.colActivity}>ACTIVITY</th>
-                    <th className={styles.colNum}>TOTAL</th>
+                    <th className={styles.colRank} scope="col">#</th>
+                    <th className={styles.colContributor} scope="col">CONTRIBUTOR</th>
+                    <th className={styles.colNum} scope="col">ADDED</th>
+                    <th className={styles.colNum} scope="col">EDITS</th>
+                    <th className={styles.colNum} scope="col">TOTAL</th>
                   </tr>
                 </thead>
                 <tbody>

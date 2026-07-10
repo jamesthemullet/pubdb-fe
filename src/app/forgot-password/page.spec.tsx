@@ -83,7 +83,7 @@ describe("ForgotPasswordPage", () => {
 
 		await waitFor(() => {
 			expect(fetchSpy).toHaveBeenCalledWith(
-				"http://localhost:4000/auth/forgot-password",
+				"/api/auth/forgot-password",
 				expect.objectContaining({
 					method: "POST",
 					headers: { "Content-Type": "application/json" },

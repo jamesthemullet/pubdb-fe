@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { API_URL } from "@/lib/apiConfig";
 
 export type AuthUser = {
   email: string;
@@ -27,7 +26,7 @@ export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boole
         return;
       }
       try {
-        const res = await fetch(`${API_URL}/auth/me`, {
+        const res = await fetch("/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -37,17 +36,8 @@ export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boole
             return;
           }
         }
-      } catch { /* fall through to JWT decode */ }
-      try {
-        const payload: unknown = JSON.parse(atob(token.split(".")[1]));
-        if (isAuthPayload(payload)) {
-          setUser({ email: payload.email, approved: payload.approved, admin: payload.admin });
-        } else {
-          setUser(null);
-        }
-      } catch {
-        setUser(null);
-      }
+      } catch { /* network error */ }
+      setUser(null);
     }
     void checkAuth();
     window.addEventListener("authChanged", checkAuth);

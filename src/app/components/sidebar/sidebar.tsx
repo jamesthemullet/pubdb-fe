@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./sidebar.module.css";
 
@@ -27,6 +26,7 @@ const WORKSPACE_LINKS = [
   { href: "/add-pub", label: "Add pub" },
   { href: "/profile", label: "API keys" },
   { href: "/docs", label: "Docs" },
+  { href: "/playground", label: "Playground" },
 ];
 
 const ACCOUNT_LINKS = [
@@ -56,7 +56,7 @@ export default function Sidebar() {
   useEffect(() => {
     if (!user) { setPlanData(null); return; }
     const token = localStorage.getItem("token");
-    fetch(`${API_URL}/auth/dashboard`, { headers: buildAuthHeaders(token) })
+    fetch("/api/auth/dashboard", { headers: buildAuthHeaders(token) })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data: { apiKeys: ApiKey[] }) => {
         const keys = data.apiKeys ?? [];
@@ -70,11 +70,11 @@ export default function Sidebar() {
       .catch(() => setPlanData(null));
   }, [user]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
     window.dispatchEvent(new Event("authChanged"));
     setMenuOpen(false);
-  };
+  }, []);
 
   const userInitials = user?.email.slice(0, 2).toUpperCase() ?? null;
 
@@ -104,10 +104,10 @@ export default function Sidebar() {
       )}
 
       <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ""}`}>
-        <div className={styles.logoRow}>
+        <Link href="/" className={styles.logoRow} onClick={() => setMenuOpen(false)}>
           <div className={styles.logoIcon}>P</div>
           <span className={styles.logoText}>Pub DB</span>
-        </div>
+        </Link>
 
         <div className={styles.searchWrap}>
           <svg className={styles.searchIcon} width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">

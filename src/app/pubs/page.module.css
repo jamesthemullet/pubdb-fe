@@ -3,6 +3,18 @@
   max-width: 1200px;
 }
 
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ── Page header ── */
 .pageHeader {
   display: flex;
@@ -85,6 +97,13 @@
 
 .btnOutline:hover {
   background: var(--surface-alt);
+}
+
+.btnOutlineActive,
+.btnOutlineActive:hover {
+  background: var(--button-primary);
+  color: var(--button-primary-text);
+  border-color: transparent;
 }
 
 .btnPrimary {
@@ -299,6 +318,76 @@
   background: none;
 }
 
+/* ── Secondary actions bar ── */
+.actionsBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.actionsBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.actionsBarRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.locationMessage {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.showLabel {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.segmentedControl {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.segmentBtn {
+  padding: 0.4rem 0.75rem;
+  background: var(--surface);
+  color: var(--text-muted);
+  border: none;
+  border-left: 1px solid var(--border-color);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.1s, color 0.1s;
+}
+
+.segmentBtn:first-child {
+  border-left: none;
+}
+
+.segmentBtn:hover {
+  background: var(--surface-alt);
+  color: var(--text-color);
+}
+
+.segmentBtnActive,
+.segmentBtnActive:hover {
+  background: var(--button-primary);
+  color: var(--button-primary-text);
+}
+
 /* ── Results metadata bar ── */
 .resultsMeta {
   display: flex;
@@ -375,6 +464,7 @@
 
 .thName { width: 28%; }
 .thLocation { width: 22%; }
+.thDistance { width: 100px; }
 .thAmenities { width: auto; }
 .thArrow { width: 36px; }
 
@@ -423,6 +513,16 @@
 .pubLocation {
   color: var(--accent);
   font-size: 0.875rem;
+}
+
+.tdDistance {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.pubDistance {
+  font-family: var(--font-jetbrains-mono), monospace;
 }
 
 /* Amenity icons */

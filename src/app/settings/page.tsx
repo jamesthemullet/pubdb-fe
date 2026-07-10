@@ -285,6 +285,7 @@ function AppearanceTab() {
             <button
               key={t}
               type="button"
+              aria-pressed={theme === t}
               className={`${styles.themeOption} ${theme === t ? styles.themeOptionActive : ""}`}
               onClick={() => setTheme(t)}
             >

@@ -1,126 +1,136 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { DELETE, GET, PATCH } from "./route";
 
-const originalEnv = process.env;
-
-function setupEnv() {
-  vi.restoreAllMocks();
-  process.env = { ...originalEnv, API_URL: "https://api.example.com", TESTING_API_KEY: "test-key" };
-}
-
-function teardownEnv() {
-  process.env = originalEnv;
-}
-
-function mockParams(id: string) {
-  return { params: Promise.resolve({ id }) };
-}
-
 function jsonResponse(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "content-type": "application/json" },
-  });
+	return new Response(JSON.stringify(data), {
+		status,
+		headers: { "content-type": "application/json" },
+	});
 }
 
 describe("GET /api/pubs/[id]", () => {
-  beforeEach(setupEnv);
-  afterEach(teardownEnv);
+	const originalEnv = process.env;
 
-  it("proxies to the upstream API for the given pub id", async () => {
-    const pub = { id: "abc", name: "The Harp" };
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(pub));
+	beforeEach(() => {
+		vi.restoreAllMocks();
+		process.env = { ...originalEnv };
+		process.env.API_URL = "https://api.example.com";
+		process.env.TESTING_API_KEY = "test-key";
+	});
 
-    const response = await GET(new Request("http://localhost/api/pubs/abc"), mockParams("abc"));
+	afterEach(() => {
+		process.env = originalEnv;
+	});
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      "https://api.example.com/api/v1/pubs/abc",
-      expect.objectContaining({ headers: expect.objectContaining({ "X-API-Key": "test-key" }) })
-    );
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual(pub);
-  });
+	it("proxies to the upstream API for the given pub id", async () => {
+		const pub = { id: "abc", name: "The Harp" };
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(pub));
+
+		const request = new Request("http://localhost/api/pubs/abc");
+		const response = await GET(request, { params: Promise.resolve({ id: "abc" }) });
+
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://api.example.com/api/v1/pubs/abc",
+			expect.objectContaining({ headers: expect.objectContaining({ "X-API-Key": "test-key" }) }),
+		);
+		expect(response.status).toBe(200);
+		await expect(response.json()).resolves.toEqual(pub);
+	});
 });
 
 describe("PATCH /api/pubs/[id]", () => {
-  beforeEach(setupEnv);
-  afterEach(teardownEnv);
+	const originalEnv = process.env;
 
-  it("forwards the body and auth header upstream and returns the result", async () => {
-    const updated = { id: "abc", name: "Updated Pub" };
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(updated));
+	beforeEach(() => {
+		vi.restoreAllMocks();
+		process.env = { ...originalEnv };
+		process.env.API_URL = "https://api.example.com";
+		process.env.TESTING_API_KEY = "test-key";
+	});
 
-    const req = new Request("http://localhost/api/pubs/abc", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", authorization: "Bearer user-token" },
-      body: JSON.stringify({ name: "Updated Pub" }),
-    });
+	afterEach(() => {
+		process.env = originalEnv;
+	});
 
-    const response = await PATCH(req, mockParams("abc"));
+	it("forwards request body and auth header to the upstream API and returns the result", async () => {
+		const upstreamData = { id: "42", name: "Updated Pub" };
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(upstreamData, 200));
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      "https://api.example.com/pubs/abc",
-      expect.objectContaining({
-        method: "PATCH",
-        headers: expect.objectContaining({
-          Authorization: "Bearer user-token",
-          "X-API-Key": "test-key",
-        }),
-      })
-    );
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual(updated);
-  });
+		const request = new Request("http://localhost/api/pubs/42", {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json", authorization: "Bearer user-token" },
+			body: JSON.stringify({ name: "Updated Pub" }),
+		});
 
-  it("returns 500 when the upstream fetch throws", async () => {
-    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Upstream unavailable"));
+		const response = await PATCH(request, { params: Promise.resolve({ id: "42" }) });
 
-    const req = new Request("http://localhost/api/pubs/abc", { method: "PATCH", body: "{}" });
-    const response = await PATCH(req, mockParams("abc"));
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://api.example.com/pubs/42",
+			expect.objectContaining({
+				method: "PATCH",
+				headers: {
+					Authorization: "Bearer user-token",
+					"Content-Type": "application/json",
+				},
+			}),
+		);
+		expect(response.status).toBe(200);
+		await expect(response.json()).resolves.toEqual(upstreamData);
+	});
 
-    expect(response.status).toBe(500);
-    await expect(response.json()).resolves.toMatchObject({ error: "Upstream unavailable" });
-  });
+	it("returns 500 with error message when fetch throws", async () => {
+		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Connection refused"));
+
+		const request = new Request("http://localhost/api/pubs/99", {
+			method: "PATCH",
+			body: JSON.stringify({ name: "Boom" }),
+		});
+
+		const response = await PATCH(request, { params: Promise.resolve({ id: "99" }) });
+
+		expect(response.status).toBe(500);
+		await expect(response.json()).resolves.toEqual({ error: "Connection refused" });
+	});
 });
 
 describe("DELETE /api/pubs/[id]", () => {
-  beforeEach(setupEnv);
-  afterEach(teardownEnv);
+	const originalEnv = process.env;
 
-  it("returns 204 with no body when upstream returns 204", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 204 }));
+	beforeEach(() => {
+		vi.restoreAllMocks();
+		process.env = { ...originalEnv };
+		process.env.API_URL = "https://api.example.com";
+		process.env.TESTING_API_KEY = "test-key";
+	});
 
-    const response = await DELETE(
-      new Request("http://localhost/api/pubs/abc", { method: "DELETE" }),
-      mockParams("abc")
-    );
+	afterEach(() => {
+		process.env = originalEnv;
+	});
 
-    expect(response.status).toBe(204);
-    expect(response.body).toBeNull();
-  });
+	it("returns a 204 response with no body when the upstream returns 204", async () => {
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 204 }));
 
-  it("returns the JSON body when upstream returns content", async () => {
-    const body = { deleted: true };
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(body));
+		const request = new Request("http://localhost/api/pubs/42", {
+			method: "DELETE",
+			headers: { authorization: "Bearer user-token" },
+		});
 
-    const response = await DELETE(
-      new Request("http://localhost/api/pubs/abc", { method: "DELETE" }),
-      mockParams("abc")
-    );
+		const response = await DELETE(request, { params: Promise.resolve({ id: "42" }) });
 
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual(body);
-  });
+		expect(response.status).toBe(204);
+		expect(await response.text()).toBe("");
+	});
 
-  it("returns 500 when the upstream fetch throws", async () => {
-    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Connection refused"));
+	it("returns upstream JSON and status for non-204 responses", async () => {
+		const upstreamData = { error: "Not found" };
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(upstreamData, 404));
 
-    const response = await DELETE(
-      new Request("http://localhost/api/pubs/abc", { method: "DELETE" }),
-      mockParams("abc")
-    );
+		const request = new Request("http://localhost/api/pubs/99", { method: "DELETE" });
 
-    expect(response.status).toBe(500);
-    await expect(response.json()).resolves.toMatchObject({ error: "Connection refused" });
-  });
+		const response = await DELETE(request, { params: Promise.resolve({ id: "99" }) });
+
+		expect(response.status).toBe(404);
+		await expect(response.json()).resolves.toEqual(upstreamData);
+	});
 });
