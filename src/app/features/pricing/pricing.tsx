@@ -4,7 +4,6 @@ import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./pricing.module.css";
 
@@ -110,14 +109,12 @@ const Pricing = (): React.JSX.Element => {
     setFeedbackMessage({ type: "error", text });
 
   const [userTier, setUserTier] = useState<string | null>(null);
-  const [_userHighestTier, _setUserHighestTier] = useState<string | null>(null);
   const [upgradeModal, setUpgradeModal] = useState<null | {
     priceId: string;
     upcoming: UpcomingBill | null;
     tierName: string;
   }>(null);
 
-  const [_estimateLoading, setEstimateLoading] = useState(false);
   const [performingUpgrade, setPerformingUpgrade] = useState(false);
   const [apiKey, setApiKey] = useState<ApiKey | null>(null);
   const upgradeModalRef = useRef<HTMLDivElement>(null);
@@ -227,7 +224,7 @@ const Pricing = (): React.JSX.Element => {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const res = await fetch(`${API_URL}/auth/dashboard`, {
+      const res = await fetch("/api/auth/dashboard", {
         headers: buildAuthHeaders(token),
       });
       if (!res.ok) return;
@@ -249,7 +246,7 @@ const Pricing = (): React.JSX.Element => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${API_URL}/payments/create-checkout-session`,
+        "/api/payments/create-checkout-session",
         {
           method: "POST",
           headers: {
@@ -283,10 +280,9 @@ const Pricing = (): React.JSX.Element => {
   };
 
   const requestUpgradeEstimate = async (priceId: string, tierName: string) => {
-    setEstimateLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/payments/upgrade-estimate`, {
+      const res = await fetch("/api/payments/upgrade-estimate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -313,8 +309,6 @@ const Pricing = (): React.JSX.Element => {
       setError(
         err instanceof Error ? err.message : "Failed to estimate upgrade"
       );
-    } finally {
-      setEstimateLoading(false);
     }
   };
 
@@ -359,7 +353,7 @@ const Pricing = (): React.JSX.Element => {
     setPerformingUpgrade(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/payments/perform-upgrade`, {
+      const res = await fetch("/api/payments/perform-upgrade", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -394,7 +388,7 @@ const Pricing = (): React.JSX.Element => {
         return;
       }
       try {
-        const response = await fetch(`${API_URL}/payments/subscribe-to-hobby`, {
+        const response = await fetch("/api/payments/subscribe-to-hobby", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

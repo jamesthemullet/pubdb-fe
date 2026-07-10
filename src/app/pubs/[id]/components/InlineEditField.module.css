@@ -37,17 +37,17 @@
   gap: 0.4rem;
 }
 
+.editLink {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
 .rowValueInner:hover .editLink {
   opacity: 1;
 }
 
 .field:hover .editLink {
   opacity: 1;
-}
-
-.editLink {
-  opacity: 0;
-  transition: opacity 0.15s;
 }
 
 .valueWrapper {

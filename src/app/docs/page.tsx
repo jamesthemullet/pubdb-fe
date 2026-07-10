@@ -1,5 +1,5 @@
-import CopyButton from "./CopyButton";
-import DocsNav from "./DocsNav";
+import { CopyButton } from "./CopyButton";
+import { DocNav } from "./DocNav";
 import styles from "./page.module.css";
 
 const CURL_QUICK_START = `curl https://api.thepubdb.com/api/v1/pubs \\
@@ -30,7 +30,6 @@ const JSON_QUICK_START = `{
 }`;
 
 const CURL_AUTH = `X-API-Key: pk_developer_xxxx····`;
-
 
 const CURL_FILTER = `curl "https://api.thepubdb.com/api/v1/pubs?hasCaskAle=true" \\
   -H "X-API-Key: $PUBDB_KEY"`;
@@ -76,7 +75,7 @@ function TypeBadge({ type }: { type: string }) {
 export default function DocsPage() {
   return (
     <div className={styles.page}>
-      <DocsNav />
+      <DocNav />
 
       <div className={styles.content}>
         <div className={styles.contentHeader}>
@@ -90,15 +89,14 @@ export default function DocsPage() {
               filtering, error handling, and SDKs.
             </p>
           </div>
+
           <div className={styles.headerActions}>
-            {/* TODO: add /playground page
             <a href="/playground" className={styles.headerBtn}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                 <polygon points="3,2 11,7 3,12" fill="currentColor" />
               </svg>
               Playground
             </a>
-            */}
           </div>
         </div>
 
@@ -115,6 +113,7 @@ export default function DocsPage() {
             <code className={styles.inlineCode}>pagination</code> object for page metadata.
           </p>
           <CodeBlock code={JSON_QUICK_START} />
+
           <div className={styles.baseUrlBar}>
             <span className={styles.baseUrlIcon} aria-hidden="true">◎</span>
             <span>
@@ -176,7 +175,6 @@ export default function DocsPage() {
               </div>
             ))}
           </div>
-
         </section>
 
         <section id="filtering" className={styles.section}>

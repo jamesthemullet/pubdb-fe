@@ -196,7 +196,7 @@ describe("ResetPasswordPage", () => {
 
 			await waitFor(() => {
 				expect(fetchSpy).toHaveBeenCalledWith(
-					"http://localhost:4000/auth/reset-password",
+					"/api/auth/reset-password",
 					expect.objectContaining({
 						method: "POST",
 						headers: { "Content-Type": "application/json" },

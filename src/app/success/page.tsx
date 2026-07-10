@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import type { ReactElement } from "react";
 import { Suspense, useEffect, useState } from "react";
 import Typography from "@/app/components/typography/typography";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
 
@@ -23,7 +23,7 @@ type SubscriptionStatus = {
   };
 };
 
-function SuccessContent() {
+function SuccessContent(): ReactElement {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const [status, setStatus] = useState<SubscriptionStatus | null>(null);
@@ -63,10 +63,9 @@ function SuccessContent() {
       }
 
       try {
-        const apiUrl = API_URL;
         const token = localStorage.getItem("token");
 
-        const response = await fetch(`${apiUrl}/payments/verify-session`, {
+        const response = await fetch("/api/payments/verify-session", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -115,9 +114,7 @@ function SuccessContent() {
         <Typography variant="headingMedium" className={styles.subheading}>Verification Failed</Typography>
         <Typography>{error}</Typography>
         <div className={styles.actionLink}>
-          <Link href="/">
-            <button type="button">Return to Home</button>
-          </Link>
+          <Link href="/" className={styles.btn}>Return to Home</Link>
         </div>
       </div>
     );
@@ -128,9 +125,7 @@ function SuccessContent() {
       <div className={styles.centered}>
         <Typography variant="headingMedium">No subscription data found</Typography>
         <div className={styles.actionLink}>
-          <Link href="/">
-            <button type="button">Return to Home</button>
-          </Link>
+          <Link href="/" className={styles.btn}>Return to Home</Link>
         </div>
       </div>
     );
@@ -170,13 +165,9 @@ function SuccessContent() {
           )}
 
           <div className={styles.actions}>
-            <Link href="/">
-              <button type="button">View Dashboard</button>
-            </Link>
-            {/* <Link href="/api-docs">
-              <button type="button" className="secondary">
-                API Documentation
-              </button>
+            <Link href="/" className={styles.btn}>View Dashboard</Link>
+            {/* <Link href="/api-docs" className={styles.btn}>
+              API Documentation
             </Link> */}
           </div>
         </>
@@ -187,12 +178,8 @@ function SuccessContent() {
           <Typography className={styles.message}>{status.message}</Typography>
 
           <div className={styles.actions}>
-            <Link href="/">
-              <button type="button">Try Again</button>
-            </Link>
-            <a href="mailto:support@thepubdb.com">
-              <button type="button" className="secondary">Contact Support</button>
-            </a>
+            <Link href="/" className={styles.btn}>Try Again</Link>
+            <a href="mailto:support@thepubdb.com" className={`${styles.btn} ${styles.btnSecondary}`}>Contact Support</a>
           </div>
         </>
       )}
@@ -200,7 +187,7 @@ function SuccessContent() {
   );
 }
 
-export default function SuccessPage() {
+export default function SuccessPage(): ReactElement {
   return (
     <Suspense
       fallback={

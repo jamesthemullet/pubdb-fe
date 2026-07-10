@@ -130,7 +130,7 @@ describe("GET /api/beer-types", () => {
     });
   });
 
-  it("returns 500 with thrown error message when fetch throws", async () => {
+  it("returns 500 with a generic message when fetch throws", async () => {
     process.env.TESTING_API_KEY = "test-key";
 
     const request = new Request("http://localhost/api/beer-types");
@@ -139,10 +139,10 @@ describe("GET /api/beer-types", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(500);
-    await expect(response.json()).resolves.toEqual({ error: "Network down" });
+    await expect(response.json()).resolves.toEqual({ error: "Internal server error" });
   });
 
-  it("returns default error message when fetch throws a non-Error", async () => {
+  it("returns 500 with a generic message when fetch throws a non-Error", async () => {
     process.env.TESTING_API_KEY = "test-key";
 
     const request = new Request("http://localhost/api/beer-types");
@@ -152,7 +152,7 @@ describe("GET /api/beer-types", () => {
 
     expect(response.status).toBe(500);
     await expect(response.json()).resolves.toEqual({
-      error: "Failed to fetch beer types",
+      error: "Internal server error",
     });
   });
 });
