@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
@@ -799,12 +800,12 @@ const Dashboard = (): React.JSX.Element | null => {
                   <ul className={styles.recentPubList}>
                     {contributions.recentPubs.map((pub) => (
                       <li key={pub.id}>
-                        <a
+                        <Link
                           href={`/pubs/${pub.id}`}
                           className={styles.recentPubLink}
                         >
                           {pub.name}
-                        </a>
+                        </Link>
                         <span className={styles.muted}> — {pub.city}</span>
                       </li>
                     ))}
@@ -823,12 +824,12 @@ const Dashboard = (): React.JSX.Element | null => {
                         <li key={entry.pubId} className={styles.editEntry}>
                           <div className={styles.editEntryRow}>
                             <div>
-                              <a
+                              <Link
                                 href={`/pubs/${entry.pubId}`}
                                 className={styles.recentPubLink}
                               >
                                 {entry.pubName}
-                              </a>
+                              </Link>
                               <span className={styles.muted}>
                                 {" "}
                                 — {entry.city}

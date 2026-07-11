@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Link from "next/link";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
 import type { AuthUser } from "@/hooks/useAuth";
@@ -21,7 +22,7 @@ export default function EditButton({ pubName, pubId, user, onEdit }: Props) {
   if (!user) {
     return (
       <div className={styles.editButtonMessage}>
-        <a href="/register">Log in to edit this pub</a>
+        <Link href="/register">Log in to edit this pub</Link>
       </div>
     );
   }
