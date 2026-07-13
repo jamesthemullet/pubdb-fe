@@ -1,6 +1,7 @@
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
+import type { CountryOption } from "@/hooks/useCountries";
 import FieldErrorList from "./FieldErrorList";
 import styles from "./PubCoreIdentityFields.module.css";
 
@@ -24,11 +25,6 @@ type CoreValues = {
 };
 
 type CoreFieldErrors = Partial<Record<CoreFieldKey, string[]>>;
-
-type CountryOption = {
-  name: string;
-  code: string;
-};
 
 type PubCoreIdentityFieldsProps = {
   values: CoreValues;

@@ -80,6 +80,14 @@ type BillingData = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+type UsageMeter = {
+  label: string;
+  used: number;
+  limit: number;
+  pct: number;
+  reset: string;
+};
+
 function formatResetTime(
   iso: string,
   period: "hour" | "day" | "month"
@@ -101,7 +109,7 @@ function formatResetTime(
   })}`;
 }
 
-function usageMeters(key: ApiKey) {
+function usageMeters(key: ApiKey): UsageMeter[] {
   const { limits, remaining, resetTimes } = key;
   return [
     {
