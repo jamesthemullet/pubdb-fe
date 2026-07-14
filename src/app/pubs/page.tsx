@@ -250,9 +250,13 @@ function PubsContent(): ReactElement {
     setLocationStatus("idle");
   }
 
-  const visibleFilters = showAllFilters
-    ? PUB_AMENITY_FIELDS
-    : PUB_AMENITY_FIELDS.slice(0, VISIBLE_FILTER_COUNT);
+  const visibleFilters = useMemo(
+    () =>
+      showAllFilters
+        ? PUB_AMENITY_FIELDS
+        : PUB_AMENITY_FIELDS.slice(0, VISIBLE_FILTER_COUNT),
+    [showAllFilters]
+  );
   const hiddenCount = PUB_AMENITY_FIELDS.length - VISIBLE_FILTER_COUNT;
   const hasActiveFilters =
     debouncedSearchTerm ||
