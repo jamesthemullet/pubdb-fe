@@ -12,7 +12,7 @@ export default function ForgotPasswordPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -27,13 +27,23 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email }),
       });
 
-      const data = await res.json();
+      const data: unknown = await res.json();
+      const body =
+        typeof data === "object" && data !== null
+          ? (data as Record<string, unknown>)
+          : {};
 
       if (!res.ok) {
-        setError(data.error || data.errors || "Unknown error");
+        const errMsg =
+          typeof body.error === "string"
+            ? body.error
+            : typeof body.errors === "string"
+              ? body.errors
+              : "Unknown error";
+        setError(errMsg);
       } else {
-        setMessage(data.message);
-        setEmail(""); // Clear the form
+        setMessage(typeof body.message === "string" ? body.message : null);
+        setEmail("");
       }
     } catch (_err) {
       setError("Network error");

@@ -157,17 +157,18 @@ const Dashboard = (): React.JSX.Element | null => {
   }
 
   useEffect(() => {
-    async function fetchDashboard(token: string) {
+    async function fetchDashboard(token: string): Promise<void> {
       try {
         setError(null);
         const res = await fetch("/api/auth/dashboard", {
           headers: buildAuthHeaders(token),
         });
         if (!res.ok) {
-          const errorData = await res.json();
+          const errorData: unknown = await res.json();
           throw { response: res, data: errorData };
         }
-        setDashboardData(await res.json());
+        const dashboardRaw: unknown = await res.json();
+        setDashboardData(dashboardRaw as DashboardData);
       } catch (err: unknown) {
         if (isHttpErrorObject(err)) {
           setError(

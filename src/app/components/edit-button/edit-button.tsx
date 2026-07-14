@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { buildAuthHeaders } from "@/lib/auth";
+import type { AuthUser } from "@/hooks/useAuth";
 import Button from "../button/button";
 import Typography from "../typography/typography";
 import styles from "./edit-button.module.css";
@@ -14,15 +15,9 @@ type EditButtonProps = {
   pubId: string;
 };
 
-type AuthUser = {
-  email: string;
-  approved?: boolean;
-  admin?: boolean;
-};
-
 const EditButton = ({ pubName, onEdit, pubId }: EditButtonProps) => {
   const router = useRouter();
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,11 +46,19 @@ const EditButton = ({ pubName, onEdit, pubId }: EditButtonProps) => {
       }
 
       try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
+        const raw: unknown = JSON.parse(atob(token.split(".")[1]));
+        const payload =
+          typeof raw === "object" && raw !== null
+            ? (raw as Record<string, unknown>)
+            : {};
         setUser({
-          email: payload.email,
-          approved: payload.approved,
-          admin: payload.admin,
+          email: typeof payload.email === "string" ? payload.email : "",
+          approved:
+            typeof payload.approved === "boolean"
+              ? payload.approved
+              : undefined,
+          admin:
+            typeof payload.admin === "boolean" ? payload.admin : undefined,
         });
       } catch {
         setUser(null);
@@ -109,8 +112,14 @@ const EditButton = ({ pubName, onEdit, pubId }: EditButtonProps) => {
         headers: buildAuthHeaders(token),
       });
       if (!res.ok) {
-        const data = await res.json();
-        setDeleteError(data.error || "Failed to delete pub");
+        const data: unknown = await res.json();
+        const body =
+          typeof data === "object" && data !== null
+            ? (data as Record<string, unknown>)
+            : {};
+        setDeleteError(
+          typeof body.error === "string" ? body.error : "Failed to delete pub"
+        );
         return;
       }
       router.push("/pubs");
