@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ReactElement } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Typography from "@/app/components/typography/typography";
 import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
@@ -276,6 +276,26 @@ export default function PubPage() {
       (f) => !editFields[f] || editFields[f]?.toString().trim() === ""
     );
 
+  const activeAmenities = useMemo(
+    () => (pub ? PUB_AMENITY_FIELDS.filter(({ key }) => pub[key]) : []),
+    [pub]
+  );
+
+  const codeByTab = useMemo<Record<CodeTab, string>>(
+    () => ({
+      curl: pub ? `# Fetch this pub\ncurl https://api.thepubdb.com/api/v1/pubs/${pub.id} \\\n     -H "X-API-Key: $PUBDB_KEY"` : "",
+      node: pub ? `const res = await fetch(\n  'https://api.thepubdb.com/api/v1/pubs/${pub.id}',\n  { headers: { 'X-API-Key': process.env.PUBDB_KEY } }\n);\nconst pub = await res.json();` : "",
+      python: pub ? `import requests\nres = requests.get(\n  f'https://api.thepubdb.com/api/v1/pubs/${pub.id}',\n  headers={'X-API-Key': PUBDB_KEY}\n)\npub = res.json()` : "",
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pub?.id]
+  );
+
+  const jsonPreview = useMemo(
+    () => (pub ? buildJsonPreview(pub) : ""),
+    [pub]
+  );
+
   function copyText(text: string, key: "id" | "code"): void {
     void navigator.clipboard.writeText(text).then(() => {
       setCopied(key);
@@ -300,13 +320,6 @@ export default function PubPage() {
   }
 
   const displayId = pubDisplayId(pub.id);
-  const activeAmenities = PUB_AMENITY_FIELDS.filter(({ key }) => pub[key]);
-  const curlCode = `# Fetch this pub\ncurl https://api.thepubdb.com/api/v1/pubs/${pub.id} \\\n     -H "X-API-Key: $PUBDB_KEY"`;
-  const nodeCode = `const res = await fetch(\n  'https://api.thepubdb.com/api/v1/pubs/${pub.id}',\n  { headers: { 'X-API-Key': process.env.PUBDB_KEY } }\n);\nconst pub = await res.json();`;
-  const pythonCode = `import requests\nres = requests.get(\n  f'https://api.thepubdb.com/api/v1/pubs/${pub.id}',\n  headers={'X-API-Key': PUBDB_KEY}\n)\npub = res.json()`;
-  const codeByTab: Record<CodeTab, string> = { curl: curlCode, node: nodeCode, python: pythonCode };
-
-  const jsonPreview = buildJsonPreview(pub);
 
   const handleDelete = async (): Promise<void> => {
     if (!confirm(`Are you sure you want to delete "${pub.name}"? This cannot be undone.`)) return;
