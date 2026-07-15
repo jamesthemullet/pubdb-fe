@@ -1,6 +1,7 @@
+"use client";
+
 // TODO: settings page is not ready — hidden from nav until wired to real API.
 // Re-enable sidebar link in src/app/components/sidebar/sidebar.tsx when done.
-"use client";
 
 import { useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";

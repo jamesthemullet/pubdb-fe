@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from "react";
 import { buildAuthHeaders } from "@/lib/auth";
 import type { BeerType } from "@/types/pub";
