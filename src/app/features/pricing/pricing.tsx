@@ -609,9 +609,9 @@ const Pricing = (): React.JSX.Element => {
               {tier.popular && (
                 <span className={styles.popularBadge}>MOST POPULAR</span>
               )}
-              <p className={`${styles.tierName} ${tier.popular ? styles.tierNamePopular : ""}`}>
+              <h3 className={`${styles.tierName} ${tier.popular ? styles.tierNamePopular : ""}`}>
                 {tier.name}
-              </p>
+              </h3>
               <div className={styles.tierPriceRow}>
                 <span className={styles.tierPrice}>{tier.price}</span>
                 <span className={`${styles.tierPriceSuffix} ${tier.popular ? styles.tierPriceSuffixPopular : ""}`}>

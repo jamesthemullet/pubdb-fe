@@ -845,6 +845,7 @@ const Dashboard = (): React.JSX.Element | null => {
                                 className={styles.toggleButton}
                                 onClick={() => toggleEditTypes(entry.pubId)}
                                 aria-expanded={expandedEdits.has(entry.pubId)}
+                                aria-controls={`edit-types-${entry.pubId}`}
                               >
                                 {expandedEdits.has(entry.pubId)
                                   ? "Hide"
@@ -853,7 +854,7 @@ const Dashboard = (): React.JSX.Element | null => {
                             )}
                           </div>
                           {expandedEdits.has(entry.pubId) && (
-                            <ul className={styles.editTypeList}>
+                            <ul id={`edit-types-${entry.pubId}`} className={styles.editTypeList}>
                               {entry.editTypes.map((t) => (
                                 <li key={t} className={styles.editTypePill}>
                                   {t}
