@@ -1,6 +1,6 @@
 export type ChangelogEntryType = "added" | "changed" | "fixed";
 
-export type ChangelogItem = {
+type ChangelogItem = {
   type: ChangelogEntryType;
   text: string;
 };
