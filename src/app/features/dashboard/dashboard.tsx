@@ -61,6 +61,12 @@ type DashboardData = {
 //   1100, 1200, 1290, 1380, 3200,
 // ].map((v, i) => ({ id: `c${i}`, v }));
 
+const TIER_KEY_LIMITS: Record<string, number> = {
+  HOBBY: 1,
+  DEVELOPER: 3,
+  BUSINESS: 10,
+};
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 // TODO: restore sparkline once API returns time-series usage data
@@ -145,6 +151,14 @@ const Dashboard = (): React.JSX.Element | null => {
   );
   const [createKeyLoading, setCreateKeyLoading] = useState(false);
   const [createKeyError, setCreateKeyError] = useState<string | null>(null);
+  const [showAddKeyModal, setShowAddKeyModal] = useState(false);
+  const [addKeyName, setAddKeyName] = useState("");
+  const [addKeyLoading, setAddKeyLoading] = useState(false);
+  const [addKeyError, setAddKeyError] = useState<string | null>(null);
+  const [revokingKeyPrefix, setRevokingKeyPrefix] = useState<string | null>(
+    null
+  );
+  const [revokeError, setRevokeError] = useState<string | null>(null);
   const forgotKeyModalRef = useRef<HTMLDivElement>(null);
   const forgotKeyModalTriggerRef = useRef<HTMLElement | null>(null);
 
@@ -340,6 +354,74 @@ const Dashboard = (): React.JSX.Element | null => {
     }
   }
 
+  function handleOpenAddKeyModal() {
+    setAddKeyName("");
+    setAddKeyError(null);
+    setShowAddKeyModal(true);
+  }
+
+  function handleCloseAddKeyModal() {
+    setShowAddKeyModal(false);
+    setAddKeyError(null);
+  }
+
+  async function handleAddApiKey() {
+    try {
+      setAddKeyLoading(true);
+      setAddKeyError(null);
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/auth/keys", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
+        body: JSON.stringify(addKeyName.trim() ? { name: addKeyName.trim() } : {}),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
+      const keyData: GeneratedApiKeyResponse = data.apiKey ?? data;
+      setShowAddKeyModal(false);
+      setForgotKeyDetails(keyData);
+      setShowForgotKeyModal(true);
+      setForgotKeyCopyStatus("idle");
+      const refreshRes = await fetch("/api/auth/dashboard", {
+        headers: buildAuthHeaders(token),
+      });
+      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+    } catch (err: unknown) {
+      setAddKeyError(getErrorMessage(err, "Failed to create API key"));
+    } finally {
+      setAddKeyLoading(false);
+    }
+  }
+
+  async function handleRevokeApiKey(keyPrefix: string) {
+    if (!confirm(`Revoke key ${keyPrefix}····? This can't be undone.`)) return;
+    try {
+      setRevokingKeyPrefix(keyPrefix);
+      setRevokeError(null);
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        `/api/auth/keys/${encodeURIComponent(keyPrefix)}`,
+        {
+          method: "DELETE",
+          headers: buildAuthHeaders(token),
+        }
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
+      const refreshRes = await fetch("/api/auth/dashboard", {
+        headers: buildAuthHeaders(token),
+      });
+      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+    } catch (err: unknown) {
+      setRevokeError(getErrorMessage(err, "Failed to revoke API key"));
+    } finally {
+      setRevokingKeyPrefix(null);
+    }
+  }
+
   useEffect(() => {
     if (showForgotKeyModal && forgotKeyDetails) {
       forgotKeyModalTriggerRef.current = document.activeElement as HTMLElement;
@@ -413,9 +495,62 @@ const Dashboard = (): React.JSX.Element | null => {
   const activeKeyCount = dashboardData.apiKeys.filter(
     (k) => k.keyStatus === "ACTIVE" || k.isActive
   ).length;
+  const accountTier = dashboardData.apiKeys[0]?.tier;
+  const keyLimit = accountTier ? TIER_KEY_LIMITS[accountTier] : undefined;
+  const atKeyLimit = !!keyLimit && dashboardData.apiKeys.length >= keyLimit;
 
   return (
     <>
+      {/* ── Add-key modal ────────────────────────────────────────────────── */}
+      {showAddKeyModal && (
+        <div className={styles.modalOverlay}>
+          <div
+            className={styles.modalCard}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-key-modal-title"
+          >
+            <p className={styles.modalTitle} id="add-key-modal-title">
+              Add a new API key
+            </p>
+            <p className={styles.modalDesc}>
+              Give it a name to help you tell your keys apart. Leave blank to
+              use the default name.
+            </p>
+            <input
+              type="text"
+              className={styles.btnOutline}
+              style={{ width: "100%", marginBottom: "1rem" }}
+              placeholder="e.g. Staging key"
+              value={addKeyName}
+              onChange={(e) => setAddKeyName(e.target.value)}
+              disabled={addKeyLoading}
+            />
+            {addKeyError && <p className={styles.inlineError}>{addKeyError}</p>}
+            <div className={styles.modalFooter} style={{ gap: "0.5rem" }}>
+              <button
+                type="button"
+                className={styles.btnOutline}
+                onClick={handleCloseAddKeyModal}
+                disabled={addKeyLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={styles.btnPrimary}
+                onClick={() => {
+                  void handleAddApiKey();
+                }}
+                disabled={addKeyLoading}
+              >
+                {addKeyLoading ? "Creating…" : "Create key"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Forgot-key modal ─────────────────────────────────────────────── */}
       {forgotKeyDetails && showForgotKeyModal && (
         <div className={styles.modalOverlay}>
@@ -499,7 +634,7 @@ const Dashboard = (): React.JSX.Element | null => {
             </p>
           </div>
           <div className={styles.pageActions}>
-            {dashboardData.apiKeys.length === 0 && (
+            {dashboardData.apiKeys.length === 0 ? (
               <button
                 type="button"
                 className={styles.btnPrimary}
@@ -509,6 +644,20 @@ const Dashboard = (): React.JSX.Element | null => {
                 }}
               >
                 {createKeyLoading ? "Creating…" : "+ New key"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={styles.btnPrimary}
+                disabled={atKeyLimit}
+                title={
+                  atKeyLimit
+                    ? `Your ${accountTier} plan allows up to ${keyLimit} API keys. Delete an existing key or upgrade your plan to create another.`
+                    : undefined
+                }
+                onClick={handleOpenAddKeyModal}
+              >
+                {atKeyLimit ? "Key limit reached" : "+ Add key"}
               </button>
             )}
             {createKeyError && (
@@ -583,7 +732,7 @@ const Dashboard = (): React.JSX.Element | null => {
                   {activeKeyCount} active
                 </span>
               </div>
-              {dashboardData.apiKeys.length === 0 && (
+              {dashboardData.apiKeys.length === 0 ? (
                 <button
                   type="button"
                   className={styles.btnOutline}
@@ -593,6 +742,20 @@ const Dashboard = (): React.JSX.Element | null => {
                   }}
                 >
                   {createKeyLoading ? "Creating…" : "+ New key"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.btnOutline}
+                  disabled={atKeyLimit}
+                  title={
+                    atKeyLimit
+                      ? `Your ${accountTier} plan allows up to ${keyLimit} API keys. Delete an existing key or upgrade your plan to create another.`
+                      : undefined
+                  }
+                  onClick={handleOpenAddKeyModal}
+                >
+                  {atKeyLimit ? "Key limit reached" : "+ Add key"}
                 </button>
               )}
             </div>
@@ -604,6 +767,9 @@ const Dashboard = (): React.JSX.Element | null => {
             )}
             {cancelMessage && (
               <p className={styles.inlineSuccess}>{cancelMessage}</p>
+            )}
+            {revokeError && (
+              <p className={styles.inlineError}>{revokeError}</p>
             )}
 
             {dashboardData.apiKeys.length === 0 ? (
@@ -692,20 +858,20 @@ const Dashboard = (): React.JSX.Element | null => {
                           </span>
                           <UsageBar pct={pct} />
                         </div>
-                        {key.tier !== "HOBBY" && (
-                          <div className={styles.keyMenuWrap}>
-                            <button
-                              type="button"
-                              className={styles.menuDotBtn}
-                              aria-label={`More options for ${key.name}`}
-                              onClick={() =>
-                                setOpenMenu(isMenuOpen ? null : key.keyPrefix)
-                              }
-                            >
-                              •••
-                            </button>
-                            {isMenuOpen && key.keyStatus === "ACTIVE" && (
-                              <div className={styles.menuDropdown}>
+                        <div className={styles.keyMenuWrap}>
+                          <button
+                            type="button"
+                            className={styles.menuDotBtn}
+                            aria-label={`More options for ${key.name}`}
+                            onClick={() =>
+                              setOpenMenu(isMenuOpen ? null : key.keyPrefix)
+                            }
+                          >
+                            •••
+                          </button>
+                          {isMenuOpen && key.keyStatus === "ACTIVE" && (
+                            <div className={styles.menuDropdown}>
+                              {key.tier !== "HOBBY" && (
                                 <button
                                   type="button"
                                   className={styles.menuItem}
@@ -717,6 +883,21 @@ const Dashboard = (): React.JSX.Element | null => {
                                 >
                                   Forgot API key
                                 </button>
+                              )}
+                              <button
+                                type="button"
+                                className={styles.menuItemDanger}
+                                disabled={revokingKeyPrefix === key.keyPrefix}
+                                onClick={() => {
+                                  void handleRevokeApiKey(key.keyPrefix);
+                                  setOpenMenu(null);
+                                }}
+                              >
+                                {revokingKeyPrefix === key.keyPrefix
+                                  ? "Revoking…"
+                                  : "Revoke key"}
+                              </button>
+                              {key.tier !== "HOBBY" && (
                                 <button
                                   type="button"
                                   className={styles.menuItemDanger}
@@ -730,10 +911,10 @@ const Dashboard = (): React.JSX.Element | null => {
                                     ? "Cancelling…"
                                     : "Cancel subscription"}
                                 </button>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     {showNudge && (

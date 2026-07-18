@@ -313,7 +313,7 @@ describe("Dashboard", () => {
 			).toBeInTheDocument();
 		});
 
-		it("does not show key menu for HOBBY tier", async () => {
+		it("does not show cancel subscription option for HOBBY tier", async () => {
 			const data = {
 				...SAMPLE_DASHBOARD_DATA,
 				apiKeys: [{ ...SAMPLE_API_KEY, tier: "HOBBY" }],
@@ -321,11 +321,14 @@ describe("Dashboard", () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
 
 			render(<Dashboard />);
-			await screen.findByText("My Key");
+			await openKeyMenu();
 
 			expect(
-				screen.queryByRole("button", { name: /More options for My Key/ }),
+				screen.queryByRole("button", { name: /Cancel subscription/ }),
 			).not.toBeInTheDocument();
+			expect(
+				screen.getByRole("button", { name: "Revoke key" }),
+			).toBeInTheDocument();
 		});
 
 		it("does not show cancel option for INACTIVE keys", async () => {
@@ -602,6 +605,183 @@ describe("Dashboard", () => {
 				expect(
 					screen.getByRole("button", { name: "Copy failed" }),
 				).toBeInTheDocument();
+			});
+		});
+	});
+
+	describe("add API key", () => {
+		beforeEach(() => {
+			localStorage.setItem("token", "test-token");
+		});
+
+		it("shows '+ Add key' button when keys already exist", async () => {
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(
+				jsonResponse(SAMPLE_DASHBOARD_DATA),
+			);
+
+			render(<Dashboard />);
+			await screen.findByText("My Key");
+
+			expect(
+				screen.getAllByRole("button", { name: "+ Add key" }).length,
+			).toBeGreaterThan(0);
+		});
+
+		it("disables add key button and shows limit message when at tier cap", async () => {
+			const data = {
+				...SAMPLE_DASHBOARD_DATA,
+				apiKeys: [{ ...SAMPLE_API_KEY, tier: "HOBBY" }],
+			};
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
+
+			render(<Dashboard />);
+			await screen.findByText("My Key");
+
+			const limitButtons = screen.getAllByRole("button", {
+				name: "Key limit reached",
+			});
+			expect(limitButtons.length).toBeGreaterThan(0);
+			for (const btn of limitButtons) {
+				expect(btn).toBeDisabled();
+			}
+		});
+
+		it("creates a new key and shows it in the reveal modal", async () => {
+			vi.spyOn(globalThis, "fetch")
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(
+					jsonResponse(
+						{
+							apiKey: {
+								name: "Staging key",
+								tier: "PRO",
+								keyStatus: "ACTIVE",
+								keyPrefix: "pk_pro_staging",
+								key: "pk_pro_staging_secret",
+								permissions: ["read:pubs"],
+							},
+						},
+						201,
+					),
+				)
+				.mockResolvedValueOnce(
+					jsonResponse({
+						...SAMPLE_DASHBOARD_DATA,
+						apiKeys: [
+							SAMPLE_API_KEY,
+							{ ...SAMPLE_API_KEY, name: "Staging key", keyPrefix: "pk_pro_staging" },
+						],
+					}),
+				);
+
+			render(<Dashboard />);
+			await screen.findByText("My Key");
+
+			fireEvent.click(screen.getAllByRole("button", { name: "+ Add key" })[0]);
+
+			const nameInput = await screen.findByPlaceholderText("e.g. Staging key");
+			fireEvent.change(nameInput, { target: { value: "Staging key" } });
+			fireEvent.click(screen.getByRole("button", { name: "Create key" }));
+
+			await waitFor(() => {
+				expect(
+					screen.getByText("New API key generated"),
+				).toBeInTheDocument();
+				expect(screen.getByText("pk_pro_staging_secret")).toBeInTheDocument();
+			});
+		});
+
+		it("shows the 409 tier-limit error inside the add key modal", async () => {
+			vi.spyOn(globalThis, "fetch")
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(
+					jsonResponse(
+						{
+							error:
+								"Your PRO plan allows up to 3 API keys. Delete an existing key or upgrade your plan to create another.",
+						},
+						409,
+					),
+				);
+
+			render(<Dashboard />);
+			await screen.findByText("My Key");
+
+			fireEvent.click(screen.getAllByRole("button", { name: "+ Add key" })[0]);
+			fireEvent.click(screen.getByRole("button", { name: "Create key" }));
+
+			await waitFor(() => {
+				expect(
+					screen.getByText(/Your PRO plan allows up to 3 API keys/),
+				).toBeInTheDocument();
+			});
+		});
+	});
+
+	describe("revoke API key", () => {
+		beforeEach(() => {
+			localStorage.setItem("token", "test-token");
+		});
+
+		async function openKeyMenu() {
+			await screen.findByText("My Key");
+			fireEvent.click(screen.getByRole("button", { name: /More options for My Key/ }));
+		}
+
+		it("revokes a key on confirm and refreshes the list", async () => {
+			vi.spyOn(globalThis, "fetch")
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(jsonResponse({ success: true }))
+				.mockResolvedValueOnce(
+					jsonResponse({
+						...SAMPLE_DASHBOARD_DATA,
+						apiKeys: [],
+						summary: { totalApiKeys: 0, totalUsage: 0 },
+					}),
+				);
+			vi.spyOn(window, "confirm").mockReturnValue(true);
+
+			render(<Dashboard />);
+			await openKeyMenu();
+
+			fireEvent.click(screen.getByRole("button", { name: "Revoke key" }));
+
+			await waitFor(() => {
+				expect(screen.getByText("No API keys yet.")).toBeInTheDocument();
+			});
+		});
+
+		it("shows an error message when revoke fails", async () => {
+			vi.spyOn(globalThis, "fetch")
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(
+					jsonResponse({ error: "Key not found" }, 404),
+				);
+			vi.spyOn(window, "confirm").mockReturnValue(true);
+
+			render(<Dashboard />);
+			await openKeyMenu();
+
+			fireEvent.click(screen.getByRole("button", { name: "Revoke key" }));
+
+			await waitFor(() => {
+				expect(screen.getByText("Key not found")).toBeInTheDocument();
+			});
+		});
+
+		it("does not revoke when the user dismisses the confirm dialog", async () => {
+			const fetchSpy = vi
+				.spyOn(globalThis, "fetch")
+				.mockResolvedValue(jsonResponse(SAMPLE_DASHBOARD_DATA));
+			vi.spyOn(window, "confirm").mockReturnValue(false);
+
+			render(<Dashboard />);
+			await openKeyMenu();
+
+			fireEvent.click(screen.getByRole("button", { name: "Revoke key" }));
+
+			await waitFor(() => {
+				expect(fetchSpy).toHaveBeenCalledTimes(1);
 			});
 		});
 	});
