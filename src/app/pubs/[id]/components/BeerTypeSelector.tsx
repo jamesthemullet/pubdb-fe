@@ -19,8 +19,8 @@ export default function BeerTypeSelector({
   onToggle,
 }: Props) {
   return (
-    <div>
-      <span>Beer Types: </span>
+    <fieldset>
+      <legend>Beer Types</legend>
       <div className={styles.beerTypesOuter}>
         {loading ? (
           <Typography as="span">Loading beer types…</Typography>
@@ -51,6 +51,6 @@ export default function BeerTypeSelector({
           </Typography>
         )}
       </div>
-    </div>
+    </fieldset>
   );
 }

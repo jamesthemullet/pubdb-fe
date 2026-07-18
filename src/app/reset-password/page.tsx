@@ -69,7 +69,7 @@ function ResetPasswordForm(): ReactElement {
   if (!token) {
     return (
       <div className={styles.container}>
-        <Typography variant="headingMedium">Invalid Reset Link</Typography>
+        <Typography variant="headingMedium" as="h1">Invalid Reset Link</Typography>
         <Typography>
           This password reset link is invalid or has expired.
         </Typography>
@@ -82,7 +82,7 @@ function ResetPasswordForm(): ReactElement {
 
   return (
     <div className={styles.container}>
-      <Typography variant="headingMedium">Reset Password</Typography>
+      <Typography variant="headingMedium" as="h1">Reset Password</Typography>
       <Typography>Enter your new password below.</Typography>
 
       <form onSubmit={handleSubmit} className={styles.form}>
