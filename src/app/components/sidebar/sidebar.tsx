@@ -27,6 +27,7 @@ const WORKSPACE_LINKS = [
   { href: "/profile", label: "API keys" },
   { href: "/docs", label: "Docs" },
   { href: "/playground", label: "Playground" },
+  { href: "/changelog", label: "Changelog" },
 ];
 
 const ACCOUNT_LINKS = [
