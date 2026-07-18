@@ -729,16 +729,19 @@ describe("Dashboard", () => {
 		}
 
 		it("revokes a key on confirm and refreshes the list", async () => {
-			vi.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
-				.mockResolvedValueOnce(jsonResponse({ success: true }))
-				.mockResolvedValueOnce(
-					jsonResponse({
-						...SAMPLE_DASHBOARD_DATA,
-						apiKeys: [],
-						summary: { totalApiKeys: 0, totalUsage: 0 },
-					}),
-				);
+			let dashboardCallCount = 0;
+			vi.spyOn(globalThis, "fetch").mockImplementation(async (_input, init) => {
+				const method = init?.method ?? "GET";
+				if (method === "DELETE") return jsonResponse({ success: true });
+				dashboardCallCount += 1;
+				return dashboardCallCount === 1
+					? jsonResponse(SAMPLE_DASHBOARD_DATA)
+					: jsonResponse({
+							...SAMPLE_DASHBOARD_DATA,
+							apiKeys: [],
+							summary: { totalApiKeys: 0, totalUsage: 0 },
+						});
+			});
 			vi.spyOn(window, "confirm").mockReturnValue(true);
 
 			render(<Dashboard />);

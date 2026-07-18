@@ -495,7 +495,9 @@ const Dashboard = (): React.JSX.Element | null => {
   const activeKeyCount = dashboardData.apiKeys.filter(
     (k) => k.keyStatus === "ACTIVE" || k.isActive
   ).length;
-  const accountTier = dashboardData.apiKeys[0]?.tier;
+  const accountTier =
+    dashboardData.apiKeys.find((k) => k.keyStatus === "ACTIVE" || k.isActive)
+      ?.tier ?? dashboardData.apiKeys[0]?.tier;
   const keyLimit = accountTier ? TIER_KEY_LIMITS[accountTier] : undefined;
   const atKeyLimit = !!keyLimit && dashboardData.apiKeys.length >= keyLimit;
 
