@@ -9,7 +9,7 @@ function jsonResponse(data: unknown, status = 200): Response {
 	});
 }
 
-describe("/api/auth/keys/[keyPrefix]", () => {
+describe("/api/auth/keys/[id]", () => {
 	const originalEnv = process.env;
 
 	beforeEach(() => {
@@ -22,21 +22,21 @@ describe("/api/auth/keys/[keyPrefix]", () => {
 		process.env = originalEnv;
 	});
 
-	it("forwards DELETE to the backend with the auth header and encoded prefix", async () => {
+	it("forwards DELETE to the backend with the auth header and encoded id", async () => {
 		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			jsonResponse({ success: true }),
 		);
 
 		const response = await DELETE(
-			new Request("http://localhost/api/auth/keys/pk_developer_ab12cd34", {
+			new Request("http://localhost/api/auth/keys/key_ab12cd34", {
 				method: "DELETE",
 				headers: { authorization: "Bearer user-token" },
 			}),
-			{ params: Promise.resolve({ keyPrefix: "pk_developer_ab12cd34" }) },
+			{ params: Promise.resolve({ id: "key_ab12cd34" }) },
 		);
 
 		expect(fetchMock).toHaveBeenCalledWith(
-			"https://api.example.com/auth/keys/pk_developer_ab12cd34",
+			"https://api.example.com/auth/keys/key_ab12cd34",
 			{
 				method: "DELETE",
 				headers: { Authorization: "Bearer user-token" },
@@ -52,10 +52,10 @@ describe("/api/auth/keys/[keyPrefix]", () => {
 		);
 
 		const response = await DELETE(
-			new Request("http://localhost/api/auth/keys/pk_bogus", {
+			new Request("http://localhost/api/auth/keys/key_bogus", {
 				method: "DELETE",
 			}),
-			{ params: Promise.resolve({ keyPrefix: "pk_bogus" }) },
+			{ params: Promise.resolve({ id: "key_bogus" }) },
 		);
 
 		expect(response.status).toBe(404);

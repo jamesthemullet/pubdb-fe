@@ -7,6 +7,7 @@ import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
 
 type ApiKey = {
+  id: string;
   name: string;
   tier: string;
   keyPrefix: string;
@@ -120,7 +121,7 @@ function CopyButton({ text, label }: { text: string; label?: string }) {
 function buildProxyRequest(
   endpoint: EndpointDef,
   values: Record<string, string>,
-  keyPrefix: string
+  keyId: string
 ): { proxyUrl: string; publicPath: string } {
   const pathSegment = (endpoint.pathParams ?? [])
     .map((p) => `/${encodeURIComponent(values[p.name] ?? "")}`)
@@ -136,7 +137,7 @@ function buildProxyRequest(
   const publicQuery = queryParams.toString();
   const publicPath = `${basePath}${pathSegment}${publicQuery ? `?${publicQuery}` : ""}`;
 
-  queryParams.set("keyPrefix", keyPrefix);
+  queryParams.set("id", keyId);
   const proxyUrl = `${endpoint.proxyUrl}${pathSegment}?${queryParams.toString()}`;
 
   return { proxyUrl, publicPath };
@@ -146,7 +147,7 @@ export default function PlaygroundPage() {
   const { user } = useAuth();
   const [apiKeys, setApiKeys] = useState<ApiKey[] | null>(null);
   const [keysError, setKeysError] = useState<string | null>(null);
-  const [selectedKeyPrefix, setSelectedKeyPrefix] = useState<string>("");
+  const [selectedKeyId, setSelectedKeyId] = useState<string>("");
   const [expandedPath, setExpandedPath] = useState<string | null>(null);
   const [paramValues, setParamValues] = useState<Record<string, string>>({});
   const [tryingPath, setTryingPath] = useState<string | null>(null);
@@ -163,7 +164,7 @@ export default function PlaygroundPage() {
       .then((data: DashboardData) => {
         setApiKeys(data.apiKeys);
         if (data.apiKeys.length > 0) {
-          setSelectedKeyPrefix(data.apiKeys.find((k) => k.isActive)?.keyPrefix ?? data.apiKeys[0].keyPrefix);
+          setSelectedKeyId(data.apiKeys.find((k) => k.isActive)?.id ?? data.apiKeys[0].id);
         }
       })
       .catch(() => setKeysError("Couldn't load your API keys."));
@@ -189,7 +190,7 @@ export default function PlaygroundPage() {
   }
 
   async function handleSend(endpoint: EndpointDef, values: Record<string, string>) {
-    if (!selectedKeyPrefix) return;
+    if (!selectedKeyId) return;
     const missingRequired = [...(endpoint.pathParams ?? []), ...(endpoint.queryParams ?? [])].some(
       (p) => p.required && !values[p.name]?.trim()
     );
@@ -199,7 +200,7 @@ export default function PlaygroundPage() {
     setResult(null);
     setResultError(null);
 
-    const { proxyUrl, publicPath } = buildProxyRequest(endpoint, values, selectedKeyPrefix);
+    const { proxyUrl, publicPath } = buildProxyRequest(endpoint, values, selectedKeyId);
     const token = localStorage.getItem("token");
     const start = performance.now();
     try {
@@ -262,11 +263,11 @@ export default function PlaygroundPage() {
                 <select
                   id="playground-key"
                   className={styles.keyPicker}
-                  value={selectedKeyPrefix}
-                  onChange={(e) => setSelectedKeyPrefix(e.target.value)}
+                  value={selectedKeyId}
+                  onChange={(e) => setSelectedKeyId(e.target.value)}
                 >
                   {apiKeys.map((key) => (
-                    <option key={key.keyPrefix} value={key.keyPrefix}>
+                    <option key={key.id} value={key.id}>
                       {key.name} ({key.keyPrefix}····) — {key.tier}
                     </option>
                   ))}
@@ -304,7 +305,7 @@ export default function PlaygroundPage() {
                     <button
                       type="button"
                       className={styles.tryBtn}
-                      disabled={!selectedKeyPrefix || isRunning}
+                      disabled={!selectedKeyId || isRunning}
                       onClick={() => toggleExpanded(endpoint)}
                     >
                       {isRunning ? "Running…" : hasParams ? (isExpanded ? "Close" : "Configure →") : "Try it →"}
@@ -351,7 +352,7 @@ export default function PlaygroundPage() {
                       <button
                         type="button"
                         className={styles.sendBtn}
-                        disabled={isRunning || !selectedKeyPrefix || missingRequired}
+                        disabled={isRunning || !selectedKeyId || missingRequired}
                         onClick={() => handleSend(endpoint, paramValues)}
                       >
                         {isRunning ? "Sending…" : "Send request →"}

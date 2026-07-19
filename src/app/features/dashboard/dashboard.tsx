@@ -11,6 +11,7 @@ import styles from "./dashboard.module.css";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type ApiKey = {
+  id: string;
   name: string;
   tier: string;
   keyPrefix: string;
@@ -155,7 +156,7 @@ const Dashboard = (): React.JSX.Element | null => {
   const [addKeyName, setAddKeyName] = useState("");
   const [addKeyLoading, setAddKeyLoading] = useState(false);
   const [addKeyError, setAddKeyError] = useState<string | null>(null);
-  const [revokingKeyPrefix, setRevokingKeyPrefix] = useState<string | null>(
+  const [revokingKeyId, setRevokingKeyId] = useState<string | null>(
     null
   );
   const [revokeError, setRevokeError] = useState<string | null>(null);
@@ -396,19 +397,16 @@ const Dashboard = (): React.JSX.Element | null => {
     }
   }
 
-  async function handleRevokeApiKey(keyPrefix: string) {
+  async function handleRevokeApiKey(id: string, keyPrefix: string) {
     if (!confirm(`Revoke key ${keyPrefix}····? This can't be undone.`)) return;
     try {
-      setRevokingKeyPrefix(keyPrefix);
+      setRevokingKeyId(id);
       setRevokeError(null);
       const token = localStorage.getItem("token");
-      const res = await fetch(
-        `/api/auth/keys/${encodeURIComponent(keyPrefix)}`,
-        {
-          method: "DELETE",
-          headers: buildAuthHeaders(token),
-        }
-      );
+      const res = await fetch(`/api/auth/keys/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers: buildAuthHeaders(token),
+      });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       const refreshRes = await fetch("/api/auth/dashboard", {
@@ -418,7 +416,7 @@ const Dashboard = (): React.JSX.Element | null => {
     } catch (err: unknown) {
       setRevokeError(getErrorMessage(err, "Failed to revoke API key"));
     } finally {
-      setRevokingKeyPrefix(null);
+      setRevokingKeyId(null);
     }
   }
 
@@ -889,13 +887,13 @@ const Dashboard = (): React.JSX.Element | null => {
                               <button
                                 type="button"
                                 className={styles.menuItemDanger}
-                                disabled={revokingKeyPrefix === key.keyPrefix}
+                                disabled={revokingKeyId === key.id}
                                 onClick={() => {
-                                  void handleRevokeApiKey(key.keyPrefix);
+                                  void handleRevokeApiKey(key.id, key.keyPrefix);
                                   setOpenMenu(null);
                                 }}
                               >
-                                {revokingKeyPrefix === key.keyPrefix
+                                {revokingKeyId === key.id
                                   ? "Revoking…"
                                   : "Revoke key"}
                               </button>

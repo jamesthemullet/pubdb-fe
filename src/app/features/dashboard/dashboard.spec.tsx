@@ -19,6 +19,7 @@ function jsonResponse(data: unknown, status = 200): Response {
 }
 
 const SAMPLE_API_KEY = {
+	id: "key_1",
 	name: "My Key",
 	tier: "PRO",
 	keyPrefix: "pk_abc",
@@ -751,6 +752,31 @@ describe("Dashboard", () => {
 
 			await waitFor(() => {
 				expect(screen.getByText("No API keys yet.")).toBeInTheDocument();
+			});
+		});
+
+		it("revokes the specific key's id, not just the first key", async () => {
+			const secondKey = { ...SAMPLE_API_KEY, id: "key_2", name: "Second Key", keyPrefix: "pk_def" };
+			const data = { ...SAMPLE_DASHBOARD_DATA, apiKeys: [SAMPLE_API_KEY, secondKey] };
+			const fetchSpy = vi
+				.spyOn(globalThis, "fetch")
+				.mockResolvedValueOnce(jsonResponse(data))
+				.mockResolvedValueOnce(jsonResponse({ success: true }))
+				.mockResolvedValueOnce(jsonResponse(data));
+			vi.spyOn(window, "confirm").mockReturnValue(true);
+
+			render(<Dashboard />);
+			await screen.findByText("Second Key");
+			fireEvent.click(
+				screen.getByRole("button", { name: /More options for Second Key/ }),
+			);
+			fireEvent.click(screen.getByRole("button", { name: "Revoke key" }));
+
+			await waitFor(() => {
+				expect(fetchSpy).toHaveBeenCalledWith(
+					"/api/auth/keys/key_2",
+					expect.objectContaining({ method: "DELETE" }),
+				);
 			});
 		});
 
