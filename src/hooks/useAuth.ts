@@ -5,9 +5,23 @@ export type AuthUser = {
   email: string;
   approved?: boolean;
   admin?: boolean;
+  name?: string;
+  username?: string;
+  image?: string;
+  location?: string;
+  bio?: string;
 } | null;
 
-type AuthPayload = { email: string; approved?: boolean; admin?: boolean };
+type AuthPayload = {
+  email: string;
+  approved?: boolean;
+  admin?: boolean;
+  name?: string;
+  username?: string;
+  image?: string;
+  location?: string;
+  bio?: string;
+};
 
 function isAuthPayload(value: unknown): value is AuthPayload {
   if (typeof value !== "object" || value === null) return false;
@@ -32,7 +46,16 @@ export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boole
         if (res.ok) {
           const raw: unknown = await res.json();
           if (isAuthPayload(raw)) {
-            setUser({ email: raw.email, approved: raw.approved, admin: raw.admin });
+            setUser({
+              email: raw.email,
+              approved: raw.approved,
+              admin: raw.admin,
+              name: raw.name,
+              username: raw.username,
+              image: raw.image,
+              location: raw.location,
+              bio: raw.bio,
+            });
             return;
           }
         }
