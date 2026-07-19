@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./sidebar.module.css";
 
-type ApiKey = {
+type Subscription = {
   tier: string;
   limits: { requestsPerMonth: number };
   remaining: { month: number };
@@ -58,12 +58,12 @@ export default function Sidebar() {
     const token = localStorage.getItem("token");
     fetch("/api/auth/dashboard", { headers: buildAuthHeaders(token) })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data: { apiKeys: ApiKey[] }) => {
-        const keys = data.apiKeys ?? [];
-        if (keys.length === 0) return;
-        const used = keys.reduce((s, k) => s + (k.limits.requestsPerMonth - k.remaining.month), 0);
-        const limit = keys.reduce((s, k) => s + k.limits.requestsPerMonth, 0);
-        const tier = keys[0].tier ?? "";
+      .then((data: { subscription?: Subscription }) => {
+        const subscription = data.subscription;
+        if (!subscription) return;
+        const used = subscription.limits.requestsPerMonth - subscription.remaining.month;
+        const limit = subscription.limits.requestsPerMonth;
+        const tier = subscription.tier ?? "";
         const planName = `${tier.charAt(0).toUpperCase()}${tier.slice(1).toLowerCase()} plan`;
         setPlanData({ planName, used, limit, pct: limit > 0 ? Math.round((used / limit) * 100) : 0 });
       })

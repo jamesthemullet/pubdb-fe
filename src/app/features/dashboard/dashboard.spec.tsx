@@ -29,6 +29,10 @@ const SAMPLE_API_KEY = {
 	createdAt: "2024-01-01T00:00:00.000Z",
 	lastUsed: "2024-04-01T12:00:00.000Z",
 	usageCount: 42,
+};
+
+const SAMPLE_SUBSCRIPTION = {
+	tier: "PRO",
 	remaining: { hour: 80, day: 800, month: 8000 },
 	limits: {
 		requestsPerHour: 100,
@@ -52,6 +56,7 @@ const SAMPLE_DASHBOARD_DATA = {
 		emailVerified: true,
 	},
 	apiKeys: [SAMPLE_API_KEY],
+	subscription: SAMPLE_SUBSCRIPTION,
 	summary: { totalApiKeys: 1, totalUsage: 42 },
 };
 
@@ -191,7 +196,19 @@ describe("Dashboard", () => {
 			});
 		});
 
-		it("renders monthly usage count and limit", async () => {
+		it("renders the key's lifetime usage count", async () => {
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(
+				jsonResponse(SAMPLE_DASHBOARD_DATA),
+			);
+
+			render(<Dashboard />);
+
+			await waitFor(() => {
+				expect(screen.getByText(/42 requests all-time/)).toBeInTheDocument();
+			});
+		});
+
+		it("renders the account-level monthly usage total from the subscription", async () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(
 				jsonResponse(SAMPLE_DASHBOARD_DATA),
 			);
@@ -200,7 +217,7 @@ describe("Dashboard", () => {
 
 			await waitFor(() => {
 				// monthly used = 10000 - 8000 = 2000
-				expect(screen.getByText(/2,000 \/ 10,000/)).toBeInTheDocument();
+				expect(screen.getByText(/2,000/)).toBeInTheDocument();
 			});
 		});
 
@@ -632,6 +649,7 @@ describe("Dashboard", () => {
 			const data = {
 				...SAMPLE_DASHBOARD_DATA,
 				apiKeys: [{ ...SAMPLE_API_KEY, tier: "HOBBY" }],
+				subscription: { ...SAMPLE_SUBSCRIPTION, tier: "HOBBY" },
 			};
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
 

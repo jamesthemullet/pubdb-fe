@@ -21,12 +21,16 @@ type ApiKey = {
   createdAt: string;
   lastUsed: string | null;
   usageCount: number;
-  remaining: { hour: number; day: number; month: number };
+};
+
+type Subscription = {
+  tier: string;
   limits: {
     requestsPerHour: number;
     requestsPerDay: number;
     requestsPerMonth: number;
   };
+  remaining: { hour: number; day: number; month: number };
   resetTimes: { hour: string; day: string; month: string };
   features: { allowLocationSearch: boolean; allowStats: boolean };
 };
@@ -49,6 +53,7 @@ type DashboardData = {
     emailVerified: boolean;
   };
   apiKeys: ApiKey[];
+  subscription: Subscription;
   summary: { totalApiKeys: number; totalUsage: number };
 };
 
@@ -109,18 +114,6 @@ function fmtRelative(iso: string | null): string {
 
 // function BarChart() { ... } // TODO: restore with real time-series data
 
-function UsageBar({ pct }: { pct: number }): React.JSX.Element {
-  const fill = pct > 90 ? "#ef4444" : pct > 75 ? "#f59e0b" : "#555555";
-  return (
-    <div className={styles.usageBarTrack}>
-      <div
-        className={styles.usageBarFill}
-        style={{ width: `${Math.min(pct, 100)}%`, background: fill }}
-      />
-    </div>
-  );
-}
-
 // ── Main component ────────────────────────────────────────────────────────────
 
 const Dashboard = (): React.JSX.Element | null => {
@@ -147,9 +140,7 @@ const Dashboard = (): React.JSX.Element | null => {
     "idle" | "copied" | "error"
   >("idle");
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [dismissedNudges, setDismissedNudges] = useState<Set<string>>(
-    new Set()
-  );
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const [createKeyLoading, setCreateKeyLoading] = useState(false);
   const [createKeyError, setCreateKeyError] = useState<string | null>(null);
   const [showAddKeyModal, setShowAddKeyModal] = useState(false);
@@ -482,22 +473,19 @@ const Dashboard = (): React.JSX.Element | null => {
 
   if (!dashboardData) return null;
 
-  const totalUsed = dashboardData.apiKeys.reduce(
-    (sum, k) => sum + (k.limits.requestsPerMonth - k.remaining.month),
-    0
-  );
-  const totalLimit = dashboardData.apiKeys.reduce(
-    (sum, k) => sum + k.limits.requestsPerMonth,
-    0
-  );
+  const { subscription } = dashboardData;
+  const totalUsed =
+    subscription.limits.requestsPerMonth - subscription.remaining.month;
+  const totalLimit = subscription.limits.requestsPerMonth;
+  const totalUsedPct = (totalUsed / totalLimit) * 100;
   const activeKeyCount = dashboardData.apiKeys.filter(
     (k) => k.keyStatus === "ACTIVE" || k.isActive
   ).length;
-  const accountTier =
-    dashboardData.apiKeys.find((k) => k.keyStatus === "ACTIVE" || k.isActive)
-      ?.tier ?? dashboardData.apiKeys[0]?.tier;
+  const accountTier = subscription.tier;
   const keyLimit = accountTier ? TIER_KEY_LIMITS[accountTier] : undefined;
   const atKeyLimit = !!keyLimit && dashboardData.apiKeys.length >= keyLimit;
+  const showNudge =
+    accountTier === "HOBBY" && totalUsedPct >= 75 && !nudgeDismissed;
 
   return (
     <>
@@ -791,16 +779,9 @@ const Dashboard = (): React.JSX.Element | null => {
               </div>
             ) : (
               dashboardData.apiKeys.map((key) => {
-                const used = key.limits.requestsPerMonth - key.remaining.month;
-                const pct = (used / key.limits.requestsPerMonth) * 100;
                 const isMenuOpen = openMenu === key.id;
                 const isForgotLoading =
                   forgotKeyLoading && forgotKeyTarget === key.id;
-
-                const showNudge =
-                  key.tier === "HOBBY" &&
-                  pct >= 75 &&
-                  !dismissedNudges.has(key.id);
 
                 return (
                   <div key={key.id} className={styles.keyCard}>
@@ -853,10 +834,8 @@ const Dashboard = (): React.JSX.Element | null => {
                         </span>
                         <div className={styles.keyUsageGroup}>
                           <span className={styles.usageText}>
-                            {used.toLocaleString()} /{" "}
-                            {key.limits.requestsPerMonth.toLocaleString()}
+                            {key.usageCount.toLocaleString()} requests all-time
                           </span>
-                          <UsageBar pct={pct} />
                         </div>
                         <div className={styles.keyMenuWrap}>
                           <button
@@ -917,48 +896,41 @@ const Dashboard = (): React.JSX.Element | null => {
                         </div>
                       </div>
                     </div>
-                    {showNudge && (
-                      <div className={styles.upgradeNudge}>
-                        <div className={styles.upgradeNudgeBody}>
-                          <p className={styles.upgradeNudgeHeading}>
-                            You&rsquo;ve used {Math.round(pct)}% of your monthly
-                            requests
-                          </p>
-                          <p className={styles.upgradeNudgeDesc}>
-                            {key.remaining.month.toLocaleString()} requests left
-                            this month. Upgrade to DEVELOPER to unlock
-                            significantly increased limits, location search and
-                            statistics.
-                          </p>
-                        </div>
-                        <div className={styles.upgradeNudgeActions}>
-                          <a
-                            href="/#pricing"
-                            className={styles.upgradeNudgeCta}
-                          >
-                            Upgrade &rarr;
-                          </a>
-                          <button
-                            type="button"
-                            className={styles.upgradeNudgeDismiss}
-                            aria-label="Dismiss upgrade prompt"
-                            onClick={() =>
-                              setDismissedNudges(
-                                (prev) => new Set([...prev, key.id])
-                              )
-                            }
-                          >
-                            &times;
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 );
               })
             )}
           </div>
         </div>
+
+        {showNudge && (
+          <div className={styles.upgradeNudge}>
+            <div className={styles.upgradeNudgeBody}>
+              <p className={styles.upgradeNudgeHeading}>
+                You&rsquo;ve used {Math.round(totalUsedPct)}% of your monthly
+                requests
+              </p>
+              <p className={styles.upgradeNudgeDesc}>
+                {subscription.remaining.month.toLocaleString()} requests left
+                this month. Upgrade to DEVELOPER to unlock significantly
+                increased limits, location search and statistics.
+              </p>
+            </div>
+            <div className={styles.upgradeNudgeActions}>
+              <a href="/#pricing" className={styles.upgradeNudgeCta}>
+                Upgrade &rarr;
+              </a>
+              <button
+                type="button"
+                className={styles.upgradeNudgeDismiss}
+                aria-label="Dismiss upgrade prompt"
+                onClick={() => setNudgeDismissed(true)}
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Contributions section */}
         {dashboardData.user.approved && (
