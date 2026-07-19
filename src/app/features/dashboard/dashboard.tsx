@@ -11,7 +11,7 @@ import styles from "./dashboard.module.css";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type ApiKey = {
-  id: string;
+  id?: string;
   name: string;
   tier: string;
   keyPrefix: string;
@@ -53,7 +53,7 @@ type DashboardData = {
     emailVerified: boolean;
   };
   apiKeys: ApiKey[];
-  subscription: Subscription;
+  subscription?: Subscription;
   summary: { totalApiKeys: number; totalUsage: number };
 };
 
@@ -474,18 +474,22 @@ const Dashboard = (): React.JSX.Element | null => {
   if (!dashboardData) return null;
 
   const { subscription } = dashboardData;
-  const totalUsed =
-    subscription.limits.requestsPerMonth - subscription.remaining.month;
-  const totalLimit = subscription.limits.requestsPerMonth;
-  const totalUsedPct = (totalUsed / totalLimit) * 100;
+  const totalUsed = subscription
+    ? subscription.limits.requestsPerMonth - subscription.remaining.month
+    : 0;
+  const totalLimit = subscription?.limits.requestsPerMonth ?? 0;
+  const totalUsedPct = totalLimit > 0 ? (totalUsed / totalLimit) * 100 : 0;
   const activeKeyCount = dashboardData.apiKeys.filter(
     (k) => k.keyStatus === "ACTIVE" || k.isActive
   ).length;
-  const accountTier = subscription.tier;
+  const accountTier = subscription?.tier;
   const keyLimit = accountTier ? TIER_KEY_LIMITS[accountTier] : undefined;
   const atKeyLimit = !!keyLimit && dashboardData.apiKeys.length >= keyLimit;
   const showNudge =
-    accountTier === "HOBBY" && totalUsedPct >= 75 && !nudgeDismissed;
+    !!subscription &&
+    accountTier === "HOBBY" &&
+    totalUsedPct >= 75 &&
+    !nudgeDismissed;
 
   return (
     <>
@@ -695,9 +699,9 @@ const Dashboard = (): React.JSX.Element | null => {
               </span>
             </div>
             <div className={styles.statValue}>
-              {totalUsed.toLocaleString()}
+              {subscription ? totalUsed.toLocaleString() : "—"}
               <span className={styles.statSuffix}>
-                /{totalLimit > 0 ? `${Math.round(totalLimit / 1000)}k` : "100k"}
+                /{totalLimit > 0 ? `${Math.round(totalLimit / 1000)}k` : "—"}
               </span>
             </div>
             {/* TODO: show % vs prev period once API returns historical usage data */}
@@ -779,12 +783,13 @@ const Dashboard = (): React.JSX.Element | null => {
               </div>
             ) : (
               dashboardData.apiKeys.map((key) => {
-                const isMenuOpen = openMenu === key.id;
+                const identityKey = key.id ?? key.keyPrefix;
+                const isMenuOpen = openMenu === identityKey;
                 const isForgotLoading =
-                  forgotKeyLoading && forgotKeyTarget === key.id;
+                  forgotKeyLoading && forgotKeyTarget === identityKey;
 
                 return (
-                  <div key={key.id} className={styles.keyCard}>
+                  <div key={identityKey} className={styles.keyCard}>
                     <div className={styles.keyRow}>
                       <div className={styles.keyLeft}>
                         <span className={styles.keyName}>{key.name}</span>
@@ -800,13 +805,13 @@ const Dashboard = (): React.JSX.Element | null => {
                           type="button"
                           className={styles.btnOutline}
                           disabled={isForgotLoading}
-                          onClick={() => handleForgotApiKey(key.id, key.keyPrefix)}
+                          onClick={() => handleForgotApiKey(identityKey, key.keyPrefix)}
                         >
                           {isForgotLoading
                             ? "Regenerating…"
                             : "Regenerate API key"}
                         </button>
-                        {forgotKeyTarget === key.id && (
+                        {forgotKeyTarget === identityKey && (
                           <>
                             {forgotKeyError && (
                               <p className={styles.inlineError}>
@@ -843,7 +848,7 @@ const Dashboard = (): React.JSX.Element | null => {
                             className={styles.menuDotBtn}
                             aria-label={`More options for ${key.name}`}
                             onClick={() =>
-                              setOpenMenu(isMenuOpen ? null : key.id)
+                              setOpenMenu(isMenuOpen ? null : identityKey)
                             }
                           >
                             •••
@@ -856,7 +861,7 @@ const Dashboard = (): React.JSX.Element | null => {
                                   className={styles.menuItem}
                                   disabled={isForgotLoading}
                                   onClick={() => {
-                                    void handleForgotApiKey(key.id, key.keyPrefix);
+                                    void handleForgotApiKey(identityKey, key.keyPrefix);
                                     setOpenMenu(null);
                                   }}
                                 >
@@ -866,8 +871,10 @@ const Dashboard = (): React.JSX.Element | null => {
                               <button
                                 type="button"
                                 className={styles.menuItemDanger}
-                                disabled={revokingKeyId === key.id}
+                                disabled={!key.id || revokingKeyId === key.id}
+                                title={key.id ? undefined : "This key can't be revoked from here — contact support."}
                                 onClick={() => {
+                                  if (!key.id) return;
                                   void handleRevokeApiKey(key.id, key.keyPrefix);
                                   setOpenMenu(null);
                                 }}
@@ -911,7 +918,7 @@ const Dashboard = (): React.JSX.Element | null => {
                 requests
               </p>
               <p className={styles.upgradeNudgeDesc}>
-                {subscription.remaining.month.toLocaleString()} requests left
+                {(subscription?.remaining.month ?? 0).toLocaleString()} requests left
                 this month. Upgrade to DEVELOPER to unlock significantly
                 increased limits, location search and statistics.
               </p>

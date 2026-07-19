@@ -31,7 +31,7 @@ type Subscription = {
 type DashboardData = {
   user: { name: string; email: string };
   apiKeys: ApiKey[];
-  subscription: Subscription;
+  subscription?: Subscription;
   summary: { totalApiKeys: number; totalUsage: number };
 };
 
@@ -237,7 +237,9 @@ export default function BillingPage() {
     }
   }
 
-  const USAGE = dashboardData ? usageMeters(dashboardData.subscription) : null;
+  const USAGE = dashboardData?.subscription
+    ? usageMeters(dashboardData.subscription)
+    : null;
 
   const sortedInvoices = useMemo(
     () =>

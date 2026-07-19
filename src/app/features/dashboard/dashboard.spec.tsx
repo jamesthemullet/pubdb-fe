@@ -171,6 +171,36 @@ describe("Dashboard", () => {
 			});
 		});
 
+		it("renders without crashing when subscription is absent (e.g. no keys yet)", async () => {
+			const data = {
+				...SAMPLE_DASHBOARD_DATA,
+				apiKeys: [],
+				subscription: undefined,
+				summary: { totalApiKeys: 0, totalUsage: 0 },
+			};
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
+
+			render(<Dashboard />);
+
+			await waitFor(() => {
+				expect(screen.getByText("No API keys yet.")).toBeInTheDocument();
+			});
+		});
+
+		it("renders a key missing an id without a React key warning, using keyPrefix as a fallback identity", async () => {
+			const data = {
+				...SAMPLE_DASHBOARD_DATA,
+				apiKeys: [{ ...SAMPLE_API_KEY, id: undefined }],
+			};
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
+
+			render(<Dashboard />);
+
+			await waitFor(() => {
+				expect(screen.getByText("My Key")).toBeInTheDocument();
+			});
+		});
+
 		it("renders API key card with name and masked prefix", async () => {
 			vi.spyOn(globalThis, "fetch").mockResolvedValue(
 				jsonResponse(SAMPLE_DASHBOARD_DATA),
