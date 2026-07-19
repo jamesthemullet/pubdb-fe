@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DELETE, PATCH } from "./route";
+import { DELETE, GET, PATCH } from "./route";
 
 function jsonResponse(data: unknown, status = 200): Response {
 	return new Response(JSON.stringify(data), {
@@ -8,6 +8,36 @@ function jsonResponse(data: unknown, status = 200): Response {
 		headers: { "content-type": "application/json" },
 	});
 }
+
+describe("GET /api/pubs/[id]", () => {
+	const originalEnv = process.env;
+
+	beforeEach(() => {
+		vi.restoreAllMocks();
+		process.env = { ...originalEnv };
+		process.env.API_URL = "https://api.example.com";
+		process.env.TESTING_API_KEY = "test-key";
+	});
+
+	afterEach(() => {
+		process.env = originalEnv;
+	});
+
+	it("proxies to the upstream API for the given pub id", async () => {
+		const pub = { id: "abc", name: "The Harp" };
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(pub));
+
+		const request = new Request("http://localhost/api/pubs/abc");
+		const response = await GET(request, { params: Promise.resolve({ id: "abc" }) });
+
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://api.example.com/api/v1/pubs/abc",
+			expect.objectContaining({ headers: expect.objectContaining({ "X-API-Key": "test-key" }) }),
+		);
+		expect(response.status).toBe(200);
+		await expect(response.json()).resolves.toEqual(pub);
+	});
+});
 
 describe("PATCH /api/pubs/[id]", () => {
 	const originalEnv = process.env;
@@ -23,7 +53,7 @@ describe("PATCH /api/pubs/[id]", () => {
 		process.env = originalEnv;
 	});
 
-	it("forwards request body, auth header, and X-API-Key to the upstream API and returns the result", async () => {
+	it("forwards request body and auth header to the upstream API and returns the result", async () => {
 		const upstreamData = { id: "42", name: "Updated Pub" };
 		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(upstreamData, 200));
 
@@ -39,11 +69,10 @@ describe("PATCH /api/pubs/[id]", () => {
 			"https://api.example.com/pubs/42",
 			expect.objectContaining({
 				method: "PATCH",
-				headers: expect.objectContaining({
-					"X-API-Key": "test-key",
+				headers: {
 					Authorization: "Bearer user-token",
 					"Content-Type": "application/json",
-				}),
+				},
 			}),
 		);
 		expect(response.status).toBe(200);

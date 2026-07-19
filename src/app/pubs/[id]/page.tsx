@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import type { ReactElement } from "react";
 import { useCallback, useEffect, useState } from "react";
 import Typography from "@/app/components/typography/typography";
 import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
@@ -530,11 +531,15 @@ export default function PubPage() {
           {/* Code block */}
           <div className={styles.codePanel}>
             <div className={styles.codePanelHeader}>
-              <div className={styles.codeTabs}>
+              <div className={styles.codeTabs} role="tablist" aria-label="Code language">
                 {(["curl", "node", "python"] as CodeTab[]).map((t) => (
                   <button
                     key={t}
                     type="button"
+                    role="tab"
+                    aria-selected={codeTab === t}
+                    id={`pub-code-tab-${t}`}
+                    aria-controls="pub-code-panel"
                     className={`${styles.codeTab} ${codeTab === t ? styles.codeTabActive : ""}`}
                     onClick={() => setCodeTab(t)}
                   >
@@ -545,12 +550,18 @@ export default function PubPage() {
               <button
                 type="button"
                 className={styles.codeCopyBtn}
+                aria-label="Copy code"
                 onClick={() => copyText(codeByTab[codeTab], "code")}
               >
                 {copied === "code" ? "Copied!" : "Copy"}
               </button>
             </div>
-            <pre className={styles.codeBlock}><code>{codeByTab[codeTab]}</code></pre>
+            <pre
+              id="pub-code-panel"
+              role="tabpanel"
+              aria-labelledby={`pub-code-tab-${codeTab}`}
+              className={styles.codeBlock}
+            ><code>{codeByTab[codeTab]}</code></pre>
           </div>
 
           {/* Raw response */}
@@ -580,7 +591,7 @@ export default function PubPage() {
 
 // ─── Tab panels ──────────────────────────────────────────────────────────────
 
-function BeersTab({ pub }: { pub: Pub }) {
+function BeersTab({ pub }: { pub: Pub }): ReactElement {
   const beerTypeNames = getBeerTypeNames(pub);
   return (
     <div className={styles.tabContent}>
@@ -633,7 +644,7 @@ function checkOpenNow(
   return cur >= open && cur < close;
 }
 
-function HoursTab({ pub }: { pub: Pub }) {
+function HoursTab({ pub }: { pub: Pub }): ReactElement {
   const now = new Date();
   const jsDayIndex = now.getDay();
   const todayFull = WEEKDAYS[jsDayIndex === 0 ? 6 : jsDayIndex - 1].full;
@@ -714,7 +725,7 @@ function formatSunExposure(s: string): string {
   return s.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function GardenTab({ pub }: { pub: Pub }) {
+function GardenTab({ pub }: { pub: Pub }): ReactElement {
   if (!pub.beerGardens?.length) {
     return (
       <div className={styles.gardenEmptyCard}>
@@ -791,7 +802,7 @@ function GardenTab({ pub }: { pub: Pub }) {
                 {g.imageUrl ? (
                   <Image
                     src={g.imageUrl}
-                    alt={g.name}
+                    alt={g.name || `Beer garden ${i + 1}`}
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
                     className={styles.gardenImage}
@@ -831,7 +842,7 @@ function avatarColor(initial: string): { bg: string; fg: string } {
   return AVATAR_COLORS[initial.toUpperCase().charCodeAt(0) % AVATAR_COLORS.length];
 }
 
-function HistoryTab({ pub }: { pub: Pub }) {
+function HistoryTab({ pub }: { pub: Pub }): ReactElement {
   type HistoryEntry = {
     key: string;
     initial: string;

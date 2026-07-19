@@ -42,7 +42,5 @@ package-lock.json
 next-env.d.ts
 /test-results
 playwright-report/index.html
-.claude/settings.local.json
 /playwright-report
-.claude/settings.local.json
 .claude/settings.local.json

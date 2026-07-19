@@ -2,7 +2,6 @@ import { useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
 import type { AuthUser } from "@/hooks/useAuth";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "../page.module.css";
 
@@ -49,7 +48,7 @@ export default function EditButton({ pubName, pubId, user, onEdit }: Props) {
     }
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/pubs/${pubId}`, {
+      const res = await fetch(`/api/pubs/${pubId}`, {
         method: "DELETE",
         headers: buildAuthHeaders(token),
       });

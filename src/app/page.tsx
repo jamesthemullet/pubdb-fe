@@ -50,7 +50,7 @@ export default function Home() {
           </p>
           <div className={styles.heroCtas}>
             <Link href="/register" className={styles.ctaPrimary}>
-              Get an API key →
+              Get an API key <span aria-hidden="true">→</span>
             </Link>
             <Link href="/pubs" className={styles.ctaSecondary}>
               Browse pubs
@@ -82,7 +82,7 @@ export default function Home() {
           </p>
           <div className={styles.contributeCtas}>
             <Link href="/pubs" className={styles.ctaPrimary}>
-              Find your local →
+              Find your local <span aria-hidden="true">→</span>
             </Link>
             <Link href="/add-pub" className={styles.ctaSecondary}>
               Add a missing pub

@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import type { ReactElement } from "react";
 import { memo, Suspense, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import {
   PUB_AMENITY_FIELDS,
   type PubAmenityKey,
 } from "@/constants/pubFormFields";
+import { useAuth } from "@/hooks/useAuth";
+import { buildAuthHeaders } from "@/lib/auth";
 import { isHttpErrorObject } from "@/lib/errors";
 import type { Pub } from "@/types/pub";
 import styles from "./page.module.css";
 
 type SortOption = "name-asc" | "name-desc" | "newest" | "oldest";
+type EditStatusFilter = "all" | "edited" | "not-edited";
 
 function pubLocation(pub: Pub): string {
   const area = pub.area || pub.borough || null;
@@ -27,7 +31,7 @@ const SORT_OPTIONS: SortOption[] = [
 ];
 
 function isSortOption(value: string): value is SortOption {
-  return (SORT_OPTIONS as string[]).includes(value);
+  return SORT_OPTIONS.some((opt) => opt === value);
 }
 
 type PubsApiResponse = { data: Pub[] };
@@ -42,7 +46,6 @@ const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
     <tr
       data-id={pub.id}
       className={styles.tableRow}
-      tabIndex={0}
     >
       <td className={styles.tdName}>
         <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
@@ -57,6 +60,11 @@ const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
       <td className={styles.tdLocation}>
         <span className={styles.pubLocation}>{pubLocation(pub)}</span>
       </td>
+      {pub.distance !== undefined && (
+        <td className={styles.tdDistance}>
+          <span className={styles.pubDistance}>{pub.distance.toFixed(1)} km</span>
+        </td>
+      )}
       {/* <td className={styles.tdAmenities}>
         <AmenityIconCell pub={pub} />
       </td> */}
@@ -75,7 +83,7 @@ const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
   );
 });
 
-function PubsContent() {
+function PubsContent(): ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
@@ -89,8 +97,49 @@ function PubsContent() {
     new Set()
   );
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const [editStatusFilter, setEditStatusFilter] =
+    useState<EditStatusFilter>("all");
   const [showAllFilters, setShowAllFilters] = useState(false);
   const [responseMs, setResponseMs] = useState<number | null>(null);
+  const [locationStatus, setLocationStatus] = useState<
+    "idle" | "loading" | "granted" | "denied" | "unsupported"
+  >("idle");
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
+
+  function handleNearMe() {
+    if (coords) {
+      setCoords(null);
+      setLocationStatus("idle");
+      setPage(0);
+      return;
+    }
+    if (!navigator.geolocation) {
+      setLocationStatus("unsupported");
+      return;
+    }
+    setLocationStatus("loading");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoords({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setLocationStatus("granted");
+        setPage(0);
+      },
+      () => setLocationStatus("denied")
+    );
+  }
+
+  useEffect(() => {
+    if (!isLoggedIn && editStatusFilter !== "all") {
+      setEditStatusFilter("all");
+    }
+  }, [isLoggedIn, editStatusFilter]);
 
   useEffect(() => {
     setSearchTerm(urlQuery);
@@ -107,6 +156,7 @@ function PubsContent() {
   }, [searchTerm]);
 
   const filteredPubs = useMemo(() => {
+    if (coords) return pubs;
     const sorted = [...pubs];
     switch (sortBy) {
       case "name-desc":
@@ -123,7 +173,7 @@ function PubsContent() {
         sorted.sort((a, b) => a.name.localeCompare(b.name));
     }
     return sorted;
-  }, [pubs, sortBy]);
+  }, [pubs, sortBy, coords]);
 
   useEffect(() => {
     async function fetchPubs() {
@@ -139,7 +189,17 @@ function PubsContent() {
         for (const amenity of activeAmenities) {
           params.append(`amenities[${amenity}]`, "true");
         }
-        const res = await fetch(`/api/pubs?${params}`);
+        if (editStatusFilter !== "all") {
+          params.set("editedByMe", editStatusFilter === "edited" ? "true" : "false");
+        }
+        if (coords) {
+          params.set("lat", String(coords.lat));
+          params.set("lng", String(coords.lng));
+        }
+        const token = localStorage.getItem("token");
+        const res = await fetch(`/api/pubs?${params}`, {
+          headers: buildAuthHeaders(token),
+        });
         setResponseMs(Date.now() - t0);
 
         if (!res.ok) {
@@ -165,12 +225,12 @@ function PubsContent() {
       }
     }
     fetchPubs();
-  }, [page, debouncedSearchTerm, activeAmenities]);
+  }, [page, debouncedSearchTerm, activeAmenities, editStatusFilter, coords]);
 
   const hasNextPage = pubs.length === PAGE_SIZE;
   const hasPrevPage = page > 0;
 
-  function toggleAmenity(key: PubAmenityKey) {
+  function toggleAmenity(key: PubAmenityKey): void {
     setPage(0);
     setActiveAmenities((prev) => {
       const next = new Set(prev);
@@ -180,19 +240,30 @@ function PubsContent() {
     });
   }
 
-  function clearAllFilters() {
+  function clearAllFilters(): void {
     setPage(0);
     setSearchTerm("");
     setActiveAmenities(new Set());
     setSortBy("name-asc");
+    setEditStatusFilter("all");
+    setCoords(null);
+    setLocationStatus("idle");
   }
 
-  const visibleFilters = showAllFilters
-    ? PUB_AMENITY_FIELDS
-    : PUB_AMENITY_FIELDS.slice(0, VISIBLE_FILTER_COUNT);
+  const visibleFilters = useMemo(
+    () =>
+      showAllFilters
+        ? PUB_AMENITY_FIELDS
+        : PUB_AMENITY_FIELDS.slice(0, VISIBLE_FILTER_COUNT),
+    [showAllFilters]
+  );
   const hiddenCount = PUB_AMENITY_FIELDS.length - VISIBLE_FILTER_COUNT;
   const hasActiveFilters =
-    debouncedSearchTerm || activeAmenities.size > 0 || sortBy !== "name-asc";
+    debouncedSearchTerm ||
+    activeAmenities.size > 0 ||
+    sortBy !== "name-asc" ||
+    editStatusFilter !== "all" ||
+    !!coords;
 
   return (
     <div className={styles.page}>
@@ -202,13 +273,13 @@ function PubsContent() {
           <div className={styles.pageTitle}>
             <h1 className={styles.heading}>All pubs</h1>
             <span className={styles.apiBadge}>
-              <code>GET /v1/pubs</code>
+              <code>GET /pubs</code>
             </span>
           </div>
           <p className={styles.pageDescription}>
-            Browse the live database. Every result here is exactly what the
-            public API returns — this view is a thin client over the same
-            endpoint.
+            Browse the live database. This view calls the same backend data
+            as the public API, plus authenticated filters (like "Edited by
+            me") that aren't part of the public contract.
           </p>
         </div>
         <div className={styles.pageHeaderActions}>
@@ -282,7 +353,7 @@ function PubsContent() {
                 className={styles.chipMore}
                 onClick={() => setShowAllFilters(true)}
               >
-                + {hiddenCount} more
+                Show {hiddenCount} more filters
               </button>
             )}
             {showAllFilters && (
@@ -300,14 +371,16 @@ function PubsContent() {
             <label htmlFor="sort-select" className={styles.srOnly}>Sort by</label>
             <Dropdown
               id="sort-select"
-              aria-label="Sort pubs by"
-              value={sortBy}
+              aria-label="Sort pubs"
+              value={coords ? "distance" : sortBy}
+              disabled={!!coords}
               onChange={(e) => {
                 const val = e.target.value;
                 if (isSortOption(val)) setSortBy(val);
               }}
               fullWidth={false}
             >
+              {coords && <option value="distance">Distance (nearest)</option>}
               <option value="name-asc">Name (A–Z)</option>
               <option value="name-desc">Name (Z–A)</option>
               <option value="newest">Newest first</option>
@@ -440,6 +513,74 @@ function PubsContent() {
         )}
       </div>
 
+      {/* Secondary actions bar */}
+      <div className={styles.actionsBar}>
+        <div className={styles.actionsBarLeft}>
+          <button
+            type="button"
+            className={`${styles.btnOutline} ${coords ? styles.btnOutlineActive : ""}`}
+            onClick={handleNearMe}
+            disabled={locationStatus === "loading"}
+            aria-pressed={!!coords}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+              <circle cx="6" cy="6" r="1.6" fill="currentColor" />
+              <path
+                d="M6 1v1.6M6 9.4V11M1 6h1.6M9.4 6H11"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                strokeLinecap="round"
+              />
+            </svg>
+            {locationStatus === "loading"
+              ? "Locating…"
+              : coords
+                ? "Near me ✕"
+                : "Near me"}
+          </button>
+          {locationStatus === "denied" && (
+            <span className={styles.locationMessage}>
+              Location permission denied
+            </span>
+          )}
+          {locationStatus === "unsupported" && (
+            <span className={styles.locationMessage}>
+              Location isn&apos;t supported in this browser
+            </span>
+          )}
+        </div>
+
+        {isLoggedIn && (
+          <div className={styles.actionsBarRight}>
+            <span className={styles.showLabel}>Show:</span>
+            <fieldset className={styles.segmentedControl} aria-label="Filter by edit status">
+              {(
+                [
+                  { value: "all", label: "All" },
+                  { value: "edited", label: "Edited" },
+                  { value: "not-edited", label: "Not edited" },
+                ] as const
+              ).map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`${styles.segmentBtn} ${
+                    editStatusFilter === value ? styles.segmentBtnActive : ""
+                  }`}
+                  aria-pressed={editStatusFilter === value}
+                  onClick={() => {
+                    setPage(0);
+                    setEditStatusFilter(value);
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </fieldset>
+          </div>
+        )}
+      </div>
+
       {/* Results metadata bar */}
       <div className={styles.resultsMeta}>
         {/* TODO: show real result count (current page / total) once API returns a total count field */}
@@ -472,9 +613,9 @@ function PubsContent() {
           </button>
         </div>
       ) : filteredPubs.length === 0 ? (
-        <div className={styles.stateMsg}>
+        <output className={styles.stateMsg}>
           No pubs found{debouncedSearchTerm ? " matching your search" : ""}.
-        </div>
+        </output>
       ) : (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
@@ -482,6 +623,9 @@ function PubsContent() {
               <tr>
                 <th className={styles.thName} scope="col">NAME</th>
                 <th className={styles.thLocation} scope="col">LOCATION</th>
+                {coords && (
+                  <th className={styles.thDistance} scope="col">DISTANCE</th>
+                )}
                 {/* TODO: improve amenity display (icons unclear, title tooltip unreliable) before re-enabling */}
                 {/* <th className={styles.thAmenities}>AMENITIES</th> */}
                 {/* <th className={styles.thArrow} aria-label="View" /> */}
@@ -533,7 +677,7 @@ function PubsContent() {
   );
 }
 
-export default function Pubs() {
+export default function Pubs(): ReactElement {
   return (
     <Suspense>
       <PubsContent />

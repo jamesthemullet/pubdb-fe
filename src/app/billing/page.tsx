@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import Pricing from "@/app/features/pricing/pricing";
 import { useAuth } from "@/hooks/useAuth";
-import { API_URL } from "@/lib/apiConfig";
 import { buildAuthHeaders } from "@/lib/auth";
 import { getErrorMessage } from "@/lib/errors";
 import styles from "./page.module.css";
@@ -16,6 +15,10 @@ type ApiKey = {
   tier: string;
   isActive: boolean;
   usageCount: number;
+};
+
+type Subscription = {
+  tier: string;
   remaining: { hour: number; day: number; month: number };
   limits: {
     requestsPerHour: number;
@@ -28,6 +31,7 @@ type ApiKey = {
 type DashboardData = {
   user: { name: string; email: string };
   apiKeys: ApiKey[];
+  subscription?: Subscription;
   summary: { totalApiKeys: number; totalUsage: number };
 };
 
@@ -102,8 +106,8 @@ function formatResetTime(
   })}`;
 }
 
-function usageMeters(key: ApiKey) {
-  const { limits, remaining, resetTimes } = key;
+function usageMeters(subscription: Subscription) {
+  const { limits, remaining, resetTimes } = subscription;
   return [
     {
       label: "HOURLY",
@@ -183,13 +187,13 @@ export default function BillingPage() {
     if (!user) return;
     const token = localStorage.getItem("token");
     const headers = buildAuthHeaders(token);
-    fetch(`${API_URL}/auth/dashboard`, { headers })
+    fetch("/api/auth/dashboard", { headers })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data) setDashboardData(data);
       })
       .catch(() => {});
-    fetch(`${API_URL}/payments/billing`, { headers })
+    fetch("/api/payments/billing", { headers })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data) setBillingData(data);
@@ -209,7 +213,7 @@ export default function BillingPage() {
       setCancelError(null);
       setCancelMessage(null);
       const token = localStorage.getItem("token");
-      const res = await fetch(`${API_URL}/payments/cancel-subscription`, {
+      const res = await fetch("/api/payments/cancel-subscription", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -233,26 +237,36 @@ export default function BillingPage() {
     }
   }
 
-  const activeKey = dashboardData?.apiKeys.find((k) => k.isActive) ?? null;
-  const USAGE = activeKey ? usageMeters(activeKey) : null;
+  const USAGE = dashboardData?.subscription
+    ? usageMeters(dashboardData.subscription)
+    : null;
 
-  const sortedInvoices =
-    billingData?.invoices
-      .slice()
-      .sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-      ) ?? [];
+  const sortedInvoices = useMemo(
+    () =>
+      billingData?.invoices
+        .slice()
+        .sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        ) ?? [],
+    [billingData]
+  );
 
-  const spendBars = sortedInvoices
-    .slice(0, 6)
-    .reverse()
-    .map((inv, i, arr) => ({
-      month: new Date(inv.date).toLocaleDateString("en-GB", { month: "short" }),
-      amount: inv.amount / 100,
-      current: i === arr.length - 1,
-    }));
-  const maxSpend =
-    spendBars.length > 0 ? Math.max(...spendBars.map((b) => b.amount)) : 1;
+  const { spendBars, maxSpend } = useMemo(() => {
+    const bars = sortedInvoices
+      .slice(0, 6)
+      .reverse()
+      .map((inv, i, arr) => ({
+        month: new Date(inv.date).toLocaleDateString("en-GB", {
+          month: "short",
+        }),
+        amount: inv.amount / 100,
+        current: i === arr.length - 1,
+      }));
+    return {
+      spendBars: bars,
+      maxSpend: bars.length > 0 ? Math.max(...bars.map((b) => b.amount)) : 1,
+    };
+  }, [sortedInvoices]);
 
   const currentPeriodEndDate = billingData?.currentPeriodEnd
     ? new Date(billingData.currentPeriodEnd)
@@ -273,48 +287,44 @@ export default function BillingPage() {
       })
     : null;
 
-  const bd = billingData?.billingDetails ?? null;
-  const billingFields = bd
-    ? ([
-        bd.name
-          ? { label: "Account", value: bd.name, link: false, mono: false }
-          : null,
-        bd.company
-          ? { label: "Company", value: bd.company, link: false, mono: false }
-          : null,
-        bd.email
-          ? { label: "Email", value: bd.email, link: true, mono: false }
-          : null,
-        bd.vatNumber
-          ? {
-              label: "VAT number",
-              value: bd.vatNumber,
-              link: false,
-              mono: true,
-            }
-          : null,
-        bd.address?.line1
-          ? {
-              label: "Address",
-              value: [
-                bd.address.line1,
-                bd.address.line2,
-                bd.address.city,
-                bd.address.postal_code,
-              ]
-                .filter(Boolean)
-                .join("\n"),
-              link: false,
-              mono: false,
-            }
-          : null,
-      ].filter(Boolean) as {
-        label: string;
-        value: string;
-        link: boolean;
-        mono: boolean;
-      }[])
-    : [];
+  const billingFields = useMemo(() => {
+    const bd = billingData?.billingDetails ?? null;
+    if (!bd) return [] as { label: string; value: string; link: boolean; mono: boolean }[];
+    return [
+      bd.name
+        ? { label: "Account", value: bd.name, link: false, mono: false }
+        : null,
+      bd.company
+        ? { label: "Company", value: bd.company, link: false, mono: false }
+        : null,
+      bd.email
+        ? { label: "Email", value: bd.email, link: true, mono: false }
+        : null,
+      bd.vatNumber
+        ? {
+            label: "VAT number",
+            value: bd.vatNumber,
+            link: false,
+            mono: true,
+          }
+        : null,
+      bd.address?.line1
+        ? {
+            label: "Address",
+            value: [
+              bd.address.line1,
+              bd.address.line2,
+              bd.address.city,
+              bd.address.postal_code,
+            ]
+              .filter(Boolean)
+              .join("\n"),
+            link: false,
+            mono: false,
+          }
+        : null,
+    ].filter(Boolean) as { label: string; value: string; link: boolean; mono: boolean }[];
+  }, [billingData]);
 
   const currencyLabel = billingData?.plan.currency?.toUpperCase() ?? "GBP";
   const acctId = billingData?.stripeCustomerId ?? null;

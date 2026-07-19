@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { API_URL } from "@/lib/apiConfig";
 import styles from "./AuthGate.module.css";
 
 type AuthGateProps = {
@@ -30,7 +29,7 @@ export default function AuthGate({ context, onLogin }: AuthGateProps) {
     try {
       const endpoint = mode === "register" ? "/register" : "/login";
       const body = mode === "register" ? { name, username, email, password } : { email, password };
-      const res = await fetch(`${API_URL}/auth${endpoint}`, {
+      const res = await fetch(`/api/auth${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -149,9 +148,9 @@ export default function AuthGate({ context, onLogin }: AuthGateProps) {
           </div>
         )}
         {success && (
-          <div role="alert" className={styles.successBox}>
+          <output className={styles.successBox}>
             <p>{success}</p>
-          </div>
+          </output>
         )}
 
         <button type="submit" className={styles.submitBtn} disabled={loading}>

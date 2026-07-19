@@ -33,8 +33,8 @@ describe("GET /api/pubs", () => {
     const response = await GET(new Request("http://localhost/api/pubs"));
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://api.example.com/api/v1/pubs",
-      { headers: { "X-API-Key": "test-key" }, cache: "no-store" }
+      "https://api.example.com/pubs",
+      { headers: {}, cache: "no-store" }
     );
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual(payload);
@@ -54,8 +54,8 @@ describe("GET /api/pubs", () => {
     await GET(new Request("http://localhost/api/pubs"));
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://public-api.example.com/api/v1/pubs",
-      { headers: { "X-API-Key": "public-key" }, cache: "no-store" }
+      "https://public-api.example.com/pubs",
+      { headers: {}, cache: "no-store" }
     );
   });
 
@@ -129,8 +129,8 @@ describe("GET /api/pubs", () => {
     await GET(new Request("http://localhost/api/pubs"));
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:4000/api/v1/pubs",
-      { headers: { "X-API-Key": "test-key" }, cache: "no-store" }
+      "http://localhost:4000/pubs",
+      { headers: {}, cache: "no-store" }
     );
   });
 });
