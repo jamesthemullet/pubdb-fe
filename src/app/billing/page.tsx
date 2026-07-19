@@ -15,6 +15,10 @@ type ApiKey = {
   tier: string;
   isActive: boolean;
   usageCount: number;
+};
+
+type Subscription = {
+  tier: string;
   remaining: { hour: number; day: number; month: number };
   limits: {
     requestsPerHour: number;
@@ -27,6 +31,7 @@ type ApiKey = {
 type DashboardData = {
   user: { name: string; email: string };
   apiKeys: ApiKey[];
+  subscription?: Subscription;
   summary: { totalApiKeys: number; totalUsage: number };
 };
 
@@ -101,8 +106,8 @@ function formatResetTime(
   })}`;
 }
 
-function usageMeters(key: ApiKey) {
-  const { limits, remaining, resetTimes } = key;
+function usageMeters(subscription: Subscription) {
+  const { limits, remaining, resetTimes } = subscription;
   return [
     {
       label: "HOURLY",
@@ -232,8 +237,9 @@ export default function BillingPage() {
     }
   }
 
-  const activeKey = dashboardData?.apiKeys.find((k) => k.isActive) ?? null;
-  const USAGE = activeKey ? usageMeters(activeKey) : null;
+  const USAGE = dashboardData?.subscription
+    ? usageMeters(dashboardData.subscription)
+    : null;
 
   const sortedInvoices = useMemo(
     () =>
