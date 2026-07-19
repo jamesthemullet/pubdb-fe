@@ -7,6 +7,6 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default function ProfilePage() {
+export default function ProfilePage(): React.JSX.Element {
   return <Dashboard />;
 }

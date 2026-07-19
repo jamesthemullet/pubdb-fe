@@ -11,7 +11,7 @@ type AuthGateProps = {
   onLogin?: () => void;
 };
 
-export default function AuthGate({ context, onLogin }: AuthGateProps) {
+export default function AuthGate({ context, onLogin }: AuthGateProps): React.JSX.Element {
   const [mode, setMode] = useState<"register" | "login">("login");
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");

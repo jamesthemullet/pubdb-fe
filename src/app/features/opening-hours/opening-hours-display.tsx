@@ -8,7 +8,7 @@ type OpeningHoursDisplayProps = {
 
 export default function OpeningHoursDisplay({
   value,
-}: OpeningHoursDisplayProps) {
+}: OpeningHoursDisplayProps): React.JSX.Element {
   const normalized = normalizeOpeningHours(value);
 
   if (!normalized) {
@@ -75,8 +75,10 @@ const normalizeOpeningHours = (
   }
   if (typeof value === "string") {
     try {
-      const parsed = JSON.parse(value) as OpeningHoursMap;
-      return parsed;
+      const parsed: unknown = JSON.parse(value);
+      return parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
+        ? (parsed as OpeningHoursMap)
+        : null;
     } catch (_error) {
       return null;
     }
