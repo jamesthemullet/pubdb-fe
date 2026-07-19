@@ -333,7 +333,7 @@ function PubsContent(): ReactElement {
             />
           </div>
 
-          <div className={styles.filterChips}>
+          <div className={styles.filterChips} id="filter-chips-list">
             {visibleFilters.map(({ key, label }) => (
               <button
                 key={key}
@@ -352,6 +352,8 @@ function PubsContent(): ReactElement {
                 type="button"
                 className={styles.chipMore}
                 onClick={() => setShowAllFilters(true)}
+                aria-expanded={false}
+                aria-controls="filter-chips-list"
               >
                 Show {hiddenCount} more filters
               </button>
@@ -361,6 +363,8 @@ function PubsContent(): ReactElement {
                 type="button"
                 className={styles.chipMore}
                 onClick={() => setShowAllFilters(false)}
+                aria-expanded={true}
+                aria-controls="filter-chips-list"
               >
                 Show less
               </button>
