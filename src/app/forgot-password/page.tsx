@@ -4,7 +4,6 @@ import { useState } from "react";
 import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
-import { API_URL } from "@/lib/apiConfig";
 import styles from "./page.module.css";
 
 export default function ForgotPasswordPage(): React.JSX.Element {
@@ -20,8 +19,7 @@ export default function ForgotPasswordPage(): React.JSX.Element {
     setMessage(null);
 
     try {
-      const apiUrl = API_URL;
-      const res = await fetch(`${apiUrl}/auth/forgot-password`, {
+      const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,7 +44,7 @@ export default function ForgotPasswordPage(): React.JSX.Element {
 
   return (
     <div className={styles.container}>
-      <Typography variant="headingMedium">Forgot Password</Typography>
+      <Typography variant="headingMedium" as="h1">Forgot Password</Typography>
       <Typography className={styles.description}>
         Enter your email address and we&apos;ll send you a link to reset your
         password.

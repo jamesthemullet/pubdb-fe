@@ -25,6 +25,20 @@ function jsonResponse(data: unknown, status = 200): Response {
 	});
 }
 
+const AUTHED_USER = { email: "alice@example.com" };
+
+function mockAuthedFetch(
+	pubsHandler: (url: string) => Response | Promise<Response>,
+) {
+	return vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+		const url = input as string;
+		if (url.includes("/api/auth/me")) {
+			return Promise.resolve(jsonResponse(AUTHED_USER));
+		}
+		return Promise.resolve(pubsHandler(url));
+	});
+}
+
 const SAMPLE_PUBS = [
 	{ id: "1", name: "The Harp", city: "London", address: "47 Chandos Place", country: "GB" },
 	{ id: "2", name: "The Crown", city: "Manchester", address: "5 Crown Street", country: "GB" },
@@ -38,10 +52,12 @@ describe("Pubs page", () => {
 		vi.restoreAllMocks();
 		process.env = { ...originalEnv };
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
+		localStorage.clear();
 	});
 
 	afterEach(() => {
 		process.env = originalEnv;
+		localStorage.clear();
 	});
 
 	it("shows loading state initially", () => {
@@ -217,6 +233,201 @@ describe("Pubs page", () => {
 			await screen.findByText("The Harp");
 
 			expect(screen.queryByText(/Showing/i)).not.toBeInTheDocument();
+		});
+	});
+
+	describe("edit status filter", () => {
+		it("hides the Show filter when the user is logged out", async () => {
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(
+				jsonResponse({ data: SAMPLE_PUBS }),
+			);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+
+			expect(screen.queryByText("Show:")).not.toBeInTheDocument();
+		});
+
+		it("shows the Show filter when logged in, and sends editedByMe to the API", async () => {
+			localStorage.setItem("token", "test-token");
+			const fetchMock = mockAuthedFetch(() =>
+				jsonResponse({ data: SAMPLE_PUBS }),
+			);
+
+			render(<Pubs />);
+
+			const editedBtn = await screen.findByRole("button", { name: "Edited" });
+			fireEvent.click(editedBtn);
+
+			await waitFor(() => {
+				const pubsCalls = fetchMock.mock.calls.filter((call) =>
+					(call[0] as string).includes("/api/pubs"),
+				);
+				const lastCall = pubsCalls[pubsCalls.length - 1];
+				const url = new URL(lastCall[0] as string, "http://localhost");
+				expect(url.searchParams.get("editedByMe")).toBe("true");
+			});
+		});
+
+		it("forwards the Bearer token on the pubs request", async () => {
+			localStorage.setItem("token", "test-token");
+			const fetchMock = mockAuthedFetch(() => jsonResponse({ data: SAMPLE_PUBS }));
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+
+			const pubsCall = fetchMock.mock.calls.find((call) =>
+				(call[0] as string).includes("/api/pubs"),
+			);
+			expect(
+				new Headers(pubsCall?.[1]?.headers).get("Authorization"),
+			).toBe("Bearer test-token");
+		});
+
+		it("shows an error when editedByMe is requested without a valid token", async () => {
+			localStorage.setItem("token", "expired-token");
+			mockAuthedFetch(() => jsonResponse({ error: "Unauthorized" }, 401));
+
+			render(<Pubs />);
+
+			const editedBtn = await screen.findByRole("button", { name: "Edited" });
+			fireEvent.click(editedBtn);
+
+			expect(await screen.findByText(/Error loading pubs/)).toBeInTheDocument();
+		});
+	});
+
+	describe("Near me", () => {
+		it("requests the user's location when clicked", async () => {
+			const getCurrentPosition = vi.fn();
+			vi.stubGlobal("navigator", { geolocation: { getCurrentPosition } });
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(
+				jsonResponse({ data: SAMPLE_PUBS }),
+			);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+			fireEvent.click(screen.getByRole("button", { name: /near me/i }));
+
+			expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+
+			vi.unstubAllGlobals();
+		});
+
+		it("shows a message when the browser has no geolocation support", async () => {
+			vi.stubGlobal("navigator", {});
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(
+				jsonResponse({ data: SAMPLE_PUBS }),
+			);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+			fireEvent.click(screen.getByRole("button", { name: /near me/i }));
+
+			expect(
+				await screen.findByText(/isn't supported in this browser/i),
+			).toBeInTheDocument();
+
+			vi.unstubAllGlobals();
+		});
+
+		it("shows a message when location permission is denied", async () => {
+			vi.stubGlobal("navigator", {
+				geolocation: {
+					getCurrentPosition: (
+						_success: PositionCallback,
+						error?: PositionErrorCallback,
+					) => error?.({} as GeolocationPositionError),
+				},
+			});
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(
+				jsonResponse({ data: SAMPLE_PUBS }),
+			);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+			fireEvent.click(screen.getByRole("button", { name: /near me/i }));
+
+			expect(
+				await screen.findByText(/location permission denied/i),
+			).toBeInTheDocument();
+
+			vi.unstubAllGlobals();
+		});
+
+		it("sends lat/lng to the API once permission is granted, and shows distance", async () => {
+			vi.stubGlobal("navigator", {
+				geolocation: {
+					getCurrentPosition: (success: PositionCallback) =>
+						success({
+							coords: { latitude: 51.5, longitude: -0.1 },
+						} as GeolocationPosition),
+				},
+			});
+			const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+				const url = new URL(input as string, "http://localhost");
+				const withDistance = url.searchParams.has("lat")
+					? SAMPLE_PUBS.map((p) => ({ ...p, distance: 1.2 }))
+					: SAMPLE_PUBS;
+				return Promise.resolve(jsonResponse({ data: withDistance }));
+			});
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+			fireEvent.click(screen.getByRole("button", { name: /near me/i }));
+
+			await waitFor(() => {
+				const lastCall = fetchMock.mock.calls[fetchMock.mock.calls.length - 1];
+				const url = new URL(lastCall[0] as string, "http://localhost");
+				expect(url.searchParams.get("lat")).toBe("51.5");
+				expect(url.searchParams.get("lng")).toBe("-0.1");
+			});
+
+			expect(await screen.findAllByText("1.2 km")).toHaveLength(SAMPLE_PUBS.length);
+
+			vi.unstubAllGlobals();
+		});
+
+		it("clears lat/lng when Near me is toggled off", async () => {
+			vi.stubGlobal("navigator", {
+				geolocation: {
+					getCurrentPosition: (success: PositionCallback) =>
+						success({
+							coords: { latitude: 51.5, longitude: -0.1 },
+						} as GeolocationPosition),
+				},
+			});
+			const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+				jsonResponse({ data: SAMPLE_PUBS }),
+			);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+			const nearMeBtn = screen.getByRole("button", { name: /near me/i });
+			fireEvent.click(nearMeBtn);
+
+			await waitFor(() => {
+				const lastCall = fetchMock.mock.calls[fetchMock.mock.calls.length - 1];
+				const url = new URL(lastCall[0] as string, "http://localhost");
+				expect(url.searchParams.has("lat")).toBe(true);
+			});
+
+			fireEvent.click(screen.getByRole("button", { name: /near me/i }));
+
+			await waitFor(() => {
+				const lastCall = fetchMock.mock.calls[fetchMock.mock.calls.length - 1];
+				const url = new URL(lastCall[0] as string, "http://localhost");
+				expect(url.searchParams.has("lat")).toBe(false);
+			});
+
+			vi.unstubAllGlobals();
 		});
 	});
 });

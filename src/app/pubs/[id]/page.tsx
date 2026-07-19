@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import type { ReactElement } from "react";
 import { useCallback, useEffect, useState } from "react";
 import Typography from "@/app/components/typography/typography";
 import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
@@ -590,7 +591,7 @@ export default function PubPage(): React.JSX.Element {
 
 // ─── Tab panels ──────────────────────────────────────────────────────────────
 
-function BeersTab({ pub }: { pub: Pub }) {
+function BeersTab({ pub }: { pub: Pub }): ReactElement {
   const beerTypeNames = getBeerTypeNames(pub);
   return (
     <div className={styles.tabContent}>
@@ -643,7 +644,7 @@ function checkOpenNow(
   return cur >= open && cur < close;
 }
 
-function HoursTab({ pub }: { pub: Pub }) {
+function HoursTab({ pub }: { pub: Pub }): ReactElement {
   const now = new Date();
   const jsDayIndex = now.getDay();
   const todayFull = WEEKDAYS[jsDayIndex === 0 ? 6 : jsDayIndex - 1].full;
@@ -724,7 +725,7 @@ function formatSunExposure(s: string): string {
   return s.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function GardenTab({ pub }: { pub: Pub }) {
+function GardenTab({ pub }: { pub: Pub }): ReactElement {
   if (!pub.beerGardens?.length) {
     return (
       <div className={styles.gardenEmptyCard}>
@@ -841,7 +842,7 @@ function avatarColor(initial: string): { bg: string; fg: string } {
   return AVATAR_COLORS[initial.toUpperCase().charCodeAt(0) % AVATAR_COLORS.length];
 }
 
-function HistoryTab({ pub }: { pub: Pub }) {
+function HistoryTab({ pub }: { pub: Pub }): ReactElement {
   type HistoryEntry = {
     key: string;
     initial: string;
