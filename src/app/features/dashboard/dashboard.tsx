@@ -153,6 +153,17 @@ const Dashboard = (): React.JSX.Element | null => {
   const [revokeError, setRevokeError] = useState<string | null>(null);
   const forgotKeyModalRef = useRef<HTMLDivElement>(null);
   const forgotKeyModalTriggerRef = useRef<HTMLElement | null>(null);
+  const cancelAuthChangedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+
+  useEffect(() => {
+    return () => {
+      if (cancelAuthChangedTimeoutRef.current) {
+        clearTimeout(cancelAuthChangedTimeoutRef.current);
+      }
+    };
+  }, []);
 
   function toggleEditTypes(pubId: string): void {
     setExpandedEdits((prev) => {
@@ -242,7 +253,10 @@ const Dashboard = (): React.JSX.Element | null => {
         data.message ||
           "Subscription cancelled. It will expire at the end of the current billing period."
       );
-      setTimeout(() => window.dispatchEvent(new Event("authChanged")), 800);
+      cancelAuthChangedTimeoutRef.current = setTimeout(
+        () => window.dispatchEvent(new Event("authChanged")),
+        800
+      );
     } catch (err: unknown) {
       setCancelError(getErrorMessage(err, "Failed to cancel subscription"));
     } finally {
