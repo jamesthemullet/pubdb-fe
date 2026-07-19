@@ -755,8 +755,8 @@ describe("Dashboard", () => {
 			});
 		});
 
-		it("revokes the specific key's id, not just the first key", async () => {
-			const secondKey = { ...SAMPLE_API_KEY, id: "key_2", name: "Second Key", keyPrefix: "pk_def" };
+		it("revokes the specific key's id, not just the first key, even when keyPrefix is shared", async () => {
+			const secondKey = { ...SAMPLE_API_KEY, id: "key_2", name: "Second Key" };
 			const data = { ...SAMPLE_DASHBOARD_DATA, apiKeys: [SAMPLE_API_KEY, secondKey] };
 			const fetchSpy = vi
 				.spyOn(globalThis, "fetch")

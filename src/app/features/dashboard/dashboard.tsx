@@ -259,7 +259,7 @@ const Dashboard = (): React.JSX.Element | null => {
     }
   }
 
-  async function handleForgotApiKey(keyPrefix: string) {
+  async function handleForgotApiKey(id: string, keyPrefix: string) {
     const userEmail = dashboardData?.user.email;
     if (!userEmail) {
       setForgotKeyError("Unable to determine account email.");
@@ -272,7 +272,7 @@ const Dashboard = (): React.JSX.Element | null => {
       setForgotKeyDetails(null);
       setShowForgotKeyModal(false);
       setForgotKeyCopyStatus("idle");
-      setForgotKeyTarget(keyPrefix);
+      setForgotKeyTarget(id);
       const token = localStorage.getItem("token");
       const res = await fetch("/api/auth/forgot-api-key", {
         method: "POST",
@@ -793,17 +793,17 @@ const Dashboard = (): React.JSX.Element | null => {
               dashboardData.apiKeys.map((key) => {
                 const used = key.limits.requestsPerMonth - key.remaining.month;
                 const pct = (used / key.limits.requestsPerMonth) * 100;
-                const isMenuOpen = openMenu === key.keyPrefix;
+                const isMenuOpen = openMenu === key.id;
                 const isForgotLoading =
-                  forgotKeyLoading && forgotKeyTarget === key.keyPrefix;
+                  forgotKeyLoading && forgotKeyTarget === key.id;
 
                 const showNudge =
                   key.tier === "HOBBY" &&
                   pct >= 75 &&
-                  !dismissedNudges.has(key.keyPrefix);
+                  !dismissedNudges.has(key.id);
 
                 return (
-                  <div key={key.keyPrefix} className={styles.keyCard}>
+                  <div key={key.id} className={styles.keyCard}>
                     <div className={styles.keyRow}>
                       <div className={styles.keyLeft}>
                         <span className={styles.keyName}>{key.name}</span>
@@ -819,13 +819,13 @@ const Dashboard = (): React.JSX.Element | null => {
                           type="button"
                           className={styles.btnOutline}
                           disabled={isForgotLoading}
-                          onClick={() => handleForgotApiKey(key.keyPrefix)}
+                          onClick={() => handleForgotApiKey(key.id, key.keyPrefix)}
                         >
                           {isForgotLoading
                             ? "Regenerating…"
                             : "Regenerate API key"}
                         </button>
-                        {forgotKeyTarget === key.keyPrefix && (
+                        {forgotKeyTarget === key.id && (
                           <>
                             {forgotKeyError && (
                               <p className={styles.inlineError}>
@@ -864,7 +864,7 @@ const Dashboard = (): React.JSX.Element | null => {
                             className={styles.menuDotBtn}
                             aria-label={`More options for ${key.name}`}
                             onClick={() =>
-                              setOpenMenu(isMenuOpen ? null : key.keyPrefix)
+                              setOpenMenu(isMenuOpen ? null : key.id)
                             }
                           >
                             •••
@@ -877,7 +877,7 @@ const Dashboard = (): React.JSX.Element | null => {
                                   className={styles.menuItem}
                                   disabled={isForgotLoading}
                                   onClick={() => {
-                                    void handleForgotApiKey(key.keyPrefix);
+                                    void handleForgotApiKey(key.id, key.keyPrefix);
                                     setOpenMenu(null);
                                   }}
                                 >
@@ -944,7 +944,7 @@ const Dashboard = (): React.JSX.Element | null => {
                             aria-label="Dismiss upgrade prompt"
                             onClick={() =>
                               setDismissedNudges(
-                                (prev) => new Set([...prev, key.keyPrefix])
+                                (prev) => new Set([...prev, key.id])
                               )
                             }
                           >
