@@ -19,6 +19,11 @@
   opacity: 0.6;
 }
 
+.button:focus-visible {
+  outline: 2px solid var(--accent, #2563eb);
+  outline-offset: 2px;
+}
+
 .primary {
   background-color: var(--button-primary);
   color: var(--button-primary-text);

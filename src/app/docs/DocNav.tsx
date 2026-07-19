@@ -30,6 +30,7 @@ export function DocNav() {
               type="button"
               className={`${styles.navItem} ${activeSection === id ? styles.navItemActive : ""}`}
               onClick={() => scrollTo(id)}
+              aria-current={activeSection === id ? "true" : undefined}
             >
               {label}
             </button>

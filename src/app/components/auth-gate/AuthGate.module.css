@@ -88,10 +88,10 @@
   color: #b5b5b0;
 }
 
-.input:focus {
+.input:focus-visible {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
 }
 
 .inputHint {
