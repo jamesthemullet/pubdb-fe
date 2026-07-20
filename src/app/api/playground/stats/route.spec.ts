@@ -28,7 +28,7 @@ describe("GET /api/playground/stats", () => {
       .mockResolvedValueOnce(jsonResponse({ token: "pgt_abc123" }))
       .mockResolvedValueOnce(jsonResponse({ success: true, data: {} }));
 
-    const request = new Request("http://localhost/api/playground/stats?keyPrefix=pk_dev_abc", {
+    const request = new Request("http://localhost/api/playground/stats?id=key_dev_abc", {
       headers: { authorization: "Bearer user-token" },
     });
 

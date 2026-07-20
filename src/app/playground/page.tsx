@@ -7,6 +7,7 @@ import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
 
 type ApiKey = {
+  id: string;
   name: string;
   tier: string;
   keyPrefix: string;
@@ -148,7 +149,7 @@ function buildPublicPath(endpoint: EndpointDef, values: Record<string, string>):
 function buildProxyRequest(
   endpoint: EndpointDef,
   values: Record<string, string>,
-  keyPrefix: string
+  keyId: string
 ): { proxyUrl: string; publicPath: string } {
   const pathSegment = endpoint.params
     .filter((p) => p.kind === "path")
@@ -160,7 +161,7 @@ function buildProxyRequest(
     const value = values[q.name]?.trim();
     if (value) queryParams.set(q.name, value);
   }
-  queryParams.set("keyPrefix", keyPrefix);
+  queryParams.set("id", keyId);
 
   return {
     proxyUrl: `${endpoint.proxyUrl}${pathSegment}?${queryParams.toString()}`,
@@ -172,7 +173,7 @@ export default function PlaygroundPage() {
   const { user } = useAuth();
   const [apiKeys, setApiKeys] = useState<ApiKey[] | null>(null);
   const [keysError, setKeysError] = useState<string | null>(null);
-  const [selectedKeyPrefix, setSelectedKeyPrefix] = useState<string>("");
+  const [selectedKeyId, setSelectedKeyId] = useState<string>("");
   const [activeEndpoint, setActiveEndpoint] = useState<EndpointDef>(ENDPOINTS[0]);
   const [paramValues, setParamValues] = useState<Record<string, string>>(() =>
     defaultParamValues(ENDPOINTS[0])
@@ -191,7 +192,7 @@ export default function PlaygroundPage() {
       .then((data: DashboardData) => {
         setApiKeys(data.apiKeys);
         if (data.apiKeys.length > 0) {
-          setSelectedKeyPrefix(data.apiKeys.find((k) => k.isActive)?.keyPrefix ?? data.apiKeys[0].keyPrefix);
+          setSelectedKeyId(data.apiKeys.find((k) => k.isActive)?.id ?? data.apiKeys[0].id);
         }
       })
       .catch(() => setKeysError("Couldn't load your API keys."));
@@ -211,7 +212,7 @@ export default function PlaygroundPage() {
   const missingRequired = activeEndpoint.params.some(
     (p) => p.required && !paramValues[p.name]?.trim()
   );
-  const canSend = !!selectedKeyPrefix && !missingRequired && !sending;
+  const canSend = !!selectedKeyId && !missingRequired && !sending;
   const curlText = `curl "https://api.thepubdb.com${buildPublicPath(activeEndpoint, paramValues)}" \\\n  -H "X-API-Key: $PUBDB_KEY"`;
 
   async function handleSend() {
@@ -221,7 +222,7 @@ export default function PlaygroundPage() {
     setResult(null);
     setResultError(null);
 
-    const { proxyUrl, publicPath } = buildProxyRequest(activeEndpoint, paramValues, selectedKeyPrefix);
+    const { proxyUrl, publicPath } = buildProxyRequest(activeEndpoint, paramValues, selectedKeyId);
     const token = localStorage.getItem("token");
     const start = performance.now();
     try {
@@ -305,11 +306,11 @@ export default function PlaygroundPage() {
                 <select
                   aria-label="Using key"
                   className={styles.keyPicker}
-                  value={selectedKeyPrefix}
-                  onChange={(e) => setSelectedKeyPrefix(e.target.value)}
+                  value={selectedKeyId}
+                  onChange={(e) => setSelectedKeyId(e.target.value)}
                 >
                   {apiKeys.map((key) => (
-                    <option key={key.keyPrefix} value={key.keyPrefix}>
+                    <option key={key.id} value={key.id}>
                       {key.name} ({key.keyPrefix}····) — {key.tier}
                     </option>
                   ))}

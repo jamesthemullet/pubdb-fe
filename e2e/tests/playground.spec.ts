@@ -34,7 +34,7 @@ function dashboardResponse(apiKeys: unknown[]) {
 }
 
 const ONE_KEY = [
-  { name: "My API Key", tier: "DEVELOPER", keyPrefix: "pk_test", isActive: true },
+  { id: "key_1", name: "My API Key", tier: "DEVELOPER", keyPrefix: "pk_test", isActive: true },
 ];
 
 test.describe("Playground page (/playground)", () => {
@@ -63,7 +63,7 @@ test.describe("Playground page (/playground)", () => {
     test("shows the key picker populated with the key", async ({ page }) => {
       const picker = page.getByRole("combobox", { name: "Using key" });
       await expect(picker).toBeVisible();
-      await expect(picker).toHaveValue("pk_test");
+      await expect(picker).toHaveValue("key_1");
     });
 
     test("Try it on GET /pubs shows a live response", async ({ page }) => {

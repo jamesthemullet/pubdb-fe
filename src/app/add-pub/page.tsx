@@ -541,7 +541,7 @@ export default function AddPubPage() {
           <p className={styles.requiredNote}>* = required field</p>
           <div className={styles.footerActions}>
             {(formErrors.length > 0 || error) && (
-              <div className={styles.errorSummary}>
+              <div className={styles.errorSummary} role="alert">
                 {formErrors.map((e) => <p key={e} className={styles.errorText}>{e}</p>)}
                 {error && <p className={styles.errorText}>{error}</p>}
               </div>

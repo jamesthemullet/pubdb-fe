@@ -24,7 +24,7 @@ describe("createPlaygroundProxyHandler", () => {
 
   it("returns 401 when no Authorization header is present", async () => {
     const handler = createPlaygroundProxyHandler(() => "/api/v1/things");
-    const request = new Request("http://localhost/api/playground/things?keyPrefix=pk_dev_abc");
+    const request = new Request("http://localhost/api/playground/things?id=key_dev_abc");
 
     const response = await handler(request);
 
@@ -32,7 +32,7 @@ describe("createPlaygroundProxyHandler", () => {
     await expect(response.json()).resolves.toEqual({ error: "Missing token" });
   });
 
-  it("returns 400 when keyPrefix is missing", async () => {
+  it("returns 400 when id is missing", async () => {
     const handler = createPlaygroundProxyHandler(() => "/api/v1/things");
     const request = new Request("http://localhost/api/playground/things", {
       headers: { authorization: "Bearer user-token" },
@@ -41,7 +41,7 @@ describe("createPlaygroundProxyHandler", () => {
     const response = await handler(request);
 
     expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({ error: "keyPrefix is required" });
+    await expect(response.json()).resolves.toEqual({ error: "id is required" });
   });
 
   it("mints a playground token then calls the built endpoint path with it as X-API-Key", async () => {
@@ -52,7 +52,7 @@ describe("createPlaygroundProxyHandler", () => {
 
     const handler = createPlaygroundProxyHandler((params) => `/api/v1/things?${params.toString()}`);
     const request = new Request(
-      "http://localhost/api/playground/things?keyPrefix=pk_dev_abc&hasCaskAle=true",
+      "http://localhost/api/playground/things?id=key_dev_abc&hasCaskAle=true",
       { headers: { authorization: "Bearer user-token" } }
     );
 
@@ -60,7 +60,7 @@ describe("createPlaygroundProxyHandler", () => {
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
-      "https://api.example.com/auth/keys/pk_dev_abc/playground-token",
+      "https://api.example.com/auth/keys/key_dev_abc/playground-token",
       { method: "POST", headers: { Authorization: "Bearer user-token" } }
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
@@ -88,7 +88,7 @@ describe("createPlaygroundProxyHandler", () => {
       );
 
     const handler = createPlaygroundProxyHandler(() => "/api/v1/things");
-    const request = new Request("http://localhost/api/playground/things?keyPrefix=pk_dev_abc", {
+    const request = new Request("http://localhost/api/playground/things?id=key_dev_abc", {
       headers: { authorization: "Bearer user-token" },
     });
 
@@ -105,7 +105,7 @@ describe("createPlaygroundProxyHandler", () => {
     );
 
     const handler = createPlaygroundProxyHandler(() => "/api/v1/things");
-    const request = new Request("http://localhost/api/playground/things?keyPrefix=pk_missing", {
+    const request = new Request("http://localhost/api/playground/things?id=key_missing", {
       headers: { authorization: "Bearer user-token" },
     });
 
@@ -119,7 +119,7 @@ describe("createPlaygroundProxyHandler", () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Connection refused"));
 
     const handler = createPlaygroundProxyHandler(() => "/api/v1/things");
-    const request = new Request("http://localhost/api/playground/things?keyPrefix=pk_dev_abc", {
+    const request = new Request("http://localhost/api/playground/things?id=key_dev_abc", {
       headers: { authorization: "Bearer user-token" },
     });
 

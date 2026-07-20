@@ -22,14 +22,14 @@ describe("GET /api/playground/pubs", () => {
     process.env = originalEnv;
   });
 
-  it("forwards query params (minus keyPrefix) to /api/v1/pubs", async () => {
+  it("forwards query params (minus id) to /api/v1/pubs", async () => {
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse({ token: "pgt_abc123" }))
       .mockResolvedValueOnce(jsonResponse({ success: true, data: [] }));
 
     const request = new Request(
-      "http://localhost/api/playground/pubs?keyPrefix=pk_dev_abc&page=2&limit=10",
+      "http://localhost/api/playground/pubs?id=key_dev_abc&page=2&limit=10",
       { headers: { authorization: "Bearer user-token" } }
     );
 
