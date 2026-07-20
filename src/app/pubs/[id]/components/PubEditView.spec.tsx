@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi, type Mock } from "vitest";
 import type { Dispatch, SetStateAction } from "react";
+import { describe, expect, it, type Mock, vi } from "vitest";
 
 import type { Pub } from "@/types/pub";
 import PubEditView from "./PubEditView";
