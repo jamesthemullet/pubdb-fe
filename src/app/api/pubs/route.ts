@@ -5,14 +5,13 @@ import { createApiProxyHandler } from "../utils/proxyHandler";
 export const GET = createApiProxyHandler("/pubs", {
   resourceName: "pubs",
   forwardAuth: true,
+  includeApiKey: false,
 });
 
 export async function POST(request: Request): Promise<Response> {
   const apiUrl = getServerApiUrl();
-  const apiKey = process.env.TESTING_API_KEY;
 
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (apiKey) headers["X-API-Key"] = apiKey;
   const authHeader = request.headers.get("authorization");
   if (authHeader) headers.Authorization = authHeader;
 

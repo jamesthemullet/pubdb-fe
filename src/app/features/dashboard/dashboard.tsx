@@ -11,6 +11,7 @@ import styles from "./dashboard.module.css";
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type ApiKey = {
+  id?: string;
   name: string;
   tier: string;
   keyPrefix: string;
@@ -20,12 +21,16 @@ type ApiKey = {
   createdAt: string;
   lastUsed: string | null;
   usageCount: number;
-  remaining: { hour: number; day: number; month: number };
+};
+
+type Subscription = {
+  tier: string;
   limits: {
     requestsPerHour: number;
     requestsPerDay: number;
     requestsPerMonth: number;
   };
+  remaining: { hour: number; day: number; month: number };
   resetTimes: { hour: string; day: string; month: string };
   features: { allowLocationSearch: boolean; allowStats: boolean };
 };
@@ -48,6 +53,7 @@ type DashboardData = {
     emailVerified: boolean;
   };
   apiKeys: ApiKey[];
+  subscription?: Subscription;
   summary: { totalApiKeys: number; totalUsage: number };
 };
 
@@ -60,6 +66,12 @@ type DashboardData = {
 //   500,  600,  650,  580,  550,
 //   1100, 1200, 1290, 1380, 3200,
 // ].map((v, i) => ({ id: `c${i}`, v }));
+
+const TIER_KEY_LIMITS: Record<string, number> = {
+  HOBBY: 1,
+  DEVELOPER: 3,
+  BUSINESS: 10,
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -102,18 +114,6 @@ function fmtRelative(iso: string | null): string {
 
 // function BarChart() { ... } // TODO: restore with real time-series data
 
-function UsageBar({ pct }: { pct: number }) {
-  const fill = pct > 90 ? "#ef4444" : pct > 75 ? "#f59e0b" : "#555555";
-  return (
-    <div className={styles.usageBarTrack}>
-      <div
-        className={styles.usageBarFill}
-        style={{ width: `${Math.min(pct, 100)}%`, background: fill }}
-      />
-    </div>
-  );
-}
-
 // ── Main component ────────────────────────────────────────────────────────────
 
 const Dashboard = (): React.JSX.Element | null => {
@@ -140,15 +140,32 @@ const Dashboard = (): React.JSX.Element | null => {
     "idle" | "copied" | "error"
   >("idle");
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [dismissedNudges, setDismissedNudges] = useState<Set<string>>(
-    new Set()
-  );
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const [createKeyLoading, setCreateKeyLoading] = useState(false);
   const [createKeyError, setCreateKeyError] = useState<string | null>(null);
+  const [showAddKeyModal, setShowAddKeyModal] = useState(false);
+  const [addKeyName, setAddKeyName] = useState("");
+  const [addKeyLoading, setAddKeyLoading] = useState(false);
+  const [addKeyError, setAddKeyError] = useState<string | null>(null);
+  const [revokingKeyId, setRevokingKeyId] = useState<string | null>(
+    null
+  );
+  const [revokeError, setRevokeError] = useState<string | null>(null);
   const forgotKeyModalRef = useRef<HTMLDivElement>(null);
   const forgotKeyModalTriggerRef = useRef<HTMLElement | null>(null);
+  const cancelAuthChangedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
 
-  function toggleEditTypes(pubId: string) {
+  useEffect(() => {
+    return () => {
+      if (cancelAuthChangedTimeoutRef.current) {
+        clearTimeout(cancelAuthChangedTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  function toggleEditTypes(pubId: string): void {
     setExpandedEdits((prev) => {
       const next = new Set(prev);
       next.has(pubId) ? next.delete(pubId) : next.add(pubId);
@@ -236,7 +253,10 @@ const Dashboard = (): React.JSX.Element | null => {
         data.message ||
           "Subscription cancelled. It will expire at the end of the current billing period."
       );
-      setTimeout(() => window.dispatchEvent(new Event("authChanged")), 800);
+      cancelAuthChangedTimeoutRef.current = setTimeout(
+        () => window.dispatchEvent(new Event("authChanged")),
+        800
+      );
     } catch (err: unknown) {
       setCancelError(getErrorMessage(err, "Failed to cancel subscription"));
     } finally {
@@ -244,7 +264,7 @@ const Dashboard = (): React.JSX.Element | null => {
     }
   }
 
-  async function handleForgotApiKey(keyPrefix: string) {
+  async function handleForgotApiKey(id: string, keyPrefix: string) {
     const userEmail = dashboardData?.user.email;
     if (!userEmail) {
       setForgotKeyError("Unable to determine account email.");
@@ -257,7 +277,7 @@ const Dashboard = (): React.JSX.Element | null => {
       setForgotKeyDetails(null);
       setShowForgotKeyModal(false);
       setForgotKeyCopyStatus("idle");
-      setForgotKeyTarget(keyPrefix);
+      setForgotKeyTarget(id);
       const token = localStorage.getItem("token");
       const res = await fetch("/api/auth/forgot-api-key", {
         method: "POST",
@@ -340,6 +360,71 @@ const Dashboard = (): React.JSX.Element | null => {
     }
   }
 
+  function handleOpenAddKeyModal() {
+    setAddKeyName("");
+    setAddKeyError(null);
+    setShowAddKeyModal(true);
+  }
+
+  function handleCloseAddKeyModal() {
+    setShowAddKeyModal(false);
+    setAddKeyError(null);
+  }
+
+  async function handleAddApiKey() {
+    try {
+      setAddKeyLoading(true);
+      setAddKeyError(null);
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/auth/keys", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
+        body: JSON.stringify(addKeyName.trim() ? { name: addKeyName.trim() } : {}),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
+      const keyData: GeneratedApiKeyResponse = data.apiKey ?? data;
+      setShowAddKeyModal(false);
+      setForgotKeyDetails(keyData);
+      setShowForgotKeyModal(true);
+      setForgotKeyCopyStatus("idle");
+      const refreshRes = await fetch("/api/auth/dashboard", {
+        headers: buildAuthHeaders(token),
+      });
+      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+    } catch (err: unknown) {
+      setAddKeyError(getErrorMessage(err, "Failed to create API key"));
+    } finally {
+      setAddKeyLoading(false);
+    }
+  }
+
+  async function handleRevokeApiKey(id: string, keyPrefix: string) {
+    if (!confirm(`Revoke key ${keyPrefix}····? This can't be undone.`)) return;
+    try {
+      setRevokingKeyId(id);
+      setRevokeError(null);
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/auth/keys/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers: buildAuthHeaders(token),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
+      const refreshRes = await fetch("/api/auth/dashboard", {
+        headers: buildAuthHeaders(token),
+      });
+      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+    } catch (err: unknown) {
+      setRevokeError(getErrorMessage(err, "Failed to revoke API key"));
+    } finally {
+      setRevokingKeyId(null);
+    }
+  }
+
   useEffect(() => {
     if (showForgotKeyModal && forgotKeyDetails) {
       forgotKeyModalTriggerRef.current = document.activeElement as HTMLElement;
@@ -372,22 +457,16 @@ const Dashboard = (): React.JSX.Element | null => {
     }
   }
 
+  const subscription = dashboardData?.subscription;
   const totalUsed = useMemo(
     () =>
-      dashboardData?.apiKeys.reduce(
-        (sum, k) => sum + (k.limits.requestsPerMonth - k.remaining.month),
-        0
-      ) ?? 0,
-    [dashboardData]
+      subscription
+        ? subscription.limits.requestsPerMonth - subscription.remaining.month
+        : 0,
+    [subscription]
   );
-  const totalLimit = useMemo(
-    () =>
-      dashboardData?.apiKeys.reduce(
-        (sum, k) => sum + k.limits.requestsPerMonth,
-        0
-      ) ?? 0,
-    [dashboardData]
-  );
+  const totalLimit = subscription?.limits.requestsPerMonth ?? 0;
+  const totalUsedPct = totalLimit > 0 ? (totalUsed / totalLimit) * 100 : 0;
   const activeKeyCount = useMemo(
     () =>
       dashboardData?.apiKeys.filter(
@@ -395,6 +474,15 @@ const Dashboard = (): React.JSX.Element | null => {
       ).length ?? 0,
     [dashboardData]
   );
+  const accountTier = subscription?.tier;
+  const keyLimit = accountTier ? TIER_KEY_LIMITS[accountTier] : undefined;
+  const atKeyLimit =
+    !!keyLimit && (dashboardData?.apiKeys.length ?? 0) >= keyLimit;
+  const showNudge =
+    !!subscription &&
+    accountTier === "HOBBY" &&
+    totalUsedPct >= 75 &&
+    !nudgeDismissed;
 
   if (!isAuthenticated) {
     return <AuthGate context="API keys" />;
@@ -428,6 +516,56 @@ const Dashboard = (): React.JSX.Element | null => {
 
   return (
     <>
+      {/* ── Add-key modal ────────────────────────────────────────────────── */}
+      {showAddKeyModal && (
+        <div className={styles.modalOverlay}>
+          <div
+            className={styles.modalCard}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-key-modal-title"
+          >
+            <p className={styles.modalTitle} id="add-key-modal-title">
+              Add a new API key
+            </p>
+            <p className={styles.modalDesc}>
+              Give it a name to help you tell your keys apart. Leave blank to
+              use the default name.
+            </p>
+            <input
+              type="text"
+              className={styles.btnOutline}
+              style={{ width: "100%", marginBottom: "1rem" }}
+              placeholder="e.g. Staging key"
+              value={addKeyName}
+              onChange={(e) => setAddKeyName(e.target.value)}
+              disabled={addKeyLoading}
+            />
+            {addKeyError && <p className={styles.inlineError}>{addKeyError}</p>}
+            <div className={styles.modalFooter} style={{ gap: "0.5rem" }}>
+              <button
+                type="button"
+                className={styles.btnOutline}
+                onClick={handleCloseAddKeyModal}
+                disabled={addKeyLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={styles.btnPrimary}
+                onClick={() => {
+                  void handleAddApiKey();
+                }}
+                disabled={addKeyLoading}
+              >
+                {addKeyLoading ? "Creating…" : "Create key"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Forgot-key modal ─────────────────────────────────────────────── */}
       {forgotKeyDetails && showForgotKeyModal && (
         <div className={styles.modalOverlay}>
@@ -511,7 +649,7 @@ const Dashboard = (): React.JSX.Element | null => {
             </p>
           </div>
           <div className={styles.pageActions}>
-            {dashboardData.apiKeys.length === 0 && (
+            {dashboardData.apiKeys.length === 0 ? (
               <button
                 type="button"
                 className={styles.btnPrimary}
@@ -521,6 +659,20 @@ const Dashboard = (): React.JSX.Element | null => {
                 }}
               >
                 {createKeyLoading ? "Creating…" : "+ New key"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={styles.btnPrimary}
+                disabled={atKeyLimit}
+                title={
+                  atKeyLimit
+                    ? `Your ${accountTier} plan allows up to ${keyLimit} API keys. Delete an existing key or upgrade your plan to create another.`
+                    : undefined
+                }
+                onClick={handleOpenAddKeyModal}
+              >
+                {atKeyLimit ? "Key limit reached" : "+ Add key"}
               </button>
             )}
             {createKeyError && (
@@ -570,9 +722,9 @@ const Dashboard = (): React.JSX.Element | null => {
               </span>
             </div>
             <div className={styles.statValue}>
-              {totalUsed.toLocaleString()}
+              {subscription ? totalUsed.toLocaleString() : "—"}
               <span className={styles.statSuffix}>
-                /{totalLimit > 0 ? `${Math.round(totalLimit / 1000)}k` : "100k"}
+                /{totalLimit > 0 ? `${Math.round(totalLimit / 1000)}k` : "—"}
               </span>
             </div>
             {/* TODO: show % vs prev period once API returns historical usage data */}
@@ -595,7 +747,7 @@ const Dashboard = (): React.JSX.Element | null => {
                   {activeKeyCount} active
                 </span>
               </div>
-              {dashboardData.apiKeys.length === 0 && (
+              {dashboardData.apiKeys.length === 0 ? (
                 <button
                   type="button"
                   className={styles.btnOutline}
@@ -605,6 +757,20 @@ const Dashboard = (): React.JSX.Element | null => {
                   }}
                 >
                   {createKeyLoading ? "Creating…" : "+ New key"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.btnOutline}
+                  disabled={atKeyLimit}
+                  title={
+                    atKeyLimit
+                      ? `Your ${accountTier} plan allows up to ${keyLimit} API keys. Delete an existing key or upgrade your plan to create another.`
+                      : undefined
+                  }
+                  onClick={handleOpenAddKeyModal}
+                >
+                  {atKeyLimit ? "Key limit reached" : "+ Add key"}
                 </button>
               )}
             </div>
@@ -616,6 +782,9 @@ const Dashboard = (): React.JSX.Element | null => {
             )}
             {cancelMessage && (
               <p className={styles.inlineSuccess}>{cancelMessage}</p>
+            )}
+            {revokeError && (
+              <p className={styles.inlineError}>{revokeError}</p>
             )}
 
             {dashboardData.apiKeys.length === 0 ? (
@@ -637,19 +806,13 @@ const Dashboard = (): React.JSX.Element | null => {
               </div>
             ) : (
               dashboardData.apiKeys.map((key) => {
-                const used = key.limits.requestsPerMonth - key.remaining.month;
-                const pct = (used / key.limits.requestsPerMonth) * 100;
-                const isMenuOpen = openMenu === key.keyPrefix;
+                const identityKey = key.id ?? key.keyPrefix;
+                const isMenuOpen = openMenu === identityKey;
                 const isForgotLoading =
-                  forgotKeyLoading && forgotKeyTarget === key.keyPrefix;
-
-                const showNudge =
-                  key.tier === "HOBBY" &&
-                  pct >= 75 &&
-                  !dismissedNudges.has(key.keyPrefix);
+                  forgotKeyLoading && forgotKeyTarget === identityKey;
 
                 return (
-                  <div key={key.keyPrefix} className={styles.keyCard}>
+                  <div key={identityKey} className={styles.keyCard}>
                     <div className={styles.keyRow}>
                       <div className={styles.keyLeft}>
                         <span className={styles.keyName}>{key.name}</span>
@@ -665,13 +828,13 @@ const Dashboard = (): React.JSX.Element | null => {
                           type="button"
                           className={styles.btnOutline}
                           disabled={isForgotLoading}
-                          onClick={() => handleForgotApiKey(key.keyPrefix)}
+                          onClick={() => handleForgotApiKey(identityKey, key.keyPrefix)}
                         >
                           {isForgotLoading
                             ? "Regenerating…"
                             : "Regenerate API key"}
                         </button>
-                        {forgotKeyTarget === key.keyPrefix && (
+                        {forgotKeyTarget === identityKey && (
                           <>
                             {forgotKeyError && (
                               <p className={styles.inlineError}>
@@ -699,36 +862,51 @@ const Dashboard = (): React.JSX.Element | null => {
                         </span>
                         <div className={styles.keyUsageGroup}>
                           <span className={styles.usageText}>
-                            {used.toLocaleString()} /{" "}
-                            {key.limits.requestsPerMonth.toLocaleString()}
+                            {key.usageCount.toLocaleString()} requests all-time
                           </span>
-                          <UsageBar pct={pct} />
                         </div>
-                        {key.tier !== "HOBBY" && (
-                          <div className={styles.keyMenuWrap}>
-                            <button
-                              type="button"
-                              className={styles.menuDotBtn}
-                              aria-label={`More options for ${key.name}`}
-                              onClick={() =>
-                                setOpenMenu(isMenuOpen ? null : key.keyPrefix)
-                              }
-                            >
-                              •••
-                            </button>
-                            {isMenuOpen && key.keyStatus === "ACTIVE" && (
-                              <div className={styles.menuDropdown}>
+                        <div className={styles.keyMenuWrap}>
+                          <button
+                            type="button"
+                            className={styles.menuDotBtn}
+                            aria-label={`More options for ${key.name}`}
+                            onClick={() =>
+                              setOpenMenu(isMenuOpen ? null : identityKey)
+                            }
+                          >
+                            •••
+                          </button>
+                          {isMenuOpen && key.keyStatus === "ACTIVE" && (
+                            <div className={styles.menuDropdown}>
+                              {key.tier !== "HOBBY" && (
                                 <button
                                   type="button"
                                   className={styles.menuItem}
                                   disabled={isForgotLoading}
                                   onClick={() => {
-                                    void handleForgotApiKey(key.keyPrefix);
+                                    void handleForgotApiKey(identityKey, key.keyPrefix);
                                     setOpenMenu(null);
                                   }}
                                 >
                                   Forgot API key
                                 </button>
+                              )}
+                              <button
+                                type="button"
+                                className={styles.menuItemDanger}
+                                disabled={!key.id || revokingKeyId === key.id}
+                                title={key.id ? undefined : "This key can't be revoked from here — contact support."}
+                                onClick={() => {
+                                  if (!key.id) return;
+                                  void handleRevokeApiKey(key.id, key.keyPrefix);
+                                  setOpenMenu(null);
+                                }}
+                              >
+                                {revokingKeyId === key.id
+                                  ? "Revoking…"
+                                  : "Revoke key"}
+                              </button>
+                              {key.tier !== "HOBBY" && (
                                 <button
                                   type="button"
                                   className={styles.menuItemDanger}
@@ -742,54 +920,47 @@ const Dashboard = (): React.JSX.Element | null => {
                                     ? "Cancelling…"
                                     : "Cancel subscription"}
                                 </button>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    {showNudge && (
-                      <div className={styles.upgradeNudge}>
-                        <div className={styles.upgradeNudgeBody}>
-                          <p className={styles.upgradeNudgeHeading}>
-                            You&rsquo;ve used {Math.round(pct)}% of your monthly
-                            requests
-                          </p>
-                          <p className={styles.upgradeNudgeDesc}>
-                            {key.remaining.month.toLocaleString()} requests left
-                            this month. Upgrade to DEVELOPER to unlock
-                            significantly increased limits, location search and
-                            statistics.
-                          </p>
-                        </div>
-                        <div className={styles.upgradeNudgeActions}>
-                          <a
-                            href="/#pricing"
-                            className={styles.upgradeNudgeCta}
-                          >
-                            Upgrade &rarr;
-                          </a>
-                          <button
-                            type="button"
-                            className={styles.upgradeNudgeDismiss}
-                            aria-label="Dismiss upgrade prompt"
-                            onClick={() =>
-                              setDismissedNudges(
-                                (prev) => new Set([...prev, key.keyPrefix])
-                              )
-                            }
-                          >
-                            &times;
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 );
               })
             )}
           </div>
         </div>
+
+        {showNudge && (
+          <div className={styles.upgradeNudge}>
+            <div className={styles.upgradeNudgeBody}>
+              <p className={styles.upgradeNudgeHeading}>
+                You&rsquo;ve used {Math.round(totalUsedPct)}% of your monthly
+                requests
+              </p>
+              <p className={styles.upgradeNudgeDesc}>
+                {(subscription?.remaining.month ?? 0).toLocaleString()} requests left
+                this month. Upgrade to DEVELOPER to unlock significantly
+                increased limits, location search and statistics.
+              </p>
+            </div>
+            <div className={styles.upgradeNudgeActions}>
+              <a href="/#pricing" className={styles.upgradeNudgeCta}>
+                Upgrade &rarr;
+              </a>
+              <button
+                type="button"
+                className={styles.upgradeNudgeDismiss}
+                aria-label="Dismiss upgrade prompt"
+                onClick={() => setNudgeDismissed(true)}
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Contributions section */}
         {dashboardData.user.approved && (

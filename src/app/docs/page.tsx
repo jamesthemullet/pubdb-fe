@@ -89,6 +89,15 @@ export default function DocsPage() {
               filtering, error handling, and SDKs.
             </p>
           </div>
+
+          <div className={styles.headerActions}>
+            <a href="/playground" className={styles.headerBtn}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <polygon points="3,2 11,7 3,12" fill="currentColor" />
+              </svg>
+              Playground
+            </a>
+          </div>
         </div>
 
         <section id="quick-start" className={styles.section}>
@@ -241,7 +250,7 @@ export default function DocsPage() {
             {[
               { code: "400", name: "bad_request", desc: "Malformed request or invalid parameter" },
               { code: "401", name: "unauthorized", desc: "Missing or invalid API key" },
-              { code: "403", name: "forbidden", desc: "Key lacks permission for this action" },
+              { code: "403", name: "forbidden", desc: "Not authenticated or lacks permission for this action" },
               { code: "404", name: "not_found", desc: "Resource does not exist" },
               { code: "429", name: "rate_limited", desc: "Hourly, daily, or monthly quota exceeded" },
               { code: "500", name: "server_error", desc: "Something went wrong on our end" },

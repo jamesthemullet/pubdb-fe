@@ -11,7 +11,7 @@ type AuthGateProps = {
   onLogin?: () => void;
 };
 
-export default function AuthGate({ context, onLogin }: AuthGateProps) {
+export default function AuthGate({ context, onLogin }: AuthGateProps): React.JSX.Element {
   const [mode, setMode] = useState<"register" | "login">("login");
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -148,9 +148,9 @@ export default function AuthGate({ context, onLogin }: AuthGateProps) {
           </div>
         )}
         {success && (
-          <div role="alert" className={styles.successBox}>
+          <output className={styles.successBox}>
             <p>{success}</p>
-          </div>
+          </output>
         )}
 
         <button type="submit" className={styles.submitBtn} disabled={loading}>

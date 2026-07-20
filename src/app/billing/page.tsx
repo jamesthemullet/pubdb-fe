@@ -15,6 +15,10 @@ type ApiKey = {
   tier: string;
   isActive: boolean;
   usageCount: number;
+};
+
+type Subscription = {
+  tier: string;
   remaining: { hour: number; day: number; month: number };
   limits: {
     requestsPerHour: number;
@@ -27,6 +31,7 @@ type ApiKey = {
 type DashboardData = {
   user: { name: string; email: string };
   apiKeys: ApiKey[];
+  subscription?: Subscription;
   summary: { totalApiKeys: number; totalUsage: number };
 };
 
@@ -101,8 +106,8 @@ function formatResetTime(
   })}`;
 }
 
-function usageMeters(key: ApiKey) {
-  const { limits, remaining, resetTimes } = key;
+function usageMeters(subscription: Subscription) {
+  const { limits, remaining, resetTimes } = subscription;
   return [
     {
       label: "HOURLY",
@@ -232,17 +237,22 @@ export default function BillingPage() {
     }
   }
 
-  const activeKey = dashboardData?.apiKeys.find((k) => k.isActive) ?? null;
-  const USAGE = activeKey ? usageMeters(activeKey) : null;
+  const USAGE = dashboardData?.subscription
+    ? usageMeters(dashboardData.subscription)
+    : null;
 
-  const { sortedInvoices, spendBars, maxSpend } = useMemo(() => {
-    const sorted =
+  const sortedInvoices = useMemo(
+    () =>
       billingData?.invoices
         .slice()
         .sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        ) ?? [];
-    const bars = sorted
+        ) ?? [],
+    [billingData]
+  );
+
+  const { spendBars, maxSpend } = useMemo(() => {
+    const bars = sortedInvoices
       .slice(0, 6)
       .reverse()
       .map((inv, i, arr) => ({
@@ -253,11 +263,10 @@ export default function BillingPage() {
         current: i === arr.length - 1,
       }));
     return {
-      sortedInvoices: sorted,
       spendBars: bars,
       maxSpend: bars.length > 0 ? Math.max(...bars.map((b) => b.amount)) : 1,
     };
-  }, [billingData]);
+  }, [sortedInvoices]);
 
   const currentPeriodEndDate = billingData?.currentPeriodEnd
     ? new Date(billingData.currentPeriodEnd)
@@ -280,7 +289,8 @@ export default function BillingPage() {
 
   const billingFields = useMemo(() => {
     const bd = billingData?.billingDetails ?? null;
-    if (!bd) return [];
+    if (!bd)
+      return [] as { label: string; value: string; link: boolean; mono: boolean }[];
     return [
       bd.name
         ? { label: "Account", value: bd.name, link: false, mono: false }
