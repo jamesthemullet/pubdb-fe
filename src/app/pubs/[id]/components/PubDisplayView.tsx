@@ -8,10 +8,10 @@ type Props = {
   pub: Pub;
   getCountryName: (code: string) => string;
   canEdit?: boolean;
-  onInlineSave?: (field: keyof Pub, value: unknown) => Promise<string | null>;
+  onInlineSave?: (field: keyof Pub, value: string | boolean | null) => Promise<string | null>;
 };
 
-export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineSave }: Props) {
+export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineSave }: Props): React.JSX.Element {
   const ce = !!(canEdit && onInlineSave);
 
   const save =

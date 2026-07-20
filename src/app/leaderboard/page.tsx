@@ -2,7 +2,7 @@ import { normalizeLeaderboard } from "@/lib/normalizeLeaderboard";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
 import LeaderboardClient from "./LeaderboardClient";
 
-export default async function LeaderboardPage() {
+export default async function LeaderboardPage(): Promise<React.JSX.Element> {
   const apiUrl = getServerApiUrl();
   const headers: Record<string, string> = {};
   const apiKey = process.env.TESTING_API_KEY;

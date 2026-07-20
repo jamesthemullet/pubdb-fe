@@ -2,7 +2,7 @@ import { normalizeChangelog } from "@/lib/normalizeChangelog";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
 import ChangelogClient from "./ChangelogClient";
 
-export default async function ChangelogPage() {
+export default async function ChangelogPage(): Promise<React.JSX.Element> {
   const apiUrl = getServerApiUrl();
   const headers: Record<string, string> = {};
   const apiKey = process.env.TESTING_API_KEY;

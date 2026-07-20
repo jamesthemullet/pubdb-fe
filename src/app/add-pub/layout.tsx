@@ -14,6 +14,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AddPubLayout({ children }: { children: React.ReactNode }) {
+export default function AddPubLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return <>{children}</>;
 }
