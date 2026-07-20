@@ -106,7 +106,15 @@ function formatResetTime(
   })}`;
 }
 
-function usageMeters(subscription: Subscription) {
+type UsageMeter = {
+  label: string;
+  used: number;
+  limit: number;
+  pct: number;
+  reset: string;
+};
+
+function usageMeters(subscription: Subscription): UsageMeter[] {
   const { limits, remaining, resetTimes } = subscription;
   return [
     {
@@ -173,7 +181,7 @@ function formatPeriod(startMs: number, endMs: number): string {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function BillingPage() {
+export default function BillingPage(): React.JSX.Element {
   const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
@@ -189,13 +197,13 @@ export default function BillingPage() {
     const headers = buildAuthHeaders(token);
     fetch("/api/auth/dashboard", { headers })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
+      .then((data: DashboardData | null) => {
         if (data) setDashboardData(data);
       })
       .catch(() => {});
     fetch("/api/payments/billing", { headers })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
+      .then((data: BillingData | null) => {
         if (data) setBillingData(data);
       })
       .catch(() => {});

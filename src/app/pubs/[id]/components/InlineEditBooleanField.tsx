@@ -14,7 +14,7 @@ type Props = {
 
 const BOOL_OPTIONS = [true, false, null] as (boolean | null)[];
 
-export default function InlineEditBooleanField({ label, value, onSave, canEdit, rowLayout }: Props) {
+export default function InlineEditBooleanField({ label, value, onSave, canEdit, rowLayout }: Props): React.JSX.Element {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);

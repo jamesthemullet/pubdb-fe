@@ -130,7 +130,7 @@ function YourRankBanner({
 
 // ── Client component ──────────────────────────────────────────────────────────
 
-export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
+export default function LeaderboardClient({ data }: { data: LeaderboardData }): React.JSX.Element {
   const { user } = useAuth();
   const router = useRouter();
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");

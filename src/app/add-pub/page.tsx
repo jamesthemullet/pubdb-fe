@@ -86,7 +86,7 @@ const AMENITY_LABELS: Partial<Record<PubAmenityKey, string>> = {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function AddPubPage() {
+export default function AddPubPage(): React.JSX.Element {
   const router = useRouter();
 
   // Core fields
