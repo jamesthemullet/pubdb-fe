@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, type Mock } from "vitest";
+import type { Dispatch, SetStateAction } from "react";
 
 import type { Pub } from "@/types/pub";
 import PubEditView from "./PubEditView";
@@ -24,8 +25,8 @@ function renderView(overrides: {
   isAdmin?: boolean;
   isSaveDisabled?: boolean;
   saveError?: string | null;
-  onFieldChange?: ReturnType<typeof vi.fn>;
-  setFieldErrors?: ReturnType<typeof vi.fn>;
+  onFieldChange?: Mock<(field: keyof Pub, value: Pub[keyof Pub]) => void>;
+  setFieldErrors?: Mock<Dispatch<SetStateAction<Record<string, string>>>>;
 } = {}) {
   const props = {
     pub: BASE_PUB,
