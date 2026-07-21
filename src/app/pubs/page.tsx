@@ -12,10 +12,16 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { buildAuthHeaders } from "@/lib/auth";
 import { isHttpErrorObject } from "@/lib/errors";
+import { pubCompletenessScore } from "@/lib/pubCompletenessScore";
 import type { Pub } from "@/types/pub";
 import styles from "./page.module.css";
 
-type SortOption = "name-asc" | "name-desc" | "newest" | "oldest";
+type SortOption =
+  | "name-asc"
+  | "name-desc"
+  | "newest"
+  | "oldest"
+  | "needs-attention";
 type EditStatusFilter = "all" | "edited" | "not-edited";
 
 function pubLocation(pub: Pub): string {
@@ -28,6 +34,7 @@ const SORT_OPTIONS: SortOption[] = [
   "name-desc",
   "newest",
   "oldest",
+  "needs-attention",
 ];
 
 function isSortOption(value: string): value is SortOption {
@@ -41,7 +48,13 @@ const PAGE_SIZE = 50;
 
 const VISIBLE_FILTER_COUNT = 6;
 
-const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
+const PubRow = memo(function PubRow({
+  pub,
+  completenessScore,
+}: {
+  pub: Pub;
+  completenessScore?: number;
+}) {
   return (
     <tr
       data-id={pub.id}
@@ -51,6 +64,11 @@ const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
         <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
           {pub.name}
         </Link>
+        {completenessScore !== undefined && (
+          <span className={styles.completenessPill}>
+            {completenessScore}% complete
+          </span>
+        )}
         {(pub.isIndependent || pub.chainName) && (
           <span className={styles.pubType}>
             {pub.isIndependent ? "Independent" : pub.chainName}
@@ -87,6 +105,7 @@ function PubsContent(): ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
+  const urlSort = searchParams.get("sort") ?? "";
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -96,7 +115,9 @@ function PubsContent(): ReactElement {
   const [activeAmenities, setActiveAmenities] = useState<Set<PubAmenityKey>>(
     new Set()
   );
-  const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const [sortBy, setSortBy] = useState<SortOption>(
+    isSortOption(urlSort) ? urlSort : "name-asc"
+  );
   const [editStatusFilter, setEditStatusFilter] =
     useState<EditStatusFilter>("all");
   const [showAllFilters, setShowAllFilters] = useState(false);
@@ -167,6 +188,15 @@ function PubsContent(): ReactElement {
         const ts = new Map(pubs.map((p) => [p.id, Date.parse(p.createdAt ?? "")]));
         const dir = sortBy === "newest" ? -1 : 1;
         sorted.sort((a, b) => dir * ((ts.get(a.id) ?? 0) - (ts.get(b.id) ?? 0)));
+        break;
+      }
+      case "needs-attention": {
+        const scores = new Map(
+          pubs.map((p) => [p.id, pubCompletenessScore(p).score])
+        );
+        sorted.sort(
+          (a, b) => (scores.get(a.id) ?? 0) - (scores.get(b.id) ?? 0)
+        );
         break;
       }
       default:
@@ -385,6 +415,7 @@ function PubsContent(): ReactElement {
               <option value="name-desc">Name (Z–A)</option>
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
+              <option value="needs-attention">Needs attention</option>
             </Dropdown>
 
             {/* TODO: implement grid and map view modes with real view-mode state and conditional rendering */}
@@ -647,7 +678,15 @@ function PubsContent(): ReactElement {
               }}
             >
               {filteredPubs.map((pub) => (
-                <PubRow key={pub.id} pub={pub} />
+                <PubRow
+                  key={pub.id}
+                  pub={pub}
+                  completenessScore={
+                    sortBy === "needs-attention"
+                      ? pubCompletenessScore(pub).score
+                      : undefined
+                  }
+                />
               ))}
             </tbody>
           </table>

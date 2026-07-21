@@ -505,6 +505,18 @@
   margin-top: 1px;
 }
 
+.completenessPill {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  border: 1px solid var(--border-color);
+}
+
 .tdLocation {
   color: var(--text-muted);
   font-size: 0.875rem;
