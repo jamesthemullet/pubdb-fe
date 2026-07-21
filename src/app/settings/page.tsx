@@ -83,16 +83,22 @@ export default function SettingsPage() {
 function FieldRow({
   label,
   hint,
+  htmlFor,
   children,
 }: {
   label: string;
   hint?: string;
+  htmlFor?: string;
   children: React.ReactNode;
 }) {
   return (
     <div className={styles.fieldRow}>
       <div className={styles.fieldMeta}>
-        <span className={styles.fieldLabel}>{label}</span>
+        {htmlFor ? (
+          <label htmlFor={htmlFor} className={styles.fieldLabel}>{label}</label>
+        ) : (
+          <span className={styles.fieldLabel}>{label}</span>
+        )}
         {hint && <span className={styles.fieldHint}>{hint}</span>}
       </div>
       <div className={styles.fieldControl}>{children}</div>
@@ -146,8 +152,9 @@ function ProfileTab({ userEmail }: { userEmail: string }) {
         title="Public profile"
         description="Other contributors see this on the leaderboard and pub edit history."
       >
-        <FieldRow label="Display name">
+        <FieldRow label="Display name" htmlFor="settings-display-name">
           <input
+            id="settings-display-name"
             className={styles.textInput}
             type="text"
             value={displayName}
@@ -170,8 +177,9 @@ function ProfileTab({ userEmail }: { userEmail: string }) {
           </div>
         </FieldRow>
 
-        <FieldRow label="City" hint="Shown on your profile, helps suggest nearby pubs.">
+        <FieldRow label="City" hint="Shown on your profile, helps suggest nearby pubs." htmlFor="settings-city">
           <input
+            id="settings-city"
             className={styles.textInput}
             type="text"
             value={city}
@@ -179,8 +187,9 @@ function ProfileTab({ userEmail }: { userEmail: string }) {
           />
         </FieldRow>
 
-        <FieldRow label="Bio">
+        <FieldRow label="Bio" htmlFor="settings-bio">
           <textarea
+            id="settings-bio"
             className={styles.textarea}
             rows={4}
             value={bio}
@@ -190,8 +199,9 @@ function ProfileTab({ userEmail }: { userEmail: string }) {
       </Card>
 
       <Card title="Contact">
-        <FieldRow label="Email">
+        <FieldRow label="Email" htmlFor="settings-email">
           <input
+            id="settings-email"
             className={styles.textInput}
             type="email"
             value={email}
@@ -216,14 +226,14 @@ function SecurityTab() {
   return (
     <>
       <Card title="Password" description="Update your login password.">
-        <FieldRow label="Current password">
-          <input className={styles.textInput} type="password" placeholder="••••••••" />
+        <FieldRow label="Current password" htmlFor="settings-current-password">
+          <input id="settings-current-password" className={styles.textInput} type="password" placeholder="••••••••" />
         </FieldRow>
-        <FieldRow label="New password">
-          <input className={styles.textInput} type="password" placeholder="••••••••" />
+        <FieldRow label="New password" htmlFor="settings-new-password">
+          <input id="settings-new-password" className={styles.textInput} type="password" placeholder="••••••••" />
         </FieldRow>
-        <FieldRow label="Confirm new password">
-          <input className={styles.textInput} type="password" placeholder="••••••••" />
+        <FieldRow label="Confirm new password" htmlFor="settings-confirm-password">
+          <input id="settings-confirm-password" className={styles.textInput} type="password" placeholder="••••••••" />
         </FieldRow>
       </Card>
 

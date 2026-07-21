@@ -349,10 +349,10 @@ export default function PubPage(): React.JSX.Element {
           </div>
           <div className={styles.editActions}>
             <button type="button" className={addPubStyles.cancelBtn} onClick={() => setEditing(false)}>
-              × Cancel
+              <span aria-hidden="true">×</span> Cancel
             </button>
             <button type="button" className={addPubStyles.submitBtn} onClick={handleSave} disabled={isSaveDisabled}>
-              ✓ Save changes
+              <span aria-hidden="true">✓</span> Save changes
             </button>
           </div>
         </div>

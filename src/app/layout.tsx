@@ -18,6 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.thepubdb.com"),
   title: {
     template: "%s | Pub DB",
     default: "Pub DB",
