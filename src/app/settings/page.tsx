@@ -1,10 +1,10 @@
-// TODO: settings page is not ready — hidden from nav until wired to real API.
-// Re-enable sidebar link in src/app/components/sidebar/sidebar.tsx when done.
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useAuth } from "@/hooks/useAuth";
+import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
@@ -17,17 +17,18 @@ type SettingsTab =
   | "danger";
 
 const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
-  { id: "profile", label: "Profile", icon: <ProfileIcon /> },
-  { id: "security", label: "Security", icon: <SecurityIcon /> },
-  { id: "notifications", label: "Notifications", icon: <BellIcon /> },
-  { id: "appearance", label: "Appearance", icon: <AppearanceIcon /> },
+  // TODO: re-enable in a future PR once wired to real API
+  // { id: "profile", label: "Profile", icon: <ProfileIcon /> },
+  // { id: "security", label: "Security", icon: <SecurityIcon /> },
+  // { id: "notifications", label: "Notifications", icon: <BellIcon /> },
+  // { id: "appearance", label: "Appearance", icon: <AppearanceIcon /> },
   { id: "danger", label: "Danger zone", icon: <DangerIcon /> },
 ];
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+  const [activeTab, setActiveTab] = useState<SettingsTab>("danger");
   const { user } = useAuth();
 
   if (!user) {
@@ -64,10 +65,12 @@ export default function SettingsPage() {
 
         {/* Content */}
         <div className={styles.content}>
+          {/* TODO: re-enable in a future PR once wired to real API
           {activeTab === "profile" && <ProfileTab userEmail={user?.email ?? ""} />}
           {activeTab === "security" && <SecurityTab />}
           {activeTab === "notifications" && <NotificationsTab />}
           {activeTab === "appearance" && <AppearanceTab />}
+          */}
           {activeTab === "danger" && <DangerTab />}
         </div>
       </div>
@@ -115,6 +118,8 @@ function Card({ title, description, children }: { title: string; description?: s
   );
 }
 
+// TODO: re-enable in a future PR once wired to real API
+/*
 function SaveBar({ onSave }: { onSave?: () => void }) {
   return (
     <div className={styles.saveBar}>
@@ -124,9 +129,11 @@ function SaveBar({ onSave }: { onSave?: () => void }) {
     </div>
   );
 }
+*/
 
 // ── Profile tab ───────────────────────────────────────────────────────────────
-
+// TODO: re-enable in a future PR once wired to real API
+/*
 function ProfileTab({ userEmail }: { userEmail: string }) {
   const [displayName, setDisplayName] = useState("Sam Mott");
   const [city, setCity] = useState("London");
@@ -310,12 +317,58 @@ function AppearanceTab() {
     </Card>
   );
 }
+*/
 
 // ── Danger zone tab ───────────────────────────────────────────────────────────
 
 function DangerTab() {
+  const router = useRouter();
+  const [confirming, setConfirming] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleDeleteAccount(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/auth/me", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      if (res.ok) {
+        localStorage.removeItem("token");
+        window.dispatchEvent(new Event("authChanged"));
+        router.push("/");
+        return;
+      }
+
+      const data = await res.json().catch(() => null);
+      if (res.status === 400 && data?.errors) {
+        setError("Password is required.");
+      } else if (res.status === 401) {
+        setError(data?.error === "Invalid credentials" ? "Incorrect password." : "Session expired — please log in again.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <Card title="Danger zone" description="Irreversible actions. Proceed with care.">
+      {/* TODO: re-enable in a future PR once wired to real API
       <div className={styles.dangerRow}>
         <div>
           <p className={styles.dangerActionTitle}>Delete all API keys</p>
@@ -323,19 +376,56 @@ function DangerTab() {
         </div>
         <button type="button" className={styles.dangerBtn}>Delete all keys</button>
       </div>
+      */}
       <div className={styles.dangerRow}>
         <div>
           <p className={styles.dangerActionTitle}>Delete account</p>
           <p className={styles.fieldHint}>Permanently removes your account, keys, and contribution history.</p>
         </div>
-        <button type="button" className={styles.dangerBtn}>Delete account</button>
+        {!confirming && (
+          <button type="button" className={styles.dangerBtn} onClick={() => setConfirming(true)}>
+            Delete account
+          </button>
+        )}
       </div>
+
+      {confirming && (
+        <form onSubmit={handleDeleteAccount} className={styles.dangerRow}>
+          <FieldRow label="Confirm password" hint="Enter your password to permanently delete your account.">
+            <input
+              className={styles.textInput}
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </FieldRow>
+          {error && <p className={styles.fieldHint}>{error}</p>}
+          <div className={styles.avatarRow}>
+            <button type="submit" className={styles.dangerBtn} disabled={submitting || !password}>
+              {submitting ? "Deleting…" : "Confirm delete"}
+            </button>
+            <button
+              type="button"
+              className={styles.avatarBtnGhost}
+              onClick={() => {
+                setConfirming(false);
+                setPassword("");
+                setError(null);
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
     </Card>
   );
 }
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
-
+// TODO: re-enable in a future PR once wired to real API
+/*
 function ProfileIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -370,6 +460,7 @@ function AppearanceIcon() {
     </svg>
   );
 }
+*/
 
 function DangerIcon() {
   return (

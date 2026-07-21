@@ -4,6 +4,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import AccentedInit from "./components/AccentedInit";
 import Sidebar from "./components/sidebar/sidebar";
+import Topbar from "./components/topbar/topbar";
 import styles from "./layout.module.css";
 
 const inter = Inter({
@@ -56,6 +57,7 @@ export default function RootLayout({
         <div className={styles.appShell}>
           <Sidebar />
           <div className={styles.contentArea}>
+            <Topbar />
             <main id="main-content" className={styles.main}>
               {children}
             </main>

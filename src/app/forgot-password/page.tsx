@@ -6,13 +6,13 @@ import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
 import styles from "./page.module.css";
 
-export default function ForgotPasswordPage() {
+export default function ForgotPasswordPage(): React.JSX.Element {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className={styles.container}>
-      <Typography variant="headingMedium">Forgot Password</Typography>
+      <Typography variant="headingMedium" as="h1">Forgot Password</Typography>
       <Typography className={styles.description}>
         Enter your email address and we&apos;ll send you a link to reset your
         password.

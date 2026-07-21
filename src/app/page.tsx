@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 //   { value: "4.2k", label: "developers using us" },
 // ];
 
-export default function Home() {
+export default function Home(): React.JSX.Element {
   return (
     <div className={styles.page}>
       <div className={styles.earlyAccessBanner}>

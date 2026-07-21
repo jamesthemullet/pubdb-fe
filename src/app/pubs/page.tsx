@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import type { ReactElement } from "react";
 import { memo, Suspense, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import {
@@ -30,7 +31,7 @@ const SORT_OPTIONS: SortOption[] = [
 ];
 
 function isSortOption(value: string): value is SortOption {
-  return (SORT_OPTIONS as string[]).includes(value);
+  return SORT_OPTIONS.some((opt) => opt === value);
 }
 
 type PubsApiResponse = { data: Pub[] };
@@ -82,7 +83,7 @@ const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
   );
 });
 
-function PubsContent() {
+function PubsContent(): ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
@@ -229,7 +230,7 @@ function PubsContent() {
   const hasNextPage = pubs.length === PAGE_SIZE;
   const hasPrevPage = page > 0;
 
-  function toggleAmenity(key: PubAmenityKey) {
+  function toggleAmenity(key: PubAmenityKey): void {
     setPage(0);
     setActiveAmenities((prev) => {
       const next = new Set(prev);
@@ -239,7 +240,7 @@ function PubsContent() {
     });
   }
 
-  function clearAllFilters() {
+  function clearAllFilters(): void {
     setPage(0);
     setSearchTerm("");
     setActiveAmenities(new Set());
@@ -249,9 +250,13 @@ function PubsContent() {
     setLocationStatus("idle");
   }
 
-  const visibleFilters = showAllFilters
-    ? PUB_AMENITY_FIELDS
-    : PUB_AMENITY_FIELDS.slice(0, VISIBLE_FILTER_COUNT);
+  const visibleFilters = useMemo(
+    () =>
+      showAllFilters
+        ? PUB_AMENITY_FIELDS
+        : PUB_AMENITY_FIELDS.slice(0, VISIBLE_FILTER_COUNT),
+    [showAllFilters]
+  );
   const hiddenCount = PUB_AMENITY_FIELDS.length - VISIBLE_FILTER_COUNT;
   const hasActiveFilters =
     debouncedSearchTerm ||
@@ -366,7 +371,7 @@ function PubsContent() {
             <label htmlFor="sort-select" className={styles.srOnly}>Sort by</label>
             <Dropdown
               id="sort-select"
-              aria-label="Sort pubs by"
+              aria-label="Sort pubs"
               value={coords ? "distance" : sortBy}
               disabled={!!coords}
               onChange={(e) => {
@@ -672,7 +677,7 @@ function PubsContent() {
   );
 }
 
-export default function Pubs() {
+export default function Pubs(): ReactElement {
   return (
     <Suspense>
       <PubsContent />

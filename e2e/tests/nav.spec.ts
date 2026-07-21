@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { mockDashboardEndpoint, setAuthToken } from "../fixtures/auth";
+import { mockAuthMeEndpoint, mockDashboardEndpoint, setAuthToken } from "../fixtures/auth";
 
 test.describe("Sidebar navigation", () => {
   test("Browse pubs link navigates to /pubs", async ({ page }) => {
@@ -22,6 +22,7 @@ test.describe("Sidebar navigation", () => {
   });
 
   test("Logout redirects to home and shows Register link", async ({ page }) => {
+    await mockAuthMeEndpoint(page, "tester@example.com");
     await mockDashboardEndpoint(page);
     await setAuthToken(page, "tester@example.com");
     await page.goto("/");
