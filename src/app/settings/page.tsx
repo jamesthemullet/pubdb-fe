@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import type { AuthUser } from "@/hooks/useAuth";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
 
@@ -22,7 +23,7 @@ const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   // TODO: re-enable in a future PR once wired to real API
   // { id: "security", label: "Security", icon: <SecurityIcon /> },
   // { id: "notifications", label: "Notifications", icon: <BellIcon /> },
-  // { id: "appearance", label: "Appearance", icon: <AppearanceIcon /> },
+  { id: "appearance", label: "Appearance", icon: <AppearanceIcon /> },
   { id: "danger", label: "Danger zone", icon: <DangerIcon /> },
 ];
 
@@ -70,8 +71,8 @@ export default function SettingsPage() {
           {/* TODO: re-enable in a future PR once wired to real API
           {activeTab === "security" && <SecurityTab />}
           {activeTab === "notifications" && <NotificationsTab />}
-          {activeTab === "appearance" && <AppearanceTab />}
           */}
+          {activeTab === "appearance" && <AppearanceTab />}
           {activeTab === "danger" && <DangerTab />}
         </div>
       </div>
@@ -405,16 +406,18 @@ function NotificationsTab() {
   );
 }
 
+*/
+
 // ── Appearance tab ────────────────────────────────────────────────────────────
 
 function AppearanceTab() {
-  const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
+  const { theme, setTheme } = useTheme();
 
   return (
     <Card title="Appearance" description="Customise how the dashboard looks for you.">
       <FieldRow label="Theme">
         <div className={styles.themeOptions}>
-          {(["light", "system", "dark"] as const).map((t) => (
+          {(["light", "dark"] as const).map((t) => (
             <button
               key={t}
               type="button"
@@ -428,12 +431,9 @@ function AppearanceTab() {
           ))}
         </div>
       </FieldRow>
-
-      <SaveBar />
     </Card>
   );
 }
-*/
 
 // ── Danger zone tab ───────────────────────────────────────────────────────────
 
@@ -568,6 +568,7 @@ function BellIcon() {
     </svg>
   );
 }
+*/
 
 function AppearanceIcon() {
   return (
@@ -577,7 +578,6 @@ function AppearanceIcon() {
     </svg>
   );
 }
-*/
 
 function DangerIcon() {
   return (
