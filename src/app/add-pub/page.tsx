@@ -220,7 +220,7 @@ export default function AddPubPage() {
         </div>
         <div className={styles.headerActions}>
           <button type="button" className={styles.cancelBtn} onClick={() => router.push("/pubs")}>
-            × Cancel
+            <span aria-hidden="true">×</span> Cancel
           </button>
           <button
             type="submit"
@@ -228,7 +228,7 @@ export default function AddPubPage() {
             className={styles.submitBtn}
             disabled={loading}
           >
-            ✓ {loading ? "Submitting…" : "Submit pub"}
+            <span aria-hidden="true">✓</span> {loading ? "Submitting…" : "Submit pub"}
           </button>
         </div>
       </div>

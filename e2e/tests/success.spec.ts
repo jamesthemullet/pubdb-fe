@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const VERIFY_API = (url: URL) =>
-  url.port === "4000" && url.pathname === "/payments/verify-session";
+const VERIFY_API = (url: URL) => url.pathname === "/api/payments/verify-session";
 
 function verifyResponse(body: unknown, status = 200) {
   return {
@@ -27,7 +26,7 @@ test.describe("Payment success page (/success)", () => {
   test("shows error when no session_id is provided", async ({ page }) => {
     await page.goto("/success");
     await expect(page.getByText("No session ID provided")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Return to Home" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Return to Home" })).toBeVisible();
   });
 
   test("shows loading state before API responds", async ({ page }) => {
@@ -46,7 +45,7 @@ test.describe("Payment success page (/success)", () => {
     await expect(page.getByText("Your subscription is now active.")).toBeVisible();
     await expect(page.getByText(/PRO/)).toBeVisible();
     await expect(page.getByText(/15th/)).toBeVisible();
-    await expect(page.getByRole("button", { name: "View Dashboard" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "View Dashboard" })).toBeVisible();
   });
 
   test("shows failure state when success is false", async ({ page }) => {
@@ -59,8 +58,8 @@ test.describe("Payment success page (/success)", () => {
 
     await expect(page.getByText("Subscription Failed")).toBeVisible();
     await expect(page.getByText("Payment was declined.")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Try Again" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Contact Support" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Try Again" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Contact Support" })).toBeVisible();
   });
 
   test("shows verification failed when API returns an error", async ({ page }) => {
@@ -71,6 +70,6 @@ test.describe("Payment success page (/success)", () => {
 
     await expect(page.getByText("Verification Failed")).toBeVisible();
     await expect(page.getByText("Session expired")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Return to Home" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Return to Home" })).toBeVisible();
   });
 });

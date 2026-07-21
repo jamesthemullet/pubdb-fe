@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useContributions } from "@/hooks/useContributions";
 import { buildAuthHeaders } from "@/lib/auth";
@@ -457,6 +457,33 @@ const Dashboard = (): React.JSX.Element | null => {
     }
   }
 
+  const subscription = dashboardData?.subscription;
+  const totalUsed = useMemo(
+    () =>
+      subscription
+        ? subscription.limits.requestsPerMonth - subscription.remaining.month
+        : 0,
+    [subscription]
+  );
+  const totalLimit = subscription?.limits.requestsPerMonth ?? 0;
+  const totalUsedPct = totalLimit > 0 ? (totalUsed / totalLimit) * 100 : 0;
+  const activeKeyCount = useMemo(
+    () =>
+      dashboardData?.apiKeys.filter(
+        (k) => k.keyStatus === "ACTIVE" || k.isActive
+      ).length ?? 0,
+    [dashboardData]
+  );
+  const accountTier = subscription?.tier;
+  const keyLimit = accountTier ? TIER_KEY_LIMITS[accountTier] : undefined;
+  const atKeyLimit =
+    !!keyLimit && (dashboardData?.apiKeys.length ?? 0) >= keyLimit;
+  const showNudge =
+    !!subscription &&
+    accountTier === "HOBBY" &&
+    totalUsedPct >= 75 &&
+    !nudgeDismissed;
+
   if (!isAuthenticated) {
     return <AuthGate context="API keys" />;
   }
@@ -486,24 +513,6 @@ const Dashboard = (): React.JSX.Element | null => {
   }
 
   if (!dashboardData) return null;
-
-  const { subscription } = dashboardData;
-  const totalUsed = subscription
-    ? subscription.limits.requestsPerMonth - subscription.remaining.month
-    : 0;
-  const totalLimit = subscription?.limits.requestsPerMonth ?? 0;
-  const totalUsedPct = totalLimit > 0 ? (totalUsed / totalLimit) * 100 : 0;
-  const activeKeyCount = dashboardData.apiKeys.filter(
-    (k) => k.keyStatus === "ACTIVE" || k.isActive
-  ).length;
-  const accountTier = subscription?.tier;
-  const keyLimit = accountTier ? TIER_KEY_LIMITS[accountTier] : undefined;
-  const atKeyLimit = !!keyLimit && dashboardData.apiKeys.length >= keyLimit;
-  const showNudge =
-    !!subscription &&
-    accountTier === "HOBBY" &&
-    totalUsedPct >= 75 &&
-    !nudgeDismissed;
 
   return (
     <>

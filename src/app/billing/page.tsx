@@ -289,7 +289,8 @@ export default function BillingPage() {
 
   const billingFields = useMemo(() => {
     const bd = billingData?.billingDetails ?? null;
-    if (!bd) return [] as { label: string; value: string; link: boolean; mono: boolean }[];
+    if (!bd)
+      return [] as { label: string; value: string; link: boolean; mono: boolean }[];
     return [
       bd.name
         ? { label: "Account", value: bd.name, link: false, mono: false }
@@ -323,7 +324,12 @@ export default function BillingPage() {
             mono: false,
           }
         : null,
-    ].filter(Boolean) as { label: string; value: string; link: boolean; mono: boolean }[];
+    ].filter(Boolean) as {
+      label: string;
+      value: string;
+      link: boolean;
+      mono: boolean;
+    }[];
   }, [billingData]);
 
   const currencyLabel = billingData?.plan.currency?.toUpperCase() ?? "GBP";
