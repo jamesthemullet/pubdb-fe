@@ -1,5 +1,3 @@
-"use client";
-
 import type { ChangelogEntryType, ChangelogVersion } from "@/lib/normalizeChangelog";
 import styles from "./page.module.css";
 
