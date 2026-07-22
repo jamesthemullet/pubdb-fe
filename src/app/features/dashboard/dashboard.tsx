@@ -1,7 +1,7 @@
 "use client";
 
-import type React from "react";
 import Link from "next/link";
+import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useContributions } from "@/hooks/useContributions";
