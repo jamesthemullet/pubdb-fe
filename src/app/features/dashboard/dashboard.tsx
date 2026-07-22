@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
@@ -947,9 +948,9 @@ const Dashboard = (): React.JSX.Element | null => {
               </p>
             </div>
             <div className={styles.upgradeNudgeActions}>
-              <a href="/#pricing" className={styles.upgradeNudgeCta}>
+              <Link href="/#pricing" className={styles.upgradeNudgeCta}>
                 Upgrade &rarr;
-              </a>
+              </Link>
               <button
                 type="button"
                 className={styles.upgradeNudgeDismiss}
