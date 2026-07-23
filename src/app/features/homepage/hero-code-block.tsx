@@ -86,7 +86,24 @@ export default function HeroCodeBlock() {
 
   return (
     <div className={styles.codeBlock}>
-      <div className={styles.tabs} role="tablist" aria-label="Code language">
+      <div
+        className={styles.tabs}
+        role="tablist"
+        aria-label="Code language"
+        onKeyDown={(e) => {
+          const idx = LANGS.indexOf(activeTab);
+          let next = -1;
+          if (e.key === "ArrowRight") next = (idx + 1) % LANGS.length;
+          else if (e.key === "ArrowLeft") next = (idx - 1 + LANGS.length) % LANGS.length;
+          else if (e.key === "Home") next = 0;
+          else if (e.key === "End") next = LANGS.length - 1;
+          if (next !== -1) {
+            e.preventDefault();
+            setActiveTab(LANGS[next]);
+            document.getElementById(`hero-tab-${LANGS[next]}`)?.focus();
+          }
+        }}
+      >
         {LANGS.map((lang) => (
           <button
             key={lang}
@@ -95,6 +112,7 @@ export default function HeroCodeBlock() {
             aria-selected={activeTab === lang}
             id={`hero-tab-${lang}`}
             aria-controls="hero-code-panel"
+            tabIndex={activeTab === lang ? 0 : -1}
             className={`${styles.tab} ${
               activeTab === lang ? styles.tabActive : ""
             }`}
