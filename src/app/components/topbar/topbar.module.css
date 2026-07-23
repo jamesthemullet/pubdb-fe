@@ -24,3 +24,21 @@
 .whatsNew:hover {
   background: var(--surface-alt);
 }
+
+.themeToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: 0.5rem;
+  padding: 0;
+  background: transparent;
+  color: var(--text-color);
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.themeToggle:hover {
+  background: var(--surface-alt);
+}
