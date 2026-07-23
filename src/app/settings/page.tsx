@@ -15,6 +15,7 @@ type SettingsTab =
   | "profile"
   | "security"
   | "notifications"
+  | "apiPreferences"
   | "appearance"
   | "danger";
 
@@ -22,7 +23,8 @@ const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   { id: "profile", label: "Profile", icon: <ProfileIcon /> },
   // TODO: re-enable in a future PR once wired to real API
   // { id: "security", label: "Security", icon: <SecurityIcon /> },
-  // { id: "notifications", label: "Notifications", icon: <BellIcon /> },
+  { id: "notifications", label: "Notifications", icon: <BellIcon /> },
+  { id: "apiPreferences", label: "API preferences", icon: <ApiPreferencesIcon /> },
   { id: "appearance", label: "Appearance", icon: <AppearanceIcon /> },
   { id: "danger", label: "Danger zone", icon: <DangerIcon /> },
 ];
@@ -72,6 +74,8 @@ export default function SettingsPage() {
           {activeTab === "security" && <SecurityTab />}
           {activeTab === "notifications" && <NotificationsTab />}
           */}
+          {activeTab === "notifications" && <NotificationsTab user={user} />}
+          {activeTab === "apiPreferences" && <ApiPreferencesTab user={user} />}
           {activeTab === "appearance" && <AppearanceTab />}
           {activeTab === "danger" && <DangerTab />}
         </div>
@@ -359,54 +363,108 @@ function SecurityTab() {
   );
 }
 
+*/
+
 // ── Notifications tab ─────────────────────────────────────────────────────────
 
-function NotificationsTab() {
-  const [notifs, setNotifs] = useState({
-    billing: true,
-    usage: true,
-    changelog: false,
-    contributions: true,
-  });
+function AlertToggleRow({
+  field,
+  label,
+  hint,
+  initial,
+}: {
+  field: "usageLimitAlertsEnabled" | "pubEditAlertsEnabled";
+  label: string;
+  hint: string;
+  initial: boolean;
+}) {
+  const [enabled, setEnabled] = useState(initial);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function toggle(key: keyof typeof notifs) {
-    setNotifs((n) => ({ ...n, [key]: !n[key] }));
+  async function handleToggle() {
+    const next = !enabled;
+    setEnabled(next);
+    setError(null);
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/auth/me", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
+        body: JSON.stringify({ [field]: next }),
+      });
+
+      if (res.ok) {
+        window.dispatchEvent(new Event("authChanged"));
+        return;
+      }
+
+      setEnabled(!next);
+      if (res.status === 401) {
+        setError("Session expired — please log in again.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setEnabled(!next);
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   }
 
-  const items = [
-    { key: "billing" as const, label: "Billing & invoices", hint: "Payment confirmations and upcoming charges" },
-    { key: "usage" as const, label: "Usage alerts", hint: "Quota warnings and limit resets" },
-    { key: "changelog" as const, label: "Changelog & announcements", hint: "New features and API updates" },
-    { key: "contributions" as const, label: "Contribution activity", hint: "Leaderboard changes and pub edit approvals" },
-  ];
-
   return (
-    <>
-      <Card title="Email notifications" description="Choose what we send to your account email.">
-        {items.map((item) => (
-          <FieldRow key={item.key} label={item.label} hint={item.hint}>
-            <label className={styles.toggleLabel}>
-              <input
-                type="checkbox"
-                className={styles.toggleInput}
-                checked={notifs[item.key]}
-                onChange={() => toggle(item.key)}
-              />
-              <span className={styles.toggleTrack}>
-                <span className={styles.toggleThumb} />
-              </span>
-              <span className={styles.toggleText}>{notifs[item.key] ? "On" : "Off"}</span>
-            </label>
-          </FieldRow>
-        ))}
-      </Card>
-
-      <SaveBar />
-    </>
+    <FieldRow label={label} hint={hint}>
+      <label className={styles.toggleLabel}>
+        <input
+          type="checkbox"
+          className={styles.toggleInput}
+          checked={enabled}
+          disabled={saving}
+          onChange={handleToggle}
+        />
+        <span className={styles.toggleTrack}>
+          <span className={styles.toggleThumb} />
+        </span>
+        <span className={styles.toggleText}>{enabled ? "On" : "Off"}</span>
+      </label>
+      {error && <p className={styles.formError}>{error}</p>}
+    </FieldRow>
   );
 }
 
-*/
+function NotificationsTab({ user }: { user: AuthUser }) {
+  return (
+    <Card title="Email notifications" description="Choose what we send to your account email.">
+      <AlertToggleRow
+        field="pubEditAlertsEnabled"
+        label="Edit to a pub I added"
+        hint="Someone updated a pub you originally submitted."
+        initial={user?.pubEditAlertsEnabled ?? true}
+      />
+    </Card>
+  );
+}
+
+// ── API preferences tab ───────────────────────────────────────────────────────
+
+function ApiPreferencesTab({ user }: { user: AuthUser }) {
+  return (
+    <Card title="API preferences" description="Control how we communicate with you about your API usage.">
+      <AlertToggleRow
+        field="usageLimitAlertsEnabled"
+        label="Usage limit alerts"
+        hint="Get an email when you reach 80% of your rate limit for the hour, day, or month."
+        initial={user?.usageLimitAlertsEnabled ?? true}
+      />
+    </Card>
+  );
+}
 
 // ── Appearance tab ────────────────────────────────────────────────────────────
 
@@ -559,6 +617,7 @@ function SecurityIcon() {
     </svg>
   );
 }
+*/
 
 function BellIcon() {
   return (
@@ -568,7 +627,15 @@ function BellIcon() {
     </svg>
   );
 }
-*/
+
+function ApiPreferencesIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <rect x="1.5" y="3" width="11" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M4 6.5h6M4 8.5h3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 function AppearanceIcon() {
   return (
