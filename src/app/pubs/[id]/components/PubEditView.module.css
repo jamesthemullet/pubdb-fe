@@ -9,7 +9,7 @@
 
 /* ── Section cards ── */
 .section {
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 1.5rem;
@@ -95,8 +95,8 @@ button.sectionHead {
   min-width: 20px;
   height: 20px;
   border-radius: 10px;
-  background: var(--text-color);
-  color: #ffffff;
+  background: var(--button-primary);
+  color: var(--button-primary-text);
   font-size: 0.6875rem;
   font-weight: 700;
   font-family: var(--font-inter), sans-serif;
@@ -340,12 +340,12 @@ button.sectionHead {
   flex-shrink: 0;
   position: relative;
   transition: background 0.15s, border-color 0.15s;
-  background: #ffffff;
+  background: var(--surface);
 }
 
 .amenityCardCheckOn {
-  background: var(--text-color);
-  border-color: var(--text-color);
+  background: var(--button-primary);
+  border-color: var(--button-primary);
 }
 
 .amenityCardCheckOn::after {
@@ -355,14 +355,14 @@ button.sectionHead {
   top: 2px;
   width: 5px;
   height: 9px;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--button-primary-text);
   border-top: none;
   border-left: none;
   transform: rotate(45deg);
 }
 
 .amenityCardCheckOff {
-  background: #ffffff;
+  background: var(--surface);
   border-color: #d78787;
 }
 
@@ -410,7 +410,7 @@ button.sectionHead {
   justify-content: space-between;
   gap: 2rem;
   padding: 1rem;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid #fecaca;
   border-radius: 8px;
 }
