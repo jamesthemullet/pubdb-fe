@@ -10,13 +10,17 @@ function readStoredTheme(): Theme {
   return localStorage.getItem(STORAGE_KEY) === "dark" ? "dark" : "light";
 }
 
-export function applyTheme(theme: Theme): void {
+function applyTheme(theme: Theme): void {
   document.documentElement.setAttribute("data-theme", theme);
   localStorage.setItem(STORAGE_KEY, theme);
   window.dispatchEvent(new Event("themeChanged"));
 }
 
-export function useTheme(): { theme: Theme; setTheme: (theme: Theme) => void; toggleTheme: () => void } {
+export function useTheme(): {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  toggleTheme: () => void;
+} {
   const [theme, setThemeState] = useState<Theme>("light");
 
   useEffect(() => {
