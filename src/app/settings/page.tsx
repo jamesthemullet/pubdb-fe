@@ -21,8 +21,7 @@ type SettingsTab =
 
 const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   { id: "profile", label: "Profile", icon: <ProfileIcon /> },
-  // TODO: re-enable in a future PR once wired to real API
-  // { id: "security", label: "Security", icon: <SecurityIcon /> },
+  { id: "security", label: "Security", icon: <SecurityIcon /> },
   { id: "notifications", label: "Notifications", icon: <BellIcon /> },
   { id: "apiPreferences", label: "API preferences", icon: <ApiPreferencesIcon /> },
   { id: "appearance", label: "Appearance", icon: <AppearanceIcon /> },
@@ -70,10 +69,7 @@ export default function SettingsPage() {
         {/* Content */}
         <div className={styles.content}>
           {activeTab === "profile" && <ProfileTab user={user} />}
-          {/* TODO: re-enable in a future PR once wired to real API
           {activeTab === "security" && <SecurityTab />}
-          {activeTab === "notifications" && <NotificationsTab />}
-          */}
           {activeTab === "notifications" && <NotificationsTab user={user} />}
           {activeTab === "apiPreferences" && <ApiPreferencesTab user={user} />}
           {activeTab === "appearance" && <AppearanceTab />}
@@ -341,29 +337,118 @@ function ProfileTab({ user }: { user: AuthUser }) {
 }
 
 // ── Security tab ──────────────────────────────────────────────────────────────
-// TODO: re-enable in a future PR once wired to real API
-/*
+
 function SecurityTab() {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const hasChanges = currentPassword.length > 0 || newPassword.length > 0 || confirmPassword.length > 0;
+
+  async function handleSave() {
+    setFormError(null);
+    setFieldErrors({});
+
+    if (newPassword !== confirmPassword) {
+      setFieldErrors({ confirmPassword: ["Passwords do not match."] });
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/auth/me/password", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (res.ok) {
+        setSaved(true);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setTimeout(() => setSaved(false), 2000);
+        return;
+      }
+
+      if (res.status === 400 && data?.errors?.fieldErrors) {
+        setFieldErrors(data.errors.fieldErrors);
+      } else if (res.status === 401) {
+        setFormError(data?.error === "Invalid credentials" ? "Current password is incorrect." : "Session expired — please log in again.");
+      } else if (res.status === 429) {
+        setFormError("Too many attempts. Please try again later.");
+      } else {
+        setFormError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setFormError("Something went wrong. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <>
       <Card title="Password" description="Update your login password.">
         <FieldRow label="Current password" htmlFor="settings-current-password">
-          <input id="settings-current-password" className={styles.textInput} type="password" placeholder="••••••••" />
+          <input
+            id="settings-current-password"
+            className={styles.textInput}
+            type="password"
+            placeholder="••••••••"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+          />
         </FieldRow>
-        <FieldRow label="New password" htmlFor="settings-new-password">
-          <input id="settings-new-password" className={styles.textInput} type="password" placeholder="••••••••" />
+        <FieldRow label="New password" hint="6–128 characters." htmlFor="settings-new-password">
+          <input
+            id="settings-new-password"
+            className={styles.textInput}
+            type="password"
+            placeholder="Enter a new password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          {fieldErrors.newPassword?.map((msg) => (
+            <span key={msg} className={styles.fieldError}>{msg}</span>
+          ))}
         </FieldRow>
         <FieldRow label="Confirm new password" htmlFor="settings-confirm-password">
-          <input id="settings-confirm-password" className={styles.textInput} type="password" placeholder="••••••••" />
+          <input
+            id="settings-confirm-password"
+            className={styles.textInput}
+            type="password"
+            placeholder="Enter a new password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          {fieldErrors.confirmPassword?.map((msg) => (
+            <span key={msg} className={styles.fieldError}>{msg}</span>
+          ))}
         </FieldRow>
       </Card>
 
-      <SaveBar />
+      <SaveBar
+        onSave={handleSave}
+        disabled={saving || !hasChanges || !currentPassword || !newPassword || !confirmPassword}
+        label={saving ? "Saving…" : "Save changes"}
+      />
+      {formError && <p className={styles.formError}>{formError}</p>}
+      {saved && <p className={styles.savedMsg}>Password updated.</p>}
     </>
   );
 }
-
-*/
 
 // ── Notifications tab ─────────────────────────────────────────────────────────
 
@@ -608,8 +693,6 @@ function ProfileIcon() {
   );
 }
 
-// TODO: re-enable in a future PR once wired to real API
-/*
 function SecurityIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -617,7 +700,6 @@ function SecurityIcon() {
     </svg>
   );
 }
-*/
 
 function BellIcon() {
   return (
