@@ -536,6 +536,7 @@ const Dashboard = (): React.JSX.Element | null => {
               type="text"
               className={styles.btnOutline}
               style={{ width: "100%", marginBottom: "1rem" }}
+              aria-label="API key name"
               placeholder="e.g. Staging key"
               value={addKeyName}
               onChange={(e) => setAddKeyName(e.target.value)}

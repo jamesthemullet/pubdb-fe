@@ -253,10 +253,11 @@ function ProfileTab({ user }: { user: AuthUser }) {
           ))}
         </FieldRow>
 
-        <FieldRow label="Username" hint="3–30 characters. Letters, numbers, and underscores only.">
+        <FieldRow label="Username" hint="3–30 characters. Letters, numbers, and underscores only." htmlFor="settings-username">
           <div className={styles.prefixInput}>
-            <span className={styles.inputPrefix}>@</span>
+            <span className={styles.inputPrefix} aria-hidden="true">@</span>
             <input
+              id="settings-username"
               className={styles.prefixInputField}
               type="text"
               value={username}
@@ -284,6 +285,7 @@ function ProfileTab({ user }: { user: AuthUser }) {
             <input
               className={styles.textInput}
               type="url"
+              aria-label="Avatar URL"
               placeholder="https://example.com/avatar.png"
               value={image}
               onChange={(e) => setImage(e.target.value)}

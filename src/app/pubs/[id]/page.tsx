@@ -482,7 +482,25 @@ export default function PubPage(): React.JSX.Element {
 
           {/* Tabs */}
           <div className={styles.tabs}>
-            <div className={styles.tabList} role="tablist">
+            <div
+              className={styles.tabList}
+              role="tablist"
+              aria-label="Pub information"
+              onKeyDown={(e) => {
+                const TABS = ["overview", "beers", "hours", "garden"] as PubTab[];
+                const idx = TABS.indexOf(activeTab);
+                let next = -1;
+                if (e.key === "ArrowRight") next = (idx + 1) % TABS.length;
+                else if (e.key === "ArrowLeft") next = (idx - 1 + TABS.length) % TABS.length;
+                else if (e.key === "Home") next = 0;
+                else if (e.key === "End") next = TABS.length - 1;
+                if (next !== -1) {
+                  e.preventDefault();
+                  setActiveTab(TABS[next]);
+                  document.getElementById(`tab-${TABS[next]}`)?.focus();
+                }
+              }}
+            >
               {/* TODO: restore history tab once API returns edit history data */}
               {(["overview", "beers", "hours", "garden"] as PubTab[]).map((tab) => (
                 <button
@@ -531,7 +549,25 @@ export default function PubPage(): React.JSX.Element {
           {/* Code block */}
           <div className={styles.codePanel}>
             <div className={styles.codePanelHeader}>
-              <div className={styles.codeTabs} role="tablist" aria-label="Code language">
+              <div
+                className={styles.codeTabs}
+                role="tablist"
+                aria-label="Code language"
+                onKeyDown={(e) => {
+                  const TABS = ["curl", "node", "python"] as CodeTab[];
+                  const idx = TABS.indexOf(codeTab);
+                  let next = -1;
+                  if (e.key === "ArrowRight") next = (idx + 1) % TABS.length;
+                  else if (e.key === "ArrowLeft") next = (idx - 1 + TABS.length) % TABS.length;
+                  else if (e.key === "Home") next = 0;
+                  else if (e.key === "End") next = TABS.length - 1;
+                  if (next !== -1) {
+                    e.preventDefault();
+                    setCodeTab(TABS[next]);
+                    document.getElementById(`pub-code-tab-${TABS[next]}`)?.focus();
+                  }
+                }}
+              >
                 {(["curl", "node", "python"] as CodeTab[]).map((t) => (
                   <button
                     key={t}
@@ -540,6 +576,7 @@ export default function PubPage(): React.JSX.Element {
                     aria-selected={codeTab === t}
                     id={`pub-code-tab-${t}`}
                     aria-controls="pub-code-panel"
+                    tabIndex={codeTab === t ? 0 : -1}
                     className={`${styles.codeTab} ${codeTab === t ? styles.codeTabActive : ""}`}
                     onClick={() => setCodeTab(t)}
                   >
