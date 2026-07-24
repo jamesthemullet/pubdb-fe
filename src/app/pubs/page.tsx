@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactElement } from "react";
@@ -15,8 +16,19 @@ import { isHttpErrorObject } from "@/lib/errors";
 import type { Pub } from "@/types/pub";
 import styles from "./page.module.css";
 
+const PubsMap = dynamic(() => import("./components/PubsMap"), {
+  ssr: false,
+  loading: () => (
+    <output className={styles.stateMsg} aria-live="polite">
+      Loading map…
+    </output>
+  ),
+});
+
 type SortOption = "name-asc" | "name-desc" | "newest" | "oldest";
 type EditStatusFilter = "all" | "edited" | "not-edited";
+type ViewMode = "list" | "map";
+const MAP_PAGE_SIZE = 500;
 
 function pubLocation(pub: Pub): string {
   const area = pub.area || pub.borough || null;
@@ -97,6 +109,7 @@ function PubsContent(): ReactElement {
     new Set()
   );
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [editStatusFilter, setEditStatusFilter] =
     useState<EditStatusFilter>("all");
   const [showAllFilters, setShowAllFilters] = useState(false);
@@ -182,8 +195,8 @@ function PubsContent(): ReactElement {
       const t0 = Date.now();
       try {
         const params = new URLSearchParams({
-          limit: String(PAGE_SIZE),
-          page: String(page + 1),
+          limit: String(viewMode === "map" ? MAP_PAGE_SIZE : PAGE_SIZE),
+          page: String(viewMode === "map" ? 1 : page + 1),
         });
         if (debouncedSearchTerm) params.set("search", debouncedSearchTerm);
         for (const amenity of activeAmenities) {
@@ -225,10 +238,21 @@ function PubsContent(): ReactElement {
       }
     }
     fetchPubs();
-  }, [page, debouncedSearchTerm, activeAmenities, editStatusFilter, coords]);
+  }, [
+    page,
+    debouncedSearchTerm,
+    activeAmenities,
+    editStatusFilter,
+    coords,
+    viewMode,
+  ]);
 
-  const hasNextPage = pubs.length === PAGE_SIZE;
-  const hasPrevPage = page > 0;
+  const hasNextPage = viewMode === "list" && pubs.length === PAGE_SIZE;
+  const hasPrevPage = viewMode === "list" && page > 0;
+  const pubsWithoutCoords = useMemo(
+    () => filteredPubs.filter((pub) => pub.lat === undefined || pub.lng === undefined).length,
+    [filteredPubs]
+  );
 
   function toggleAmenity(key: PubAmenityKey): void {
     setPage(0);
@@ -387,66 +411,14 @@ function PubsContent(): ReactElement {
               <option value="oldest">Oldest first</option>
             </Dropdown>
 
-            {/* TODO: implement grid and map view modes with real view-mode state and conditional rendering */}
-            {/* <fieldset className={styles.viewToggle} aria-label="View mode">
+            <fieldset className={styles.viewToggle} aria-label="View mode">
               <button
                 type="button"
-                className={`${styles.viewBtn} ${styles.viewBtnActive}`}
-                aria-pressed="true"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  aria-hidden="true"
-                >
-                  <rect
-                    x="1"
-                    y="1"
-                    width="5"
-                    height="5"
-                    rx="1"
-                    stroke="currentColor"
-                    strokeWidth="1.3"
-                    fill="none"
-                  />
-                  <rect
-                    x="8"
-                    y="1"
-                    width="5"
-                    height="5"
-                    rx="1"
-                    stroke="currentColor"
-                    strokeWidth="1.3"
-                    fill="none"
-                  />
-                  <rect
-                    x="1"
-                    y="8"
-                    width="5"
-                    height="5"
-                    rx="1"
-                    stroke="currentColor"
-                    strokeWidth="1.3"
-                    fill="none"
-                  />
-                  <rect
-                    x="8"
-                    y="8"
-                    width="5"
-                    height="5"
-                    rx="1"
-                    stroke="currentColor"
-                    strokeWidth="1.3"
-                    fill="none"
-                  />
-                </svg>
-                Grid
-              </button>
-              <button
-                type="button"
-                className={styles.viewBtn}
-                aria-pressed="false"
+                className={`${styles.viewBtn} ${
+                  viewMode === "list" ? styles.viewBtnActive : ""
+                }`}
+                aria-pressed={viewMode === "list"}
+                onClick={() => setViewMode("list")}
               >
                 <svg
                   width="14"
@@ -465,8 +437,11 @@ function PubsContent(): ReactElement {
               </button>
               <button
                 type="button"
-                className={styles.viewBtn}
-                aria-pressed="false"
+                className={`${styles.viewBtn} ${
+                  viewMode === "map" ? styles.viewBtnActive : ""
+                }`}
+                aria-pressed={viewMode === "map"}
+                onClick={() => setViewMode("map")}
               >
                 <svg
                   width="14"
@@ -496,7 +471,7 @@ function PubsContent(): ReactElement {
                 </svg>
                 Map
               </button>
-            </fieldset> */}
+            </fieldset>
           </div>
         </div>
 
@@ -616,6 +591,16 @@ function PubsContent(): ReactElement {
         <output className={styles.stateMsg}>
           No pubs found{debouncedSearchTerm ? " matching your search" : ""}.
         </output>
+      ) : viewMode === "map" ? (
+        <div className={styles.mapViewWrap}>
+          {pubsWithoutCoords > 0 && (
+            <p className={styles.mapMissingCoords}>
+              {pubsWithoutCoords} pub{pubsWithoutCoords === 1 ? "" : "s"} not
+              shown (missing coordinates)
+            </p>
+          )}
+          <PubsMap pubs={filteredPubs} />
+        </div>
       ) : (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
