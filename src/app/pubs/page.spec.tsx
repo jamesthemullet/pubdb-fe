@@ -18,6 +18,13 @@ vi.mock("next/navigation", () => ({
 	useSearchParams: () => ({ get: () => null }),
 }));
 
+vi.mock("next/dynamic", () => ({
+	default: () =>
+		function MockPubsMap({ pubs }: { pubs: { id: string }[] }) {
+			return <div data-testid="pubs-map">{pubs.length} pubs on map</div>;
+		},
+}));
+
 function jsonResponse(data: unknown, status = 200): Response {
 	return new Response(JSON.stringify(data), {
 		status,
@@ -428,6 +435,93 @@ describe("Pubs page", () => {
 			});
 
 			vi.unstubAllGlobals();
+		});
+	});
+
+	describe("Map view", () => {
+		it("shows the list view by default", async () => {
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(
+				jsonResponse({ data: SAMPLE_PUBS }),
+			);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+
+			expect(screen.queryByTestId("pubs-map")).not.toBeInTheDocument();
+		});
+
+		it("switches to the map view when the Map toggle is clicked", async () => {
+			vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+				Promise.resolve(jsonResponse({ data: SAMPLE_PUBS })),
+			);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+			fireEvent.click(screen.getByRole("button", { name: "Map" }));
+
+			expect(await screen.findByTestId("pubs-map")).toBeInTheDocument();
+			expect(screen.queryByText("The Harp")).not.toBeInTheDocument();
+		});
+
+		it("requests a larger page of results for the map view", async () => {
+			const fetchMock = vi
+				.spyOn(globalThis, "fetch")
+				.mockImplementation(() =>
+					Promise.resolve(jsonResponse({ data: SAMPLE_PUBS })),
+				);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+			fireEvent.click(screen.getByRole("button", { name: "Map" }));
+
+			await waitFor(() => {
+				const lastCall = fetchMock.mock.calls[fetchMock.mock.calls.length - 1];
+				const url = new URL(lastCall[0] as string, "http://localhost");
+				expect(url.searchParams.get("limit")).toBe("500");
+			});
+		});
+
+		it("shows a count of pubs missing coordinates in map view", async () => {
+			vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+				Promise.resolve(
+					jsonResponse({
+						data: [
+							{ ...SAMPLE_PUBS[0], lat: 51.5, lng: -0.1 },
+							SAMPLE_PUBS[1],
+							SAMPLE_PUBS[2],
+						],
+					}),
+				),
+			);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+			fireEvent.click(screen.getByRole("button", { name: "Map" }));
+
+			expect(
+				await screen.findByText("2 pubs not shown (missing coordinates)"),
+			).toBeInTheDocument();
+		});
+
+		it("switches back to the list view when the List toggle is clicked", async () => {
+			vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+				Promise.resolve(jsonResponse({ data: SAMPLE_PUBS })),
+			);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+			fireEvent.click(screen.getByRole("button", { name: "Map" }));
+			await screen.findByTestId("pubs-map");
+
+			fireEvent.click(screen.getByRole("button", { name: "List" }));
+
+			expect(await screen.findByText("The Harp")).toBeInTheDocument();
+			expect(screen.queryByTestId("pubs-map")).not.toBeInTheDocument();
 		});
 	});
 });
