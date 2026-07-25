@@ -27,13 +27,23 @@ export default function ForgotPasswordPage(): React.JSX.Element {
         body: JSON.stringify({ email }),
       });
 
-      const data = await res.json();
+      const data: unknown = await res.json();
+      const body =
+        typeof data === "object" && data !== null
+          ? (data as Record<string, unknown>)
+          : {};
 
       if (!res.ok) {
-        setError(data.error || data.errors || "Unknown error");
+        const errMsg =
+          typeof body.error === "string"
+            ? body.error
+            : typeof body.errors === "string"
+              ? body.errors
+              : "Unknown error";
+        setError(errMsg);
       } else {
-        setMessage(data.message);
-        setEmail(""); // Clear the form
+        setMessage(typeof body.message === "string" ? body.message : null);
+        setEmail("");
       }
     } catch (_err) {
       setError("Network error");
