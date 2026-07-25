@@ -6,7 +6,7 @@ import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
 import styles from "./page.module.css";
 
-export default function ForgotPasswordPage() {
+export default function ForgotPasswordPage(): React.JSX.Element {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);

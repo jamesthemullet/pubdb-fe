@@ -115,7 +115,7 @@ function setupFetchMock({
 				]);
 			}
 
-			if (url.includes("restcountries.com")) {
+			if (url.includes("/api/countries")) {
 				return jsonResponse([
 					{ name: { common: "United Kingdom" }, cca2: "GB" },
 					{ name: { common: "United States" }, cca2: "US" },
@@ -346,7 +346,7 @@ describe("PubPage", () => {
 					if (url.includes("/api/beer-types")) {
 						return jsonResponse([]);
 					}
-					if (url.includes("restcountries.com")) {
+					if (url.includes("/api/countries")) {
 						return jsonResponse([]);
 					}
 					throw new Error(`Unexpected fetch URL: ${url}`);

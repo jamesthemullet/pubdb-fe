@@ -106,11 +106,11 @@
   position: relative;
 }
 
-/* Popular (Developer) card — dark */
+/* Popular (Developer) card — inverted relative to the page theme */
 .tierCardPopular {
-  background: #111111;
-  border-color: #111111;
-  color: #f0f0f0;
+  background: var(--button-primary);
+  border-color: var(--button-primary);
+  color: var(--button-primary-text);
 }
 
 .popularBadge {
@@ -137,7 +137,7 @@
 }
 
 .tierNamePopular {
-  color: #888888;
+  color: color-mix(in srgb, var(--button-primary-text) 55%, var(--button-primary));
 }
 
 /* Price */
@@ -158,7 +158,7 @@
 }
 
 .tierCardPopular .tierPrice {
-  color: #ffffff;
+  color: var(--button-primary-text);
 }
 
 .tierPriceSuffix {
@@ -168,7 +168,7 @@
 }
 
 .tierPriceSuffixPopular {
-  color: #888888;
+  color: color-mix(in srgb, var(--button-primary-text) 55%, var(--button-primary));
 }
 
 /* Feature list */
@@ -191,7 +191,7 @@
 }
 
 .tierCardPopular .tierFeatureItem {
-  color: #c0c0c0;
+  color: color-mix(in srgb, var(--button-primary-text) 75%, var(--button-primary));
 }
 
 .featureCheck {
@@ -204,7 +204,7 @@
 
 /* Overrides for text inside the popular (dark) card */
 .tierCardPopular .tierPrice {
-  color: #ffffff;
+  color: var(--button-primary-text);
 }
 
 /* CTA */
@@ -217,12 +217,12 @@
 }
 
 .tierBtnPopular {
-  background: #ffffff;
-  color: #111111;
+  background: var(--button-primary-text);
+  color: var(--button-primary);
 }
 
 .tierBtnPopular:hover {
-  background: #e8e8e8;
+  background: color-mix(in srgb, var(--button-primary-text) 90%, var(--button-primary));
 }
 
 @media (max-width: 900px) {

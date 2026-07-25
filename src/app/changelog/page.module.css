@@ -1,0 +1,178 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--background);
+  padding-bottom: 3rem;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 2rem 2rem 1rem;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-color);
+  font-family: var(--font-mono, monospace);
+}
+
+.endpointBadge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: var(--font-mono, monospace);
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  max-width: 540px;
+}
+
+/* ── Empty state ── */
+.empty {
+  margin: 2rem;
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+/* ── Timeline ── */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  padding: 0 2rem;
+  max-width: 720px;
+}
+
+.versionEntry {
+  display: flex;
+  gap: 1rem;
+}
+
+.versionRail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 12px;
+}
+
+.versionDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-color);
+  margin-top: 0.4rem;
+  flex-shrink: 0;
+}
+
+.versionLine {
+  flex: 1;
+  width: 2px;
+  background: var(--border-color);
+  margin-top: 0.25rem;
+}
+
+.versionEntry:last-child .versionLine {
+  display: none;
+}
+
+.versionBody {
+  flex: 1;
+  padding-bottom: 2rem;
+}
+
+.versionHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.versionTag {
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  color: var(--text-color);
+}
+
+.versionDate {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.itemRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  color: var(--text-color);
+  line-height: 1.5;
+}
+
+.itemText {
+  flex: 1;
+}
+
+/* ── Type badges ── */
+.typeBadge {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-top: 0.1rem;
+}
+
+.typeadded {
+  color: #15803d;
+  background: rgba(21, 128, 61, 0.12);
+}
+
+.typechanged {
+  color: #b45309;
+  background: rgba(180, 83, 9, 0.12);
+}
+
+.typefixed {
+  color: #b91c1c;
+  background: rgba(185, 28, 28, 0.12);
+}

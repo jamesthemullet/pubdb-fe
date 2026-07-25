@@ -9,7 +9,7 @@
 
 /* ── Section cards ── */
 .section {
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 1.5rem;
@@ -95,8 +95,8 @@ button.sectionHead {
   min-width: 20px;
   height: 20px;
   border-radius: 10px;
-  background: var(--text-color);
-  color: #ffffff;
+  background: var(--button-primary);
+  color: var(--button-primary-text);
   font-size: 0.6875rem;
   font-weight: 700;
   font-family: var(--font-inter), sans-serif;
@@ -283,11 +283,15 @@ button.sectionHead {
   display: flex;
   align-items: center;
   gap: 0.625rem;
+  width: 100%;
   padding: 0.75rem 1rem;
   cursor: pointer;
   border: 1px solid var(--border-color);
   border-radius: 7px;
   background: var(--surface);
+  font: inherit;
+  text-align: left;
+  color: inherit;
   transition: background 0.12s, border-color 0.12s;
   user-select: none;
 }
@@ -299,6 +303,10 @@ button.sectionHead {
 .amenityCardChecked {
   border-color: var(--text-color);
   background: var(--surface);
+}
+
+.amenityCardUnavailable {
+  border-color: #f0b0b0;
 }
 
 .amenityCardIcon {
@@ -315,6 +323,15 @@ button.sectionHead {
   color: var(--text-color);
 }
 
+.amenityCardState {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
 .amenityCardCheck {
   width: 20px;
   height: 20px;
@@ -323,12 +340,12 @@ button.sectionHead {
   flex-shrink: 0;
   position: relative;
   transition: background 0.15s, border-color 0.15s;
-  background: #ffffff;
+  background: var(--surface);
 }
 
 .amenityCardCheckOn {
-  background: var(--text-color);
-  border-color: var(--text-color);
+  background: var(--button-primary);
+  border-color: var(--button-primary);
 }
 
 .amenityCardCheckOn::after {
@@ -338,17 +355,25 @@ button.sectionHead {
   top: 2px;
   width: 5px;
   height: 9px;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--button-primary-text);
   border-top: none;
   border-left: none;
   transform: rotate(45deg);
 }
 
-.amenityHiddenInput {
+.amenityCardCheckOff {
+  background: var(--surface);
+  border-color: #d78787;
+}
+
+.amenityCardCheckOff::after {
+  content: '';
   position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
+  left: 4px;
+  top: 8.5px;
+  width: 11px;
+  height: 2px;
+  background: #d78787;
 }
 
 /* ── Closed down ── */
@@ -385,7 +410,7 @@ button.sectionHead {
   justify-content: space-between;
   gap: 2rem;
   padding: 1rem;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid #fecaca;
   border-radius: 8px;
 }
