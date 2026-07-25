@@ -325,13 +325,7 @@ function ProfileTab({ user }: { user: AuthUser }) {
 
       <Card title="Contact">
         <FieldRow label="Email" htmlFor="settings-email">
-          <input
-            id="settings-email"
-            className={styles.textInput}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <span id="settings-email" className={styles.fieldHint}>{user?.email}</span>
         </FieldRow>
       </Card>
 
