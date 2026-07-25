@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Typography from "@/app/components/typography/typography";
 import type { Pub } from "@/types/pub";
 
-export default function Pubs() {
+export default function Pubs(): React.JSX.Element {
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [loading, setLoading] = useState(true);
 

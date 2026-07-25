@@ -250,9 +250,13 @@ function PubsContent(): ReactElement {
     setLocationStatus("idle");
   }
 
-  const visibleFilters = showAllFilters
-    ? PUB_AMENITY_FIELDS
-    : PUB_AMENITY_FIELDS.slice(0, VISIBLE_FILTER_COUNT);
+  const visibleFilters = useMemo(
+    () =>
+      showAllFilters
+        ? PUB_AMENITY_FIELDS
+        : PUB_AMENITY_FIELDS.slice(0, VISIBLE_FILTER_COUNT),
+    [showAllFilters]
+  );
   const hiddenCount = PUB_AMENITY_FIELDS.length - VISIBLE_FILTER_COUNT;
   const hasActiveFilters =
     debouncedSearchTerm ||
@@ -624,7 +628,7 @@ function PubsContent(): ReactElement {
                 )}
                 {/* TODO: improve amenity display (icons unclear, title tooltip unreliable) before re-enabling */}
                 {/* <th className={styles.thAmenities}>AMENITIES</th> */}
-                {/* <th className={styles.thArrow} aria-label="View" /> */}
+                <th className={styles.thArrow} aria-label="View" />
               </tr>
             </thead>
             <tbody

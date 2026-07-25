@@ -113,10 +113,9 @@ export function useCountries(): { countries: CountryOption[]; countriesLoading: 
     async function fetchCountries(): Promise<void> {
       setCountriesLoading(true);
       try {
-        const res = await fetch(
-          "https://restcountries.com/v3.1/all?fields=name,cca2",
-          { signal: controller.signal }
-        );
+        const res = await fetch("/api/countries", {
+          signal: controller.signal,
+        });
         if (!res.ok) {
           throw new Error(`Failed to fetch countries: ${res.status}`);
         }
