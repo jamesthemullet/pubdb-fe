@@ -28,7 +28,7 @@ describe("GET /api/playground/leaderboard", () => {
       .mockResolvedValueOnce(jsonResponse({ token: "pgt_abc123" }))
       .mockResolvedValueOnce(jsonResponse({ success: true, data: [] }));
 
-    const request = new Request("http://localhost/api/playground/leaderboard?keyPrefix=pk_dev_abc", {
+    const request = new Request("http://localhost/api/playground/leaderboard?id=key_dev_abc", {
       headers: { authorization: "Bearer user-token" },
     });
 

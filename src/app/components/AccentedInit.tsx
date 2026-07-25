@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-export default function AccentedInit() {
+export default function AccentedInit(): null {
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_ACCENTED === "true") {
       import("accented").then(({ accented }) => accented());
