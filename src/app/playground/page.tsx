@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useAuth } from "@/hooks/useAuth";
@@ -249,7 +250,7 @@ export default function PlaygroundPage() {
           {apiKeys?.length === 0 && (
             <p className={styles.sectionText}>
               You don&apos;t have an API key yet. Create one from the{" "}
-              <a href="/profile" className={styles.inlineLink}>dashboard</a> to use the
+              <Link href="/profile" className={styles.inlineLink}>dashboard</Link> to use the
               playground.
             </p>
           )}
@@ -285,7 +286,7 @@ export default function PlaygroundPage() {
           <h2 className={styles.sectionTitle}>Endpoints</h2>
           <p className={styles.sectionText}>
             Pick an endpoint below to build a request and see a live response. Manage your
-            keys from the <a href="/profile" className={styles.inlineLink}>dashboard</a>.
+            keys from the <Link href="/profile" className={styles.inlineLink}>dashboard</Link>.
           </p>
 
           <div className={styles.endpointList}>

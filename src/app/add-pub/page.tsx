@@ -520,6 +520,7 @@ export default function AddPubPage() {
             className={styles.sectionHead}
             onClick={() => setHoursOpen((o) => !o)}
             aria-expanded={hoursOpen}
+            aria-controls="opening-hours-body"
           >
             <span className={styles.sectionIcon}><ClockIcon /></span>
             <div className={styles.sectionHeadText}>
@@ -529,7 +530,7 @@ export default function AddPubPage() {
             <span className={`${styles.chevron} ${hoursOpen ? styles.chevronOpen : ""}`}>↓</span>
           </button>
           {hoursOpen && (
-            <div className={styles.openingHoursBody}>
+            <div id="opening-hours-body" className={styles.openingHoursBody}>
               <OpeningHoursEditor value={openingHours} onChange={(val) => setOpeningHours(val)} />
               <FieldErrorList errors={fieldErrors.openingHours} className={styles.errorText} idPrefix="openingHours" />
             </div>
