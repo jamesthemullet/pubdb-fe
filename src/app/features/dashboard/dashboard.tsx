@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useContributions } from "@/hooks/useContributions";
 import { buildAuthHeaders } from "@/lib/auth";
@@ -174,17 +175,18 @@ const Dashboard = (): React.JSX.Element | null => {
   }
 
   useEffect(() => {
-    async function fetchDashboard(token: string) {
+    async function fetchDashboard(token: string): Promise<void> {
       try {
         setError(null);
         const res = await fetch("/api/auth/dashboard", {
           headers: buildAuthHeaders(token),
         });
         if (!res.ok) {
-          const errorData = await res.json();
+          const errorData: unknown = await res.json();
           throw { response: res, data: errorData };
         }
-        setDashboardData(await res.json());
+        const dashboardRaw: unknown = await res.json();
+        setDashboardData(dashboardRaw as DashboardData);
       } catch (err: unknown) {
         if (isHttpErrorObject(err)) {
           setError(
@@ -457,6 +459,33 @@ const Dashboard = (): React.JSX.Element | null => {
     }
   }
 
+  const subscription = dashboardData?.subscription;
+  const totalUsed = useMemo(
+    () =>
+      subscription
+        ? subscription.limits.requestsPerMonth - subscription.remaining.month
+        : 0,
+    [subscription]
+  );
+  const totalLimit = subscription?.limits.requestsPerMonth ?? 0;
+  const totalUsedPct = totalLimit > 0 ? (totalUsed / totalLimit) * 100 : 0;
+  const activeKeyCount = useMemo(
+    () =>
+      dashboardData?.apiKeys.filter(
+        (k) => k.keyStatus === "ACTIVE" || k.isActive
+      ).length ?? 0,
+    [dashboardData]
+  );
+  const accountTier = subscription?.tier;
+  const keyLimit = accountTier ? TIER_KEY_LIMITS[accountTier] : undefined;
+  const atKeyLimit =
+    !!keyLimit && (dashboardData?.apiKeys.length ?? 0) >= keyLimit;
+  const showNudge =
+    !!subscription &&
+    accountTier === "HOBBY" &&
+    totalUsedPct >= 75 &&
+    !nudgeDismissed;
+
   if (!isAuthenticated) {
     return <AuthGate context="API keys" />;
   }
@@ -486,24 +515,6 @@ const Dashboard = (): React.JSX.Element | null => {
   }
 
   if (!dashboardData) return null;
-
-  const { subscription } = dashboardData;
-  const totalUsed = subscription
-    ? subscription.limits.requestsPerMonth - subscription.remaining.month
-    : 0;
-  const totalLimit = subscription?.limits.requestsPerMonth ?? 0;
-  const totalUsedPct = totalLimit > 0 ? (totalUsed / totalLimit) * 100 : 0;
-  const activeKeyCount = dashboardData.apiKeys.filter(
-    (k) => k.keyStatus === "ACTIVE" || k.isActive
-  ).length;
-  const accountTier = subscription?.tier;
-  const keyLimit = accountTier ? TIER_KEY_LIMITS[accountTier] : undefined;
-  const atKeyLimit = !!keyLimit && dashboardData.apiKeys.length >= keyLimit;
-  const showNudge =
-    !!subscription &&
-    accountTier === "HOBBY" &&
-    totalUsedPct >= 75 &&
-    !nudgeDismissed;
 
   return (
     <>
@@ -973,12 +984,12 @@ const Dashboard = (): React.JSX.Element | null => {
                   <ul className={styles.recentPubList}>
                     {contributions.recentPubs.map((pub) => (
                       <li key={pub.id}>
-                        <a
+                        <Link
                           href={`/pubs/${pub.id}`}
                           className={styles.recentPubLink}
                         >
                           {pub.name}
-                        </a>
+                        </Link>
                         <span className={styles.muted}> — {pub.city}</span>
                       </li>
                     ))}
@@ -997,12 +1008,12 @@ const Dashboard = (): React.JSX.Element | null => {
                         <li key={entry.pubId} className={styles.editEntry}>
                           <div className={styles.editEntryRow}>
                             <div>
-                              <a
+                              <Link
                                 href={`/pubs/${entry.pubId}`}
                                 className={styles.recentPubLink}
                               >
                                 {entry.pubName}
-                              </a>
+                              </Link>
                               <span className={styles.muted}>
                                 {" "}
                                 — {entry.city}
@@ -1019,6 +1030,7 @@ const Dashboard = (): React.JSX.Element | null => {
                                 className={styles.toggleButton}
                                 onClick={() => toggleEditTypes(entry.pubId)}
                                 aria-expanded={expandedEdits.has(entry.pubId)}
+                                aria-controls={`edit-types-${entry.pubId}`}
                               >
                                 {expandedEdits.has(entry.pubId)
                                   ? "Hide"
@@ -1027,7 +1039,7 @@ const Dashboard = (): React.JSX.Element | null => {
                             )}
                           </div>
                           {expandedEdits.has(entry.pubId) && (
-                            <ul className={styles.editTypeList}>
+                            <ul id={`edit-types-${entry.pubId}`} className={styles.editTypeList}>
                               {entry.editTypes.map((t) => (
                                 <li key={t} className={styles.editTypePill}>
                                   {t}

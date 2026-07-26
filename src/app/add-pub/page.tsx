@@ -220,7 +220,7 @@ export default function AddPubPage(): React.JSX.Element {
         </div>
         <div className={styles.headerActions}>
           <button type="button" className={styles.cancelBtn} onClick={() => router.push("/pubs")}>
-            × Cancel
+            <span aria-hidden="true">×</span> Cancel
           </button>
           <button
             type="submit"
@@ -228,7 +228,7 @@ export default function AddPubPage(): React.JSX.Element {
             className={styles.submitBtn}
             disabled={loading}
           >
-            ✓ {loading ? "Submitting…" : "Submit pub"}
+            <span aria-hidden="true">✓</span> {loading ? "Submitting…" : "Submit pub"}
           </button>
         </div>
       </div>
@@ -520,6 +520,7 @@ export default function AddPubPage(): React.JSX.Element {
             className={styles.sectionHead}
             onClick={() => setHoursOpen((o) => !o)}
             aria-expanded={hoursOpen}
+            aria-controls="opening-hours-body"
           >
             <span className={styles.sectionIcon}><ClockIcon /></span>
             <div className={styles.sectionHeadText}>
@@ -529,7 +530,7 @@ export default function AddPubPage(): React.JSX.Element {
             <span className={`${styles.chevron} ${hoursOpen ? styles.chevronOpen : ""}`}>↓</span>
           </button>
           {hoursOpen && (
-            <div className={styles.openingHoursBody}>
+            <div id="opening-hours-body" className={styles.openingHoursBody}>
               <OpeningHoursEditor value={openingHours} onChange={(val) => setOpeningHours(val)} />
               <FieldErrorList errors={fieldErrors.openingHours} className={styles.errorText} idPrefix="openingHours" />
             </div>

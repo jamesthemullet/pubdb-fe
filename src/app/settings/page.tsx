@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
+import type { AuthUser } from "@/hooks/useAuth";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
 
@@ -13,22 +15,23 @@ type SettingsTab =
   | "profile"
   | "security"
   | "notifications"
+  | "apiPreferences"
   | "appearance"
   | "danger";
 
 const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
-  // TODO: re-enable in a future PR once wired to real API
-  // { id: "profile", label: "Profile", icon: <ProfileIcon /> },
-  // { id: "security", label: "Security", icon: <SecurityIcon /> },
-  // { id: "notifications", label: "Notifications", icon: <BellIcon /> },
-  // { id: "appearance", label: "Appearance", icon: <AppearanceIcon /> },
+  { id: "profile", label: "Profile", icon: <ProfileIcon /> },
+  { id: "security", label: "Security", icon: <SecurityIcon /> },
+  { id: "notifications", label: "Notifications", icon: <BellIcon /> },
+  { id: "apiPreferences", label: "API preferences", icon: <ApiPreferencesIcon /> },
+  { id: "appearance", label: "Appearance", icon: <AppearanceIcon /> },
   { id: "danger", label: "Danger zone", icon: <DangerIcon /> },
 ];
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage(): React.JSX.Element {
-  const [activeTab, setActiveTab] = useState<SettingsTab>("danger");
+  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const { user } = useAuth();
 
   if (!user) {
@@ -65,12 +68,11 @@ export default function SettingsPage(): React.JSX.Element {
 
         {/* Content */}
         <div className={styles.content}>
-          {/* TODO: re-enable in a future PR once wired to real API
-          {activeTab === "profile" && <ProfileTab userEmail={user?.email ?? ""} />}
+          {activeTab === "profile" && <ProfileTab user={user} />}
           {activeTab === "security" && <SecurityTab />}
-          {activeTab === "notifications" && <NotificationsTab />}
+          {activeTab === "notifications" && <NotificationsTab user={user} />}
+          {activeTab === "apiPreferences" && <ApiPreferencesTab user={user} />}
           {activeTab === "appearance" && <AppearanceTab />}
-          */}
           {activeTab === "danger" && <DangerTab />}
         </div>
       </div>
@@ -83,16 +85,22 @@ export default function SettingsPage(): React.JSX.Element {
 function FieldRow({
   label,
   hint,
+  htmlFor,
   children,
 }: {
   label: string;
   hint?: string;
+  htmlFor?: string;
   children: React.ReactNode;
 }) {
   return (
     <div className={styles.fieldRow}>
       <div className={styles.fieldMeta}>
-        <span className={styles.fieldLabel}>{label}</span>
+        {htmlFor ? (
+          <label htmlFor={htmlFor} className={styles.fieldLabel}>{label}</label>
+        ) : (
+          <span className={styles.fieldLabel}>{label}</span>
+        )}
         {hint && <span className={styles.fieldHint}>{hint}</span>}
       </div>
       <div className={styles.fieldControl}>{children}</div>
@@ -112,32 +120,119 @@ function Card({ title, description, children }: { title: string; description?: s
   );
 }
 
-// TODO: re-enable in a future PR once wired to real API
-/*
-function SaveBar({ onSave }: { onSave?: () => void }) {
+function SaveBar({
+  onSave,
+  disabled,
+  label = "Save changes",
+}: {
+  onSave?: () => void;
+  disabled?: boolean;
+  label?: string;
+}) {
   return (
     <div className={styles.saveBar}>
-      <button type="button" className={styles.saveBtn} onClick={onSave}>
-        Save changes
+      <button type="button" className={styles.saveBtn} onClick={onSave} disabled={disabled}>
+        {label}
       </button>
     </div>
   );
 }
-*/
 
 // ── Profile tab ───────────────────────────────────────────────────────────────
-// TODO: re-enable in a future PR once wired to real API
-/*
-function ProfileTab({ userEmail }: { userEmail: string }) {
-  const [displayName, setDisplayName] = useState("Sam Mott");
-  const [city, setCity] = useState("London");
-  const [bio, setBio] = useState("Building Pintly. Probably at a pub right now.");
-  const [email, setEmail] = useState(userEmail || "sam@pintly.app");
+
+type ProfileFormState = {
+  name: string;
+  username: string;
+  image: string;
+  location: string;
+  bio: string;
+};
+
+function profileFormStateFromUser(user: AuthUser): ProfileFormState {
+  return {
+    name: user?.name ?? "",
+    username: user?.username ?? "",
+    image: user?.image ?? "",
+    location: user?.location ?? "",
+    bio: user?.bio ?? "",
+  };
+}
+
+function initialsFor(name: string, username: string, email: string): string {
+  const source = name || username || email;
+  return source
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function ProfileTab({ user }: { user: AuthUser }) {
+  const initial = useMemo(() => profileFormStateFromUser(user), [user]);
+
+  const [name, setName] = useState(initial.name);
+  const [username, setUsername] = useState(initial.username);
+  const [image, setImage] = useState(initial.image);
+  const [location, setLocation] = useState(initial.location);
+  const [bio, setBio] = useState(initial.bio);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  function handleSave() {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const current: ProfileFormState = { name, username, image, location, bio };
+  const hasChanges = (Object.keys(current) as (keyof ProfileFormState)[]).some(
+    (key) => current[key] !== initial[key]
+  );
+
+  async function handleSave() {
+    const body: Partial<ProfileFormState> = {};
+    (Object.keys(current) as (keyof ProfileFormState)[]).forEach((key) => {
+      if (current[key] !== initial[key]) body[key] = current[key];
+    });
+
+    if (Object.keys(body).length === 0) return;
+
+    setFormError(null);
+    setFieldErrors({});
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/auth/me", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (res.ok) {
+        setSaved(true);
+        window.dispatchEvent(new Event("authChanged"));
+        setTimeout(() => setSaved(false), 2000);
+        return;
+      }
+
+      if (res.status === 409) {
+        setFieldErrors({ username: [typeof data?.error === "string" ? data.error : "Username already taken"] });
+      } else if (res.status === 400 && data?.errors?.fieldErrors) {
+        setFieldErrors(data.errors.fieldErrors);
+      } else if (res.status === 401) {
+        setFormError("Session expired — please log in again.");
+      } else {
+        setFormError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setFormError("Something went wrong. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -146,65 +241,96 @@ function ProfileTab({ userEmail }: { userEmail: string }) {
         title="Public profile"
         description="Other contributors see this on the leaderboard and pub edit history."
       >
-        <FieldRow label="Display name">
+        <FieldRow label="Display name" hint="2–100 characters." htmlFor="settings-display-name">
           <input
+            id="settings-display-name"
             className={styles.textInput}
             type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
+          {fieldErrors.name?.map((msg) => (
+            <span key={msg} className={styles.fieldError}>{msg}</span>
+          ))}
         </FieldRow>
 
-        <FieldRow label="Avatar" hint="Recommended 256×256.">
-          <div className={styles.avatarRow}>
-            <span className={styles.avatarCircle}>
-              {displayName
-                .split(" ")
-                .map((w) => w[0])
-                .join("")
-                .slice(0, 2)
-                .toUpperCase()}
-            </span>
-            <button type="button" className={styles.avatarBtn}>Upload</button>
-            <button type="button" className={styles.avatarBtnGhost}>Remove</button>
+        <FieldRow label="Username" hint="3–30 characters. Letters, numbers, and underscores only.">
+          <div className={styles.prefixInput}>
+            <span className={styles.inputPrefix}>@</span>
+            <input
+              className={styles.prefixInputField}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
           </div>
+          {fieldErrors.username?.map((msg) => (
+            <span key={msg} className={styles.fieldError}>{msg}</span>
+          ))}
         </FieldRow>
 
-        <FieldRow label="City" hint="Shown on your profile, helps suggest nearby pubs.">
+        <FieldRow label="Avatar" hint="Paste an image URL.">
+          <div className={styles.avatarRow}>
+            {image ? (
+              // biome-ignore lint/performance/noImgElement: user-supplied external avatar URL, not an optimizable local asset
+              <img
+                src={image}
+                alt=""
+                className={styles.avatarCircle}
+                style={{ objectFit: "cover" }}
+              />
+            ) : (
+              <span className={styles.avatarCircle}>{initialsFor(name, username, user?.email ?? "")}</span>
+            )}
+            <input
+              className={styles.textInput}
+              type="url"
+              placeholder="https://example.com/avatar.png"
+              value={image}
+              onChange={(e) => setImage(e.target.value)}
+            />
+          </div>
+          {fieldErrors.image?.map((msg) => (
+            <span key={msg} className={styles.fieldError}>{msg}</span>
+          ))}
+        </FieldRow>
+
+        <FieldRow label="City" hint="Shown on your profile, helps suggest nearby pubs." htmlFor="settings-city">
           <input
+            id="settings-city"
             className={styles.textInput}
             type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
           />
+          {fieldErrors.location?.map((msg) => (
+            <span key={msg} className={styles.fieldError}>{msg}</span>
+          ))}
         </FieldRow>
 
-        <FieldRow label="Bio">
+        <FieldRow label="Bio" hint="Max 280 characters." htmlFor="settings-bio">
           <textarea
+            id="settings-bio"
             className={styles.textarea}
             rows={4}
+            maxLength={280}
             value={bio}
             onChange={(e) => setBio(e.target.value)}
           />
+          {fieldErrors.bio?.map((msg) => (
+            <span key={msg} className={styles.fieldError}>{msg}</span>
+          ))}
         </FieldRow>
       </Card>
 
       <Card title="Contact">
-        <FieldRow label="Email">
-          <input
-            className={styles.textInput}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </FieldRow>
-
-        <FieldRow label="Email verified">
-          <span className={styles.verifiedBadge}>✓ Verified · 14 Mar 2024</span>
+        <FieldRow label="Email" htmlFor="settings-email">
+          <span id="settings-email" className={styles.fieldHint}>{user?.email}</span>
         </FieldRow>
       </Card>
 
-      <SaveBar onSave={handleSave} />
+      <SaveBar onSave={handleSave} disabled={saving || !hasChanges} label={saving ? "Saving…" : "Save changes"} />
+      {formError && <p className={styles.formError}>{formError}</p>}
       {saved && <p className={styles.savedMsg}>Changes saved.</p>}
     </>
   );
@@ -213,82 +339,221 @@ function ProfileTab({ userEmail }: { userEmail: string }) {
 // ── Security tab ──────────────────────────────────────────────────────────────
 
 function SecurityTab() {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const hasChanges = currentPassword.length > 0 || newPassword.length > 0 || confirmPassword.length > 0;
+
+  async function handleSave() {
+    setFormError(null);
+    setFieldErrors({});
+
+    if (newPassword !== confirmPassword) {
+      setFieldErrors({ confirmPassword: ["Passwords do not match."] });
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/auth/me/password", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (res.ok) {
+        setSaved(true);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setTimeout(() => setSaved(false), 2000);
+        return;
+      }
+
+      if (res.status === 400 && data?.errors?.fieldErrors) {
+        setFieldErrors(data.errors.fieldErrors);
+      } else if (res.status === 401) {
+        setFormError(data?.error === "Invalid credentials" ? "Current password is incorrect." : "Session expired — please log in again.");
+      } else if (res.status === 429) {
+        setFormError("Too many attempts. Please try again later.");
+      } else {
+        setFormError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setFormError("Something went wrong. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <>
       <Card title="Password" description="Update your login password.">
-        <FieldRow label="Current password">
-          <input className={styles.textInput} type="password" placeholder="••••••••" />
+        <FieldRow label="Current password" htmlFor="settings-current-password">
+          <input id="settings-current-password" className={styles.textInput} type="password" placeholder="••••••••" />
         </FieldRow>
-        <FieldRow label="New password">
-          <input className={styles.textInput} type="password" placeholder="••••••••" />
+        <FieldRow label="New password" hint="6–128 characters." htmlFor="settings-new-password">
+          <input
+            id="settings-new-password"
+            className={styles.textInput}
+            type="password"
+            placeholder="Enter a new password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          {fieldErrors.newPassword?.map((msg) => (
+            <span key={msg} className={styles.fieldError}>{msg}</span>
+          ))}
         </FieldRow>
-        <FieldRow label="Confirm new password">
-          <input className={styles.textInput} type="password" placeholder="••••••••" />
+        <FieldRow label="Confirm new password" htmlFor="settings-confirm-password">
+          <input
+            id="settings-confirm-password"
+            className={styles.textInput}
+            type="password"
+            placeholder="Enter a new password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          {fieldErrors.confirmPassword?.map((msg) => (
+            <span key={msg} className={styles.fieldError}>{msg}</span>
+          ))}
         </FieldRow>
       </Card>
 
-      <SaveBar />
+      <SaveBar
+        onSave={handleSave}
+        disabled={saving || !hasChanges || !currentPassword || !newPassword || !confirmPassword}
+        label={saving ? "Saving…" : "Save changes"}
+      />
+      {formError && <p className={styles.formError}>{formError}</p>}
+      {saved && <p className={styles.savedMsg}>Password updated.</p>}
     </>
   );
 }
 
 // ── Notifications tab ─────────────────────────────────────────────────────────
 
-function NotificationsTab() {
-  const [notifs, setNotifs] = useState({
-    billing: true,
-    usage: true,
-    changelog: false,
-    contributions: true,
-  });
+function AlertToggleRow({
+  field,
+  label,
+  hint,
+  initial,
+}: {
+  field: "usageLimitAlertsEnabled" | "pubEditAlertsEnabled";
+  label: string;
+  hint: string;
+  initial: boolean;
+}) {
+  const [enabled, setEnabled] = useState(initial);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function toggle(key: keyof typeof notifs) {
-    setNotifs((n) => ({ ...n, [key]: !n[key] }));
+  async function handleToggle() {
+    const next = !enabled;
+    setEnabled(next);
+    setError(null);
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/auth/me", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
+        body: JSON.stringify({ [field]: next }),
+      });
+
+      if (res.ok) {
+        window.dispatchEvent(new Event("authChanged"));
+        return;
+      }
+
+      setEnabled(!next);
+      if (res.status === 401) {
+        setError("Session expired — please log in again.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setEnabled(!next);
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   }
 
-  const items = [
-    { key: "billing" as const, label: "Billing & invoices", hint: "Payment confirmations and upcoming charges" },
-    { key: "usage" as const, label: "Usage alerts", hint: "Quota warnings and limit resets" },
-    { key: "changelog" as const, label: "Changelog & announcements", hint: "New features and API updates" },
-    { key: "contributions" as const, label: "Contribution activity", hint: "Leaderboard changes and pub edit approvals" },
-  ];
-
   return (
-    <>
-      <Card title="Email notifications" description="Choose what we send to your account email.">
-        {items.map((item) => (
-          <FieldRow key={item.key} label={item.label} hint={item.hint}>
-            <label className={styles.toggleLabel}>
-              <input
-                type="checkbox"
-                className={styles.toggleInput}
-                checked={notifs[item.key]}
-                onChange={() => toggle(item.key)}
-              />
-              <span className={styles.toggleTrack}>
-                <span className={styles.toggleThumb} />
-              </span>
-              <span className={styles.toggleText}>{notifs[item.key] ? "On" : "Off"}</span>
-            </label>
-          </FieldRow>
-        ))}
-      </Card>
+    <FieldRow label={label} hint={hint}>
+      <label className={styles.toggleLabel}>
+        <input
+          type="checkbox"
+          className={styles.toggleInput}
+          checked={enabled}
+          disabled={saving}
+          onChange={handleToggle}
+        />
+        <span className={styles.toggleTrack}>
+          <span className={styles.toggleThumb} />
+        </span>
+        <span className={styles.toggleText}>{enabled ? "On" : "Off"}</span>
+      </label>
+      {error && <p className={styles.formError}>{error}</p>}
+    </FieldRow>
+  );
+}
 
-      <SaveBar />
-    </>
+function NotificationsTab({ user }: { user: AuthUser }) {
+  return (
+    <Card title="Email notifications" description="Choose what we send to your account email.">
+      <AlertToggleRow
+        field="pubEditAlertsEnabled"
+        label="Edit to a pub I added"
+        hint="Someone updated a pub you originally submitted."
+        initial={user?.pubEditAlertsEnabled ?? true}
+      />
+    </Card>
+  );
+}
+
+// ── API preferences tab ───────────────────────────────────────────────────────
+
+function ApiPreferencesTab({ user }: { user: AuthUser }) {
+  return (
+    <Card title="API preferences" description="Control how we communicate with you about your API usage.">
+      <AlertToggleRow
+        field="usageLimitAlertsEnabled"
+        label="Usage limit alerts"
+        hint="Get an email when you reach 80% of your rate limit for the hour, day, or month."
+        initial={user?.usageLimitAlertsEnabled ?? true}
+      />
+    </Card>
   );
 }
 
 // ── Appearance tab ────────────────────────────────────────────────────────────
 
 function AppearanceTab() {
-  const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
+  const { theme, setTheme } = useTheme();
 
   return (
     <Card title="Appearance" description="Customise how the dashboard looks for you.">
       <FieldRow label="Theme">
         <div className={styles.themeOptions}>
-          {(["light", "system", "dark"] as const).map((t) => (
+          {(["light", "dark"] as const).map((t) => (
             <button
               key={t}
               type="button"
@@ -302,12 +567,9 @@ function AppearanceTab() {
           ))}
         </div>
       </FieldRow>
-
-      <SaveBar />
     </Card>
   );
 }
-*/
 
 // ── Danger zone tab ───────────────────────────────────────────────────────────
 
@@ -414,8 +676,7 @@ function DangerTab() {
 }
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
-// TODO: re-enable in a future PR once wired to real API
-/*
+
 function ProfileIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -442,6 +703,15 @@ function BellIcon() {
   );
 }
 
+function ApiPreferencesIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <rect x="1.5" y="3" width="11" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M4 6.5h6M4 8.5h3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function AppearanceIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -450,7 +720,6 @@ function AppearanceIcon() {
     </svg>
   );
 }
-*/
 
 function DangerIcon() {
   return (

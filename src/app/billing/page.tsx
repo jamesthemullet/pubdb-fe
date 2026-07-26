@@ -85,6 +85,14 @@ type BillingData = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+type UsageMeter = {
+  label: string;
+  used: number;
+  limit: number;
+  pct: number;
+  reset: string;
+};
+
 function formatResetTime(
   iso: string,
   period: "hour" | "day" | "month"
@@ -297,7 +305,8 @@ export default function BillingPage(): React.JSX.Element {
 
   const billingFields = useMemo(() => {
     const bd = billingData?.billingDetails ?? null;
-    if (!bd) return [] as { label: string; value: string; link: boolean; mono: boolean }[];
+    if (!bd)
+      return [] as { label: string; value: string; link: boolean; mono: boolean }[];
     return [
       bd.name
         ? { label: "Account", value: bd.name, link: false, mono: false }
@@ -331,7 +340,12 @@ export default function BillingPage(): React.JSX.Element {
             mono: false,
           }
         : null,
-    ].filter(Boolean) as { label: string; value: string; link: boolean; mono: boolean }[];
+    ].filter(Boolean) as {
+      label: string;
+      value: string;
+      link: boolean;
+      mono: boolean;
+    }[];
   }, [billingData]);
 
   const currencyLabel = billingData?.plan.currency?.toUpperCase() ?? "GBP";
