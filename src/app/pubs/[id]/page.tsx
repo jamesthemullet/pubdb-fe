@@ -287,8 +287,7 @@ export default function PubPage(): React.JSX.Element {
       node: pub ? `const res = await fetch(\n  'https://api.thepubdb.com/api/v1/pubs/${pub.id}',\n  { headers: { 'X-API-Key': process.env.PUBDB_KEY } }\n);\nconst pub = await res.json();` : "",
       python: pub ? `import requests\nres = requests.get(\n  f'https://api.thepubdb.com/api/v1/pubs/${pub.id}',\n  headers={'X-API-Key': PUBDB_KEY}\n)\npub = res.json()` : "",
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pub?.id]
+    [pub]
   );
 
   const jsonPreview = useMemo(

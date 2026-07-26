@@ -152,61 +152,6 @@ const pricingTiers = [
   },
 ];
 
-function formatCurrency(amount?: number, currency: string = "usd"): string {
-  if (typeof amount !== "number") return "-";
-  const normalizedCurrency = currency?.toUpperCase() || "USD";
-  try {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: normalizedCurrency,
-    }).format(amount / 100);
-  } catch {
-    return `$${(amount / 100).toFixed(2)}`;
-  }
-}
-
-function formatDateTime(timestamp?: number): string | null {
-  if (!timestamp) return null;
-  return new Date(timestamp * 1000).toLocaleString();
-}
-
-function getProrationItems(
-  upcoming: UpcomingBill | null | undefined
-): ProrationItem[] {
-  if (!upcoming) return [];
-  return (
-    upcoming.proration ||
-    upcoming.proration_lines ||
-    upcoming.lines ||
-    upcoming.invoice?.lines ||
-    []
-  );
-}
-
-function getInvoiceLike(
-  upcoming: UpcomingBill | null | undefined
-): UpcomingBill | InvoiceLike | Omit<InvoiceLike, "lines"> | null {
-  if (!upcoming) return null;
-  if (typeof upcoming.amount_due === "number") return upcoming;
-  if (upcoming.invoice && typeof upcoming.invoice.amount_due === "number")
-    return upcoming.invoice;
-  if (
-    upcoming.latest_invoice &&
-    typeof upcoming.latest_invoice.amount_due === "number"
-  )
-    return upcoming.latest_invoice;
-  return null;
-}
-
-function firstNumber(...values: Array<number | null | undefined>): number | undefined {
-  for (const value of values) {
-    if (typeof value === "number" && Number.isFinite(value)) {
-      return value;
-    }
-  }
-  return undefined;
-}
-
 const Pricing = (): React.JSX.Element => {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<{
