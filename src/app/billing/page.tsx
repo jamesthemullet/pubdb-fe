@@ -114,14 +114,6 @@ function formatResetTime(
   })}`;
 }
 
-type UsageMeter = {
-  label: string;
-  used: number;
-  limit: number;
-  pct: number;
-  reset: string;
-};
-
 function usageMeters(subscription: Subscription): UsageMeter[] {
   const { limits, remaining, resetTimes } = subscription;
   return [
