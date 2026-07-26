@@ -41,7 +41,7 @@ const PAGE_SIZE = 50;
 
 const VISIBLE_FILTER_COUNT = 6;
 
-const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
+const PubRow = memo(function PubRow({ pub }: { pub: Pub }): React.JSX.Element {
   return (
     <tr
       data-id={pub.id}

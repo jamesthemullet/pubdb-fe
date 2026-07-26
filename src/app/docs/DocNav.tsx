@@ -13,7 +13,7 @@ const NAV_ITEMS = [
   { id: "errors", label: "Errors" },
 ];
 
-export function DocNav() {
+export function DocNav(): React.JSX.Element {
   const [activeSection, setActiveSection] = useState("quick-start");
 
   const scrollTo = (id: string): void => {
