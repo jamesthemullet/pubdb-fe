@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 import { makeFakeJwt } from "../fixtures/auth";
 
-const AUTH_ME_API = (url: URL) => url.port === "4000" && url.pathname === "/auth/me";
-const ADD_PUB_API = (url: URL) => url.port === "4000" && url.pathname === "/pubs";
-const COUNTRIES_API = (url: URL) => url.href.includes("restcountries.com");
+const AUTH_ME_API = (url: URL) => url.pathname === "/api/auth/me";
+const ADD_PUB_API = (url: URL) => url.pathname === "/api/pubs";
+const COUNTRIES_API = (url: URL) => url.pathname === "/api/countries";
 
 function jsonResponse(body: unknown, status = 200) {
   return {

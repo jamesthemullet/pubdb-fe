@@ -10,6 +10,7 @@ export const metadata: Metadata = {
       "See who has contributed the most to the Pub DB database. Rankings by pubs added across different time periods.",
   },
   twitter: {
+    card: "summary_large_image",
     title: "Leaderboard | Pub DB",
     description:
       "See who has contributed the most to the Pub DB database. Rankings by pubs added across different time periods.",

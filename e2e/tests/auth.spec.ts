@@ -58,6 +58,9 @@ test.describe("Register / Login page", () => {
 			await page.route("**/auth/login", (route) =>
 				route.fulfill(jsonResponse({ token: fakeToken })),
 			);
+			await page.route("**/auth/me", (route) =>
+				route.fulfill(jsonResponse({ email: "user@example.com", approved: true })),
+			);
 
 			await page.locator(field.email).fill("user@example.com");
 			await page.locator(field.password).fill("password123");

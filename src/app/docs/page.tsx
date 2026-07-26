@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CopyButton } from "./CopyButton";
 import { DocNav } from "./DocNav";
 import styles from "./page.module.css";
@@ -91,12 +92,12 @@ export default function DocsPage() {
           </div>
 
           <div className={styles.headerActions}>
-            <a href="/playground" className={styles.headerBtn}>
+            <Link href="/playground" className={styles.headerBtn}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                 <polygon points="3,2 11,7 3,12" fill="currentColor" />
               </svg>
               Playground
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -104,7 +105,7 @@ export default function DocsPage() {
           <h2 className={styles.sectionTitle}>Quick start</h2>
           <p className={styles.sectionText}>
             Get your first response in under a minute. Grab an API key from the{" "}
-            <a href="/profile" className={styles.inlineLink}>dashboard</a>, then make a request:
+            <Link href="/profile" className={styles.inlineLink}>dashboard</Link>, then make a request:
           </p>
           <CodeBlock code={CURL_QUICK_START} />
           <p className={styles.sectionText}>
