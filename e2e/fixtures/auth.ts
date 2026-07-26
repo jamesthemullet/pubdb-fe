@@ -26,6 +26,24 @@ export async function setAuthToken(page: Page, email: string): Promise<void> {
 }
 
 /**
+ * Mock the /api/auth/me endpoint the useAuth hook calls on every page
+ * to resolve the current user from the stored token.
+ */
+export async function mockAuthMeEndpoint(
+  page: Page,
+  email: string,
+  { approved = true }: { approved?: boolean } = {}
+): Promise<void> {
+  await page.route("**/auth/me", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ email, approved }),
+    })
+  );
+}
+
+/**
  * Mock the backend dashboard endpoint so pages that call it when
  * authenticated don't get a network error.
  */

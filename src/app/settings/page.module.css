@@ -358,6 +358,18 @@
   text-align: right;
 }
 
+.fieldError {
+  font-size: 0.75rem;
+  color: #dc2626;
+  line-height: 1.45;
+}
+
+.formError {
+  font-size: 0.8125rem;
+  color: #dc2626;
+  text-align: right;
+}
+
 /* ── Security ── */
 .twoFaRow {
   display: flex;

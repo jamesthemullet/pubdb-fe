@@ -17,7 +17,7 @@ function isPlaygroundTokenResponse(value: unknown): value is PlaygroundTokenResp
  * Builds a GET handler that mints a short-lived playground token for the
  * caller's selected key (via the backend's Bearer-authenticated
  * playground-token endpoint) and uses it as X-API-Key on the real request.
- * `buildEndpointPath` receives the incoming query params with `keyPrefix`
+ * `buildEndpointPath` receives the incoming query params with `id`
  * already stripped, so it can forward the rest (or ignore them) as needed.
  */
 export function createPlaygroundProxyHandler(
@@ -31,14 +31,14 @@ export function createPlaygroundProxyHandler(
     }
 
     const { searchParams } = new URL(request.url);
-    const keyPrefix = searchParams.get("keyPrefix");
-    if (!keyPrefix) {
-      return NextResponse.json({ error: "keyPrefix is required" }, { status: 400 });
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
 
     try {
       const tokenRes = await fetch(
-        `${apiUrl}/auth/keys/${encodeURIComponent(keyPrefix)}/playground-token`,
+        `${apiUrl}/auth/keys/${encodeURIComponent(id)}/playground-token`,
         { method: "POST", headers: { Authorization: authHeader } }
       );
       const tokenData: unknown = await tokenRes.json().catch(() => null);
@@ -51,7 +51,7 @@ export function createPlaygroundProxyHandler(
       }
 
       const forwardParams = new URLSearchParams(searchParams);
-      forwardParams.delete("keyPrefix");
+      forwardParams.delete("id");
 
       const response = await fetch(`${apiUrl}${buildEndpointPath(forwardParams)}`, {
         headers: { "X-API-Key": tokenData.token },

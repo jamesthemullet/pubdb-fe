@@ -36,7 +36,7 @@ function pubDisplayId(id: string | undefined): string {
   return id ? `pub_${id.slice(0, 6)}` : "pub_??????";
 }
 
-export default function PubPage() {
+export default function PubPage(): React.JSX.Element {
   const { id } = useParams();
   const [pub, setPub] = useState<Pub | null>(null);
   const [loading, setLoading] = useState(true);
@@ -362,10 +362,10 @@ export default function PubPage() {
           </div>
           <div className={styles.editActions}>
             <button type="button" className={addPubStyles.cancelBtn} onClick={() => setEditing(false)}>
-              × Cancel
+              <span aria-hidden="true">×</span> Cancel
             </button>
             <button type="button" className={addPubStyles.submitBtn} onClick={handleSave} disabled={isSaveDisabled}>
-              ✓ Save changes
+              <span aria-hidden="true">✓</span> Save changes
             </button>
           </div>
         </div>
