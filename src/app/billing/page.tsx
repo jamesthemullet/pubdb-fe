@@ -181,7 +181,7 @@ function formatPeriod(startMs: number, endMs: number): string {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function BillingPage(): React.JSX.Element {
+export default function BillingPage(){
   const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null

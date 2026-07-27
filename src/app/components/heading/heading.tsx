@@ -4,7 +4,7 @@ type HeadingProps = {
   text: string;
 };
 
-export default function Heading({ text }: HeadingProps): React.JSX.Element {
+export default function Heading({ text }: HeadingProps){
   return (
     <Typography as="h1" variant="headingLarge">
       {text}

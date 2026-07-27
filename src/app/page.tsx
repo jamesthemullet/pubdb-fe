@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactElement } from "react";
 import Link from "next/link";
 import HeroCodeBlock from "./features/homepage/hero-code-block";
 import Pricing from "./features/pricing/pricing";
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
 //   { value: "4.2k", label: "developers using us" },
 // ];
 
-export default function Home(): React.JSX.Element {
+export default function Home(): ReactElement {
   return (
     <div className={styles.page}>
       <div className={styles.earlyAccessBanner}>

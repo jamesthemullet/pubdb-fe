@@ -35,7 +35,7 @@ const ACCOUNT_LINKS = [
   { href: "/settings", label: "Settings" },
 ];
 
-export default function Sidebar(): React.JSX.Element {
+export default function Sidebar(){
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();

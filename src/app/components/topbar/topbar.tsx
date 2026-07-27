@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useTheme } from "@/hooks/useTheme";
 import styles from "./topbar.module.css";
 
-export default function Topbar(): React.JSX.Element {
+export default function Topbar(){
   const { theme, toggleTheme } = useTheme();
   return (
     <div className={styles.topbar}>

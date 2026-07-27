@@ -129,7 +129,7 @@ export function useContributions(): {
         if (!ignore) {
           setContributions(normalizeContributions(payload));
         }
-      } catch (err) {
+      } catch (err: unknown) {
         if (!ignore) {
           setContributionsError(
             err instanceof Error ? err.message : "Unable to load contributions."

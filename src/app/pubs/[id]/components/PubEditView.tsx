@@ -1,6 +1,6 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useState } from "react";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
 import { PUB_AMENITY_FIELDS, type PubAmenityKey } from "@/constants/pubFormFields";
@@ -47,7 +47,7 @@ function nextAmenityValue(current: boolean | null): boolean | null {
   return AMENITY_CYCLE[(AMENITY_CYCLE.indexOf(current) + 1) % AMENITY_CYCLE.length];
 }
 
-const AMENITY_ICONS: Partial<Record<PubAmenityKey, React.ReactNode>> = {
+const AMENITY_ICONS: Partial<Record<PubAmenityKey, ReactNode>> = {
   hasFood: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M5 1v4M5 7v6M9 1c0 0 0 4-2 4s-2 0-2 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /><path d="M10 1v12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
   hasSundayRoast: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 10c0-2.761 2.239-5 5-5s5 2.239 5 5H2z" stroke="currentColor" strokeWidth="1.2" /><path d="M7 5V3M5 3h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
   hasBeerGarden: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 13V7M7 7C7 4 4 2 1 3c2 1 4 3 4 5M7 7c0-3 3-5 6-4-2 1-4 3-4 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,

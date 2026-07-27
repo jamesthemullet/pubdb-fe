@@ -52,7 +52,7 @@ function VersionEntry({ entry }: { entry: ChangelogVersion }) {
   );
 }
 
-export default function ChangelogClient({ versions }: { versions: ChangelogVersion[] }): React.JSX.Element {
+export default function ChangelogClient({ versions }: { versions: ChangelogVersion[] }){
   return (
     <div className={styles.page}>
       <div className={styles.header}>

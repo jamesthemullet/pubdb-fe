@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
 
 type PubMetaShape = {
@@ -58,6 +59,6 @@ export async function generateMetadata({
   }
 }
 
-export default function PubLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
+export default function PubLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import type { FormEvent, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
@@ -51,7 +52,7 @@ function parseApiValidationErrors(data: unknown): { formErrors: string[]; fieldE
 }
 
 // Amenity icon map
-const AMENITY_ICONS: Partial<Record<PubAmenityKey, React.ReactNode>> = {
+const AMENITY_ICONS: Partial<Record<PubAmenityKey, ReactNode>> = {
   hasFood: <FoodIcon />,
   hasSundayRoast: <RoastIcon />,
   hasBeerGarden: <GardenIcon />,
@@ -86,7 +87,7 @@ const AMENITY_LABELS: Partial<Record<PubAmenityKey, string>> = {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function AddPubPage(): React.JSX.Element {
+export default function AddPubPage(){
   const router = useRouter();
 
   // Core fields
@@ -145,7 +146,7 @@ export default function AddPubPage(): React.JSX.Element {
     return () => { window.removeEventListener("authChanged", checkAuth); window.removeEventListener("storage", checkAuth); };
   }, []);
 
-  async function handleSubmit(e: React.FormEvent): Promise<void> {
+  async function handleSubmit(e: FormEvent): Promise<void> {
     e.preventDefault();
     setLoading(true); setError(null); setFormErrors([]); setFieldErrors({}); setSuccess(null); setEditLink(null);
     try {
