@@ -1,3 +1,13 @@
+export type Badge = {
+  key: string;
+  name: string;
+  description: string;
+};
+
+export type NextBadge = Badge & {
+  remaining: number;
+};
+
 export type LeaderboardEntry = {
   rank: number;
   userId: string;
@@ -7,6 +17,8 @@ export type LeaderboardEntry = {
   totalEdits: number;
   totalContributions: number;
   streak: number;
+  badges: Badge[];
+  nextBadges: NextBadge[];
 };
 
 export type LeaderboardPeriodKey = "7d" | "30d" | "90d" | "all";
@@ -25,7 +37,7 @@ const PERIOD_KEYS: LeaderboardPeriodKey[] = ["7d", "30d", "90d", "all"];
 
 function isLeaderboardEntry(
   item: unknown
-): item is Omit<LeaderboardEntry, "streak"> {
+): item is Omit<LeaderboardEntry, "streak" | "badges" | "nextBadges"> {
   if (typeof item !== "object" || item === null) return false;
   const obj = item as Record<string, unknown>;
   return (
@@ -37,6 +49,28 @@ function isLeaderboardEntry(
     typeof obj.totalEdits === "number" &&
     typeof obj.totalContributions === "number"
   );
+}
+
+function isBadge(item: unknown): item is Badge {
+  if (typeof item !== "object" || item === null) return false;
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.key === "string" &&
+    typeof obj.name === "string" &&
+    typeof obj.description === "string"
+  );
+}
+
+function normalizeBadges(value: unknown): Badge[] {
+  return Array.isArray(value) ? value.filter(isBadge) : [];
+}
+
+function isNextBadge(item: unknown): item is NextBadge {
+  return isBadge(item) && typeof (item as Record<string, unknown>).remaining === "number";
+}
+
+function normalizeNextBadges(value: unknown): NextBadge[] {
+  return Array.isArray(value) ? value.filter(isNextBadge) : [];
 }
 
 function normalizePeriod(value: unknown): LeaderboardPeriod {
@@ -54,6 +88,12 @@ function normalizePeriod(value: unknown): LeaderboardPeriod {
             "number"
               ? (entry as unknown as { streak: number }).streak
               : 0,
+          badges: normalizeBadges(
+            (entry as unknown as { badges?: unknown }).badges
+          ),
+          nextBadges: normalizeNextBadges(
+            (entry as unknown as { nextBadges?: unknown }).nextBadges
+          ),
         }))
       : [],
   };

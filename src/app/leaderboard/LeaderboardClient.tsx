@@ -4,9 +4,11 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import type {
+  Badge,
   LeaderboardData,
   LeaderboardEntry,
   LeaderboardPeriodKey,
+  NextBadge,
 } from "@/lib/normalizeLeaderboard";
 import styles from "./page.module.css";
 
@@ -35,6 +37,36 @@ function getInitials(entry: LeaderboardEntry): string {
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
+
+const BADGE_VARIANTS = ["green", "amber", "orange", "purple", "blue"] as const;
+
+function badgeVariant(index: number): (typeof BADGE_VARIANTS)[number] {
+  return BADGE_VARIANTS[index % BADGE_VARIANTS.length];
+}
+
+function BadgeList({
+  badges,
+  className,
+}: {
+  badges: Badge[];
+  className: string;
+}) {
+  if (badges.length === 0) return null;
+  return (
+    <div className={className}>
+      {badges.map((badge, index) => (
+        <span
+          key={badge.key}
+          className={styles.badge}
+          data-variant={badgeVariant(index)}
+          title={badge.description}
+        >
+          {badge.name}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 const MEDAL: Record<1 | 2 | 3, { bg: string; text: string }> = {
   1: { bg: "#fbbf24", text: "#78350f" },
@@ -77,6 +109,7 @@ function PodiumCard({
           ? `You (${entry.displayName || entry.username})`
           : entry.displayName || entry.username}
       </p>
+      <BadgeList badges={entry.badges} className={styles.podiumBadges} />
       <div className={styles.podiumStats}>
         <div className={styles.podiumStat}>
           <span className={styles.podiumStatNum}>{entry.totalAdded}</span>
@@ -125,6 +158,7 @@ function YourRankBanner({
         <span className={styles.yourRankName}>
           You ({entry.displayName || entry.username})
         </span>
+        <BadgeList badges={entry.badges} className={styles.badgeRow} />
       </div>
       <div className={styles.yourRankStats}>
         <div className={styles.yourRankStat}>
@@ -155,6 +189,33 @@ function YourRankBanner({
       >
         View profile →
       </button>
+    </div>
+  );
+}
+
+function EarnBadgesPanel({ nextBadges }: { nextBadges: NextBadge[] }) {
+  if (nextBadges.length === 0) return null;
+  return (
+    <div className={styles.sidebarPanel}>
+      <div className={styles.sidebarPanelHeader}>
+        <span className={styles.sidebarPanelTitle}>Earn badges</span>
+      </div>
+      {nextBadges.map((badge) => (
+        <div key={badge.key} className={styles.earnRow}>
+          <span className={styles.earnEmoji} aria-hidden="true">
+            🎯
+          </span>
+          <div className={styles.earnInfo}>
+            <div className={styles.earnNameRow}>
+              <span className={styles.earnName}>{badge.name}</span>
+              <span className={styles.earnProgress}>
+                {badge.remaining} to go
+              </span>
+            </div>
+            <span className={styles.earnDesc}>{badge.description}</span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -374,6 +435,10 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
                                     : entry.displayName || entry.username}
                                 </span>
                               </div>
+                              <BadgeList
+                                badges={entry.badges}
+                                className={styles.badgeRow}
+                              />
                             </div>
                           </div>
                         </td>
@@ -392,7 +457,11 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
               </table>
             </div>
 
-            <div className={styles.sidebar} />
+            <div className={styles.sidebar}>
+              {yourEntry && (
+                <EarnBadgesPanel nextBadges={yourEntry.nextBadges} />
+              )}
+            </div>
           </div>
         </>
       )}
