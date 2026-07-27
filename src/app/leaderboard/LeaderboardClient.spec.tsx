@@ -20,6 +20,8 @@ function makeEntry(overrides: Partial<LeaderboardEntry> & Pick<LeaderboardEntry,
 		totalEdits: 0,
 		totalContributions: 0,
 		streak: 0,
+		badges: [],
+		nextBadges: [],
 		...overrides,
 	};
 }

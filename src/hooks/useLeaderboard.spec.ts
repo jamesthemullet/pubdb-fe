@@ -18,6 +18,8 @@ const ALICE_ENTRY = {
   totalEdits: 5,
   totalContributions: 15,
   streak: 4,
+  badges: [],
+  nextBadges: [],
 };
 
 const SAMPLE_PAYLOAD = {

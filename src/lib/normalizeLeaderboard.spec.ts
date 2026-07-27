@@ -10,6 +10,12 @@ const VALID_ENTRY = {
   totalEdits: 2,
   totalContributions: 7,
   streak: 3,
+  badges: [
+    { key: "first_pour", name: "First Pour", description: "Made at least 1 contribution" },
+  ],
+  nextBadges: [
+    { key: "local", name: "Local", description: "Made at least 50 contributions", remaining: 8 },
+  ],
 };
 
 const EMPTY_PERIODS = {
@@ -74,6 +80,83 @@ describe("normalizeLeaderboard", () => {
     };
     const result = normalizeLeaderboard(payload);
     expect(result.periods.all.leaderboard[0].streak).toBe(0);
+  });
+
+  it("defaults badges to an empty array when missing", () => {
+    const { badges: _badges, ...entryWithoutBadges } = VALID_ENTRY;
+    const payload = {
+      data: {
+        periods: { all: { since: null, leaderboard: [entryWithoutBadges] } },
+        generatedAt: "",
+      },
+    };
+    const result = normalizeLeaderboard(payload);
+    expect(result.periods.all.leaderboard[0].badges).toEqual([]);
+  });
+
+  it("filters out malformed badge entries while keeping valid ones", () => {
+    const payload = {
+      data: {
+        periods: {
+          all: {
+            since: null,
+            leaderboard: [
+              {
+                ...VALID_ENTRY,
+                badges: [
+                  { key: "regular", name: "Regular", description: "Made at least 10 contributions" },
+                  { key: "scout", name: "Scout" },
+                  "not-an-object",
+                ],
+              },
+            ],
+          },
+        },
+        generatedAt: "",
+      },
+    };
+    const result = normalizeLeaderboard(payload);
+    expect(result.periods.all.leaderboard[0].badges).toEqual([
+      { key: "regular", name: "Regular", description: "Made at least 10 contributions" },
+    ]);
+  });
+
+  it("defaults nextBadges to an empty array when missing", () => {
+    const { nextBadges: _nextBadges, ...entryWithoutNextBadges } = VALID_ENTRY;
+    const payload = {
+      data: {
+        periods: { all: { since: null, leaderboard: [entryWithoutNextBadges] } },
+        generatedAt: "",
+      },
+    };
+    const result = normalizeLeaderboard(payload);
+    expect(result.periods.all.leaderboard[0].nextBadges).toEqual([]);
+  });
+
+  it("filters out next-badge entries missing a numeric remaining", () => {
+    const payload = {
+      data: {
+        periods: {
+          all: {
+            since: null,
+            leaderboard: [
+              {
+                ...VALID_ENTRY,
+                nextBadges: [
+                  { key: "local", name: "Local", description: "Made at least 50 contributions", remaining: 8 },
+                  { key: "landlord", name: "Landlord", description: "Made at least 250 contributions" },
+                ],
+              },
+            ],
+          },
+        },
+        generatedAt: "",
+      },
+    };
+    const result = normalizeLeaderboard(payload);
+    expect(result.periods.all.leaderboard[0].nextBadges).toEqual([
+      { key: "local", name: "Local", description: "Made at least 50 contributions", remaining: 8 },
+    ]);
   });
 
   it("defaults missing or malformed periods to empty", () => {
