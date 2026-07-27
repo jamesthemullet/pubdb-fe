@@ -1,7 +1,7 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import type { ReactNode } from "react";
 import "./globals.css";
 import AccentedInit from "./components/AccentedInit";
 import Sidebar from "./components/sidebar/sidebar";

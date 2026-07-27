@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import type { ReactElement } from "react";
 import Link from "next/link";
+import type { ReactElement } from "react";
 import HeroCodeBlock from "./features/homepage/hero-code-block";
 import Pricing from "./features/pricing/pricing";
 import styles from "./page.module.css";
