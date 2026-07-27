@@ -23,7 +23,7 @@ export type LeaderboardEntry = {
 
 export type LeaderboardPeriodKey = "7d" | "30d" | "90d" | "all";
 
-export type LeaderboardPeriod = {
+type LeaderboardPeriod = {
   since: string | null;
   leaderboard: LeaderboardEntry[];
 };
@@ -66,7 +66,10 @@ function normalizeBadges(value: unknown): Badge[] {
 }
 
 function isNextBadge(item: unknown): item is NextBadge {
-  return isBadge(item) && typeof (item as Record<string, unknown>).remaining === "number";
+  return (
+    isBadge(item) &&
+    typeof (item as Record<string, unknown>).remaining === "number"
+  );
 }
 
 function normalizeNextBadges(value: unknown): NextBadge[] {
@@ -109,7 +112,10 @@ function emptyPeriods(): Record<LeaderboardPeriodKey, LeaderboardPeriod> {
 }
 
 export function normalizeLeaderboard(payload: unknown): LeaderboardData {
-  const fallback: LeaderboardData = { periods: emptyPeriods(), generatedAt: "" };
+  const fallback: LeaderboardData = {
+    periods: emptyPeriods(),
+    generatedAt: "",
+  };
 
   if (typeof payload !== "object" || payload === null) return fallback;
   const root = payload as Record<string, unknown>;
@@ -120,7 +126,9 @@ export function normalizeLeaderboard(payload: unknown): LeaderboardData {
   const periods = emptyPeriods();
   for (const key of PERIOD_KEYS) {
     periods[key] = normalizePeriod(
-      typeof rawPeriods === "object" && rawPeriods !== null ? rawPeriods[key] : undefined
+      typeof rawPeriods === "object" && rawPeriods !== null
+        ? rawPeriods[key]
+        : undefined
     );
   }
 
