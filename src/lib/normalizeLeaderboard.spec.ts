@@ -9,6 +9,7 @@ const VALID_ENTRY = {
   totalAdded: 5,
   totalEdits: 2,
   totalContributions: 7,
+  streak: 3,
 };
 
 const EMPTY_PERIODS = {
@@ -61,6 +62,18 @@ describe("normalizeLeaderboard", () => {
     const result = normalizeLeaderboard(payload);
     expect(result.periods.all.leaderboard).toHaveLength(1);
     expect(result.periods.all.leaderboard[0].userId).toBe("u1");
+  });
+
+  it("defaults streak to 0 when missing from an otherwise valid entry", () => {
+    const { streak: _streak, ...entryWithoutStreak } = VALID_ENTRY;
+    const payload = {
+      data: {
+        periods: { all: { since: null, leaderboard: [entryWithoutStreak] } },
+        generatedAt: "",
+      },
+    };
+    const result = normalizeLeaderboard(payload);
+    expect(result.periods.all.leaderboard[0].streak).toBe(0);
   });
 
   it("defaults missing or malformed periods to empty", () => {
