@@ -3,8 +3,19 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import type { LeaderboardData, LeaderboardEntry } from "@/lib/normalizeLeaderboard";
+import type {
+  LeaderboardData,
+  LeaderboardEntry,
+  LeaderboardPeriodKey,
+} from "@/lib/normalizeLeaderboard";
 import styles from "./page.module.css";
+
+const PERIOD_TABS: { key: LeaderboardPeriodKey; label: string }[] = [
+  { key: "7d", label: "Last 7 days" },
+  { key: "30d", label: "Last 30 days" },
+  { key: "90d", label: "Last 90 days" },
+  { key: "all", label: "All-time" },
+];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -134,8 +145,10 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
   const { user } = useAuth();
   const router = useRouter();
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [activePeriod, setActivePeriod] = useState<LeaderboardPeriodKey>("30d");
 
-  const entries = data.leaderboard;
+  const period = data.periods[activePeriod];
+  const entries = period.leaderboard;
 
   const emailPrefix = user?.email?.split("@")[0]?.toLowerCase() ?? "";
   const yourEntry = useMemo(
@@ -199,7 +212,23 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
 
       {/* Filter bar */}
       <div className={styles.filterBar}>
-        <div className={styles.filterLeft} />
+        <div className={styles.filterLeft}>
+          <div className={styles.timePills}>
+            {PERIOD_TABS.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                className={`${styles.timePill} ${
+                  activePeriod === tab.key ? styles.timePillActive : ""
+                }`}
+                aria-pressed={activePeriod === tab.key}
+                onClick={() => setActivePeriod(tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className={styles.filterMeta}>
           <span className={styles.snapshotDot} />
           <span>
@@ -218,6 +247,18 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
                 }`
               : "—"}
           </span>
+          {period.since && (
+            <>
+              <span className={styles.metaDivider}>·</span>
+              <span>
+                since{" "}
+                {new Date(period.since).toLocaleDateString([], {
+                  month: "short",
+                  day: "numeric",
+                })}
+              </span>
+            </>
+          )}
         </div>
       </div>
 
