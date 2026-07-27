@@ -68,6 +68,9 @@ function PodiumCard({
       </div>
       <div className={styles.podiumAvatarWrap}>
         <span className={styles.podiumAvatar}>{getInitials(entry)}</span>
+        {entry.streak > 0 && (
+          <span className={styles.podiumStreak}>🔥 {entry.streak}</span>
+        )}
       </div>
       <p className={styles.podiumName}>
         {isYou
@@ -98,15 +101,26 @@ function PodiumCard({
 
 function YourRankBanner({
   entry,
+  avatarUrl,
   onViewProfile,
 }: {
   entry: LeaderboardEntry;
+  avatarUrl?: string;
   onViewProfile: () => void;
 }) {
   return (
     <div className={styles.yourRankBanner}>
       <span className={styles.yourRankLabel}>YOUR RANK</span>
-      <span className={styles.yourRankAvatar}>{getInitials(entry)}</span>
+      {avatarUrl ? (
+        // biome-ignore lint/performance/noImgElement: user-supplied external avatar URL, not an optimizable local asset
+        <img
+          src={avatarUrl}
+          alt=""
+          className={styles.yourRankAvatar}
+        />
+      ) : (
+        <span className={styles.yourRankAvatar}>{getInitials(entry)}</span>
+      )}
       <div className={styles.yourRankInfo}>
         <span className={styles.yourRankName}>
           You ({entry.displayName || entry.username})
@@ -126,6 +140,12 @@ function YourRankBanner({
             {entry.totalContributions}
           </span>
           <span className={styles.yourRankStatLabel}>TOTAL</span>
+        </div>
+        <div className={styles.yourRankStat}>
+          <span className={styles.yourRankStatNum}>
+            {entry.streak > 0 ? `🔥 ${entry.streak}` : entry.streak}
+          </span>
+          <span className={styles.yourRankStatLabel}>STREAK</span>
         </div>
       </div>
       <button
@@ -150,15 +170,17 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
   const period = data.periods[activePeriod];
   const entries = period.leaderboard;
 
+  const username = user?.username?.toLowerCase() ?? "";
   const emailPrefix = user?.email?.split("@")[0]?.toLowerCase() ?? "";
   const yourEntry = useMemo(
     () =>
       entries.find(
         (e) =>
+          (username && e.username.toLowerCase() === username) ||
           e.username.toLowerCase() === emailPrefix ||
           nameInitials(e.displayName ?? "").toLowerCase() === emailPrefix
       ),
-    [entries, emailPrefix]
+    [entries, username, emailPrefix]
   );
 
   const hasPodium = entries.length >= 3;
@@ -294,6 +316,7 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
           {yourEntry && (
             <YourRankBanner
               entry={yourEntry}
+              avatarUrl={user?.image}
               onViewProfile={() => router.push("/profile")}
             />
           )}
@@ -324,6 +347,7 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
                     <th className={styles.colNum} scope="col">ADDED</th>
                     <th className={styles.colNum} scope="col">EDITS</th>
                     <th className={styles.colNum} scope="col">TOTAL</th>
+                    <th className={styles.colNum} scope="col">STREAK</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -357,6 +381,9 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
                         <td className={styles.colNum}>{entry.totalEdits}</td>
                         <td className={`${styles.colNum} ${styles.totalCell}`}>
                           {entry.totalContributions.toLocaleString()}
+                        </td>
+                        <td className={styles.colNum}>
+                          {entry.streak > 0 ? `🔥 ${entry.streak}` : entry.streak}
                         </td>
                       </tr>
                     );

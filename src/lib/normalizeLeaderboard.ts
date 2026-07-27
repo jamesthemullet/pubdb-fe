@@ -6,6 +6,7 @@ export type LeaderboardEntry = {
   totalAdded: number;
   totalEdits: number;
   totalContributions: number;
+  streak: number;
 };
 
 export type LeaderboardPeriodKey = "7d" | "30d" | "90d" | "all";
@@ -22,7 +23,9 @@ export type LeaderboardData = {
 
 const PERIOD_KEYS: LeaderboardPeriodKey[] = ["7d", "30d", "90d", "all"];
 
-function isLeaderboardEntry(item: unknown): item is LeaderboardEntry {
+function isLeaderboardEntry(
+  item: unknown
+): item is Omit<LeaderboardEntry, "streak"> {
   if (typeof item !== "object" || item === null) return false;
   const obj = item as Record<string, unknown>;
   return (
@@ -44,7 +47,14 @@ function normalizePeriod(value: unknown): LeaderboardPeriod {
   return {
     since: typeof obj.since === "string" ? obj.since : null,
     leaderboard: Array.isArray(obj.leaderboard)
-      ? obj.leaderboard.filter(isLeaderboardEntry)
+      ? obj.leaderboard.filter(isLeaderboardEntry).map((entry) => ({
+          ...entry,
+          streak:
+            typeof (entry as unknown as { streak?: unknown }).streak ===
+            "number"
+              ? (entry as unknown as { streak: number }).streak
+              : 0,
+        }))
       : [],
   };
 }

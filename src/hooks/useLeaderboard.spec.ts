@@ -17,6 +17,7 @@ const ALICE_ENTRY = {
   totalAdded: 10,
   totalEdits: 5,
   totalContributions: 15,
+  streak: 4,
 };
 
 const SAMPLE_PAYLOAD = {

@@ -19,6 +19,7 @@ function makeEntry(overrides: Partial<LeaderboardEntry> & Pick<LeaderboardEntry,
 		totalAdded: 0,
 		totalEdits: 0,
 		totalContributions: 0,
+		streak: 0,
 		...overrides,
 	};
 }
