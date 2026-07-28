@@ -21,10 +21,37 @@
   --gray-alpha-200: rgba(0, 0, 0, 0.12);
 }
 
+:root[data-theme="dark"] {
+  --background: #111111;
+  --surface: #1a1a1a;
+  --surface-alt: #242424;
+  --text-color: #f4f4f0;
+  --text-muted: #9ca3af;
+  --brand: #f4f4f0;
+  --brand-hover: #d4d4d0;
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --button-primary: #f4f4f0;
+  --button-primary-hover: #d4d4d0;
+  --button-primary-text: #111111;
+  --button-secondary: transparent;
+  --button-secondary-hover: #2a2a2a;
+  --button-secondary-text: #f4f4f0;
+  --border-color: #2e2e2e;
+  --input-background: #1a1a1a;
+  --foreground: #111111;
+  --gray-alpha-100: rgba(255, 255, 255, 0.06);
+  --gray-alpha-200: rgba(255, 255, 255, 0.12);
+}
+
 html,
 body {
   overflow-x: hidden;
   min-height: 100vh;
+}
+
+body {
+  transition: background-color 0.15s, color 0.15s;
 }
 
 body {

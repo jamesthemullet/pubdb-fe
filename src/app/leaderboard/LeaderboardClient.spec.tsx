@@ -19,6 +19,9 @@ function makeEntry(overrides: Partial<LeaderboardEntry> & Pick<LeaderboardEntry,
 		totalAdded: 0,
 		totalEdits: 0,
 		totalContributions: 0,
+		streak: 0,
+		badges: [],
+		nextBadges: [],
 		...overrides,
 	};
 }
@@ -28,7 +31,11 @@ const BOB   = makeEntry({ rank: 2, userId: "u2", username: "bob",   displayName:
 const CAROL = makeEntry({ rank: 3, userId: "u3", username: "carol", displayName: "Carol White", totalAdded: 5, totalEdits: 2, totalContributions: 7  });
 
 function makeData(entries: LeaderboardEntry[] = [ALICE, BOB, CAROL], generatedAt = "2026-06-01T12:30:00Z"): LeaderboardData {
-	return { leaderboard: entries, since: null, generatedAt };
+	const period = { since: null, leaderboard: entries };
+	return {
+		periods: { "7d": period, "30d": period, "90d": period, all: period },
+		generatedAt,
+	};
 }
 
 describe("LeaderboardClient", () => {
@@ -138,5 +145,31 @@ describe("LeaderboardClient", () => {
 	it("shows the snapshot timestamp from generatedAt", () => {
 		render(<LeaderboardClient data={makeData([ALICE], "2026-06-01T14:30:00Z")} />);
 		expect(screen.getByText(/Snapshot/)).toBeInTheDocument();
+	});
+
+	it("defaults to the 'Last 30 days' tab", () => {
+		render(<LeaderboardClient data={makeData()} />);
+		expect(screen.getByRole("button", { name: "Last 30 days" })).toHaveAttribute(
+			"aria-pressed",
+			"true"
+		);
+	});
+
+	it("switches leaderboard entries when a different period tab is clicked", () => {
+		const data: LeaderboardData = {
+			periods: {
+				"7d": { since: "2026-05-25T00:00:00Z", leaderboard: [ALICE] },
+				"30d": { since: "2026-05-02T00:00:00Z", leaderboard: [ALICE, BOB] },
+				"90d": { since: "2026-03-03T00:00:00Z", leaderboard: [ALICE, BOB, CAROL] },
+				all: { since: null, leaderboard: [ALICE, BOB, CAROL] },
+			},
+			generatedAt: "2026-06-01T12:30:00Z",
+		};
+		render(<LeaderboardClient data={data} />);
+		expect(screen.getByText("2 contributors")).toBeInTheDocument();
+
+		fireEvent.click(screen.getByRole("button", { name: "Last 7 days" }));
+		expect(screen.getByText("1 contributor")).toBeInTheDocument();
+		expect(screen.queryByText("Bob Jones")).not.toBeInTheDocument();
 	});
 });

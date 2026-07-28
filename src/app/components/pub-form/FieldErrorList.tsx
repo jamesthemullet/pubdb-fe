@@ -16,7 +16,7 @@ export default function FieldErrorList({
   }
 
   return (
-    <div id={`${idPrefix}-error`}>
+    <div id={`${idPrefix}-error`} role="alert" aria-live="assertive">
       {errors.map((fieldError) => (
         <Typography
           key={`${idPrefix}-error-${fieldError}`}

@@ -54,7 +54,7 @@ const PubRow = memo(function PubRow({
 }: {
   pub: Pub;
   completenessScore?: number;
-}) {
+}): React.JSX.Element {
   return (
     <tr
       data-id={pub.id}
@@ -659,7 +659,7 @@ function PubsContent(): ReactElement {
                 )}
                 {/* TODO: improve amenity display (icons unclear, title tooltip unreliable) before re-enabling */}
                 {/* <th className={styles.thAmenities}>AMENITIES</th> */}
-                {/* <th className={styles.thArrow} aria-label="View" /> */}
+                <th className={styles.thArrow} aria-label="View" />
               </tr>
             </thead>
             <tbody

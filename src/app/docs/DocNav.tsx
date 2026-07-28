@@ -13,7 +13,7 @@ const NAV_ITEMS = [
   { id: "errors", label: "Errors" },
 ];
 
-export function DocNav() {
+export function DocNav(): React.JSX.Element {
   const [activeSection, setActiveSection] = useState("quick-start");
 
   const scrollTo = (id: string): void => {
@@ -26,13 +26,13 @@ export function DocNav() {
       <ul className={styles.navList}>
         {NAV_ITEMS.map(({ id, label }) => (
           <li key={id}>
-            <button
-              type="button"
+            <a
+              href={`#${id}`}
               className={`${styles.navItem} ${activeSection === id ? styles.navItemActive : ""}`}
-              onClick={() => scrollTo(id)}
+              onClick={(e) => { e.preventDefault(); scrollTo(id); }}
             >
               {label}
-            </button>
+            </a>
           </li>
         ))}
       </ul>
