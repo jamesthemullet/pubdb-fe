@@ -15,6 +15,10 @@ type ApiKey = {
   tier: string;
   isActive: boolean;
   usageCount: number;
+};
+
+type Subscription = {
+  tier: string;
   remaining: { hour: number; day: number; month: number };
   limits: {
     requestsPerHour: number;
@@ -27,6 +31,7 @@ type ApiKey = {
 type DashboardData = {
   user: { name: string; email: string };
   apiKeys: ApiKey[];
+  subscription?: Subscription;
   summary: { totalApiKeys: number; totalUsage: number };
 };
 
@@ -80,6 +85,14 @@ type BillingData = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+type UsageMeter = {
+  label: string;
+  used: number;
+  limit: number;
+  pct: number;
+  reset: string;
+};
+
 function formatResetTime(
   iso: string,
   period: "hour" | "day" | "month"
@@ -101,8 +114,8 @@ function formatResetTime(
   })}`;
 }
 
-function usageMeters(key: ApiKey) {
-  const { limits, remaining, resetTimes } = key;
+function usageMeters(subscription: Subscription): UsageMeter[] {
+  const { limits, remaining, resetTimes } = subscription;
   return [
     {
       label: "HOURLY",
@@ -168,7 +181,7 @@ function formatPeriod(startMs: number, endMs: number): string {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function BillingPage() {
+export default function BillingPage(): React.JSX.Element {
   const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
@@ -184,13 +197,13 @@ export default function BillingPage() {
     const headers = buildAuthHeaders(token);
     fetch("/api/auth/dashboard", { headers })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
+      .then((data: DashboardData | null) => {
         if (data) setDashboardData(data);
       })
       .catch(() => {});
     fetch("/api/payments/billing", { headers })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
+      .then((data: BillingData | null) => {
         if (data) setBillingData(data);
       })
       .catch(() => {});
@@ -232,8 +245,9 @@ export default function BillingPage() {
     }
   }
 
-  const activeKey = dashboardData?.apiKeys.find((k) => k.isActive) ?? null;
-  const USAGE = activeKey ? usageMeters(activeKey) : null;
+  const USAGE = dashboardData?.subscription
+    ? usageMeters(dashboardData.subscription)
+    : null;
 
   const sortedInvoices = useMemo(
     () =>
@@ -283,7 +297,8 @@ export default function BillingPage() {
 
   const billingFields = useMemo(() => {
     const bd = billingData?.billingDetails ?? null;
-    if (!bd) return [] as { label: string; value: string; link: boolean; mono: boolean }[];
+    if (!bd)
+      return [] as { label: string; value: string; link: boolean; mono: boolean }[];
     return [
       bd.name
         ? { label: "Account", value: bd.name, link: false, mono: false }
@@ -317,7 +332,12 @@ export default function BillingPage() {
             mono: false,
           }
         : null,
-    ].filter(Boolean) as { label: string; value: string; link: boolean; mono: boolean }[];
+    ].filter(Boolean) as {
+      label: string;
+      value: string;
+      link: boolean;
+      mono: boolean;
+    }[];
   }, [billingData]);
 
   const currencyLabel = billingData?.plan.currency?.toUpperCase() ?? "GBP";

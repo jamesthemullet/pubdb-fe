@@ -348,6 +348,7 @@
   font-weight: 700;
   color: #fff;
   flex-shrink: 0;
+  object-fit: cover;
 }
 
 .yourRankInfo {
@@ -629,6 +630,13 @@
 .badge[data-variant="blue"] {
   background: #dbeafe;
   color: #1e40af;
+}
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
 }
 
 /* ── Sidebar ── */

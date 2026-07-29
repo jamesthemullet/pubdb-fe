@@ -40,6 +40,13 @@ const AMENITY_FIELDS_NO_INDEPENDENT = PUB_AMENITY_FIELDS.filter(
   (f) => f.key !== "isIndependent"
 );
 
+// Clicking an amenity card cycles its value: unknown -> yes -> no -> unknown.
+const AMENITY_CYCLE: (boolean | null)[] = [null, true, false];
+
+function nextAmenityValue(current: boolean | null): boolean | null {
+  return AMENITY_CYCLE[(AMENITY_CYCLE.indexOf(current) + 1) % AMENITY_CYCLE.length];
+}
+
 const AMENITY_ICONS: Partial<Record<PubAmenityKey, React.ReactNode>> = {
   hasFood: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M5 1v4M5 7v6M9 1c0 0 0 4-2 4s-2 0-2 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /><path d="M10 1v12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
   hasSundayRoast: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 10c0-2.761 2.239-5 5-5s5 2.239 5 5H2z" stroke="currentColor" strokeWidth="1.2" /><path d="M7 5V3M5 3h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
@@ -84,7 +91,7 @@ export default function PubEditView({
   const [beerGardensOpen, setBeerGardensOpen] = useState(false);
 
   const activeAmenityCount = AMENITY_FIELDS_NO_INDEPENDENT.filter(
-    (f) => Boolean(editFields[f.key as keyof Pub])
+    (f) => editFields[f.key as keyof Pub] === true
   ).length;
 
   return (
@@ -432,29 +439,32 @@ export default function PubEditView({
                 <span className={styles.sectionCount}>{activeAmenityCount}</span>
               )}
             </h2>
-            <p className={styles.sectionDesc}>Toggle amenities on or off — these power the browse page filters.</p>
+            <p className={styles.sectionDesc}>Click to cycle each amenity through Not set, Yes, and No — these power the browse page filters.</p>
           </div>
         </div>
 
         <div className={styles.amenitiesGrid}>
           {AMENITY_FIELDS_NO_INDEPENDENT.map((field) => {
-            const checked = Boolean(editFields[field.key as keyof Pub]);
+            const value = (editFields[field.key as keyof Pub] as boolean | null | undefined) ?? null;
             const icon = AMENITY_ICONS[field.key];
+            const stateLabel = value === true ? "Yes" : value === false ? "No" : "Not set";
             return (
-              <label
+              <button
                 key={field.key}
-                className={`${styles.amenityCard} ${checked ? styles.amenityCardChecked : ""}`}
+                type="button"
+                className={`${styles.amenityCard} ${value === true ? styles.amenityCardChecked : ""} ${value === false ? styles.amenityCardUnavailable : ""}`}
+                onClick={() =>
+                  onFieldChange(field.key as keyof Pub, nextAmenityValue(value) as Pub[keyof Pub])
+                }
+                aria-label={`${field.label}: ${stateLabel}. Click to change.`}
               >
                 <span className={styles.amenityCardIcon}>{icon}</span>
                 <span className={styles.amenityCardLabel}>{field.label}</span>
-                <span className={`${styles.amenityCardCheck} ${checked ? styles.amenityCardCheckOn : ""}`} />
-                <input
-                  type="checkbox"
-                  className={styles.amenityHiddenInput}
-                  checked={checked}
-                  onChange={(e) => onFieldChange(field.key as keyof Pub, e.target.checked)}
+                <span className={styles.amenityCardState}>{stateLabel}</span>
+                <span
+                  className={`${styles.amenityCardCheck} ${value === true ? styles.amenityCardCheckOn : ""} ${value === false ? styles.amenityCardCheckOff : ""}`}
                 />
-              </label>
+              </button>
             );
           })}
         </div>
@@ -467,6 +477,7 @@ export default function PubEditView({
           className={styles.sectionHead}
           onClick={() => setHoursOpen((o) => !o)}
           aria-expanded={hoursOpen}
+          aria-controls="pub-hours-section"
         >
           <span className={styles.sectionIcon}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -481,7 +492,7 @@ export default function PubEditView({
           <span className={`${styles.chevron} ${hoursOpen ? styles.chevronOpen : ""}`}>↓</span>
         </button>
         {hoursOpen && (
-          <div className={styles.collapsibleBody}>
+          <div id="pub-hours-section" className={styles.collapsibleBody}>
             <OpeningHoursEditor
               value={editFields.openingHours}
               onChange={(val) => onFieldChange("openingHours", val)}
@@ -497,6 +508,7 @@ export default function PubEditView({
           className={styles.sectionHead}
           onClick={() => setBeerTypesOpen((o) => !o)}
           aria-expanded={beerTypesOpen}
+          aria-controls="pub-beer-types-section"
         >
           <span className={styles.sectionIcon}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -511,7 +523,7 @@ export default function PubEditView({
           <span className={`${styles.chevron} ${beerTypesOpen ? styles.chevronOpen : ""}`}>↓</span>
         </button>
         {beerTypesOpen && (
-          <div className={styles.collapsibleBody}>
+          <div id="pub-beer-types-section" className={styles.collapsibleBody}>
             <BeerTypeSelector
               selectedIds={editFields.beerTypeIds ?? []}
               options={beerTypeOptions}
@@ -530,6 +542,7 @@ export default function PubEditView({
           className={styles.sectionHead}
           onClick={() => setBeerGardensOpen((o) => !o)}
           aria-expanded={beerGardensOpen}
+          aria-controls="pub-beer-gardens-section"
         >
           <span className={styles.sectionIcon}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -543,7 +556,7 @@ export default function PubEditView({
           <span className={`${styles.chevron} ${beerGardensOpen ? styles.chevronOpen : ""}`}>↓</span>
         </button>
         {beerGardensOpen && (
-          <div className={styles.collapsibleBody}>
+          <div id="pub-beer-gardens-section" className={styles.collapsibleBody}>
             {(editFields.beerGardens ?? []).length === 0 && (
               <p className={styles.sectionDesc}>No beer gardens added yet.</p>
             )}

@@ -299,6 +299,63 @@ describe("Pubs page", () => {
 		});
 	});
 
+	describe("Needs attention sort", () => {
+		const LOW_SCORE_PUB = {
+			id: "1",
+			name: "The Harp",
+			city: "London",
+			address: "47 Chandos Place",
+			country: "GB",
+		};
+		const HIGH_SCORE_PUB = {
+			id: "2",
+			name: "The Crown",
+			city: "Manchester",
+			address: "5 Crown Street",
+			country: "GB",
+			description: "A lovely pub",
+			imageUrl: "http://example.com/img.jpg",
+			openingHours: { mon: { open: "09:00", close: "23:00" } },
+			beerTypes: ["Lager"],
+			website: "http://example.com",
+			phone: "0123456789",
+			beerGardens: [{ name: "Garden" }],
+			isIndependent: true,
+			hasFood: true,
+			hasSundayRoast: true,
+			hasBeerGarden: true,
+			hasCaskAle: true,
+			isBeerFocused: true,
+			isDogFriendly: true,
+			isFamilyFriendly: true,
+			hasStepFreeAccess: true,
+			hasAccessibleToilet: true,
+			hasLiveSport: true,
+			hasLiveMusic: true,
+			hasPoolTable: true,
+			hasDartsBoard: true,
+		};
+
+		it("sorts pubs by completeness score ascending and shows a completeness pill", async () => {
+			vi.spyOn(globalThis, "fetch").mockResolvedValue(
+				jsonResponse({ data: [HIGH_SCORE_PUB, LOW_SCORE_PUB] }),
+			);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+
+			fireEvent.change(screen.getByLabelText("Sort pubs"), {
+				target: { value: "needs-attention" },
+			});
+
+			const rows = await screen.findAllByRole("row");
+			expect(rows[1]).toHaveTextContent("The Harp");
+			expect(rows[2]).toHaveTextContent("The Crown");
+			expect(screen.getAllByText(/% complete/)).toHaveLength(2);
+		});
+	});
+
 	describe("Near me", () => {
 		it("requests the user's location when clicked", async () => {
 			const getCurrentPosition = vi.fn();

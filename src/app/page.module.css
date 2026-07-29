@@ -82,8 +82,8 @@
 .ctaPrimary {
   display: inline-flex;
   align-items: center;
-  background: var(--text-color);
-  color: #ffffff;
+  background: var(--button-primary);
+  color: var(--button-primary-text);
   padding: 10px 20px;
   border-radius: 6px;
   font-weight: 600;
@@ -93,7 +93,7 @@
 }
 
 .ctaPrimary:hover {
-  background: #333333;
+  background: var(--button-primary-hover);
 }
 
 .ctaSecondary {

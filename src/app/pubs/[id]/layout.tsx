@@ -39,9 +39,11 @@ export async function generateMetadata({
     if (!res.ok) return fallback;
     const raw: unknown = await res.json().catch(() => null);
     const pub: PubMetaShape =
-      raw && typeof raw === "object" && "data" in raw
-        ? (raw as { data: PubMetaShape }).data
-        : (raw as PubMetaShape) ?? {};
+      raw !== null && typeof raw === "object" && !Array.isArray(raw)
+        ? "data" in raw
+          ? (raw as { data: PubMetaShape }).data
+          : (raw as PubMetaShape)
+        : {};
     if (!pub?.name) return fallback;
     const title = pub.city ? `${pub.name} — ${pub.city}` : pub.name;
     const description = `View details, amenities, opening hours, and more for ${pub.name}${pub.city ? ` in ${pub.city}` : ""}.`;
@@ -56,6 +58,6 @@ export async function generateMetadata({
   }
 }
 
-export default function PubLayout({ children }: { children: React.ReactNode }) {
+export default function PubLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return <>{children}</>;
 }

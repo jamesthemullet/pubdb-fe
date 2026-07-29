@@ -29,7 +29,7 @@ describe("GET /api/playground/pubs/[id]", () => {
       .mockResolvedValueOnce(jsonResponse({ success: true, data: { id: "pub_1" } }));
 
     const request = new Request(
-      "http://localhost/api/playground/pubs/pub_1?keyPrefix=pk_dev_abc",
+      "http://localhost/api/playground/pubs/pub_1?id=key_dev_abc",
       { headers: { authorization: "Bearer user-token" } }
     );
 
