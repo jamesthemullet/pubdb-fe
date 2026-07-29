@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LeaderboardData, LeaderboardEntry } from "@/lib/normalizeLeaderboard";
 
@@ -78,11 +78,11 @@ describe("LeaderboardClient", () => {
 		expect(screen.getAllByText("Alice Smith").length).toBeGreaterThan(1);
 	});
 
-	it("renders each name exactly once when fewer than 3 entries (no podium)", () => {
+	it("renders each name exactly once in the table when fewer than 3 entries (no podium)", () => {
 		render(<LeaderboardClient data={makeData([ALICE, BOB])} />);
-		// No podium section — each name appears only in the table
-		expect(screen.getAllByText("Alice Smith")).toHaveLength(1);
-		expect(screen.getAllByText("Bob Jones")).toHaveLength(1);
+		// No podium section — each name appears in the table row and the "Top this week" panel
+		expect(screen.getAllByText("Alice Smith")).toHaveLength(2);
+		expect(screen.getAllByText("Bob Jones")).toHaveLength(2);
 	});
 
 	it("has the sort button labelled as descending by default", () => {
@@ -171,5 +171,36 @@ describe("LeaderboardClient", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Last 7 days" }));
 		expect(screen.getByText("1 contributor")).toBeInTheDocument();
 		expect(screen.queryByText("Bob Jones")).not.toBeInTheDocument();
+	});
+
+	it("shows a 'Top this week' panel ranking the top 5 contributors by pubs added", () => {
+		render(<LeaderboardClient data={makeData()} />);
+		const heading = screen.getByText("Top this week");
+		expect(heading).toBeInTheDocument();
+		expect(screen.getByText("by new pubs")).toBeInTheDocument();
+
+		// heading -> sidebarPanelHeader -> sidebarPanel
+		const panel = heading.parentElement?.parentElement as HTMLElement;
+		const scoped = within(panel);
+
+		// Ordered by totalAdded descending: Alice (10), Bob (8), Carol (5)
+		const names = scoped
+			.getAllByText(/Alice Smith|Bob Jones|Carol White/)
+			.map((el) => el.textContent);
+		expect(names).toEqual(["Alice Smith", "Bob Jones", "Carol White"]);
+	});
+
+	it("does not show the 'Top this week' panel when there are no 7-day entries", () => {
+		const data: LeaderboardData = {
+			periods: {
+				"7d": { since: null, leaderboard: [] },
+				"30d": { since: null, leaderboard: [ALICE] },
+				"90d": { since: null, leaderboard: [ALICE] },
+				all: { since: null, leaderboard: [ALICE] },
+			},
+			generatedAt: "2026-06-01T12:30:00Z",
+		};
+		render(<LeaderboardClient data={data} />);
+		expect(screen.queryByText("Top this week")).not.toBeInTheDocument();
 	});
 });

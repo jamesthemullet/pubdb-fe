@@ -193,6 +193,44 @@ function YourRankBanner({
   );
 }
 
+function TopThisWeekPanel({ entries }: { entries: LeaderboardEntry[] }) {
+  const top5 = useMemo(
+    () =>
+      [...entries]
+        .sort((a, b) => b.totalAdded - a.totalAdded)
+        .slice(0, 5),
+    [entries]
+  );
+
+  if (top5.length === 0) return null;
+
+  const maxAdded = top5[0].totalAdded || 1;
+
+  return (
+    <div className={styles.sidebarPanel}>
+      <div className={styles.sidebarPanelHeader}>
+        <span className={styles.sidebarPanelTitle}>Top this week</span>
+        <span className={styles.sidebarPanelSub}>by new pubs</span>
+      </div>
+      {top5.map((entry, index) => (
+        <div key={entry.userId} className={styles.weekRow}>
+          <span className={styles.weekRank}>{index + 1}</span>
+          <span className={styles.weekName}>
+            {entry.displayName || entry.username}
+          </span>
+          <div className={styles.weekBarWrap}>
+            <div
+              className={styles.weekBar}
+              style={{ width: `${(entry.totalAdded / maxAdded) * 100}%` }}
+            />
+          </div>
+          <span className={styles.weekValue}>{entry.totalAdded}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function EarnBadgesPanel({ nextBadges }: { nextBadges: NextBadge[] }) {
   if (nextBadges.length === 0) return null;
   return (
@@ -458,6 +496,7 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
             </div>
 
             <div className={styles.sidebar}>
+              <TopThisWeekPanel entries={data.periods["7d"].leaderboard} />
               {yourEntry && (
                 <EarnBadgesPanel nextBadges={yourEntry.nextBadges} />
               )}
