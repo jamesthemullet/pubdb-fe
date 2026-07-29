@@ -270,11 +270,14 @@ export default function PubPage(): React.JSX.Element {
     [pub]
   );
 
-  const isSaveDisabled =
-    Object.values(fieldErrors).some(Boolean) ||
-    (["name", "city", "address", "postcode", "country"] as (keyof Pub)[]).some(
-      (f) => !editFields[f] || editFields[f]?.toString().trim() === ""
-    );
+  const isSaveDisabled = useMemo(
+    () =>
+      Object.values(fieldErrors).some(Boolean) ||
+      (["name", "city", "address", "postcode", "country"] as (keyof Pub)[]).some(
+        (f) => !editFields[f] || editFields[f]?.toString().trim() === ""
+      ),
+    [fieldErrors, editFields]
+  );
 
   const activeAmenities = useMemo(
     () => (pub ? PUB_AMENITY_FIELDS.filter(({ key }) => pub[key]) : []),

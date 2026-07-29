@@ -245,9 +245,10 @@ export default function BillingPage(): React.JSX.Element {
     }
   }
 
-  const USAGE = dashboardData?.subscription
-    ? usageMeters(dashboardData.subscription)
-    : null;
+  const USAGE = useMemo(
+    () => (dashboardData?.subscription ? usageMeters(dashboardData.subscription) : null),
+    [dashboardData]
+  );
 
   const sortedInvoices = useMemo(
     () =>

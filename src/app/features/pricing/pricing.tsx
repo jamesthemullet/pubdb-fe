@@ -228,7 +228,7 @@ const Pricing = (): React.JSX.Element => {
       if (!res.ok) return;
       const data = await res.json();
 
-      setUserTier(data.apiKeys[0].tier);
+      setUserTier(data.apiKeys[0]?.tier ?? null);
     } catch (_err) {
       /* ignore */
     }
