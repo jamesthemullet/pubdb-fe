@@ -74,6 +74,7 @@ const DISPLAY_LABELS: Record<string, string> = {
   hasAccessibleToilet: "Accessible Toilet",
   hasPoolTable: "Pool Table",
   hasDartsBoard: "Darts Board",
+  hasAirConditioning: "Air Conditioning",
 };
 
 function fillRequiredInputs() {

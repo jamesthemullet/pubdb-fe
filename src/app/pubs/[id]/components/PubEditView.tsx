@@ -61,6 +61,7 @@ const AMENITY_ICONS: Partial<Record<PubAmenityKey, React.ReactNode>> = {
   hasDartsBoard: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>,
   hasStepFreeAccess: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>,
   hasAccessibleToilet: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+  hasAirConditioning: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v12M2.5 3.5l9 7M2.5 10.5l9-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
 };
 
 export default function PubEditView({

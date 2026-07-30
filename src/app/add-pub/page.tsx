@@ -65,6 +65,7 @@ const AMENITY_ICONS: Partial<Record<PubAmenityKey, React.ReactNode>> = {
   hasDartsBoard: <CheckIcon />,
   hasStepFreeAccess: <CheckIcon />,
   hasAccessibleToilet: <CheckIcon />,
+  hasAirConditioning: <SnowflakeIcon />,
 };
 
 // Design labels (override defaults for cleaner display)
@@ -82,6 +83,7 @@ const AMENITY_LABELS: Partial<Record<PubAmenityKey, string>> = {
   hasDartsBoard: "Darts Board",
   hasStepFreeAccess: "Step Free Access",
   hasAccessibleToilet: "Accessible Toilet",
+  hasAirConditioning: "Air Conditioning",
 };
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -612,4 +614,7 @@ function MusicIcon() {
 }
 function CheckIcon() {
   return <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+function SnowflakeIcon() {
+  return <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v12M2.5 3.5l9 7M2.5 10.5l9-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>;
 }
