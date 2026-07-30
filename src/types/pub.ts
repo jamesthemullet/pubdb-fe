@@ -67,6 +67,7 @@ export type Pub = {
   hasLiveMusic?: boolean | null;
   hasPoolTable?: boolean | null;
   hasDartsBoard?: boolean | null;
+  hasAirConditioning?: boolean | null;
   closedDown?: boolean | null;
   createdAt: string;
   updatedAt?: string;

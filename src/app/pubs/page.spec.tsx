@@ -334,6 +334,7 @@ describe("Pubs page", () => {
 			hasLiveMusic: true,
 			hasPoolTable: true,
 			hasDartsBoard: true,
+			hasAirConditioning: true,
 		};
 
 		it("sorts pubs by completeness score ascending and shows a completeness pill", async () => {
