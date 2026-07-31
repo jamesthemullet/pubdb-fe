@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   description:
     "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
   openGraph: {
+    type: "website",
+    siteName: "Pub DB",
     title: "Pub DB",
     description:
       "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
@@ -25,7 +27,7 @@ export const metadata: Metadata = {
 //   { value: "4.2k", label: "developers using us" },
 // ];
 
-export default function Home() {
+export default function Home(): React.JSX.Element {
   return (
     <div className={styles.page}>
       <div className={styles.earlyAccessBanner}>
@@ -86,6 +88,12 @@ export default function Home() {
             </Link>
             <Link href="/add-pub" className={styles.ctaSecondary}>
               Add a missing pub
+            </Link>
+            <Link
+              href="/pubs?sort=needs-attention"
+              className={styles.ctaSecondary}
+            >
+              Help fill in the gaps
             </Link>
           </div>
         </div>

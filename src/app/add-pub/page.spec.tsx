@@ -42,7 +42,7 @@ async function renderApprovedPageWithSubmitResult(
       return jsonResponse({ email: "editor@example.com", approved: true });
     }
 
-    if (url.includes("restcountries.com")) {
+    if (url.includes("/api/countries")) {
       return jsonResponse([{ name: { common: "United Kingdom" }, cca2: "GB" }]);
     }
 
@@ -74,6 +74,7 @@ const DISPLAY_LABELS: Record<string, string> = {
   hasAccessibleToilet: "Accessible Toilet",
   hasPoolTable: "Pool Table",
   hasDartsBoard: "Darts Board",
+  hasAirConditioning: "Air Conditioning",
 };
 
 function fillRequiredInputs() {
@@ -114,7 +115,7 @@ describe("AddPubPage", () => {
   it("shows login prompt when no user is authenticated", async () => {
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
       const url = toUrl(input);
-      if (url.includes("restcountries.com")) {
+      if (url.includes("/api/countries")) {
         return jsonResponse([
           { name: { common: "United Kingdom" }, cca2: "GB" },
         ]);
@@ -140,7 +141,7 @@ describe("AddPubPage", () => {
         return jsonResponse({ email: "alice@example.com", approved: false });
       }
 
-      if (url.includes("restcountries.com")) {
+      if (url.includes("/api/countries")) {
         return jsonResponse([{ name: { common: "France" }, cca2: "FR" }]);
       }
 
@@ -209,7 +210,7 @@ describe("AddPubPage", () => {
           return jsonResponse({ email: "editor@example.com", approved: true });
         }
 
-        if (url.includes("restcountries.com")) {
+        if (url.includes("/api/countries")) {
           return jsonResponse([
             { name: { common: "United Kingdom" }, cca2: "GB" },
           ]);
@@ -368,7 +369,7 @@ describe("AddPubPage", () => {
         return jsonResponse({ error: "unauthorized" }, 401);
       }
 
-      if (url.includes("restcountries.com")) {
+      if (url.includes("/api/countries")) {
         return jsonResponse([
           { name: { common: "United Kingdom" }, cca2: "GB" },
         ]);
@@ -394,7 +395,7 @@ describe("AddPubPage", () => {
         throw new Error("auth down");
       }
 
-      if (url.includes("restcountries.com")) {
+      if (url.includes("/api/countries")) {
         return jsonResponse([
           { name: { common: "United Kingdom" }, cca2: "GB" },
         ]);
@@ -422,7 +423,7 @@ describe("AddPubPage", () => {
         return jsonResponse({ email: "editor@example.com", approved: true });
       }
 
-      if (url.includes("restcountries.com")) {
+      if (url.includes("/api/countries")) {
         return jsonResponse({ error: "rate limited" }, 500);
       }
 
@@ -450,7 +451,7 @@ describe("AddPubPage", () => {
         return jsonResponse({ email: "editor@example.com", approved: true });
       }
 
-      if (url.includes("restcountries.com")) {
+      if (url.includes("/api/countries")) {
         return new Promise<Response>(() => {
           // Keep countries request pending to assert loading placeholder state.
         });
@@ -479,7 +480,7 @@ describe("AddPubPage", () => {
         return jsonResponse({ email: "editor@example.com", approved: true });
       }
 
-      if (url.includes("restcountries.com")) {
+      if (url.includes("/api/countries")) {
         return jsonResponse([
           { name: { common: "United Kingdom" }, cca2: "GB" },
         ]);

@@ -78,6 +78,7 @@ export default function InlineEditField({
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   autoFocus
+                  aria-label={label}
                   onKeyDown={(e) => { if (e.key === "Escape") cancel(); }}
                 />
               ) : (
@@ -88,6 +89,7 @@ export default function InlineEditField({
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   autoFocus
+                  aria-label={label}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") void save();
                     if (e.key === "Escape") cancel();
@@ -127,6 +129,7 @@ export default function InlineEditField({
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               autoFocus
+              aria-label={label}
               onKeyDown={(e) => {
                 if (e.key === "Escape") cancel();
               }}
@@ -139,6 +142,7 @@ export default function InlineEditField({
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               autoFocus
+              aria-label={label}
               onKeyDown={(e) => {
                 if (e.key === "Enter") void save();
                 if (e.key === "Escape") cancel();

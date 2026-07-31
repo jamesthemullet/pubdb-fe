@@ -3,8 +3,21 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import type { LeaderboardData, LeaderboardEntry } from "@/lib/normalizeLeaderboard";
+import type {
+  Badge,
+  LeaderboardData,
+  LeaderboardEntry,
+  LeaderboardPeriodKey,
+  NextBadge,
+} from "@/lib/normalizeLeaderboard";
 import styles from "./page.module.css";
+
+const PERIOD_TABS: { key: LeaderboardPeriodKey; label: string }[] = [
+  { key: "7d", label: "Last 7 days" },
+  { key: "30d", label: "Last 30 days" },
+  { key: "90d", label: "Last 90 days" },
+  { key: "all", label: "All-time" },
+];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -24,6 +37,36 @@ function getInitials(entry: LeaderboardEntry): string {
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
+
+const BADGE_VARIANTS = ["green", "amber", "orange", "purple", "blue"] as const;
+
+function badgeVariant(index: number): (typeof BADGE_VARIANTS)[number] {
+  return BADGE_VARIANTS[index % BADGE_VARIANTS.length];
+}
+
+function BadgeList({
+  badges,
+  className,
+}: {
+  badges: Badge[];
+  className: string;
+}) {
+  if (badges.length === 0) return null;
+  return (
+    <div className={className}>
+      {badges.map((badge, index) => (
+        <span
+          key={badge.key}
+          className={styles.badge}
+          data-variant={badgeVariant(index)}
+          title={badge.description}
+        >
+          {badge.name}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 const MEDAL: Record<1 | 2 | 3, { bg: string; text: string }> = {
   1: { bg: "#fbbf24", text: "#78350f" },
@@ -57,12 +100,16 @@ function PodiumCard({
       </div>
       <div className={styles.podiumAvatarWrap}>
         <span className={styles.podiumAvatar}>{getInitials(entry)}</span>
+        {entry.streak > 0 && (
+          <span className={styles.podiumStreak}>🔥 {entry.streak}</span>
+        )}
       </div>
       <p className={styles.podiumName}>
         {isYou
           ? `You (${entry.displayName || entry.username})`
           : entry.displayName || entry.username}
       </p>
+      <BadgeList badges={entry.badges} className={styles.podiumBadges} />
       <div className={styles.podiumStats}>
         <div className={styles.podiumStat}>
           <span className={styles.podiumStatNum}>{entry.totalAdded}</span>
@@ -87,19 +134,31 @@ function PodiumCard({
 
 function YourRankBanner({
   entry,
+  avatarUrl,
   onViewProfile,
 }: {
   entry: LeaderboardEntry;
+  avatarUrl?: string;
   onViewProfile: () => void;
 }) {
   return (
     <div className={styles.yourRankBanner}>
       <span className={styles.yourRankLabel}>YOUR RANK</span>
-      <span className={styles.yourRankAvatar}>{getInitials(entry)}</span>
+      {avatarUrl ? (
+        // biome-ignore lint/performance/noImgElement: user-supplied external avatar URL, not an optimizable local asset
+        <img
+          src={avatarUrl}
+          alt=""
+          className={styles.yourRankAvatar}
+        />
+      ) : (
+        <span className={styles.yourRankAvatar}>{getInitials(entry)}</span>
+      )}
       <div className={styles.yourRankInfo}>
         <span className={styles.yourRankName}>
           You ({entry.displayName || entry.username})
         </span>
+        <BadgeList badges={entry.badges} className={styles.badgeRow} />
       </div>
       <div className={styles.yourRankStats}>
         <div className={styles.yourRankStat}>
@@ -116,6 +175,12 @@ function YourRankBanner({
           </span>
           <span className={styles.yourRankStatLabel}>TOTAL</span>
         </div>
+        <div className={styles.yourRankStat}>
+          <span className={styles.yourRankStatNum}>
+            {entry.streak > 0 ? `🔥 ${entry.streak}` : entry.streak}
+          </span>
+          <span className={styles.yourRankStatLabel}>STREAK</span>
+        </div>
       </div>
       <button
         type="button"
@@ -128,24 +193,93 @@ function YourRankBanner({
   );
 }
 
+function TopThisWeekPanel({ entries }: { entries: LeaderboardEntry[] }) {
+  const top5 = useMemo(
+    () =>
+      [...entries]
+        .sort((a, b) => b.totalAdded - a.totalAdded)
+        .slice(0, 5),
+    [entries]
+  );
+
+  if (top5.length === 0) return null;
+
+  const maxAdded = top5[0].totalAdded || 1;
+
+  return (
+    <div className={styles.sidebarPanel}>
+      <div className={styles.sidebarPanelHeader}>
+        <span className={styles.sidebarPanelTitle}>Top this week</span>
+        <span className={styles.sidebarPanelSub}>by new pubs</span>
+      </div>
+      {top5.map((entry, index) => (
+        <div key={entry.userId} className={styles.weekRow}>
+          <span className={styles.weekRank}>{index + 1}</span>
+          <span className={styles.weekName}>
+            {entry.displayName || entry.username}
+          </span>
+          <div className={styles.weekBarWrap}>
+            <div
+              className={styles.weekBar}
+              style={{ width: `${(entry.totalAdded / maxAdded) * 100}%` }}
+            />
+          </div>
+          <span className={styles.weekValue}>{entry.totalAdded}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EarnBadgesPanel({ nextBadges }: { nextBadges: NextBadge[] }) {
+  if (nextBadges.length === 0) return null;
+  return (
+    <div className={styles.sidebarPanel}>
+      <div className={styles.sidebarPanelHeader}>
+        <span className={styles.sidebarPanelTitle}>Earn badges</span>
+      </div>
+      {nextBadges.map((badge) => (
+        <div key={badge.key} className={styles.earnRow}>
+          <span className={styles.earnEmoji} aria-hidden="true">
+            🎯
+          </span>
+          <div className={styles.earnInfo}>
+            <div className={styles.earnNameRow}>
+              <span className={styles.earnName}>{badge.name}</span>
+              <span className={styles.earnProgress}>
+                {badge.remaining} to go
+              </span>
+            </div>
+            <span className={styles.earnDesc}>{badge.description}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Client component ──────────────────────────────────────────────────────────
 
-export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
+export default function LeaderboardClient({ data }: { data: LeaderboardData }): React.JSX.Element {
   const { user } = useAuth();
   const router = useRouter();
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [activePeriod, setActivePeriod] = useState<LeaderboardPeriodKey>("30d");
 
-  const entries = data.leaderboard;
+  const period = data.periods[activePeriod];
+  const entries = period.leaderboard;
 
+  const username = user?.username?.toLowerCase() ?? "";
   const emailPrefix = user?.email?.split("@")[0]?.toLowerCase() ?? "";
   const yourEntry = useMemo(
     () =>
       entries.find(
         (e) =>
+          (username && e.username.toLowerCase() === username) ||
           e.username.toLowerCase() === emailPrefix ||
           nameInitials(e.displayName ?? "").toLowerCase() === emailPrefix
       ),
-    [entries, emailPrefix]
+    [entries, username, emailPrefix]
   );
 
   const hasPodium = entries.length >= 3;
@@ -199,7 +333,23 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
 
       {/* Filter bar */}
       <div className={styles.filterBar}>
-        <div className={styles.filterLeft} />
+        <div className={styles.filterLeft}>
+          <div className={styles.timePills}>
+            {PERIOD_TABS.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                className={`${styles.timePill} ${
+                  activePeriod === tab.key ? styles.timePillActive : ""
+                }`}
+                aria-pressed={activePeriod === tab.key}
+                onClick={() => setActivePeriod(tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className={styles.filterMeta}>
           <span className={styles.snapshotDot} />
           <span>
@@ -218,6 +368,18 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
                 }`
               : "—"}
           </span>
+          {period.since && (
+            <>
+              <span className={styles.metaDivider}>·</span>
+              <span>
+                since{" "}
+                {new Date(period.since).toLocaleDateString([], {
+                  month: "short",
+                  day: "numeric",
+                })}
+              </span>
+            </>
+          )}
         </div>
       </div>
 
@@ -253,6 +415,7 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
           {yourEntry && (
             <YourRankBanner
               entry={yourEntry}
+              avatarUrl={user?.image}
               onViewProfile={() => router.push("/profile")}
             />
           )}
@@ -283,6 +446,7 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
                     <th className={styles.colNum} scope="col">ADDED</th>
                     <th className={styles.colNum} scope="col">EDITS</th>
                     <th className={styles.colNum} scope="col">TOTAL</th>
+                    <th className={styles.colNum} scope="col">STREAK</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -309,6 +473,10 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
                                     : entry.displayName || entry.username}
                                 </span>
                               </div>
+                              <BadgeList
+                                badges={entry.badges}
+                                className={styles.badgeRow}
+                              />
                             </div>
                           </div>
                         </td>
@@ -317,6 +485,9 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
                         <td className={`${styles.colNum} ${styles.totalCell}`}>
                           {entry.totalContributions.toLocaleString()}
                         </td>
+                        <td className={styles.colNum}>
+                          {entry.streak > 0 ? `🔥 ${entry.streak}` : entry.streak}
+                        </td>
                       </tr>
                     );
                   })}
@@ -324,7 +495,12 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }) {
               </table>
             </div>
 
-            <div className={styles.sidebar} />
+            <div className={styles.sidebar}>
+              <TopThisWeekPanel entries={data.periods["7d"].leaderboard} />
+              {yourEntry && (
+                <EarnBadgesPanel nextBadges={yourEntry.nextBadges} />
+              )}
+            </div>
           </div>
         </>
       )}

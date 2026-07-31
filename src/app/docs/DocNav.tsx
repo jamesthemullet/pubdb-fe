@@ -13,27 +13,22 @@ const NAV_ITEMS = [
   { id: "errors", label: "Errors" },
 ];
 
-export function DocNav() {
+export function DocNav(): React.JSX.Element {
   const [activeSection, setActiveSection] = useState("quick-start");
-
-  const scrollTo = (id: string): void => {
-    setActiveSection(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <nav className={styles.docsNav} aria-label="Documentation navigation">
       <ul className={styles.navList}>
         {NAV_ITEMS.map(({ id, label }) => (
           <li key={id}>
-            <button
-              type="button"
+            <a
+              href={`#${id}`}
               className={`${styles.navItem} ${activeSection === id ? styles.navItemActive : ""}`}
-              onClick={() => scrollTo(id)}
+              onClick={() => setActiveSection(id)}
               aria-current={activeSection === id ? "true" : undefined}
             >
               {label}
-            </button>
+            </a>
           </li>
         ))}
       </ul>

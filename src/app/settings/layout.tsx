@@ -1,8 +1,4 @@
-// TODO: settings page is not ready — hidden from nav until wired to real API.
-// Re-enable sidebar link in src/app/components/sidebar/sidebar.tsx when done.
-
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -10,7 +6,6 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default function SettingsLayout({ children }: { children: React.ReactNode }) {
-  redirect("/");
+export default function SettingsLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return <>{children}</>;
 }

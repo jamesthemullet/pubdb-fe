@@ -65,6 +65,7 @@ const AMENITY_ICONS: Partial<Record<PubAmenityKey, React.ReactNode>> = {
   hasDartsBoard: <CheckIcon />,
   hasStepFreeAccess: <CheckIcon />,
   hasAccessibleToilet: <CheckIcon />,
+  hasAirConditioning: <SnowflakeIcon />,
 };
 
 // Design labels (override defaults for cleaner display)
@@ -82,11 +83,12 @@ const AMENITY_LABELS: Partial<Record<PubAmenityKey, string>> = {
   hasDartsBoard: "Darts Board",
   hasStepFreeAccess: "Step Free Access",
   hasAccessibleToilet: "Accessible Toilet",
+  hasAirConditioning: "Air Conditioning",
 };
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function AddPubPage() {
+export default function AddPubPage(): React.JSX.Element {
   const router = useRouter();
 
   // Core fields
@@ -520,6 +522,7 @@ export default function AddPubPage() {
             className={styles.sectionHead}
             onClick={() => setHoursOpen((o) => !o)}
             aria-expanded={hoursOpen}
+            aria-controls="opening-hours-body"
           >
             <span className={styles.sectionIcon}><ClockIcon /></span>
             <div className={styles.sectionHeadText}>
@@ -529,7 +532,7 @@ export default function AddPubPage() {
             <span className={`${styles.chevron} ${hoursOpen ? styles.chevronOpen : ""}`}>↓</span>
           </button>
           {hoursOpen && (
-            <div className={styles.openingHoursBody}>
+            <div id="opening-hours-body" className={styles.openingHoursBody}>
               <OpeningHoursEditor value={openingHours} onChange={(val) => setOpeningHours(val)} />
               <FieldErrorList errors={fieldErrors.openingHours} className={styles.errorText} idPrefix="openingHours" />
             </div>
@@ -541,7 +544,7 @@ export default function AddPubPage() {
           <p className={styles.requiredNote}>* = required field</p>
           <div className={styles.footerActions}>
             {(formErrors.length > 0 || error) && (
-              <div className={styles.errorSummary}>
+              <div className={styles.errorSummary} role="alert">
                 {formErrors.map((e) => <p key={e} className={styles.errorText}>{e}</p>)}
                 {error && <p className={styles.errorText}>{error}</p>}
               </div>
@@ -611,4 +614,7 @@ function MusicIcon() {
 }
 function CheckIcon() {
   return <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+function SnowflakeIcon() {
+  return <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v12M2.5 3.5l9 7M2.5 10.5l9-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>;
 }

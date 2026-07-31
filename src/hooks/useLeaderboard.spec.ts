@@ -9,20 +9,27 @@ function jsonResponse(data: unknown, status = 200): Response {
   });
 }
 
+const ALICE_ENTRY = {
+  rank: 1,
+  userId: "user-1",
+  displayName: "Alice",
+  username: "alice",
+  totalAdded: 10,
+  totalEdits: 5,
+  totalContributions: 15,
+  streak: 4,
+  badges: [],
+  nextBadges: [],
+};
+
 const SAMPLE_PAYLOAD = {
   data: {
-    leaderboard: [
-      {
-        rank: 1,
-        userId: "user-1",
-        displayName: "Alice",
-        username: "alice",
-        totalAdded: 10,
-        totalEdits: 5,
-        totalContributions: 15,
-      },
-    ],
-    since: "2026-01-01",
+    periods: {
+      "7d": { since: "2026-05-25", leaderboard: [ALICE_ENTRY] },
+      "30d": { since: "2026-05-02", leaderboard: [ALICE_ENTRY] },
+      "90d": { since: "2026-03-03", leaderboard: [ALICE_ENTRY] },
+      all: { since: null, leaderboard: [ALICE_ENTRY] },
+    },
     generatedAt: "2026-06-01T12:00:00Z",
   },
 };
@@ -44,11 +51,9 @@ describe("useLeaderboard", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(SAMPLE_PAYLOAD));
     const { result } = renderHook(() => useLeaderboard());
     await waitFor(() => expect(result.current.leaderboardLoading).toBe(false));
-    expect(result.current.leaderboard).toEqual({
-      leaderboard: SAMPLE_PAYLOAD.data.leaderboard,
-      since: "2026-01-01",
-      generatedAt: "2026-06-01T12:00:00Z",
-    });
+    expect(result.current.leaderboard?.periods["30d"].leaderboard).toEqual([ALICE_ENTRY]);
+    expect(result.current.leaderboard?.periods.all.since).toBeNull();
+    expect(result.current.leaderboard?.generatedAt).toBe("2026-06-01T12:00:00Z");
     expect(result.current.leaderboardError).toBeNull();
   });
 
@@ -63,28 +68,32 @@ describe("useLeaderboard", () => {
   it("filters out leaderboard entries that are missing required fields", async () => {
     const payload = {
       data: {
-        leaderboard: [
-          // valid entry
-          {
-            rank: 1,
-            userId: "u1",
-            displayName: "Bob",
-            username: "bob",
-            totalAdded: 3,
-            totalEdits: 1,
-            totalContributions: 4,
+        periods: {
+          all: {
+            since: null,
+            leaderboard: [
+              // valid entry
+              {
+                rank: 1,
+                userId: "u1",
+                displayName: "Bob",
+                username: "bob",
+                totalAdded: 3,
+                totalEdits: 1,
+                totalContributions: 4,
+              },
+              // invalid — missing username
+              { rank: 2, userId: "u2", displayName: "Eve", totalAdded: 1, totalEdits: 0, totalContributions: 1 },
+            ],
           },
-          // invalid — missing username
-          { rank: 2, userId: "u2", displayName: "Eve", totalAdded: 1, totalEdits: 0, totalContributions: 1 },
-        ],
-        since: null,
+        },
         generatedAt: "2026-06-01T00:00:00Z",
       },
     };
     vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(payload));
     const { result } = renderHook(() => useLeaderboard());
     await waitFor(() => expect(result.current.leaderboardLoading).toBe(false));
-    expect(result.current.leaderboard?.leaderboard).toHaveLength(1);
-    expect(result.current.leaderboard?.leaderboard[0].displayName).toBe("Bob");
+    expect(result.current.leaderboard?.periods.all.leaderboard).toHaveLength(1);
+    expect(result.current.leaderboard?.periods.all.leaderboard[0].displayName).toBe("Bob");
   });
 });

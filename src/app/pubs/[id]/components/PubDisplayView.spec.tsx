@@ -98,6 +98,7 @@ describe("PubDisplayView", () => {
       ["hasLiveMusic", "Live music"],
       ["hasPoolTable", "Pool table"],
       ["hasDartsBoard", "Darts board"],
+      ["hasAirConditioning", "Air conditioning"],
     ] as const)('renders "%s" as an inactive chip when explicitly false', (field, label) => {
       renderView({ [field]: false });
       expect(screen.getByText(label)).toBeInTheDocument();
@@ -118,6 +119,7 @@ describe("PubDisplayView", () => {
       ["hasLiveMusic", "Live music"],
       ["hasPoolTable", "Pool table"],
       ["hasDartsBoard", "Darts board"],
+      ["hasAirConditioning", "Air conditioning"],
     ] as const)('does not render "%s" as an inactive chip when null', (field, label) => {
       renderView({ [field]: null });
       expect(screen.queryByText(label)).not.toBeInTheDocument();
