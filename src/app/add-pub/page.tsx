@@ -526,7 +526,7 @@ export default function AddPubPage(): React.JSX.Element {
           >
             <span className={styles.sectionIcon}><ClockIcon /></span>
             <div className={styles.sectionHeadText}>
-              <h2 className={styles.sectionTitle}>Opening hours</h2>
+              <span className={styles.sectionTitle}>Opening hours</span>
               <p className={styles.sectionDesc}>Optional — set the pub's regular weekly schedule.</p>
             </div>
             <span className={`${styles.chevron} ${hoursOpen ? styles.chevronOpen : ""}`}>↓</span>

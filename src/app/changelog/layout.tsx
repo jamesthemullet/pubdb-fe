@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     description: "Every notable change to the Pub DB API, newest first.",
   },
   twitter: {
+    card: "summary_large_image",
     title: "Changelog | Pub DB",
     description: "Every notable change to the Pub DB API, newest first.",
   },
