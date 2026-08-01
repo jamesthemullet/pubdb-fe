@@ -193,24 +193,44 @@ function YourRankBanner({
   );
 }
 
+const WEEK_METRICS: { key: "totalAdded" | "totalEdits"; label: string }[] = [
+  { key: "totalAdded", label: "by new pubs" },
+  { key: "totalEdits", label: "by edits" },
+];
+
 function TopThisWeekPanel({ entries }: { entries: LeaderboardEntry[] }) {
+  const [metric, setMetric] = useState<"totalAdded" | "totalEdits">(
+    "totalAdded"
+  );
+
   const top5 = useMemo(
-    () =>
-      [...entries]
-        .sort((a, b) => b.totalAdded - a.totalAdded)
-        .slice(0, 5),
-    [entries]
+    () => [...entries].sort((a, b) => b[metric] - a[metric]).slice(0, 5),
+    [entries, metric]
   );
 
   if (top5.length === 0) return null;
 
-  const maxAdded = top5[0].totalAdded || 1;
+  const maxValue = top5[0][metric] || 1;
 
   return (
     <div className={styles.sidebarPanel}>
       <div className={styles.sidebarPanelHeader}>
         <span className={styles.sidebarPanelTitle}>Top this week</span>
-        <span className={styles.sidebarPanelSub}>by new pubs</span>
+        <div className={styles.sidebarPanelToggle} role="group" aria-label="Rank top this week by">
+          {WEEK_METRICS.map((m) => (
+            <button
+              key={m.key}
+              type="button"
+              className={`${styles.sidebarPanelSub} ${
+                metric === m.key ? styles.sidebarPanelSubActive : ""
+              }`}
+              aria-pressed={metric === m.key}
+              onClick={() => setMetric(m.key)}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
       </div>
       {top5.map((entry, index) => (
         <div key={entry.userId} className={styles.weekRow}>
@@ -221,10 +241,54 @@ function TopThisWeekPanel({ entries }: { entries: LeaderboardEntry[] }) {
           <div className={styles.weekBarWrap}>
             <div
               className={styles.weekBar}
-              style={{ width: `${(entry.totalAdded / maxAdded) * 100}%` }}
+              style={{ width: `${(entry[metric] / maxValue) * 100}%` }}
             />
           </div>
-          <span className={styles.weekValue}>{entry.totalAdded}</span>
+          <span className={styles.weekValue}>{entry[metric]}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ClimbingFastestPanel({ entries }: { entries: LeaderboardEntry[] }) {
+  const climbers = useMemo(
+    () =>
+      entries
+        .filter(
+          (e): e is LeaderboardEntry & { rankChange: number } =>
+            e.rankChange !== null
+        )
+        .sort((a, b) => b.rankChange - a.rankChange)
+        .slice(0, 3),
+    [entries]
+  );
+
+  if (climbers.length === 0) return null;
+
+  return (
+    <div className={styles.sidebarPanel}>
+      <div className={styles.sidebarPanelHeader}>
+        <span className={styles.sidebarPanelTitle}>Climbing fastest</span>
+        <span className={styles.sidebarPanelSub}>vs previous period</span>
+      </div>
+      {climbers.map((entry, index) => (
+        <div key={entry.userId} className={styles.climbRow}>
+          <span
+            className={styles.climbAvatar}
+            data-variant={badgeVariant(index)}
+          >
+            {getInitials(entry)}
+          </span>
+          <div className={styles.climbInfo}>
+            <span className={styles.climbName}>
+              {entry.displayName || entry.username}
+            </span>
+            <span className={styles.climbRank}>
+              #{entry.previousRank ?? "–"} → #{entry.rank}
+            </span>
+          </div>
+          <span className={styles.climbGain}>+{entry.rankChange}</span>
         </div>
       ))}
     </div>
@@ -497,6 +561,7 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
 
             <div className={styles.sidebar}>
               <TopThisWeekPanel entries={data.periods["7d"].leaderboard} />
+              <ClimbingFastestPanel entries={entries} />
               {yourEntry && (
                 <EarnBadgesPanel nextBadges={yourEntry.nextBadges} />
               )}

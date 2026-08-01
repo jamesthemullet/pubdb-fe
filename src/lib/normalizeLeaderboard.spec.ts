@@ -16,6 +16,9 @@ const VALID_ENTRY = {
   nextBadges: [
     { key: "local", name: "Local", description: "Made at least 50 contributions", remaining: 8 },
   ],
+  rankChange: 3,
+  previousRank: 4,
+  previousTotalContributions: 4,
 };
 
 const EMPTY_PERIODS = {
@@ -157,6 +160,27 @@ describe("normalizeLeaderboard", () => {
     expect(result.periods.all.leaderboard[0].nextBadges).toEqual([
       { key: "local", name: "Local", description: "Made at least 50 contributions", remaining: 8 },
     ]);
+  });
+
+  it("defaults rankChange, previousRank, and previousTotalContributions to null when missing", () => {
+    const {
+      rankChange: _rankChange,
+      previousRank: _previousRank,
+      previousTotalContributions: _previousTotalContributions,
+      ...entryWithoutRankChange
+    } = VALID_ENTRY;
+    const payload = {
+      data: {
+        periods: { all: { since: null, leaderboard: [entryWithoutRankChange] } },
+        generatedAt: "",
+      },
+    };
+    const result = normalizeLeaderboard(payload);
+    expect(result.periods.all.leaderboard[0].rankChange).toBeNull();
+    expect(result.periods.all.leaderboard[0].previousRank).toBeNull();
+    expect(
+      result.periods.all.leaderboard[0].previousTotalContributions
+    ).toBeNull();
   });
 
   it("defaults missing or malformed periods to empty", () => {
