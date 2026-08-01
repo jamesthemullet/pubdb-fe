@@ -103,7 +103,7 @@ describe("SettingsPage", () => {
 	it("on success clears the token, dispatches authChanged, and redirects to /", async () => {
 		localStorage.setItem("token", "test-token");
 		const push = vi.fn();
-		vi.mocked(useRouter).mockReturnValue({ push } as ReturnType<typeof useRouter>);
+		vi.mocked(useRouter).mockReturnValue({ push } as unknown as ReturnType<typeof useRouter>);
 		vi.mocked(useAuth).mockReturnValue({
 			user: { email: "alice@example.com", approved: true },
 			isApproved: true,
