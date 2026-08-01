@@ -203,6 +203,7 @@ export default function Sidebar(): React.JSX.Element {
               aria-valuemin={0}
               aria-valuemax={100}
               aria-label="Plan usage"
+              aria-valuetext={`${planData.used.toLocaleString()} of ${planData.limit.toLocaleString()} requests used this month`}
             >
               <div className={styles.planBarFill} style={{ width: `${planData.pct}%` }} />
             </div>

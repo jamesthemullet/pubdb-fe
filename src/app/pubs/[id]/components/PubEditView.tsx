@@ -61,6 +61,7 @@ const AMENITY_ICONS: Partial<Record<PubAmenityKey, React.ReactNode>> = {
   hasDartsBoard: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>,
   hasStepFreeAccess: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>,
   hasAccessibleToilet: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+  hasAirConditioning: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v12M2.5 3.5l9 7M2.5 10.5l9-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
 };
 
 export default function PubEditView({
@@ -477,6 +478,7 @@ export default function PubEditView({
           className={styles.sectionHead}
           onClick={() => setHoursOpen((o) => !o)}
           aria-expanded={hoursOpen}
+          aria-controls="pub-hours-section"
         >
           <span className={styles.sectionIcon}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -491,7 +493,7 @@ export default function PubEditView({
           <span className={`${styles.chevron} ${hoursOpen ? styles.chevronOpen : ""}`}>↓</span>
         </button>
         {hoursOpen && (
-          <div className={styles.collapsibleBody}>
+          <div id="pub-hours-section" className={styles.collapsibleBody}>
             <OpeningHoursEditor
               value={editFields.openingHours}
               onChange={(val) => onFieldChange("openingHours", val)}
@@ -507,6 +509,7 @@ export default function PubEditView({
           className={styles.sectionHead}
           onClick={() => setBeerTypesOpen((o) => !o)}
           aria-expanded={beerTypesOpen}
+          aria-controls="pub-beer-types-section"
         >
           <span className={styles.sectionIcon}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -521,7 +524,7 @@ export default function PubEditView({
           <span className={`${styles.chevron} ${beerTypesOpen ? styles.chevronOpen : ""}`}>↓</span>
         </button>
         {beerTypesOpen && (
-          <div className={styles.collapsibleBody}>
+          <div id="pub-beer-types-section" className={styles.collapsibleBody}>
             <BeerTypeSelector
               selectedIds={editFields.beerTypeIds ?? []}
               options={beerTypeOptions}
@@ -540,6 +543,7 @@ export default function PubEditView({
           className={styles.sectionHead}
           onClick={() => setBeerGardensOpen((o) => !o)}
           aria-expanded={beerGardensOpen}
+          aria-controls="pub-beer-gardens-section"
         >
           <span className={styles.sectionIcon}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -553,7 +557,7 @@ export default function PubEditView({
           <span className={`${styles.chevron} ${beerGardensOpen ? styles.chevronOpen : ""}`}>↓</span>
         </button>
         {beerGardensOpen && (
-          <div className={styles.collapsibleBody}>
+          <div id="pub-beer-gardens-section" className={styles.collapsibleBody}>
             {(editFields.beerGardens ?? []).length === 0 && (
               <p className={styles.sectionDesc}>No beer gardens added yet.</p>
             )}

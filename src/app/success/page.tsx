@@ -102,7 +102,7 @@ function SuccessContent(): ReactElement {
   if (loading) {
     return (
       <div className={styles.centered}>
-        <Typography variant="headingMedium">Verifying your subscription...</Typography>
+        <Typography variant="headingMedium" as="h1">Verifying your subscription...</Typography>
         <Typography>Please wait while we confirm your payment.</Typography>
       </div>
     );
@@ -111,7 +111,7 @@ function SuccessContent(): ReactElement {
   if (error) {
     return (
       <div className={styles.centered}>
-        <Typography variant="headingMedium" className={styles.subheading}>Verification Failed</Typography>
+        <Typography variant="headingMedium" as="h1" className={styles.subheading}>Verification Failed</Typography>
         <Typography>{error}</Typography>
         <div className={styles.actionLink}>
           <Link href="/" className={styles.btn}>Return to Home</Link>
@@ -123,7 +123,7 @@ function SuccessContent(): ReactElement {
   if (!status) {
     return (
       <div className={styles.centered}>
-        <Typography variant="headingMedium">No subscription data found</Typography>
+        <Typography variant="headingMedium" as="h1">No subscription data found</Typography>
         <div className={styles.actionLink}>
           <Link href="/" className={styles.btn}>Return to Home</Link>
         </div>
@@ -136,7 +136,7 @@ function SuccessContent(): ReactElement {
       {status.success ? (
         <>
           <div className={styles.icon} aria-hidden="true">🎉</div>
-          <Typography variant="headingMedium" className={styles.headingSuccess}>Subscription Successful!</Typography>
+          <Typography variant="headingMedium" as="h1" className={styles.headingSuccess}>Subscription Successful!</Typography>
           <Typography className={styles.message}>{status.message}</Typography>
 
           {status.subscription && (
@@ -174,7 +174,7 @@ function SuccessContent(): ReactElement {
       ) : (
         <>
           <div className={styles.icon} aria-hidden="true">❌</div>
-          <Typography variant="headingMedium" className={styles.headingError}>Subscription Failed</Typography>
+          <Typography variant="headingMedium" as="h1" className={styles.headingError}>Subscription Failed</Typography>
           <Typography className={styles.message}>{status.message}</Typography>
 
           <div className={styles.actions}>
