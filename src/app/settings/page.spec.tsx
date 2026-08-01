@@ -26,6 +26,10 @@ function jsonResponse(data: unknown, status = 200): Response {
 	});
 }
 
+function openDangerZone() {
+	fireEvent.click(screen.getByRole("button", { name: /Danger zone/i }));
+}
+
 describe("SettingsPage", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
@@ -70,6 +74,7 @@ describe("SettingsPage", () => {
 			isAdmin: false,
 		});
 		render(<SettingsPage />);
+		openDangerZone();
 		expect(screen.getByRole("button", { name: /Delete account/i })).toBeInTheDocument();
 		expect(screen.queryByPlaceholderText("••••••••")).not.toBeInTheDocument();
 	});
@@ -81,6 +86,7 @@ describe("SettingsPage", () => {
 			isAdmin: false,
 		});
 		render(<SettingsPage />);
+		openDangerZone();
 		fireEvent.click(screen.getByRole("button", { name: /Delete account/i }));
 		expect(screen.getByPlaceholderText("••••••••")).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: /Confirm delete/i })).toBeInTheDocument();
@@ -94,6 +100,7 @@ describe("SettingsPage", () => {
 			isAdmin: false,
 		});
 		render(<SettingsPage />);
+		openDangerZone();
 		fireEvent.click(screen.getByRole("button", { name: /Delete account/i }));
 		fireEvent.click(screen.getByRole("button", { name: /Cancel/i }));
 		expect(screen.queryByPlaceholderText("••••••••")).not.toBeInTheDocument();
@@ -113,6 +120,7 @@ describe("SettingsPage", () => {
 		const dispatchSpy = vi.spyOn(window, "dispatchEvent");
 
 		render(<SettingsPage />);
+		openDangerZone();
 		fireEvent.click(screen.getByRole("button", { name: /Delete account/i }));
 		fireEvent.change(screen.getByPlaceholderText("••••••••"), {
 			target: { value: "my-password" },
@@ -138,6 +146,7 @@ describe("SettingsPage", () => {
 		);
 
 		render(<SettingsPage />);
+		openDangerZone();
 		fireEvent.click(screen.getByRole("button", { name: /Delete account/i }));
 		fireEvent.change(screen.getByPlaceholderText("••••••••"), {
 			target: { value: "wrong-password" },
@@ -163,6 +172,7 @@ describe("SettingsPage", () => {
 		);
 
 		render(<SettingsPage />);
+		openDangerZone();
 		fireEvent.click(screen.getByRole("button", { name: /Delete account/i }));
 		fireEvent.change(screen.getByPlaceholderText("••••••••"), {
 			target: { value: "x" },
@@ -186,6 +196,7 @@ describe("SettingsPage", () => {
 		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network down"));
 
 		render(<SettingsPage />);
+		openDangerZone();
 		fireEvent.click(screen.getByRole("button", { name: /Delete account/i }));
 		fireEvent.change(screen.getByPlaceholderText("••••••••"), {
 			target: { value: "my-password" },
