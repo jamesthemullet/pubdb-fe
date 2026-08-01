@@ -257,7 +257,7 @@ function ClimbingFastestPanel({ entries }: { entries: LeaderboardEntry[] }) {
       entries
         .filter(
           (e): e is LeaderboardEntry & { rankChange: number } =>
-            e.rankChange !== null
+            e.rankChange !== null && e.rankChange > 0
         )
         .sort((a, b) => b.rankChange - a.rankChange)
         .slice(0, 3),

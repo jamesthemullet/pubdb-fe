@@ -207,7 +207,7 @@ describe("LeaderboardClient", () => {
 		expect(screen.queryByText("Top this week")).not.toBeInTheDocument();
 	});
 
-	it("shows a 'Climbing fastest' panel ranking entries by rankChange descending, skipping null entries", () => {
+	it("shows a 'Climbing fastest' panel ranking entries by rankChange descending, skipping null and non-positive entries", () => {
 		const climbing = makeEntry({
 			rank: 2,
 			userId: "u4",
@@ -224,7 +224,15 @@ describe("LeaderboardClient", () => {
 			rankChange: null,
 			previousRank: null,
 		});
-		const data = makeData([ALICE, climbing, noChange]);
+		const falling = makeEntry({
+			rank: 2,
+			userId: "u6",
+			username: "frank",
+			displayName: "Frank Stone",
+			rankChange: -1,
+			previousRank: 1,
+		});
+		const data = makeData([ALICE, climbing, noChange, falling]);
 		render(<LeaderboardClient data={data} />);
 
 		const heading = screen.getByText("Climbing fastest");
@@ -239,6 +247,21 @@ describe("LeaderboardClient", () => {
 		expect(scoped.getByText("#7 → #2")).toBeInTheDocument();
 		expect(scoped.getByText("+5")).toBeInTheDocument();
 		expect(scoped.queryByText("Eve Black")).not.toBeInTheDocument();
+		expect(scoped.queryByText("Frank Stone")).not.toBeInTheDocument();
+	});
+
+	it("does not show the 'Climbing fastest' panel when every entry with a rankChange has fallen or stayed put", () => {
+		const falling = makeEntry({
+			rank: 2,
+			userId: "u6",
+			username: "frank",
+			displayName: "Frank Stone",
+			rankChange: -1,
+			previousRank: 1,
+		});
+		const data = makeData([ALICE, falling]);
+		render(<LeaderboardClient data={data} />);
+		expect(screen.queryByText("Climbing fastest")).not.toBeInTheDocument();
 	});
 
 	it("does not show the 'Climbing fastest' panel when no entries have a rankChange", () => {
