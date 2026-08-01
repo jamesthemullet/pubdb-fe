@@ -216,7 +216,7 @@ function TopThisWeekPanel({ entries }: { entries: LeaderboardEntry[] }) {
     <div className={styles.sidebarPanel}>
       <div className={styles.sidebarPanelHeader}>
         <span className={styles.sidebarPanelTitle}>Top this week</span>
-        <div className={styles.sidebarPanelToggle} role="group" aria-label="Rank top this week by">
+        <fieldset className={styles.sidebarPanelToggle} aria-label="Rank top this week by">
           {WEEK_METRICS.map((m) => (
             <button
               key={m.key}
@@ -230,7 +230,7 @@ function TopThisWeekPanel({ entries }: { entries: LeaderboardEntry[] }) {
               {m.label}
             </button>
           ))}
-        </div>
+        </fieldset>
       </div>
       {top5.map((entry, index) => (
         <div key={entry.userId} className={styles.weekRow}>
