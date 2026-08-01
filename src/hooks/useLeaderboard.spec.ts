@@ -20,6 +20,9 @@ const ALICE_ENTRY = {
   streak: 4,
   badges: [],
   nextBadges: [],
+  rankChange: null,
+  previousRank: null,
+  previousTotalContributions: null,
 };
 
 const SAMPLE_PAYLOAD = {

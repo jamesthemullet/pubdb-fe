@@ -22,6 +22,9 @@ function makeEntry(overrides: Partial<LeaderboardEntry> & Pick<LeaderboardEntry,
 		streak: 0,
 		badges: [],
 		nextBadges: [],
+		rankChange: null,
+		previousRank: null,
+		previousTotalContributions: null,
 		...overrides,
 	};
 }
@@ -202,5 +205,67 @@ describe("LeaderboardClient", () => {
 		};
 		render(<LeaderboardClient data={data} />);
 		expect(screen.queryByText("Top this week")).not.toBeInTheDocument();
+	});
+
+	it("shows a 'Climbing fastest' panel ranking entries by rankChange descending, skipping null and non-positive entries", () => {
+		const climbing = makeEntry({
+			rank: 2,
+			userId: "u4",
+			username: "dave",
+			displayName: "Dave Green",
+			rankChange: 5,
+			previousRank: 7,
+		});
+		const noChange = makeEntry({
+			rank: 5,
+			userId: "u5",
+			username: "eve",
+			displayName: "Eve Black",
+			rankChange: null,
+			previousRank: null,
+		});
+		const falling = makeEntry({
+			rank: 2,
+			userId: "u6",
+			username: "frank",
+			displayName: "Frank Stone",
+			rankChange: -1,
+			previousRank: 1,
+		});
+		const data = makeData([ALICE, climbing, noChange, falling]);
+		render(<LeaderboardClient data={data} />);
+
+		const heading = screen.getByText("Climbing fastest");
+		expect(heading).toBeInTheDocument();
+		expect(screen.getByText("vs previous period")).toBeInTheDocument();
+
+		// heading -> sidebarPanelHeader -> sidebarPanel
+		const panel = heading.parentElement?.parentElement as HTMLElement;
+		const scoped = within(panel);
+
+		expect(scoped.getByText("Dave Green")).toBeInTheDocument();
+		expect(scoped.getByText("#7 → #2")).toBeInTheDocument();
+		expect(scoped.getByText("+5")).toBeInTheDocument();
+		expect(scoped.queryByText("Eve Black")).not.toBeInTheDocument();
+		expect(scoped.queryByText("Frank Stone")).not.toBeInTheDocument();
+	});
+
+	it("does not show the 'Climbing fastest' panel when every entry with a rankChange has fallen or stayed put", () => {
+		const falling = makeEntry({
+			rank: 2,
+			userId: "u6",
+			username: "frank",
+			displayName: "Frank Stone",
+			rankChange: -1,
+			previousRank: 1,
+		});
+		const data = makeData([ALICE, falling]);
+		render(<LeaderboardClient data={data} />);
+		expect(screen.queryByText("Climbing fastest")).not.toBeInTheDocument();
+	});
+
+	it("does not show the 'Climbing fastest' panel when no entries have a rankChange", () => {
+		render(<LeaderboardClient data={makeData()} />);
+		expect(screen.queryByText("Climbing fastest")).not.toBeInTheDocument();
 	});
 });
