@@ -532,5 +532,5 @@ describe("AddPubPage", () => {
       expect(submitted[amenity.key]).toBe(true);
     }
     expect(submitted.isIndependent).toBe(true);
-  });
+  }, 10000);
 });

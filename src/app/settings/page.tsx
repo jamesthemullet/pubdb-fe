@@ -57,6 +57,7 @@ export default function SettingsPage(): React.JSX.Element {
                   type="button"
                   className={`${styles.navItem} ${activeTab === id ? styles.navItemActive : ""} ${id === "danger" ? styles.navItemDanger : ""}`}
                   onClick={() => setActiveTab(id)}
+                  aria-current={activeTab === id ? "true" : undefined}
                 >
                   <span className={styles.navIcon}>{icon}</span>
                   {label}
