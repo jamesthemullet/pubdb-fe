@@ -616,6 +616,11 @@ const Pricing = (): React.JSX.Element => {
                   {tier.priceSuffix}
                 </span>
               </div>
+              {tier.name === "DEVELOPER" && (
+                <p className={styles.tierPromo}>
+                  or free in 2026 if you contribute 100+ times/month
+                </p>
+              )}
               <ul className={styles.tierFeatures}>
                 {tier.features.map((f) => (
                   <li key={f} className={styles.tierFeatureItem}>

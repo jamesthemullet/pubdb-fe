@@ -395,6 +395,12 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
         </div>
       </div>
 
+      {/* Promo banner */}
+      <div className={styles.promoBanner}>
+        🎉 100+ contributions this month unlocks free Developer tier API
+        access. Developer only · 2026 introductory offer.
+      </div>
+
       {/* Filter bar */}
       <div className={styles.filterBar}>
         <div className={styles.filterLeft}>
