@@ -16,6 +16,15 @@ export function isHttpErrorObject(err: unknown): err is HttpErrorObject {
   );
 }
 
+/** Extracts a `message` string from an unknown API response body. */
+export function getResponseMessage(data: unknown): string | undefined {
+  if (typeof data === "object" && data !== null) {
+    const val = (data as Record<string, unknown>).message;
+    if (typeof val === "string") return val;
+  }
+  return undefined;
+}
+
 /** Extracts a human-readable message from any caught value. */
 export function getErrorMessage(err: unknown, fallback: string): string {
   if (err instanceof Error) return err.message || fallback;

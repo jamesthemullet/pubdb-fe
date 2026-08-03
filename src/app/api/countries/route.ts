@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 // data cache and at the CDN edge.
 const REVALIDATE_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
-export async function GET() {
+export async function GET(): Promise<Response> {
   try {
     const res = await fetch(
       "https://restcountries.com/v3.1/all?fields=name,cca2",

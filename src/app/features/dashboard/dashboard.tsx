@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useContributions } from "@/hooks/useContributions";
 import { buildAuthHeaders } from "@/lib/auth";
-import { getErrorMessage, isHttpErrorObject } from "@/lib/errors";
+import { getErrorMessage, getResponseMessage, isHttpErrorObject } from "@/lib/errors";
 import styles from "./dashboard.module.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -249,10 +249,10 @@ const Dashboard = (): React.JSX.Element | null => {
         },
         body: JSON.stringify({}),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       setCancelMessage(
-        data.message ||
+        getResponseMessage(data) ||
           "Subscription cancelled. It will expire at the end of the current billing period."
       );
       cancelAuthChangedTimeoutRef.current = setTimeout(
@@ -289,16 +289,18 @@ const Dashboard = (): React.JSX.Element | null => {
         },
         body: JSON.stringify({ keyPrefix, email: userEmail }),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       setForgotKeyMessage(
-        data.message ||
+        getResponseMessage(data) ||
           "If this API key is eligible, instructions have been emailed to the account owner."
       );
-      if (data.apiKey) {
+      const raw = data as Record<string, unknown>;
+      if (raw.apiKey && typeof raw.apiKey === "object") {
+        const apiKey = raw.apiKey as GeneratedApiKeyResponse;
         setForgotKeyDetails({
-          ...data.apiKey,
-          keyPrefix: data.apiKey.keyPrefix || keyPrefix,
+          ...apiKey,
+          keyPrefix: apiKey.keyPrefix || keyPrefix,
         });
         setShowForgotKeyModal(true);
         setForgotKeyCopyStatus("idle");
@@ -345,16 +347,17 @@ const Dashboard = (): React.JSX.Element | null => {
         method: "POST",
         headers: buildAuthHeaders(token),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
-      const keyData: GeneratedApiKeyResponse = data.apiKey ?? data;
+      const raw = data as Record<string, unknown>;
+      const keyData: GeneratedApiKeyResponse = (raw.apiKey ?? raw) as GeneratedApiKeyResponse;
       setForgotKeyDetails(keyData);
       setShowForgotKeyModal(true);
       setForgotKeyCopyStatus("idle");
       const refreshRes = await fetch("/api/auth/dashboard", {
         headers: buildAuthHeaders(token),
       });
-      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+      if (refreshRes.ok) setDashboardData((await refreshRes.json()) as unknown as DashboardData);
     } catch (err: unknown) {
       setCreateKeyError(getErrorMessage(err, "Failed to create API key"));
     } finally {
@@ -386,9 +389,10 @@ const Dashboard = (): React.JSX.Element | null => {
         },
         body: JSON.stringify(addKeyName.trim() ? { name: addKeyName.trim() } : {}),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
-      const keyData: GeneratedApiKeyResponse = data.apiKey ?? data;
+      const raw = data as Record<string, unknown>;
+      const keyData: GeneratedApiKeyResponse = (raw.apiKey ?? raw) as GeneratedApiKeyResponse;
       setShowAddKeyModal(false);
       setForgotKeyDetails(keyData);
       setShowForgotKeyModal(true);
@@ -396,7 +400,7 @@ const Dashboard = (): React.JSX.Element | null => {
       const refreshRes = await fetch("/api/auth/dashboard", {
         headers: buildAuthHeaders(token),
       });
-      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+      if (refreshRes.ok) setDashboardData((await refreshRes.json()) as unknown as DashboardData);
     } catch (err: unknown) {
       setAddKeyError(getErrorMessage(err, "Failed to create API key"));
     } finally {
@@ -414,12 +418,12 @@ const Dashboard = (): React.JSX.Element | null => {
         method: "DELETE",
         headers: buildAuthHeaders(token),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       const refreshRes = await fetch("/api/auth/dashboard", {
         headers: buildAuthHeaders(token),
       });
-      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+      if (refreshRes.ok) setDashboardData((await refreshRes.json()) as unknown as DashboardData);
     } catch (err: unknown) {
       setRevokeError(getErrorMessage(err, "Failed to revoke API key"));
     } finally {

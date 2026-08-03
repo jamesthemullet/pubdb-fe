@@ -1,3 +1,4 @@
+import type React from "react";
 import type { Metadata } from "next";
 import Typography from "@/app/components/typography/typography";
 import styles from "./style-guide.module.css";
@@ -24,7 +25,7 @@ const palette = [
   { name: "Input Background", variable: "--input-background", swatchClass: styles.swatchInputBackground },
 ];
 
-const StyleGuidePage = () => {
+const StyleGuidePage = (): React.JSX.Element => {
   return (
     <section className={styles.page}>
       <header className={styles.hero}>
