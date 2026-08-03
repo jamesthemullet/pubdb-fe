@@ -80,6 +80,17 @@
   background: var(--surface-alt);
 }
 
+/* ── Promo banner ── */
+.promoBanner {
+  margin: 0 2rem;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.8125rem;
+  color: #1e40af;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+}
+
 /* ── Filter bar ── */
 .filterBar {
   display: flex;

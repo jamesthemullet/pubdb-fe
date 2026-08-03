@@ -970,6 +970,10 @@ const Dashboard = (): React.JSX.Element | null => {
             <p className={styles.contributionsSectionTitle}>
               Your contributions
             </p>
+            <p className={styles.contributionsPromo}>
+              100+ contributions this month unlocks free Developer tier API
+              access. Developer tier only · 2026 introductory offer.
+            </p>
             {contributionsLoading && <p className={styles.muted}>Loading…</p>}
             {contributionsError && (
               <p className={styles.inlineError}>{contributionsError}</p>
