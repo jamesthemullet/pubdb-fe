@@ -6,14 +6,16 @@ import type { ReactElement } from "react";
 import { memo, Suspense, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import {
+  getPubTypeLabel,
   PUB_AMENITY_FIELDS,
+  PUB_TYPE_OPTIONS,
   type PubAmenityKey,
 } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { buildAuthHeaders } from "@/lib/auth";
 import { isHttpErrorObject } from "@/lib/errors";
 import { pubCompletenessScore } from "@/lib/pubCompletenessScore";
-import type { Pub } from "@/types/pub";
+import type { Pub, PubType } from "@/types/pub";
 import styles from "./page.module.css";
 
 type SortOption =
@@ -74,6 +76,7 @@ const PubRow = memo(function PubRow({
             {pub.isIndependent ? "Independent" : pub.chainName}
           </span>
         )}
+        <span className={styles.pubType}>{getPubTypeLabel(pub.type)}</span>
       </td>
       <td className={styles.tdLocation}>
         <span className={styles.pubLocation}>{pubLocation(pub)}</span>
@@ -120,6 +123,7 @@ function PubsContent(): ReactElement {
   );
   const [editStatusFilter, setEditStatusFilter] =
     useState<EditStatusFilter>("all");
+  const [typeFilter, setTypeFilter] = useState<PubType | "">("");
   const [showAllFilters, setShowAllFilters] = useState(false);
   const [responseMs, setResponseMs] = useState<number | null>(null);
   const [locationStatus, setLocationStatus] = useState<
@@ -222,6 +226,7 @@ function PubsContent(): ReactElement {
         if (editStatusFilter !== "all") {
           params.set("editedByMe", editStatusFilter === "edited" ? "true" : "false");
         }
+        if (typeFilter) params.set("type", typeFilter);
         if (coords) {
           params.set("lat", String(coords.lat));
           params.set("lng", String(coords.lng));
@@ -255,7 +260,7 @@ function PubsContent(): ReactElement {
       }
     }
     fetchPubs();
-  }, [page, debouncedSearchTerm, activeAmenities, editStatusFilter, coords]);
+  }, [page, debouncedSearchTerm, activeAmenities, editStatusFilter, typeFilter, coords]);
 
   const hasNextPage = pubs.length === PAGE_SIZE;
   const hasPrevPage = page > 0;
@@ -276,6 +281,7 @@ function PubsContent(): ReactElement {
     setActiveAmenities(new Set());
     setSortBy("name-asc");
     setEditStatusFilter("all");
+    setTypeFilter("");
     setCoords(null);
     setLocationStatus("idle");
   }
@@ -293,6 +299,7 @@ function PubsContent(): ReactElement {
     activeAmenities.size > 0 ||
     sortBy !== "name-asc" ||
     editStatusFilter !== "all" ||
+    !!typeFilter ||
     !!coords;
 
   return (
@@ -402,6 +409,25 @@ function PubsContent(): ReactElement {
           </div>
 
           <div className={styles.filterRight}>
+            <label htmlFor="type-select" className={styles.srOnly}>Filter by type</label>
+            <Dropdown
+              id="type-select"
+              aria-label="Filter by type"
+              value={typeFilter}
+              onChange={(e) => {
+                setPage(0);
+                setTypeFilter(e.target.value as PubType | "");
+              }}
+              fullWidth={false}
+            >
+              <option value="">All types</option>
+              {PUB_TYPE_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Dropdown>
+
             <label htmlFor="sort-select" className={styles.srOnly}>Sort by</label>
             <Dropdown
               id="sort-select"
