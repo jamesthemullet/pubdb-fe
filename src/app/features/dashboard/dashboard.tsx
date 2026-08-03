@@ -949,9 +949,9 @@ const Dashboard = (): React.JSX.Element | null => {
               </p>
             </div>
             <div className={styles.upgradeNudgeActions}>
-              <a href="/#pricing" className={styles.upgradeNudgeCta}>
+              <Link href="/#pricing" className={styles.upgradeNudgeCta}>
                 Upgrade &rarr;
-              </a>
+              </Link>
               <button
                 type="button"
                 className={styles.upgradeNudgeDismiss}
