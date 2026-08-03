@@ -54,16 +54,6 @@ export type PubHistoryEntry = {
   username?: string;
 };
 
-export type PubHistoryResponse = {
-  pubId: string;
-  history: PubHistoryEntry[];
-  meta?: {
-    count: number;
-    limit: number;
-    since: string | null;
-  };
-};
-
 export type Pub = {
   id: string;
   name: string;
