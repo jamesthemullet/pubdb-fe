@@ -8,11 +8,12 @@ export const metadata: Metadata = {
     description: "Every notable change to the Pub DB API, newest first.",
   },
   twitter: {
+    card: "summary_large_image",
     title: "Changelog | Pub DB",
     description: "Every notable change to the Pub DB API, newest first.",
   },
 };
 
-export default function ChangelogLayout({ children }: { children: React.ReactNode }) {
+export default function ChangelogLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return <>{children}</>;
 }

@@ -5,6 +5,6 @@ export const metadata: Metadata = {
   description: "Pub DB Terms of Service.",
 };
 
-export default function TermsLayout({ children }: { children: React.ReactNode }) {
+export default function TermsLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return <>{children}</>;
 }

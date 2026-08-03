@@ -17,6 +17,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function LeaderboardLayout({ children }: { children: React.ReactNode }) {
+export default function LeaderboardLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return <>{children}</>;
 }

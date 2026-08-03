@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import type { AuthUser } from "@/hooks/useAuth";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
 
@@ -14,21 +15,22 @@ type SettingsTab =
   | "profile"
   | "security"
   | "notifications"
+  | "apiPreferences"
   | "appearance"
   | "danger";
 
 const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   { id: "profile", label: "Profile", icon: <ProfileIcon /> },
-  // TODO: re-enable in a future PR once wired to real API
-  // { id: "security", label: "Security", icon: <SecurityIcon /> },
-  // { id: "notifications", label: "Notifications", icon: <BellIcon /> },
-  // { id: "appearance", label: "Appearance", icon: <AppearanceIcon /> },
+  { id: "security", label: "Security", icon: <SecurityIcon /> },
+  { id: "notifications", label: "Notifications", icon: <BellIcon /> },
+  { id: "apiPreferences", label: "API preferences", icon: <ApiPreferencesIcon /> },
+  { id: "appearance", label: "Appearance", icon: <AppearanceIcon /> },
   { id: "danger", label: "Danger zone", icon: <DangerIcon /> },
 ];
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function SettingsPage() {
+export default function SettingsPage(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const { user } = useAuth();
 
@@ -55,6 +57,7 @@ export default function SettingsPage() {
                   type="button"
                   className={`${styles.navItem} ${activeTab === id ? styles.navItemActive : ""} ${id === "danger" ? styles.navItemDanger : ""}`}
                   onClick={() => setActiveTab(id)}
+                  aria-current={activeTab === id ? "true" : undefined}
                 >
                   <span className={styles.navIcon}>{icon}</span>
                   {label}
@@ -67,11 +70,10 @@ export default function SettingsPage() {
         {/* Content */}
         <div className={styles.content}>
           {activeTab === "profile" && <ProfileTab user={user} />}
-          {/* TODO: re-enable in a future PR once wired to real API
           {activeTab === "security" && <SecurityTab />}
-          {activeTab === "notifications" && <NotificationsTab />}
+          {activeTab === "notifications" && <NotificationsTab user={user} />}
+          {activeTab === "apiPreferences" && <ApiPreferencesTab user={user} />}
           {activeTab === "appearance" && <AppearanceTab />}
-          */}
           {activeTab === "danger" && <DangerTab />}
         </div>
       </div>
@@ -324,7 +326,7 @@ function ProfileTab({ user }: { user: AuthUser }) {
 
       <Card title="Contact">
         <FieldRow label="Email" htmlFor="settings-email">
-          <span className={styles.fieldHint}>{user?.email}</span>
+          <span id="settings-email" className={styles.fieldHint}>{user?.email}</span>
         </FieldRow>
       </Card>
 
@@ -336,85 +338,223 @@ function ProfileTab({ user }: { user: AuthUser }) {
 }
 
 // ── Security tab ──────────────────────────────────────────────────────────────
-// TODO: re-enable in a future PR once wired to real API
-/*
+
 function SecurityTab() {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const hasChanges = currentPassword.length > 0 || newPassword.length > 0 || confirmPassword.length > 0;
+
+  async function handleSave() {
+    setFormError(null);
+    setFieldErrors({});
+
+    if (newPassword !== confirmPassword) {
+      setFieldErrors({ confirmPassword: ["Passwords do not match."] });
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/auth/me/password", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (res.ok) {
+        setSaved(true);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setTimeout(() => setSaved(false), 2000);
+        return;
+      }
+
+      if (res.status === 400 && data?.errors?.fieldErrors) {
+        setFieldErrors(data.errors.fieldErrors);
+      } else if (res.status === 401) {
+        setFormError(data?.error === "Invalid credentials" ? "Current password is incorrect." : "Session expired — please log in again.");
+      } else if (res.status === 429) {
+        setFormError("Too many attempts. Please try again later.");
+      } else {
+        setFormError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setFormError("Something went wrong. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <>
       <Card title="Password" description="Update your login password.">
         <FieldRow label="Current password" htmlFor="settings-current-password">
           <input id="settings-current-password" className={styles.textInput} type="password" placeholder="••••••••" />
         </FieldRow>
-        <FieldRow label="New password" htmlFor="settings-new-password">
-          <input id="settings-new-password" className={styles.textInput} type="password" placeholder="••••••••" />
+        <FieldRow label="New password" hint="6–128 characters." htmlFor="settings-new-password">
+          <input
+            id="settings-new-password"
+            className={styles.textInput}
+            type="password"
+            placeholder="Enter a new password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          {fieldErrors.newPassword?.map((msg) => (
+            <span key={msg} className={styles.fieldError}>{msg}</span>
+          ))}
         </FieldRow>
         <FieldRow label="Confirm new password" htmlFor="settings-confirm-password">
-          <input id="settings-confirm-password" className={styles.textInput} type="password" placeholder="••••••••" />
+          <input
+            id="settings-confirm-password"
+            className={styles.textInput}
+            type="password"
+            placeholder="Enter a new password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          {fieldErrors.confirmPassword?.map((msg) => (
+            <span key={msg} className={styles.fieldError}>{msg}</span>
+          ))}
         </FieldRow>
       </Card>
 
-      <SaveBar />
+      <SaveBar
+        onSave={handleSave}
+        disabled={saving || !hasChanges || !currentPassword || !newPassword || !confirmPassword}
+        label={saving ? "Saving…" : "Save changes"}
+      />
+      {formError && <p className={styles.formError}>{formError}</p>}
+      {saved && <p className={styles.savedMsg}>Password updated.</p>}
     </>
   );
 }
 
 // ── Notifications tab ─────────────────────────────────────────────────────────
 
-function NotificationsTab() {
-  const [notifs, setNotifs] = useState({
-    billing: true,
-    usage: true,
-    changelog: false,
-    contributions: true,
-  });
+function AlertToggleRow({
+  field,
+  label,
+  hint,
+  initial,
+}: {
+  field: "usageLimitAlertsEnabled" | "pubEditAlertsEnabled";
+  label: string;
+  hint: string;
+  initial: boolean;
+}) {
+  const [enabled, setEnabled] = useState(initial);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function toggle(key: keyof typeof notifs) {
-    setNotifs((n) => ({ ...n, [key]: !n[key] }));
+  async function handleToggle() {
+    const next = !enabled;
+    setEnabled(next);
+    setError(null);
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/auth/me", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
+        body: JSON.stringify({ [field]: next }),
+      });
+
+      if (res.ok) {
+        window.dispatchEvent(new Event("authChanged"));
+        return;
+      }
+
+      setEnabled(!next);
+      if (res.status === 401) {
+        setError("Session expired — please log in again.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setEnabled(!next);
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   }
 
-  const items = [
-    { key: "billing" as const, label: "Billing & invoices", hint: "Payment confirmations and upcoming charges" },
-    { key: "usage" as const, label: "Usage alerts", hint: "Quota warnings and limit resets" },
-    { key: "changelog" as const, label: "Changelog & announcements", hint: "New features and API updates" },
-    { key: "contributions" as const, label: "Contribution activity", hint: "Leaderboard changes and pub edit approvals" },
-  ];
-
   return (
-    <>
-      <Card title="Email notifications" description="Choose what we send to your account email.">
-        {items.map((item) => (
-          <FieldRow key={item.key} label={item.label} hint={item.hint}>
-            <label className={styles.toggleLabel}>
-              <input
-                type="checkbox"
-                className={styles.toggleInput}
-                checked={notifs[item.key]}
-                onChange={() => toggle(item.key)}
-              />
-              <span className={styles.toggleTrack}>
-                <span className={styles.toggleThumb} />
-              </span>
-              <span className={styles.toggleText}>{notifs[item.key] ? "On" : "Off"}</span>
-            </label>
-          </FieldRow>
-        ))}
-      </Card>
+    <FieldRow label={label} hint={hint}>
+      <label className={styles.toggleLabel}>
+        <input
+          type="checkbox"
+          className={styles.toggleInput}
+          checked={enabled}
+          disabled={saving}
+          onChange={handleToggle}
+        />
+        <span className={styles.toggleTrack}>
+          <span className={styles.toggleThumb} />
+        </span>
+        <span className={styles.toggleText}>{enabled ? "On" : "Off"}</span>
+      </label>
+      {error && <p className={styles.formError}>{error}</p>}
+    </FieldRow>
+  );
+}
 
-      <SaveBar />
-    </>
+function NotificationsTab({ user }: { user: AuthUser }) {
+  return (
+    <Card title="Email notifications" description="Choose what we send to your account email.">
+      <AlertToggleRow
+        field="pubEditAlertsEnabled"
+        label="Edit to a pub I added"
+        hint="Someone updated a pub you originally submitted."
+        initial={user?.pubEditAlertsEnabled ?? true}
+      />
+    </Card>
+  );
+}
+
+// ── API preferences tab ───────────────────────────────────────────────────────
+
+function ApiPreferencesTab({ user }: { user: AuthUser }) {
+  return (
+    <Card title="API preferences" description="Control how we communicate with you about your API usage.">
+      <AlertToggleRow
+        field="usageLimitAlertsEnabled"
+        label="Usage limit alerts"
+        hint="Get an email when you reach 80% of your rate limit for the hour, day, or month."
+        initial={user?.usageLimitAlertsEnabled ?? true}
+      />
+    </Card>
   );
 }
 
 // ── Appearance tab ────────────────────────────────────────────────────────────
 
 function AppearanceTab() {
-  const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
+  const { theme, setTheme } = useTheme();
 
   return (
     <Card title="Appearance" description="Customise how the dashboard looks for you.">
       <FieldRow label="Theme">
         <div className={styles.themeOptions}>
-          {(["light", "system", "dark"] as const).map((t) => (
+          {(["light", "dark"] as const).map((t) => (
             <button
               key={t}
               type="button"
@@ -428,12 +568,9 @@ function AppearanceTab() {
           ))}
         </div>
       </FieldRow>
-
-      <SaveBar />
     </Card>
   );
 }
-*/
 
 // ── Danger zone tab ───────────────────────────────────────────────────────────
 
@@ -550,8 +687,6 @@ function ProfileIcon() {
   );
 }
 
-// TODO: re-enable in a future PR once wired to real API
-/*
 function SecurityIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -569,6 +704,15 @@ function BellIcon() {
   );
 }
 
+function ApiPreferencesIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <rect x="1.5" y="3" width="11" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M4 6.5h6M4 8.5h3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function AppearanceIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -577,7 +721,6 @@ function AppearanceIcon() {
     </svg>
   );
 }
-*/
 
 function DangerIcon() {
   return (

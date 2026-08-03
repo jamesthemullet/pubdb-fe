@@ -1,3 +1,5 @@
+'use client';
+
 import Link from "next/link";
 import { useState } from "react";
 import Button from "@/app/components/button/button";
@@ -13,7 +15,7 @@ type Props = {
   onEdit: () => void;
 };
 
-export default function EditButton({ pubName, pubId, user, onEdit }: Props) {
+export default function EditButton({ pubName, pubId, user, onEdit }: Props): React.JSX.Element {
   const [deleteMessage, setDeleteMessage] = useState<{
     type: "success" | "error";
     text: string;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import styles from "./page.module.css";
 
-export function CopyButton({ text }: { text: string }) {
+export function CopyButton({ text }: { text: string }): React.JSX.Element {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -13,8 +13,17 @@ export function CopyButton({ text }: { text: string }) {
   };
 
   return (
-    <button type="button" className={styles.copyBtn} onClick={handleCopy}>
-      {copied ? "Copied" : "Copy"}
-    </button>
+    <>
+      <button type="button" className={styles.copyBtn} onClick={handleCopy} aria-label={copied ? "Copied to clipboard" : "Copy to clipboard"}>
+        {copied ? "Copied" : "Copy"}
+      </button>
+      <span
+        aria-live="polite"
+        aria-atomic="true"
+        style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}
+      >
+        {copied ? "Copied to clipboard" : ""}
+      </span>
+    </>
   );
 }

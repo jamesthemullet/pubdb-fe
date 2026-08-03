@@ -348,6 +348,7 @@
   font-weight: 700;
   color: #fff;
   flex-shrink: 0;
+  object-fit: cover;
 }
 
 .yourRankInfo {
@@ -631,6 +632,13 @@
   color: #1e40af;
 }
 
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+
 /* ── Sidebar ── */
 .sidebar {
   display: flex;
@@ -664,6 +672,32 @@
   color: var(--text-muted);
 }
 
+.sidebarPanelToggle {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+button.sidebarPanelSub {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-inter), sans-serif;
+  transition: color 0.12s;
+}
+
+button.sidebarPanelSub:hover {
+  color: var(--text-color);
+}
+
+button.sidebarPanelSubActive {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 /* Climbing fastest */
 .climbRow {
   display: flex;
@@ -688,6 +722,26 @@
   font-weight: 700;
   color: #fff;
   flex-shrink: 0;
+}
+
+.climbAvatar[data-variant="green"] {
+  background: #10b981;
+}
+
+.climbAvatar[data-variant="amber"] {
+  background: #f59e0b;
+}
+
+.climbAvatar[data-variant="orange"] {
+  background: #f97316;
+}
+
+.climbAvatar[data-variant="purple"] {
+  background: #8b5cf6;
+}
+
+.climbAvatar[data-variant="blue"] {
+  background: #3b82f6;
 }
 
 .climbInfo {

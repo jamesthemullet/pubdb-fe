@@ -144,7 +144,7 @@ function buildProxyRequest(
   return { proxyUrl, publicPath };
 }
 
-export default function PlaygroundPage() {
+export default function PlaygroundPage(): React.JSX.Element {
   const { user } = useAuth();
   const [apiKeys, setApiKeys] = useState<ApiKey[] | null>(null);
   const [keysError, setKeysError] = useState<string | null>(null);
@@ -407,6 +407,7 @@ export default function PlaygroundPage() {
                 type="button"
                 className={styles.historyToggle}
                 onClick={() => setHistoryOpen((prev) => !prev)}
+                aria-expanded={historyOpen}
               >
                 {historyOpen ? "Hide" : "Show"} history ({history.length})
               </button>
