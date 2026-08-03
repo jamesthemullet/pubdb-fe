@@ -8,6 +8,15 @@ export type OpeningHoursMap = Record<string, OpeningHoursEntry>;
 
 export type SunExposure = "FULL_SUN" | "PARTIAL_SUN" | "SHADED";
 
+export type PubType =
+  | "PUB"
+  | "BAR"
+  | "BREWERY"
+  | "TAPROOM"
+  | "MICROPUB"
+  | "SOCIAL_CLUB"
+  | "PRIVATE_MEMBERS_CLUB";
+
 export type BeerType = {
   id: string;
   name: string;
@@ -67,6 +76,7 @@ export type Pub = {
   description?: string;
   imageUrl?: string;
   chainName?: string;
+  type?: PubType | null;
   isIndependent?: boolean | null;
   hasFood?: boolean | null;
   hasSundayRoast?: boolean | null;

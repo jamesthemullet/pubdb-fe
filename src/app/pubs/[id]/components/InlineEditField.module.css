@@ -78,6 +78,12 @@
   vertical-align: top;
 }
 
+.selectInput {
+  min-width: 10rem;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.9em;
+}
+
 .boolOptions {
   display: inline-flex;
   gap: 0.25rem;

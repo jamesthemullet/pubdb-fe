@@ -922,6 +922,7 @@ Object.assign(HISTORY_FIELD_LABELS, {
   website: "Website",
   description: "Description",
   operator: "Operator",
+  type: "Type",
   area: "Area",
   borough: "Borough",
   chainName: "Chain",
