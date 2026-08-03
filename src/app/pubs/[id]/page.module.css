@@ -714,6 +714,11 @@
   font-weight: 400;
 }
 
+.actionDeleted {
+  color: #b91c1c;
+  font-weight: 400;
+}
+
 .historyDetail {
   color: var(--text-muted);
 }
