@@ -6,9 +6,9 @@ import type { ReactElement } from "react";
 import { memo, Suspense, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import {
+  getPubTypeLabel,
   PUB_AMENITY_FIELDS,
   PUB_TYPE_OPTIONS,
-  getPubTypeLabel,
   type PubAmenityKey,
 } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
