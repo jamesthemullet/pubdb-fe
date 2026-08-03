@@ -40,6 +40,20 @@ export type BeerGarden = {
   updatedAt?: string;
 };
 
+export type PubHistoryChange = {
+  from: unknown;
+  to: unknown;
+};
+
+export type PubHistoryEntry = {
+  id: string;
+  action: "CREATE" | "UPDATE" | "DELETE" | string;
+  timestamp: string;
+  changedFields?: Record<string, PubHistoryChange>;
+  /** Not yet returned by the API for every entry — falls back to "system" when absent. */
+  username?: string;
+};
+
 export type Pub = {
   id: string;
   name: string;
