@@ -27,16 +27,19 @@ export const metadata: Metadata = {
     "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
   openGraph: {
     type: "website",
+    url: "https://www.thepubdb.com",
     siteName: "Pub DB",
     title: "Pub DB",
     description:
       "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "Pub DB" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Pub DB",
     description:
       "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
+    images: ["/og-default.png"],
   },
 };
 
@@ -47,6 +50,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: static inline script, no user input, needed to set theme before hydration and avoid a flash of light mode
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}",
+          }}
+        />
+      </head>
       <body
         suppressHydrationWarning
         className={`${inter.variable} ${jetbrainsMono.variable}`}

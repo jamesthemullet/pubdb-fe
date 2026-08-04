@@ -1,3 +1,5 @@
+import type { PubType } from "@/types/pub";
+
 export type PubAmenityKey =
   | "isIndependent"
   | "hasFood"
@@ -12,12 +14,28 @@ export type PubAmenityKey =
   | "hasLiveSport"
   | "hasLiveMusic"
   | "hasPoolTable"
-  | "hasDartsBoard";
+  | "hasDartsBoard"
+  | "hasAirConditioning";
 
 export type PubAmenityField = {
   key: PubAmenityKey;
   label: string;
 };
+
+export const PUB_TYPE_OPTIONS: Array<{ value: PubType; label: string }> = [
+  { value: "PUB", label: "Pub" },
+  { value: "BAR", label: "Bar" },
+  { value: "BREWERY", label: "Brewery" },
+  { value: "TAPROOM", label: "Taproom" },
+  { value: "MICROPUB", label: "Micropub" },
+  { value: "SOCIAL_CLUB", label: "Social club" },
+  { value: "PRIVATE_MEMBERS_CLUB", label: "Private members' club" },
+];
+
+export function getPubTypeLabel(type: PubType | null | undefined): string {
+  if (!type) return "Pub";
+  return PUB_TYPE_OPTIONS.find((option) => option.value === type)?.label ?? "Pub";
+}
 
 export const PUB_AMENITY_FIELDS: PubAmenityField[] = [
   { key: "isIndependent", label: "Independent" },
@@ -34,4 +52,5 @@ export const PUB_AMENITY_FIELDS: PubAmenityField[] = [
   { key: "hasLiveMusic", label: "Live music" },
   { key: "hasPoolTable", label: "Pool table" },
   { key: "hasDartsBoard", label: "Darts board" },
+  { key: "hasAirConditioning", label: "Air conditioning" },
 ];

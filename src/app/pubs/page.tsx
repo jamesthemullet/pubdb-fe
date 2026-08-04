@@ -6,16 +6,24 @@ import type { ReactElement } from "react";
 import { memo, Suspense, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import {
+  getPubTypeLabel,
   PUB_AMENITY_FIELDS,
+  PUB_TYPE_OPTIONS,
   type PubAmenityKey,
 } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { buildAuthHeaders } from "@/lib/auth";
 import { isHttpErrorObject } from "@/lib/errors";
-import type { Pub } from "@/types/pub";
+import { pubCompletenessScore } from "@/lib/pubCompletenessScore";
+import type { Pub, PubType } from "@/types/pub";
 import styles from "./page.module.css";
 
-type SortOption = "name-asc" | "name-desc" | "newest" | "oldest";
+type SortOption =
+  | "name-asc"
+  | "name-desc"
+  | "newest"
+  | "oldest"
+  | "needs-attention";
 type EditStatusFilter = "all" | "edited" | "not-edited";
 
 function pubLocation(pub: Pub): string {
@@ -28,6 +36,7 @@ const SORT_OPTIONS: SortOption[] = [
   "name-desc",
   "newest",
   "oldest",
+  "needs-attention",
 ];
 
 function isSortOption(value: string): value is SortOption {
@@ -41,7 +50,13 @@ const PAGE_SIZE = 50;
 
 const VISIBLE_FILTER_COUNT = 6;
 
-const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
+const PubRow = memo(function PubRow({
+  pub,
+  completenessScore,
+}: {
+  pub: Pub;
+  completenessScore?: number;
+}): React.JSX.Element {
   return (
     <tr
       data-id={pub.id}
@@ -51,11 +66,17 @@ const PubRow = memo(function PubRow({ pub }: { pub: Pub }) {
         <Link href={`/pubs/${pub.id}`} className={styles.pubName}>
           {pub.name}
         </Link>
+        {completenessScore !== undefined && (
+          <span className={styles.completenessPill}>
+            {completenessScore}% complete
+          </span>
+        )}
         {(pub.isIndependent || pub.chainName) && (
           <span className={styles.pubType}>
             {pub.isIndependent ? "Independent" : pub.chainName}
           </span>
         )}
+        <span className={styles.pubType}>{getPubTypeLabel(pub.type)}</span>
       </td>
       <td className={styles.tdLocation}>
         <span className={styles.pubLocation}>{pubLocation(pub)}</span>
@@ -87,6 +108,7 @@ function PubsContent(): ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
+  const urlSort = searchParams.get("sort") ?? "";
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -96,9 +118,12 @@ function PubsContent(): ReactElement {
   const [activeAmenities, setActiveAmenities] = useState<Set<PubAmenityKey>>(
     new Set()
   );
-  const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const [sortBy, setSortBy] = useState<SortOption>(
+    isSortOption(urlSort) ? urlSort : "name-asc"
+  );
   const [editStatusFilter, setEditStatusFilter] =
     useState<EditStatusFilter>("all");
+  const [typeFilter, setTypeFilter] = useState<PubType | "">("");
   const [showAllFilters, setShowAllFilters] = useState(false);
   const [responseMs, setResponseMs] = useState<number | null>(null);
   const [locationStatus, setLocationStatus] = useState<
@@ -169,6 +194,15 @@ function PubsContent(): ReactElement {
         sorted.sort((a, b) => dir * ((ts.get(a.id) ?? 0) - (ts.get(b.id) ?? 0)));
         break;
       }
+      case "needs-attention": {
+        const scores = new Map(
+          pubs.map((p) => [p.id, pubCompletenessScore(p).score])
+        );
+        sorted.sort(
+          (a, b) => (scores.get(a.id) ?? 0) - (scores.get(b.id) ?? 0)
+        );
+        break;
+      }
       default:
         sorted.sort((a, b) => a.name.localeCompare(b.name));
     }
@@ -192,6 +226,7 @@ function PubsContent(): ReactElement {
         if (editStatusFilter !== "all") {
           params.set("editedByMe", editStatusFilter === "edited" ? "true" : "false");
         }
+        if (typeFilter) params.set("type", typeFilter);
         if (coords) {
           params.set("lat", String(coords.lat));
           params.set("lng", String(coords.lng));
@@ -225,7 +260,7 @@ function PubsContent(): ReactElement {
       }
     }
     fetchPubs();
-  }, [page, debouncedSearchTerm, activeAmenities, editStatusFilter, coords]);
+  }, [page, debouncedSearchTerm, activeAmenities, editStatusFilter, typeFilter, coords]);
 
   const hasNextPage = pubs.length === PAGE_SIZE;
   const hasPrevPage = page > 0;
@@ -246,6 +281,7 @@ function PubsContent(): ReactElement {
     setActiveAmenities(new Set());
     setSortBy("name-asc");
     setEditStatusFilter("all");
+    setTypeFilter("");
     setCoords(null);
     setLocationStatus("idle");
   }
@@ -263,6 +299,7 @@ function PubsContent(): ReactElement {
     activeAmenities.size > 0 ||
     sortBy !== "name-asc" ||
     editStatusFilter !== "all" ||
+    !!typeFilter ||
     !!coords;
 
   return (
@@ -333,7 +370,7 @@ function PubsContent(): ReactElement {
             />
           </div>
 
-          <div className={styles.filterChips}>
+          <div className={styles.filterChips} id="filter-chips-list">
             {visibleFilters.map(({ key, label }) => (
               <button
                 key={key}
@@ -352,6 +389,8 @@ function PubsContent(): ReactElement {
                 type="button"
                 className={styles.chipMore}
                 onClick={() => setShowAllFilters(true)}
+                aria-expanded={false}
+                aria-controls="filter-chips-list"
               >
                 Show {hiddenCount} more filters
               </button>
@@ -361,6 +400,8 @@ function PubsContent(): ReactElement {
                 type="button"
                 className={styles.chipMore}
                 onClick={() => setShowAllFilters(false)}
+                aria-expanded={true}
+                aria-controls="filter-chips-list"
               >
                 Show less
               </button>
@@ -368,6 +409,25 @@ function PubsContent(): ReactElement {
           </div>
 
           <div className={styles.filterRight}>
+            <label htmlFor="type-select" className={styles.srOnly}>Filter by type</label>
+            <Dropdown
+              id="type-select"
+              aria-label="Filter by type"
+              value={typeFilter}
+              onChange={(e) => {
+                setPage(0);
+                setTypeFilter(e.target.value as PubType | "");
+              }}
+              fullWidth={false}
+            >
+              <option value="">All types</option>
+              {PUB_TYPE_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </Dropdown>
+
             <label htmlFor="sort-select" className={styles.srOnly}>Sort by</label>
             <Dropdown
               id="sort-select"
@@ -385,6 +445,7 @@ function PubsContent(): ReactElement {
               <option value="name-desc">Name (Z–A)</option>
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
+              <option value="needs-attention">Needs attention</option>
             </Dropdown>
 
             {/* TODO: implement grid and map view modes with real view-mode state and conditional rendering */}
@@ -647,7 +708,15 @@ function PubsContent(): ReactElement {
               }}
             >
               {filteredPubs.map((pub) => (
-                <PubRow key={pub.id} pub={pub} />
+                <PubRow
+                  key={pub.id}
+                  pub={pub}
+                  completenessScore={
+                    sortBy === "needs-attention"
+                      ? pubCompletenessScore(pub).score
+                      : undefined
+                  }
+                />
               ))}
             </tbody>
           </table>

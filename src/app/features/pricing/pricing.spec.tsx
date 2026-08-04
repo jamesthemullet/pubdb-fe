@@ -87,8 +87,8 @@ describe("Pricing component", () => {
     it("renders tier prices", async () => {
       render(<Pricing />);
       expect(screen.getByText("£0")).toBeInTheDocument();
-      expect(screen.getByText("£9")).toBeInTheDocument();
-      expect(screen.getByText("£19")).toBeInTheDocument();
+      expect(screen.getByText("£9.99")).toBeInTheDocument();
+      expect(screen.getByText("£19.99")).toBeInTheDocument();
     });
 
     it("renders feature lists for each tier", () => {

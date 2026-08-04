@@ -74,7 +74,6 @@
   color: #888888;
   font-size: 12px;
   padding: 7px 40px 7px 30px;
-  outline: none;
   font-family: inherit;
 }
 
@@ -82,8 +81,10 @@
   color: #555555;
 }
 
-.searchInput:focus {
-  border-color: #444444;
+.searchInput:focus-visible {
+  border-color: #6699cc;
+  box-shadow: 0 0 0 2px rgba(102, 153, 204, 0.35);
+  outline: none;
 }
 
 .searchKbd {
@@ -140,6 +141,11 @@
 .navItem:hover {
   background: #1e1e1e;
   color: #ffffff;
+}
+
+.navItem:focus-visible {
+  outline: 2px solid #6699cc;
+  outline-offset: -2px;
 }
 
 .navItemActive {

@@ -6,6 +6,6 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default function ResetPasswordLayout({ children }: { children: React.ReactNode }) {
+export default function ResetPasswordLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return <>{children}</>;
 }

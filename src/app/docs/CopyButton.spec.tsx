@@ -16,13 +16,13 @@ describe("CopyButton", () => {
 	it("shows 'Copied' and calls clipboard.writeText after click", async () => {
 		render(<CopyButton text="hello world" />);
 
-		expect(screen.getByRole("button", { name: "Copy" })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Copy to clipboard" })).toBeInTheDocument();
 
 		await act(async () => {
-			fireEvent.click(screen.getByRole("button", { name: "Copy" }));
+			fireEvent.click(screen.getByRole("button", { name: "Copy to clipboard" }));
 		});
 
-		expect(screen.getByRole("button", { name: "Copied" })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Copied to clipboard" })).toBeInTheDocument();
 		expect(navigator.clipboard.writeText).toHaveBeenCalledWith("hello world");
 	});
 
@@ -32,16 +32,16 @@ describe("CopyButton", () => {
 		render(<CopyButton text="reset me" />);
 
 		await act(async () => {
-			fireEvent.click(screen.getByRole("button", { name: "Copy" }));
+			fireEvent.click(screen.getByRole("button", { name: "Copy to clipboard" }));
 		});
 
-		expect(screen.getByRole("button", { name: "Copied" })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Copied to clipboard" })).toBeInTheDocument();
 
 		act(() => {
 			vi.advanceTimersByTime(2000);
 		});
 
-		expect(screen.getByRole("button", { name: "Copy" })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Copy to clipboard" })).toBeInTheDocument();
 
 		vi.useRealTimers();
 	});

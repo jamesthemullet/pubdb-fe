@@ -714,8 +714,27 @@
   font-weight: 400;
 }
 
+.actionDeleted {
+  color: #b91c1c;
+  font-weight: 400;
+}
+
 .historyDetail {
   color: var(--text-muted);
+}
+
+.historyMoreBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--text-color);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.historyMoreBtn:hover {
+  color: var(--accent-color, currentColor);
 }
 
 .historyTime {

@@ -10,6 +10,8 @@ export type AuthUser = {
   image?: string;
   location?: string;
   bio?: string;
+  usageLimitAlertsEnabled?: boolean;
+  pubEditAlertsEnabled?: boolean;
 } | null;
 
 type AuthPayload = {
@@ -21,6 +23,8 @@ type AuthPayload = {
   image?: string;
   location?: string;
   bio?: string;
+  usageLimitAlertsEnabled?: boolean;
+  pubEditAlertsEnabled?: boolean;
 };
 
 function isAuthPayload(value: unknown): value is AuthPayload {
@@ -55,6 +59,8 @@ export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boole
               image: raw.image,
               location: raw.location,
               bio: raw.bio,
+              usageLimitAlertsEnabled: raw.usageLimitAlertsEnabled,
+              pubEditAlertsEnabled: raw.pubEditAlertsEnabled,
             });
             return;
           }
