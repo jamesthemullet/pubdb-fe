@@ -141,7 +141,7 @@ export default function Sidebar(): React.JSX.Element {
                   onClick={() => setMenuOpen(false)}
                 >
                   <span className={styles.navLabel}>{label}</span>
-                  {badge && <span className={styles.navBadge}>{badge}</span>}
+                  {badge && <span className={styles.navBadge} aria-hidden="true">{badge}</span>}
                 </Link>
               </li>
             ))}
