@@ -6,6 +6,7 @@ import Typography from "@/app/components/typography/typography";
 import type { BeerGarden, SunExposure } from "@/types/pub";
 import OpeningHoursEditor from "../../../features/opening-hours/opening-hours-editor";
 import styles from "../page.module.css";
+import SunScheduleEditor from "./SunScheduleEditor";
 
 const SUN_EXPOSURE_OPTIONS: Array<{ label: string; value: SunExposure }> = [
   { label: "Full sun", value: "FULL_SUN" },
@@ -163,6 +164,13 @@ export default function BeerGardenEditCard({
         <OpeningHoursEditor
           value={garden.openingHours}
           onChange={(val) => onUpdate(index, { openingHours: val })}
+        />
+      </div>
+      <div>
+        <Typography as="span">Sun schedule: </Typography>
+        <SunScheduleEditor
+          value={garden.sunSchedule}
+          onChange={(val) => onUpdate(index, { sunSchedule: val })}
         />
       </div>
     </div>

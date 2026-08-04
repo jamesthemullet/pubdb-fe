@@ -11,12 +11,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
 import { buildAuthHeaders } from "@/lib/auth";
-import type { BeerGarden, Pub, PubHistoryChange, PubHistoryEntry } from "@/types/pub";
+import type {
+  BeerGarden,
+  Pub,
+  PubHistoryChange,
+  PubHistoryEntry,
+  SunScheduleEntry,
+} from "@/types/pub";
 import addPubStyles from "../../add-pub/page.module.css";
 import CompletenessCard from "./components/CompletenessCard";
 import EditButton from "./components/EditButton";
 import PubDisplayView from "./components/PubDisplayView";
 import PubEditView from "./components/PubEditView";
+import SunScheduleDisplay from "./components/SunScheduleDisplay";
 import styles from "./page.module.css";
 
 type PubTab = "overview" | "beers" | "hours" | "garden" | "history";
@@ -899,6 +906,10 @@ function GardenTab({ pub }: { pub: Pub }): ReactElement {
                 )}
               </div>
             </div>
+
+            {g.sunSchedule && g.sunSchedule.length > 0 && (
+              <SunScheduleDisplay schedule={g.sunSchedule} />
+            )}
           </div>
         );
       })}
@@ -1303,5 +1314,42 @@ function sanitizeBeerGarden(garden: BeerGarden): BeerGarden {
   if (cleaned.isFamilyFriendly === null) cleaned.isFamilyFriendly = undefined;
   if (cleaned.petFriendly === null) cleaned.petFriendly = undefined;
   if (cleaned.pubId === null) cleaned.pubId = undefined;
+  if (cleaned.sunSchedule === null) cleaned.sunSchedule = undefined;
+  else if (cleaned.sunSchedule) {
+    cleaned.sunSchedule = cleaned.sunSchedule
+      .filter((entry) => typeof entry.time === "string" && entry.time.trim())
+      .map(sanitizeSunScheduleEntry)
+      .slice(0, MAX_SUN_SCHEDULE_ENTRIES);
+  }
+  return cleaned;
+}
+
+const MAX_SUN_SCHEDULE_ENTRIES = 288;
+
+function sanitizeSunScheduleEntry(entry: SunScheduleEntry): SunScheduleEntry {
+  const cleaned: SunScheduleEntry = { ...entry };
+
+  const [hours] = cleaned.time.split(":");
+  const roundedHour = Math.min(23, Math.max(0, Math.round(Number(hours) || 0)));
+  cleaned.time = `${String(roundedHour).padStart(2, "0")}:00`;
+
+  if (cleaned.month == null || Number.isNaN(cleaned.month)) {
+    cleaned.month = undefined;
+  } else {
+    cleaned.month = Math.min(12, Math.max(1, Math.round(cleaned.month)));
+  }
+
+  if (cleaned.seats == null || Number.isNaN(cleaned.seats)) {
+    cleaned.seats = undefined;
+  } else {
+    cleaned.seats = Math.max(0, Math.round(cleaned.seats));
+  }
+
+  if (cleaned.percentInSun == null || Number.isNaN(cleaned.percentInSun)) {
+    cleaned.percentInSun = undefined;
+  } else {
+    cleaned.percentInSun = Math.min(100, Math.max(0, Math.round(cleaned.percentInSun)));
+  }
+
   return cleaned;
 }

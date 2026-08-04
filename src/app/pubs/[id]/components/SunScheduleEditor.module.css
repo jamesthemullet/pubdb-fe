@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.emptyText {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.limitText {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
