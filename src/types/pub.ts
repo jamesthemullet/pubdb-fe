@@ -31,6 +31,13 @@ type PubBeerType = {
   beerType?: BeerType | null;
 };
 
+export type SunScheduleEntry = {
+  month?: number;
+  time: string;
+  seats?: number;
+  percentInSun?: number;
+};
+
 export type BeerGarden = {
   id?: string;
   pubId?: string;
@@ -45,6 +52,7 @@ export type BeerGarden = {
   openingHours?: OpeningHoursMap;
   imageUrl?: string;
   notes?: string;
+  sunSchedule?: SunScheduleEntry[];
   createdAt?: string;
   updatedAt?: string;
 };
