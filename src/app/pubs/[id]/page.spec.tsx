@@ -7,6 +7,7 @@ import PubPage from "./page";
 
 vi.mock("next/navigation", () => ({
 	useParams: () => ({ id: "pub-123" }),
+	useRouter: () => ({ push: vi.fn() }),
 }));
 
 vi.mock("next/link", () => ({
