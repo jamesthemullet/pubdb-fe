@@ -45,6 +45,8 @@ type GeneratedApiKeyResponse = {
   key?: string;
 };
 
+type TopEndpoint = { method: string; path: string; count: number };
+
 type DashboardData = {
   user: {
     name: string;
@@ -56,6 +58,7 @@ type DashboardData = {
   apiKeys: ApiKey[];
   subscription?: Subscription;
   summary: { totalApiKeys: number; totalUsage: number };
+  topEndpoints?: TopEndpoint[];
 };
 
 // TODO: restore request volume chart once API returns time-series data
@@ -460,6 +463,7 @@ const Dashboard = (): React.JSX.Element | null => {
   }
 
   const subscription = dashboardData?.subscription;
+  const topEndpoints = dashboardData?.topEndpoints ?? [];
   const totalUsed = useMemo(
     () =>
       subscription
@@ -934,6 +938,37 @@ const Dashboard = (): React.JSX.Element | null => {
               })
             )}
           </div>
+
+          {/* Top endpoints panel */}
+          {topEndpoints.length > 0 && (
+            <div className={styles.endpointsPanel}>
+              <div className={styles.endpointsPanelHeader}>
+                <span className={styles.endpointsTitle}>Top endpoints</span>
+              </div>
+              {topEndpoints.map((ep) => (
+                <div
+                  key={`${ep.method}-${ep.path}`}
+                  className={styles.endpointRow}
+                >
+                  <div className={styles.endpointLabel}>
+                    <span className={styles.endpointMethod}>{ep.method}</span>
+                    <code className={styles.endpointPath}>{ep.path}</code>
+                  </div>
+                  <div className={styles.endpointBarWrap}>
+                    <div
+                      className={styles.endpointBar}
+                      style={{
+                        width: `${(ep.count / topEndpoints[0].count) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <span className={styles.endpointCount}>
+                    {ep.count.toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {showNudge && (
