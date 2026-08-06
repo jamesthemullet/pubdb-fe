@@ -59,7 +59,8 @@ function BadgeList({
           key={badge.key}
           className={styles.badge}
           data-variant={badgeVariant(index)}
-          title={badge.description}
+          role="img"
+          aria-label={`${badge.name}: ${badge.description}`}
         >
           {badge.name}
         </span>
@@ -187,7 +188,7 @@ function YourRankBanner({
         className={styles.viewProfileBtn}
         onClick={onViewProfile}
       >
-        View profile →
+        View profile <span aria-hidden="true">→</span>
       </button>
     </div>
   );
