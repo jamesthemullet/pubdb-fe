@@ -48,7 +48,7 @@ export default function InlineEditBooleanField({ label, value, onSave, canEdit, 
     <span className={styles.editWrapper}>
       <span className={styles.boolOptions}>
         {BOOL_OPTIONS.map((option) => (
-          <Button key={String(option)} size="xs" variant={draft === option ? "primary" : "secondary"} onClick={() => setDraft(option)}>
+          <Button key={String(option)} size="xs" variant={draft === option ? "primary" : "secondary"} aria-pressed={draft === option} onClick={() => setDraft(option)}>
             {option == null ? "Not set" : option ? "Yes" : "No"}
           </Button>
         ))}
