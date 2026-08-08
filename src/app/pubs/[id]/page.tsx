@@ -382,7 +382,7 @@ export default function PubPage(): React.JSX.Element {
           <span className={styles.editBreadcrumbSep}>/</span>
           <code className={styles.editBreadcrumbCode}>{displayId}</code>
           <span className={styles.editBreadcrumbSep}>/</span>
-          <strong className={styles.editBreadcrumbCurrent}>Edit</strong>
+          <strong className={styles.editBreadcrumbCurrent} aria-current="page">Edit</strong>
         </nav>
 
         {/* Edit page header */}
@@ -443,7 +443,7 @@ export default function PubPage(): React.JSX.Element {
         <span className={styles.breadcrumbSep}>/</span>
         <span className={styles.breadcrumbLink}>{pub.city}</span>
         <span className={styles.breadcrumbSep}>/</span>
-        <code className={styles.breadcrumbId}>{displayId}</code>
+        <code className={styles.breadcrumbId} aria-current="page">{displayId}</code>
       </nav>
 
       {/* Page header */}
