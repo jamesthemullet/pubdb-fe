@@ -304,7 +304,7 @@ const Pricing = (): React.JSX.Element => {
         tierName,
       });
       setApiKey(data.apiKey);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(
         err instanceof Error ? err.message : "Failed to estimate upgrade"
       );
@@ -367,7 +367,7 @@ const Pricing = (): React.JSX.Element => {
       await fetchUserTier();
       closeUpgradeModal();
       setFeedbackMessage({ type: "success", text: "Upgrade successful" });
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Upgrade failed");
     } finally {
       setPerformingUpgrade(false);

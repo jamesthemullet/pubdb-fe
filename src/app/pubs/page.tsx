@@ -56,7 +56,7 @@ const PubRow = memo(function PubRow({
 }: {
   pub: Pub;
   completenessScore?: number;
-}): React.JSX.Element {
+}): ReactElement {
   return (
     <tr
       data-id={pub.id}

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import type { ReactElement } from "react";
+import type { FormEvent, ReactElement } from "react";
 import { Suspense, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
@@ -24,7 +24,7 @@ function ResetPasswordForm(): ReactElement {
     }
   }, [token]);
 
-  async function handleSubmit(e: React.FormEvent): Promise<void> {
+  async function handleSubmit(e: FormEvent): Promise<void> {
     e.preventDefault();
 
     if (password !== confirmPassword) {

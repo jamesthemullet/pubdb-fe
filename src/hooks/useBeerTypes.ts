@@ -84,7 +84,7 @@ export function useBeerTypes(): {
 				if (!ignore) {
 					setBeerTypeOptions(sorted);
 				}
-			} catch (err) {
+			} catch (err: unknown) {
 				if (!ignore) {
 					setBeerTypesError(
 						err instanceof Error ? err.message : "Unable to load beer types.",

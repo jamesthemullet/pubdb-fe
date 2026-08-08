@@ -73,7 +73,7 @@ function TypeBadge({ type }: { type: string }) {
   return <span className={styles.typeBadge}>{type}</span>;
 }
 
-export default function DocsPage(): React.JSX.Element {
+export default function DocsPage(){
   return (
     <div className={styles.page}>
       <DocNav />
