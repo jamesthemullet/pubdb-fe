@@ -59,7 +59,7 @@ function BadgeList({
           key={badge.key}
           className={styles.badge}
           data-variant={badgeVariant(index)}
-          title={badge.description}
+          aria-label={`${badge.name}: ${badge.description}`}
         >
           {badge.name}
         </span>
@@ -148,7 +148,7 @@ function YourRankBanner({
         // biome-ignore lint/performance/noImgElement: user-supplied external avatar URL, not an optimizable local asset
         <img
           src={avatarUrl}
-          alt=""
+          alt={entry.displayName || entry.username}
           className={styles.yourRankAvatar}
         />
       ) : (
