@@ -395,11 +395,6 @@ const Dashboard = (): React.JSX.Element | null => {
   }
 
   async function handleForgotApiKey(id: string, keyPrefix: string) {
-    const userEmail = dashboardData?.user.email;
-    if (!userEmail) {
-      setForgotKeyError("Unable to determine account email.");
-      return;
-    }
     try {
       setForgotKeyLoading(true);
       setForgotKeyError(null);
@@ -409,13 +404,13 @@ const Dashboard = (): React.JSX.Element | null => {
       setForgotKeyCopyStatus("idle");
       setForgotKeyTarget(id);
       const token = localStorage.getItem("token");
-      const res = await fetch("/api/auth/forgot-api-key", {
+      const res = await fetch(`/api/auth/keys/${encodeURIComponent(id)}/regenerate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...buildAuthHeaders(token),
         },
-        body: JSON.stringify({ keyPrefix, email: userEmail }),
+        body: JSON.stringify({}),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
@@ -986,8 +981,12 @@ const Dashboard = (): React.JSX.Element | null => {
                         <button
                           type="button"
                           className={styles.btnOutline}
-                          disabled={isForgotLoading}
-                          onClick={() => handleForgotApiKey(identityKey, key.keyPrefix)}
+                          disabled={isForgotLoading || !key.id}
+                          title={key.id ? undefined : "This key can't be regenerated from here — contact support."}
+                          onClick={() => {
+                            if (!key.id) return;
+                            void handleForgotApiKey(key.id, key.keyPrefix);
+                          }}
                         >
                           {isForgotLoading
                             ? "Regenerating…"
@@ -1041,9 +1040,10 @@ const Dashboard = (): React.JSX.Element | null => {
                                 <button
                                   type="button"
                                   className={styles.menuItem}
-                                  disabled={isForgotLoading}
+                                  disabled={isForgotLoading || !key.id}
                                   onClick={() => {
-                                    void handleForgotApiKey(identityKey, key.keyPrefix);
+                                    if (!key.id) return;
+                                    void handleForgotApiKey(key.id, key.keyPrefix);
                                     setOpenMenu(null);
                                   }}
                                 >
