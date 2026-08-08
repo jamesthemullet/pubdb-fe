@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
 import { buildAuthHeaders } from "@/lib/auth";
-import type { BeerGarden, Pub } from "@/types/pub";
+import type { BeerGarden, Pub, PubHistoryChange, PubHistoryEntry } from "@/types/pub";
 import addPubStyles from "../../add-pub/page.module.css";
 import CompletenessCard from "./components/CompletenessCard";
 import EditButton from "./components/EditButton";
@@ -47,6 +47,9 @@ export default function PubPage(): ReactElement {
   const [activeTab, setActiveTab] = useState<PubTab>("overview");
   const [codeTab, setCodeTab] = useState<CodeTab>("curl");
   const [copied, setCopied] = useState<"id" | "code" | null>(null);
+  const [history, setHistory] = useState<PubHistoryEntry[] | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
 
   const { user, isApproved } = useAuth();
   const { countries, countriesLoading, countriesError } = useCountries();
@@ -76,6 +79,42 @@ export default function PubPage(): ReactElement {
     }
     if (id) fetchPub();
   }, [id]);
+
+  useEffect(() => {
+    if (activeTab !== "history" || history !== null || !id) return;
+
+    let ignore = false;
+    async function fetchHistory(): Promise<void> {
+      setHistoryLoading(true);
+      setHistoryError(null);
+      try {
+        const res = await fetch(`/api/pubs/${id}/history`);
+        const raw: unknown = await res.json().catch(() => null);
+        if (!res.ok) {
+          if (!ignore) setHistoryError(extractErrorMessage(raw));
+          return;
+        }
+        const data =
+          raw && typeof raw === "object" && "data" in raw
+            ? (raw as { data: unknown }).data
+            : raw;
+        const entries =
+          data && typeof data === "object" && "history" in data
+            ? (data as { history: unknown }).history
+            : data;
+        if (!ignore) setHistory(Array.isArray(entries) ? (entries as PubHistoryEntry[]) : []);
+      } catch {
+        if (!ignore) setHistoryError("Network error");
+      } finally {
+        if (!ignore) setHistoryLoading(false);
+      }
+    }
+    fetchHistory();
+
+    return () => {
+      ignore = true;
+    };
+  }, [activeTab, history, id]);
 
   const handleEditClick = useCallback(() => {
     if (!pub) return;
@@ -494,9 +533,26 @@ export default function PubPage(): ReactElement {
 
           {/* Tabs */}
           <div className={styles.tabs}>
-            <div className={styles.tabList} role="tablist">
-              {/* TODO: restore history tab once API returns edit history data */}
-              {(["overview", "beers", "hours", "garden"] as PubTab[]).map((tab) => (
+            <div
+              className={styles.tabList}
+              role="tablist"
+              aria-label="Pub information"
+              onKeyDown={(e) => {
+                const TABS = ["overview", "beers", "hours", "garden", "history"] as PubTab[];
+                const idx = TABS.indexOf(activeTab);
+                let next = -1;
+                if (e.key === "ArrowRight") next = (idx + 1) % TABS.length;
+                else if (e.key === "ArrowLeft") next = (idx - 1 + TABS.length) % TABS.length;
+                else if (e.key === "Home") next = 0;
+                else if (e.key === "End") next = TABS.length - 1;
+                if (next !== -1) {
+                  e.preventDefault();
+                  setActiveTab(TABS[next]);
+                  document.getElementById(`tab-${TABS[next]}`)?.focus();
+                }
+              }}
+            >
+              {(["overview", "beers", "hours", "garden", "history"] as PubTab[]).map((tab) => (
                 <button
                   key={tab}
                   id={`tab-${tab}`}
@@ -532,7 +588,7 @@ export default function PubPage(): ReactElement {
                 <GardenTab pub={pub} />
               )}
               {activeTab === "history" && (
-                <HistoryTab pub={pub} />
+                <HistoryTab entries={history} loading={historyLoading} error={historyError} />
               )}
             </div>
           </div>
@@ -543,7 +599,25 @@ export default function PubPage(): ReactElement {
           {/* Code block */}
           <div className={styles.codePanel}>
             <div className={styles.codePanelHeader}>
-              <div className={styles.codeTabs} role="tablist" aria-label="Code language">
+              <div
+                className={styles.codeTabs}
+                role="tablist"
+                aria-label="Code language"
+                onKeyDown={(e) => {
+                  const TABS = ["curl", "node", "python"] as CodeTab[];
+                  const idx = TABS.indexOf(codeTab);
+                  let next = -1;
+                  if (e.key === "ArrowRight") next = (idx + 1) % TABS.length;
+                  else if (e.key === "ArrowLeft") next = (idx - 1 + TABS.length) % TABS.length;
+                  else if (e.key === "Home") next = 0;
+                  else if (e.key === "End") next = TABS.length - 1;
+                  if (next !== -1) {
+                    e.preventDefault();
+                    setCodeTab(TABS[next]);
+                    document.getElementById(`pub-code-tab-${TABS[next]}`)?.focus();
+                  }
+                }}
+              >
                 {(["curl", "node", "python"] as CodeTab[]).map((t) => (
                   <button
                     key={t}
@@ -552,6 +626,7 @@ export default function PubPage(): ReactElement {
                     aria-selected={codeTab === t}
                     id={`pub-code-tab-${t}`}
                     aria-controls="pub-code-panel"
+                    tabIndex={codeTab === t ? 0 : -1}
                     className={`${styles.codeTab} ${codeTab === t ? styles.codeTabActive : ""}`}
                     onClick={() => setCodeTab(t)}
                   >
@@ -854,40 +929,202 @@ function avatarColor(initial: string): { bg: string; fg: string } {
   return AVATAR_COLORS[initial.toUpperCase().charCodeAt(0) % AVATAR_COLORS.length];
 }
 
-function HistoryTab({ pub }: { pub: Pub }): ReactElement {
-  type HistoryEntry = {
-    key: string;
-    initial: string;
-    actor: string;
-    action: string;
-    actionVariant: "edited" | "created";
-    detail?: string;
-    date: string;
-    absolute?: boolean;
-  };
+const ACTION_LABELS: Record<string, string> = {
+  CREATE: "created pub",
+  UPDATE: "edited",
+  DELETE: "deleted pub",
+};
 
-  const entries: HistoryEntry[] = [];
+const ACTION_STYLES: Record<string, string> = {
+  CREATE: styles.actionCreated,
+  UPDATE: styles.actionEdited,
+  DELETE: styles.actionDeleted,
+};
 
-  if (pub.updatedAt && pub.updatedAt !== pub.createdAt) {
-    entries.push({
-      key: "updated",
-      initial: "S",
-      actor: "system",
-      action: "updated pub",
-      actionVariant: "edited",
-      date: pub.updatedAt,
-    });
+// Fields that are either internal bookkeeping or too noisy/verbose to show as a
+// raw from → to diff (PATCH sends the whole pub, so these "change" on every save).
+const HIDDEN_HISTORY_FIELDS = new Set(["id", "createdAt", "updatedAt", "beerTypeIds"]);
+const SUMMARY_ONLY_FIELDS = new Set(["openingHours", "beerTypes", "beerGardens"]);
+
+const HISTORY_FIELD_LABELS: Record<string, string> = Object.fromEntries(
+  PUB_AMENITY_FIELDS.map(({ key, label }) => [key, label])
+);
+Object.assign(HISTORY_FIELD_LABELS, {
+  name: "Name",
+  address: "Address",
+  city: "City",
+  postcode: "Postcode",
+  country: "Country",
+  phone: "Phone",
+  website: "Website",
+  description: "Description",
+  operator: "Operator",
+  type: "Type",
+  area: "Area",
+  borough: "Borough",
+  chainName: "Chain",
+  lat: "Latitude",
+  lng: "Longitude",
+  closedDown: "Closed down",
+  openingHours: "Opening hours",
+  beerTypes: "Beer types",
+  beerGardens: "Beer gardens",
+  imageUrl: "Image",
+});
+
+const BOOLEAN_HISTORY_FIELDS = new Set([...Object.keys(HISTORY_FIELD_LABELS)].filter((key) =>
+  PUB_AMENITY_FIELDS.some((f) => f.key === key)
+));
+BOOLEAN_HISTORY_FIELDS.add("closedDown");
+
+function humanizeFieldName(field: string): string {
+  return field
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/^./, (c) => c.toUpperCase());
+}
+
+function historyFieldLabel(field: string): string {
+  return HISTORY_FIELD_LABELS[field] ?? humanizeFieldName(field);
+}
+
+function deepEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a === null || b === null || typeof a !== "object" || typeof b !== "object") return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  const aKeys = Object.keys(a as Record<string, unknown>);
+  const bKeys = Object.keys(b as Record<string, unknown>);
+  if (aKeys.length !== bKeys.length) return false;
+  return aKeys.every((key) =>
+    deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key])
+  );
+}
+
+function isEmptyValue(value: unknown): boolean {
+  return value === null || value === undefined || value === "" || (Array.isArray(value) && value.length === 0);
+}
+
+function formatBoolean(value: unknown): string {
+  if (value === true) return "Yes";
+  if (value === false) return "No";
+  return "—";
+}
+
+function formatDateValue(value: string): string {
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? value : parsed.toISOString().slice(0, 10);
+}
+
+function looksLikeIsoDate(value: unknown): value is string {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value);
+}
+
+function formatScalarValue(value: unknown): string {
+  if (isEmptyValue(value)) return "—";
+  if (looksLikeIsoDate(value)) return formatDateValue(value);
+  return String(value);
+}
+
+function describeFieldChange(field: string, change: PubHistoryChange): string | null {
+  if (deepEqual(change.from, change.to)) return null;
+
+  const label = historyFieldLabel(field);
+
+  if (BOOLEAN_HISTORY_FIELDS.has(field)) {
+    return `${label} ${formatBoolean(change.from)} → ${formatBoolean(change.to)}`;
   }
 
-  entries.push({
-    key: "created",
-    initial: "S",
-    actor: "system",
-    action: "created pub",
-    actionVariant: "created",
-    date: pub.createdAt,
-    absolute: true,
-  });
+  if (SUMMARY_ONLY_FIELDS.has(field) || Array.isArray(change.from) || Array.isArray(change.to)) {
+    if (isEmptyValue(change.from) && !isEmptyValue(change.to)) return `${label} added`;
+    if (!isEmptyValue(change.from) && isEmptyValue(change.to)) return `${label} removed`;
+    return `${label} updated`;
+  }
+
+  if (typeof change.from === "object" || typeof change.to === "object") {
+    return `${label} updated`;
+  }
+
+  return `${label} ${formatScalarValue(change.from)} → ${formatScalarValue(change.to)}`;
+}
+
+function listChangedFields(changedFields: PubHistoryEntry["changedFields"]): string[] {
+  if (!changedFields) return [];
+  return Object.entries(changedFields)
+    .filter(([field]) => !HIDDEN_HISTORY_FIELDS.has(field))
+    .map(([field, change]) => describeFieldChange(field, change))
+    .filter((part): part is string => Boolean(part));
+}
+
+const MAX_VISIBLE_FIELD_CHANGES = 4;
+
+function HistoryRowDetail({ changes }: { changes: string[] }): ReactElement | null {
+  const [expanded, setExpanded] = useState(false);
+
+  if (changes.length === 0) return null;
+
+  const visible = expanded ? changes : changes.slice(0, MAX_VISIBLE_FIELD_CHANGES);
+  const remaining = changes.length - MAX_VISIBLE_FIELD_CHANGES;
+
+  return (
+    <span className={styles.historyDetail}>
+      {" · "}
+      {visible.join(", ")}
+      {!expanded && remaining > 0 && (
+        <>
+          {", "}
+          <button
+            type="button"
+            className={styles.historyMoreBtn}
+            onClick={() => setExpanded(true)}
+          >
+            +{remaining} more
+          </button>
+        </>
+      )}
+    </span>
+  );
+}
+
+function HistoryTab({
+  entries,
+  loading,
+  error,
+}: {
+  entries: PubHistoryEntry[] | null;
+  loading: boolean;
+  error: string | null;
+}): ReactElement {
+  if (loading) {
+    return (
+      <div className={styles.historyCard}>
+        <div className={styles.historyCardHeader}>
+          <span className={styles.historyCardTitle}>Edit history</span>
+        </div>
+        <p className={styles.hoursEmpty}>Loading history…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.historyCard}>
+        <div className={styles.historyCardHeader}>
+          <span className={styles.historyCardTitle}>Edit history</span>
+        </div>
+        <p className={styles.hoursEmpty}>{error}</p>
+      </div>
+    );
+  }
+
+  if (!entries || entries.length === 0) {
+    return (
+      <div className={styles.historyCard}>
+        <div className={styles.historyCardHeader}>
+          <span className={styles.historyCardTitle}>Edit history</span>
+        </div>
+        <p className={styles.hoursEmpty}>No history recorded for this pub.</p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.historyCard}>
@@ -896,31 +1133,28 @@ function HistoryTab({ pub }: { pub: Pub }): ReactElement {
       </div>
       <div className={styles.historyRows}>
         {entries.map((entry) => {
-          const color = avatarColor(entry.initial);
+          const actor = entry.username || "system";
+          const initial = actor.charAt(0).toUpperCase();
+          const color = avatarColor(initial);
+          const changes = listChangedFields(entry.changedFields);
           return (
-            <div key={entry.key} className={styles.historyRow}>
+            <div key={entry.id} className={styles.historyRow}>
               <span
                 className={styles.historyAvatar}
                 style={{ background: color.bg, color: color.fg }}
                 aria-hidden="true"
               >
-                {entry.initial}
+                {initial}
               </span>
               <div className={styles.historyContent}>
-                <span className={styles.historyActor}>{entry.actor}</span>
+                <span className={styles.historyActor}>{actor}</span>
                 {" "}
-                <span className={entry.actionVariant === "edited" ? styles.actionEdited : styles.actionCreated}>
-                  {entry.action}
+                <span className={ACTION_STYLES[entry.action] || styles.actionEdited}>
+                  {ACTION_LABELS[entry.action] || entry.action.toLowerCase()}
                 </span>
-                {entry.detail && (
-                  <span className={styles.historyDetail}> · {entry.detail}</span>
-                )}
+                <HistoryRowDetail changes={changes} />
               </div>
-              <span className={styles.historyTime}>
-                {entry.absolute
-                  ? new Date(entry.date).toISOString().slice(0, 10)
-                  : relativeTime(entry.date)}
-              </span>
+              <span className={styles.historyTime}>{relativeTime(entry.timestamp)}</span>
             </div>
           );
         })}

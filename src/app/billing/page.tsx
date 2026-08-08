@@ -577,7 +577,7 @@ export default function BillingPage(){
                 <span className={styles.spendCurrent}>
                   {formatCurrency(
                     sortedInvoices[0]?.amount ?? 0,
-                    sortedInvoices[0]?.currency ?? "usd"
+                    sortedInvoices[0]?.currency ?? "gbp"
                   )}
                 </span>
               )}

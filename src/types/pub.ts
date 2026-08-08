@@ -8,6 +8,15 @@ export type OpeningHoursMap = Record<string, OpeningHoursEntry>;
 
 export type SunExposure = "FULL_SUN" | "PARTIAL_SUN" | "SHADED";
 
+export type PubType =
+  | "PUB"
+  | "BAR"
+  | "BREWERY"
+  | "TAPROOM"
+  | "MICROPUB"
+  | "SOCIAL_CLUB"
+  | "PRIVATE_MEMBERS_CLUB";
+
 export type BeerType = {
   id: string;
   name: string;
@@ -40,6 +49,20 @@ export type BeerGarden = {
   updatedAt?: string;
 };
 
+export type PubHistoryChange = {
+  from: unknown;
+  to: unknown;
+};
+
+export type PubHistoryEntry = {
+  id: string;
+  action: "CREATE" | "UPDATE" | "DELETE" | string;
+  timestamp: string;
+  changedFields?: Record<string, PubHistoryChange>;
+  /** Not yet returned by the API for every entry — falls back to "system" when absent. */
+  username?: string;
+};
+
 export type Pub = {
   id: string;
   name: string;
@@ -53,6 +76,7 @@ export type Pub = {
   description?: string;
   imageUrl?: string;
   chainName?: string;
+  type?: PubType | null;
   isIndependent?: boolean | null;
   hasFood?: boolean | null;
   hasSundayRoast?: boolean | null;
@@ -67,6 +91,7 @@ export type Pub = {
   hasLiveMusic?: boolean | null;
   hasPoolTable?: boolean | null;
   hasDartsBoard?: boolean | null;
+  hasAirConditioning?: boolean | null;
   closedDown?: boolean | null;
   createdAt: string;
   updatedAt?: string;

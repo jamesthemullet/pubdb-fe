@@ -3,7 +3,7 @@
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useState } from "react";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
-import { PUB_AMENITY_FIELDS, type PubAmenityKey } from "@/constants/pubFormFields";
+import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey } from "@/constants/pubFormFields";
 import type { BeerType } from "@/hooks/useBeerTypes";
 import type { CountryOption } from "@/hooks/useCountries";
 import type { BeerGarden, Pub } from "@/types/pub";
@@ -61,6 +61,7 @@ const AMENITY_ICONS: Partial<Record<PubAmenityKey, ReactNode>> = {
   hasDartsBoard: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>,
   hasStepFreeAccess: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>,
   hasAccessibleToilet: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+  hasAirConditioning: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v12M2.5 3.5l9 7M2.5 10.5l9-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
 };
 
 export default function PubEditView({
@@ -255,6 +256,26 @@ export default function PubEditView({
               placeholder="https://..."
             />
           </div>
+        </div>
+
+        <div className={styles.fieldGrid2}>
+          <div className={styles.fieldBlock}>
+            <label className={styles.fieldLabel} htmlFor="edit-type">
+              Type <span className={styles.optLabel}>(optional)</span>
+            </label>
+            <select
+              id="edit-type"
+              className={styles.selectInput}
+              value={editFields.type ?? ""}
+              onChange={(e) => onFieldChange("type", (e.target.value || null) as Pub["type"])}
+            >
+              <option value="">Unknown</option>
+              {PUB_TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.fieldBlock} />
         </div>
 
         <div className={styles.fieldBlock}>

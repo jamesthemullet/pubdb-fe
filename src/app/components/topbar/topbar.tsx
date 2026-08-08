@@ -7,7 +7,7 @@ import styles from "./topbar.module.css";
 export default function Topbar(){
   const { theme, toggleTheme } = useTheme();
   return (
-    <div className={styles.topbar}>
+    <header className={styles.topbar}>
       <Link href="/changelog" className={styles.whatsNew}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
           <path
@@ -44,6 +44,6 @@ export default function Topbar(){
           </svg>
         )}
       </button>
-    </div>
+    </header>
   );
 }

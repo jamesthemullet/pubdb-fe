@@ -90,6 +90,12 @@ export default function Home(): ReactElement {
             <Link href="/add-pub" className={styles.ctaSecondary}>
               Add a missing pub
             </Link>
+            <Link
+              href="/pubs?sort=needs-attention"
+              className={styles.ctaSecondary}
+            >
+              Help fill in the gaps
+            </Link>
           </div>
         </div>
       </section>

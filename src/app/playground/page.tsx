@@ -407,6 +407,7 @@ export default function PlaygroundPage(){
                 type="button"
                 className={styles.historyToggle}
                 onClick={() => setHistoryOpen((prev) => !prev)}
+                aria-expanded={historyOpen}
               >
                 {historyOpen ? "Hide" : "Show"} history ({history.length})
               </button>
