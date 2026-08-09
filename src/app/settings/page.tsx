@@ -58,7 +58,7 @@ export default function SettingsPage() {
                   type="button"
                   className={`${styles.navItem} ${activeTab === id ? styles.navItemActive : ""} ${id === "danger" ? styles.navItemDanger : ""}`}
                   onClick={() => setActiveTab(id)}
-                  aria-current={activeTab === id ? "true" : undefined}
+                  aria-pressed={activeTab === id}
                 >
                   <span className={styles.navIcon}>{icon}</span>
                   {label}
