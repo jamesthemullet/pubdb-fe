@@ -189,7 +189,7 @@ function ProfileTab({ user }: { user: AuthUser }) {
     (key) => current[key] !== initial[key]
   );
 
-  async function handleSave() {
+  async function handleSave(): Promise<void> {
     const body: Partial<ProfileFormState> = {};
     (Object.keys(current) as (keyof ProfileFormState)[]).forEach((key) => {
       if (current[key] !== initial[key]) body[key] = current[key];
@@ -353,7 +353,7 @@ function SecurityTab() {
 
   const hasChanges = currentPassword.length > 0 || newPassword.length > 0 || confirmPassword.length > 0;
 
-  async function handleSave() {
+  async function handleSave(): Promise<void> {
     setFormError(null);
     setFieldErrors({});
 
@@ -464,7 +464,7 @@ function AlertToggleRow({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleToggle() {
+  async function handleToggle(): Promise<void> {
     const next = !enabled;
     setEnabled(next);
     setError(null);
@@ -584,7 +584,7 @@ function DangerTab() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleDeleteAccount(e: FormEvent) {
+  async function handleDeleteAccount(e: FormEvent): Promise<void> {
     e.preventDefault();
     setError(null);
     setSubmitting(true);

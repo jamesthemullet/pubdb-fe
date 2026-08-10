@@ -6,6 +6,7 @@ import type { ReactElement } from "react";
 import { Suspense, useEffect, useState } from "react";
 import Typography from "@/app/components/typography/typography";
 import { buildAuthHeaders } from "@/lib/auth";
+import { getErrorMessage } from "@/lib/errors";
 import styles from "./page.module.css";
 
 type SubscriptionStatus = {
@@ -75,14 +76,12 @@ function SuccessContent(): ReactElement {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.message || errorData.error || "Failed to verify session"
-          );
+          const errorData: unknown = await response.json();
+          throw new Error(getErrorMessage(errorData, "Failed to verify session"));
         }
 
-        const data = await response.json();
-        setStatus(data);
+        const data: unknown = await response.json();
+        setStatus(data as SubscriptionStatus);
 
         window.dispatchEvent(new Event("authChanged"));
       } catch (error) {

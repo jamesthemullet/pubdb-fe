@@ -139,7 +139,13 @@ export default function AddPubPage(){
       if (!token) { setUser(null); return; }
       try {
         const res = await fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } });
-        if (res.ok) { const d = await res.json(); setUser({ email: d.email, approved: d.approved }); }
+        if (res.ok) {
+          const raw: unknown = await res.json();
+          const d = raw !== null && typeof raw === "object" ? (raw as Record<string, unknown>) : null;
+          if (d && typeof d.email === "string") {
+            setUser({ email: d.email, approved: typeof d.approved === "boolean" ? d.approved : undefined });
+          }
+        }
         else setUser(null);
       } catch { setUser(null); }
     }

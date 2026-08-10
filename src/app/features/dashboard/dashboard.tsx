@@ -357,7 +357,7 @@ const Dashboard = (): React.JSX.Element | null => {
     };
   }, [chartRange]);
 
-  async function handleCancelSubscription() {
+  async function handleCancelSubscription(): Promise<void> {
     if (
       !confirm(
         "Cancel subscription? This will stop automatic renewal — your subscription will remain active until the end of the current billing period."
@@ -394,7 +394,7 @@ const Dashboard = (): React.JSX.Element | null => {
     }
   }
 
-  async function handleForgotApiKey(id: string, keyPrefix: string) {
+  async function handleForgotApiKey(id: string, keyPrefix: string): Promise<void> {
     try {
       setForgotKeyLoading(true);
       setForgotKeyError(null);
@@ -438,7 +438,7 @@ const Dashboard = (): React.JSX.Element | null => {
     }
   }
 
-  async function handleCopyNewApiKey() {
+  async function handleCopyNewApiKey(): Promise<void> {
     if (!forgotKeyDetails?.key) return;
     try {
       await navigator.clipboard.writeText(forgotKeyDetails.key);
@@ -456,7 +456,7 @@ const Dashboard = (): React.JSX.Element | null => {
     forgotKeyModalTriggerRef.current?.focus();
   }
 
-  async function handleCreateApiKey() {
+  async function handleCreateApiKey(): Promise<void> {
     try {
       setCreateKeyLoading(true);
       setCreateKeyError(null);
@@ -496,7 +496,7 @@ const Dashboard = (): React.JSX.Element | null => {
     setAddKeyError(null);
   }
 
-  async function handleAddApiKey() {
+  async function handleAddApiKey(): Promise<void> {
     try {
       setAddKeyLoading(true);
       setAddKeyError(null);
@@ -527,7 +527,7 @@ const Dashboard = (): React.JSX.Element | null => {
     }
   }
 
-  async function handleRevokeApiKey(id: string, keyPrefix: string) {
+  async function handleRevokeApiKey(id: string, keyPrefix: string): Promise<void> {
     if (!confirm(`Revoke key ${keyPrefix}····? This can't be undone.`)) return;
     try {
       setRevokingKeyId(id);

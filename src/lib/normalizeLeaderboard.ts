@@ -91,30 +91,18 @@ function normalizePeriod(value: unknown): LeaderboardPeriod {
   return {
     since: typeof obj.since === "string" ? obj.since : null,
     leaderboard: Array.isArray(obj.leaderboard)
-      ? obj.leaderboard.filter(isLeaderboardEntry).map((entry) => ({
-          ...entry,
-          streak:
-            typeof (entry as unknown as { streak?: unknown }).streak ===
-            "number"
-              ? (entry as unknown as { streak: number }).streak
-              : 0,
-          badges: normalizeBadges(
-            (entry as unknown as { badges?: unknown }).badges
-          ),
-          nextBadges: normalizeNextBadges(
-            (entry as unknown as { nextBadges?: unknown }).nextBadges
-          ),
-          rankChange: normalizeNullableNumber(
-            (entry as unknown as { rankChange?: unknown }).rankChange
-          ),
-          previousRank: normalizeNullableNumber(
-            (entry as unknown as { previousRank?: unknown }).previousRank
-          ),
-          previousTotalContributions: normalizeNullableNumber(
-            (entry as unknown as { previousTotalContributions?: unknown })
-              .previousTotalContributions
-          ),
-        }))
+      ? obj.leaderboard.filter(isLeaderboardEntry).map((entry) => {
+          const raw = entry as unknown as Record<string, unknown>;
+          return {
+            ...entry,
+            streak: typeof raw.streak === "number" ? raw.streak : 0,
+            badges: normalizeBadges(raw.badges),
+            nextBadges: normalizeNextBadges(raw.nextBadges),
+            rankChange: normalizeNullableNumber(entry.rankChange),
+            previousRank: normalizeNullableNumber(entry.previousRank),
+            previousTotalContributions: normalizeNullableNumber(entry.previousTotalContributions),
+          };
+        })
       : [],
   };
 }

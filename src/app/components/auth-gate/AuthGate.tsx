@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { getErrorMessage } from "@/lib/errors";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import styles from "./AuthGate.module.css";
@@ -35,15 +36,18 @@ export default function AuthGate({ context, onLogin }: AuthGateProps){
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
+      const raw: unknown = await res.json();
       if (!res.ok) {
-        setError(data.error || data.errors || "Unknown error");
-      } else if (mode === "login" && data.token) {
-        localStorage.setItem("token", data.token);
-        window.dispatchEvent(new Event("authChanged"));
-        onLogin?.();
+        setError(getErrorMessage(raw, "Unknown error"));
       } else {
-        setSuccess("Registration successful! Check your email to verify your account.");
+        const d = raw !== null && typeof raw === "object" ? (raw as Record<string, unknown>) : null;
+        if (mode === "login" && typeof d?.token === "string") {
+          localStorage.setItem("token", d.token);
+          window.dispatchEvent(new Event("authChanged"));
+          onLogin?.();
+        } else {
+          setSuccess("Registration successful! Check your email to verify your account.");
+        }
       }
     } catch {
       setError("Network error");
