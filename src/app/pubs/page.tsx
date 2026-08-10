@@ -209,6 +209,14 @@ function PubsContent(): ReactElement {
     return sorted;
   }, [pubs, sortBy, coords]);
 
+  const completenessScores = useMemo(
+    () =>
+      sortBy === "needs-attention"
+        ? new Map(pubs.map((p) => [p.id, pubCompletenessScore(p).score]))
+        : null,
+    [pubs, sortBy]
+  );
+
   useEffect(() => {
     async function fetchPubs() {
       setLoading(true);
@@ -711,11 +719,7 @@ function PubsContent(): ReactElement {
                 <PubRow
                   key={pub.id}
                   pub={pub}
-                  completenessScore={
-                    sortBy === "needs-attention"
-                      ? pubCompletenessScore(pub).score
-                      : undefined
-                  }
+                  completenessScore={completenessScores?.get(pub.id)}
                 />
               ))}
             </tbody>

@@ -245,9 +245,10 @@ export default function BillingPage(){
     }
   }
 
-  const USAGE = dashboardData?.subscription
-    ? usageMeters(dashboardData.subscription)
-    : null;
+  const USAGE = useMemo(
+    () => (dashboardData?.subscription ? usageMeters(dashboardData.subscription) : null),
+    [dashboardData]
+  );
 
   const sortedInvoices = useMemo(
     () =>
