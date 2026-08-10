@@ -1,14 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import type { FormEvent, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
 import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-editor";
-import { PUB_AMENITY_FIELDS, type PubAmenityKey } from "@/constants/pubFormFields";
+import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey } from "@/constants/pubFormFields";
 import { useCountries } from "@/hooks/useCountries";
 import { buildAuthHeaders } from "@/lib/auth";
-import type { OpeningHoursMap } from "@/types/pub";
+import type { OpeningHoursMap, PubType } from "@/types/pub";
 import styles from "./page.module.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -51,7 +52,7 @@ function parseApiValidationErrors(data: unknown): { formErrors: string[]; fieldE
 }
 
 // Amenity icon map
-const AMENITY_ICONS: Partial<Record<PubAmenityKey, React.ReactNode>> = {
+const AMENITY_ICONS: Partial<Record<PubAmenityKey, ReactNode>> = {
   hasFood: <FoodIcon />,
   hasSundayRoast: <RoastIcon />,
   hasBeerGarden: <GardenIcon />,
@@ -65,6 +66,7 @@ const AMENITY_ICONS: Partial<Record<PubAmenityKey, React.ReactNode>> = {
   hasDartsBoard: <CheckIcon />,
   hasStepFreeAccess: <CheckIcon />,
   hasAccessibleToilet: <CheckIcon />,
+  hasAirConditioning: <SnowflakeIcon />,
 };
 
 // Design labels (override defaults for cleaner display)
@@ -82,11 +84,12 @@ const AMENITY_LABELS: Partial<Record<PubAmenityKey, string>> = {
   hasDartsBoard: "Darts Board",
   hasStepFreeAccess: "Step Free Access",
   hasAccessibleToilet: "Accessible Toilet",
+  hasAirConditioning: "Air Conditioning",
 };
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function AddPubPage(): React.JSX.Element {
+export default function AddPubPage(){
   const router = useRouter();
 
   // Core fields
@@ -103,6 +106,7 @@ export default function AddPubPage(): React.JSX.Element {
   const [imageUrl, setImageUrl] = useState("");
   const [chainName, setChainName] = useState("");
   const [operator, setOperator] = useState("");
+  const [type, setType] = useState<PubType | "">("");
 
   // Ownership toggle — maps to isIndependent amenity
   const [isIndependent, setIsIndependent] = useState(true);
@@ -145,7 +149,7 @@ export default function AddPubPage(): React.JSX.Element {
     return () => { window.removeEventListener("authChanged", checkAuth); window.removeEventListener("storage", checkAuth); };
   }, []);
 
-  async function handleSubmit(e: React.FormEvent): Promise<void> {
+  async function handleSubmit(e: FormEvent): Promise<void> {
     e.preventDefault();
     setLoading(true); setError(null); setFormErrors([]); setFieldErrors({}); setSuccess(null); setEditLink(null);
     try {
@@ -160,6 +164,7 @@ export default function AddPubPage(): React.JSX.Element {
         imageUrl: imageUrl || undefined,
         chainName: (!isIndependent && chainName) ? chainName : undefined,
         operator: operator || undefined,
+        type: type || undefined,
         openingHours,
         isIndependent,
         ...amenities,
@@ -364,6 +369,24 @@ export default function AddPubPage(): React.JSX.Element {
               />
             </div>
           </div>
+
+          <div className={styles.fieldGrid2}>
+            <div className={styles.fieldBlock}>
+              <label className={styles.fieldLabel} htmlFor="type">Type <span className={styles.optLabel}>(optional)</span></label>
+              <select
+                id="type"
+                className={styles.selectInput}
+                value={type}
+                onChange={(e) => setType(e.target.value as PubType | "")}
+              >
+                <option value="">Unknown</option>
+                {PUB_TYPE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+            </div>
+            <div />
+          </div>
         </div>
 
         {/* ── Location ── */}
@@ -524,7 +547,7 @@ export default function AddPubPage(): React.JSX.Element {
           >
             <span className={styles.sectionIcon}><ClockIcon /></span>
             <div className={styles.sectionHeadText}>
-              <h2 className={styles.sectionTitle}>Opening hours</h2>
+              <span className={styles.sectionTitle}>Opening hours</span>
               <p className={styles.sectionDesc}>Optional — set the pub's regular weekly schedule.</p>
             </div>
             <span className={`${styles.chevron} ${hoursOpen ? styles.chevronOpen : ""}`}>↓</span>
@@ -612,4 +635,7 @@ function MusicIcon() {
 }
 function CheckIcon() {
   return <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+function SnowflakeIcon() {
+  return <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v12M2.5 3.5l9 7M2.5 10.5l9-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>;
 }

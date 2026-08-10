@@ -181,7 +181,7 @@ function formatPeriod(startMs: number, endMs: number): string {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function BillingPage(): React.JSX.Element {
+export default function BillingPage(){
   const { user } = useAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
@@ -578,7 +578,7 @@ export default function BillingPage(): React.JSX.Element {
                 <span className={styles.spendCurrent}>
                   {formatCurrency(
                     sortedInvoices[0]?.amount ?? 0,
-                    sortedInvoices[0]?.currency ?? "usd"
+                    sortedInvoices[0]?.currency ?? "gbp"
                   )}
                 </span>
               )}

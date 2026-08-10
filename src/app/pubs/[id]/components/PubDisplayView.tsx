@@ -1,7 +1,8 @@
-import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
+import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS } from "@/constants/pubFormFields";
 import type { Pub } from "@/types/pub";
 import InlineEditBooleanField from "./InlineEditBooleanField";
 import InlineEditField from "./InlineEditField";
+import InlineEditSelectField from "./InlineEditSelectField";
 import styles from "./PubDisplayView.module.css";
 
 type Props = {
@@ -11,7 +12,7 @@ type Props = {
   onInlineSave?: (field: keyof Pub, value: string | boolean | null) => Promise<string | null>;
 };
 
-export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineSave }: Props): React.JSX.Element {
+export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineSave }: Props){
   const ce = !!(canEdit && onInlineSave);
 
   const save =
@@ -22,6 +23,11 @@ export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineS
   const saveBool =
     (field: keyof Pub) =>
     (val: boolean | null): Promise<string | null> =>
+      onInlineSave?.(field, val) ?? Promise.resolve(null);
+
+  const saveNullable =
+    (field: keyof Pub) =>
+    (val: string | null): Promise<string | null> =>
       onInlineSave?.(field, val) ?? Promise.resolve(null);
 
   const activeAmenities = new Set(
@@ -109,6 +115,14 @@ export default function PubDisplayView({ pub, getCountryName, canEdit, onInlineS
           }
           initialValue={pub.operator ?? ""}
           onSave={save("operator")}
+          canEdit={ce}
+        />
+        <InlineEditSelectField
+          rowLayout
+          label="Type"
+          value={pub.type ?? null}
+          options={PUB_TYPE_OPTIONS}
+          onSave={saveNullable("type")}
           canEdit={ce}
         />
         <InlineEditField

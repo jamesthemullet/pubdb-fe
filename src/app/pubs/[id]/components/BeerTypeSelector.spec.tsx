@@ -126,9 +126,9 @@ describe("BeerTypeSelector", () => {
   });
 
   describe("section label", () => {
-    it('renders the "Beer Types:" label', () => {
+    it('renders the "Beer Types" legend', () => {
       renderSelector();
-      expect(screen.getByText("Beer Types:")).toBeInTheDocument();
+      expect(screen.getByText("Beer Types")).toBeInTheDocument();
     });
   });
 });

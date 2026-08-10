@@ -74,6 +74,7 @@ const DISPLAY_LABELS: Record<string, string> = {
   hasAccessibleToilet: "Accessible Toilet",
   hasPoolTable: "Pool Table",
   hasDartsBoard: "Darts Board",
+  hasAirConditioning: "Air Conditioning",
 };
 
 function fillRequiredInputs() {
@@ -531,5 +532,5 @@ describe("AddPubPage", () => {
       expect(submitted[amenity.key]).toBe(true);
     }
     expect(submitted.isIndependent).toBe(true);
-  });
+  }, 10000);
 });

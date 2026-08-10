@@ -35,7 +35,7 @@ const ACCOUNT_LINKS = [
   { href: "/settings", label: "Settings" },
 ];
 
-export default function Sidebar(): React.JSX.Element {
+export default function Sidebar(){
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
@@ -141,7 +141,7 @@ export default function Sidebar(): React.JSX.Element {
                   onClick={() => setMenuOpen(false)}
                 >
                   <span className={styles.navLabel}>{label}</span>
-                  {badge && <span className={styles.navBadge}>{badge}</span>}
+                  {badge && <span className={styles.navBadge} aria-hidden="true">{badge}</span>}
                 </Link>
               </li>
             ))}
@@ -203,6 +203,7 @@ export default function Sidebar(): React.JSX.Element {
               aria-valuemin={0}
               aria-valuemax={100}
               aria-label="Plan usage"
+              aria-valuetext={`${planData.used.toLocaleString()} of ${planData.limit.toLocaleString()} requests used this month`}
             >
               <div className={styles.planBarFill} style={{ width: `${planData.pct}%` }} />
             </div>

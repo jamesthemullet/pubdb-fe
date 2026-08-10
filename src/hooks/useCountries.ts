@@ -136,7 +136,7 @@ export function useCountries(): { countries: CountryOption[]; countriesLoading: 
         if (!ignore) {
           setCountries(options);
         }
-      } catch (err) {
+      } catch (err: unknown) {
         if (!ignore) {
           setCountriesError(
             err instanceof Error ? err.message : "Failed to load countries"

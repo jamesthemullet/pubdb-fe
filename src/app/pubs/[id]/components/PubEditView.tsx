@@ -1,9 +1,9 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useState } from "react";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
-import { PUB_AMENITY_FIELDS, type PubAmenityKey } from "@/constants/pubFormFields";
+import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey } from "@/constants/pubFormFields";
 import type { BeerType } from "@/hooks/useBeerTypes";
 import type { CountryOption } from "@/hooks/useCountries";
 import type { BeerGarden, Pub } from "@/types/pub";
@@ -47,7 +47,7 @@ function nextAmenityValue(current: boolean | null): boolean | null {
   return AMENITY_CYCLE[(AMENITY_CYCLE.indexOf(current) + 1) % AMENITY_CYCLE.length];
 }
 
-const AMENITY_ICONS: Partial<Record<PubAmenityKey, React.ReactNode>> = {
+const AMENITY_ICONS: Partial<Record<PubAmenityKey, ReactNode>> = {
   hasFood: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M5 1v4M5 7v6M9 1c0 0 0 4-2 4s-2 0-2 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /><path d="M10 1v12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
   hasSundayRoast: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 10c0-2.761 2.239-5 5-5s5 2.239 5 5H2z" stroke="currentColor" strokeWidth="1.2" /><path d="M7 5V3M5 3h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
   hasBeerGarden: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 13V7M7 7C7 4 4 2 1 3c2 1 4 3 4 5M7 7c0-3 3-5 6-4-2 1-4 3-4 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
@@ -61,6 +61,7 @@ const AMENITY_ICONS: Partial<Record<PubAmenityKey, React.ReactNode>> = {
   hasDartsBoard: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>,
   hasStepFreeAccess: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>,
   hasAccessibleToilet: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7l3.5 3.5L12 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+  hasAirConditioning: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v12M2.5 3.5l9 7M2.5 10.5l9-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
 };
 
 export default function PubEditView({
@@ -255,6 +256,26 @@ export default function PubEditView({
               placeholder="https://..."
             />
           </div>
+        </div>
+
+        <div className={styles.fieldGrid2}>
+          <div className={styles.fieldBlock}>
+            <label className={styles.fieldLabel} htmlFor="edit-type">
+              Type <span className={styles.optLabel}>(optional)</span>
+            </label>
+            <select
+              id="edit-type"
+              className={styles.selectInput}
+              value={editFields.type ?? ""}
+              onChange={(e) => onFieldChange("type", (e.target.value || null) as Pub["type"])}
+            >
+              <option value="">Unknown</option>
+              {PUB_TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.fieldBlock} />
         </div>
 
         <div className={styles.fieldBlock}>

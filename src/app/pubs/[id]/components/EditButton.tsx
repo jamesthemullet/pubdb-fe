@@ -15,7 +15,7 @@ type Props = {
   onEdit: () => void;
 };
 
-export default function EditButton({ pubName, pubId, user, onEdit }: Props): React.JSX.Element {
+export default function EditButton({ pubName, pubId, user, onEdit }: Props){
   const [deleteMessage, setDeleteMessage] = useState<{
     type: "success" | "error";
     text: string;

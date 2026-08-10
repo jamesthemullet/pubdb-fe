@@ -19,6 +19,9 @@ export type LeaderboardEntry = {
   streak: number;
   badges: Badge[];
   nextBadges: NextBadge[];
+  rankChange: number | null;
+  previousRank: number | null;
+  previousTotalContributions: number | null;
 };
 
 export type LeaderboardPeriodKey = "7d" | "30d" | "90d" | "all";
@@ -76,6 +79,10 @@ function normalizeNextBadges(value: unknown): NextBadge[] {
   return Array.isArray(value) ? value.filter(isNextBadge) : [];
 }
 
+function normalizeNullableNumber(value: unknown): number | null {
+  return typeof value === "number" ? value : null;
+}
+
 function normalizePeriod(value: unknown): LeaderboardPeriod {
   if (typeof value !== "object" || value === null) {
     return { since: null, leaderboard: [] };
@@ -96,6 +103,16 @@ function normalizePeriod(value: unknown): LeaderboardPeriod {
           ),
           nextBadges: normalizeNextBadges(
             (entry as unknown as { nextBadges?: unknown }).nextBadges
+          ),
+          rankChange: normalizeNullableNumber(
+            (entry as unknown as { rankChange?: unknown }).rankChange
+          ),
+          previousRank: normalizeNullableNumber(
+            (entry as unknown as { previousRank?: unknown }).previousRank
+          ),
+          previousTotalContributions: normalizeNullableNumber(
+            (entry as unknown as { previousTotalContributions?: unknown })
+              .previousTotalContributions
           ),
         }))
       : [],
