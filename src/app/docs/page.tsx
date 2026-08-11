@@ -176,6 +176,9 @@ export default function DocsPage(){
               </div>
             ))}
           </div>
+          <p className={styles.sectionText}>
+            <strong>Note:</strong> the leaderboard updates every 5 minutes.
+          </p>
         </section>
 
         <section id="filtering" className={styles.section}>
