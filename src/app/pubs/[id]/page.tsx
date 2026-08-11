@@ -36,7 +36,7 @@ function pubDisplayId(id: string | undefined): string {
   return id ? `pub_${id.slice(0, 6)}` : "pub_??????";
 }
 
-export default function PubPage(): React.JSX.Element {
+export default function PubPage(): ReactElement {
   const { id } = useParams();
   const [pub, setPub] = useState<Pub | null>(null);
   const [loading, setLoading] = useState(true);
@@ -309,11 +309,14 @@ export default function PubPage(): React.JSX.Element {
     [pub]
   );
 
-  const isSaveDisabled =
-    Object.values(fieldErrors).some(Boolean) ||
-    (["name", "city", "address", "postcode", "country"] as (keyof Pub)[]).some(
-      (f) => !editFields[f] || editFields[f]?.toString().trim() === ""
-    );
+  const isSaveDisabled = useMemo(
+    () =>
+      Object.values(fieldErrors).some(Boolean) ||
+      (["name", "city", "address", "postcode", "country"] as (keyof Pub)[]).some(
+        (f) => !editFields[f] || editFields[f]?.toString().trim() === ""
+      ),
+    [fieldErrors, editFields]
+  );
 
   const activeAmenities = useMemo(
     () => (pub ? PUB_AMENITY_FIELDS.filter(({ key }) => pub[key]) : []),
@@ -533,7 +536,25 @@ export default function PubPage(): React.JSX.Element {
 
           {/* Tabs */}
           <div className={styles.tabs}>
-            <div className={styles.tabList} role="tablist">
+            <div
+              className={styles.tabList}
+              role="tablist"
+              aria-label="Pub information"
+              onKeyDown={(e) => {
+                const TABS = ["overview", "beers", "hours", "garden", "history"] as PubTab[];
+                const idx = TABS.indexOf(activeTab);
+                let next = -1;
+                if (e.key === "ArrowRight") next = (idx + 1) % TABS.length;
+                else if (e.key === "ArrowLeft") next = (idx - 1 + TABS.length) % TABS.length;
+                else if (e.key === "Home") next = 0;
+                else if (e.key === "End") next = TABS.length - 1;
+                if (next !== -1) {
+                  e.preventDefault();
+                  setActiveTab(TABS[next]);
+                  document.getElementById(`tab-${TABS[next]}`)?.focus();
+                }
+              }}
+            >
               {(["overview", "beers", "hours", "garden", "history"] as PubTab[]).map((tab) => (
                 <button
                   key={tab}
@@ -581,7 +602,25 @@ export default function PubPage(): React.JSX.Element {
           {/* Code block */}
           <div className={styles.codePanel}>
             <div className={styles.codePanelHeader}>
-              <div className={styles.codeTabs} role="tablist" aria-label="Code language">
+              <div
+                className={styles.codeTabs}
+                role="tablist"
+                aria-label="Code language"
+                onKeyDown={(e) => {
+                  const TABS = ["curl", "node", "python"] as CodeTab[];
+                  const idx = TABS.indexOf(codeTab);
+                  let next = -1;
+                  if (e.key === "ArrowRight") next = (idx + 1) % TABS.length;
+                  else if (e.key === "ArrowLeft") next = (idx - 1 + TABS.length) % TABS.length;
+                  else if (e.key === "Home") next = 0;
+                  else if (e.key === "End") next = TABS.length - 1;
+                  if (next !== -1) {
+                    e.preventDefault();
+                    setCodeTab(TABS[next]);
+                    document.getElementById(`pub-code-tab-${TABS[next]}`)?.focus();
+                  }
+                }}
+              >
                 {(["curl", "node", "python"] as CodeTab[]).map((t) => (
                   <button
                     key={t}
@@ -590,6 +629,7 @@ export default function PubPage(): React.JSX.Element {
                     aria-selected={codeTab === t}
                     id={`pub-code-tab-${t}`}
                     aria-controls="pub-code-panel"
+                    tabIndex={codeTab === t ? 0 : -1}
                     className={`${styles.codeTab} ${codeTab === t ? styles.codeTabActive : ""}`}
                     onClick={() => setCodeTab(t)}
                   >

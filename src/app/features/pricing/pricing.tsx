@@ -54,16 +54,16 @@ type ApiKey = {
   key: string;
 };
 
-function formatCurrency(amount?: number, currency: string = "usd"): string {
+function formatCurrency(amount?: number, currency: string = "gbp"): string {
   if (typeof amount !== "number") return "-";
-  const normalizedCurrency = currency?.toUpperCase() || "USD";
+  const normalizedCurrency = currency?.toUpperCase() || "GBP";
   try {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-GB", {
       style: "currency",
       currency: normalizedCurrency,
     }).format(amount / 100);
   } catch {
-    return `$${(amount / 100).toFixed(2)}`;
+    return `£${(amount / 100).toFixed(2)}`;
   }
 }
 
@@ -72,7 +72,9 @@ function formatDateTime(timestamp?: number): string | null {
   return new Date(timestamp * 1000).toLocaleString();
 }
 
-function getProrationItems(upcoming: UpcomingBill | null | undefined): ProrationItem[] {
+function getProrationItems(
+  upcoming: UpcomingBill | null | undefined
+): ProrationItem[] {
   if (!upcoming) return [];
   return (
     upcoming.proration ||
@@ -98,7 +100,9 @@ function getInvoiceLike(
   return null;
 }
 
-function firstNumber(...values: Array<number | null | undefined>): number | undefined {
+function firstNumber(
+  ...values: Array<number | null | undefined>
+): number | undefined {
   for (const value of values) {
     if (typeof value === "number" && Number.isFinite(value)) {
       return value;
@@ -125,9 +129,9 @@ const pricingTiers = [
   {
     index: 1,
     name: "DEVELOPER",
-    price: "£9",
+    price: "£9.99",
     priceSuffix: "/month",
-    priceId: "price_1S6cBZ0k31jD9MVaQH1JSrAl",
+    priceId: "price_1U0cOt12KkBkgivvQG9NdyqH",
     popular: true,
     features: [
       "1,000 requests/hour",
@@ -139,9 +143,9 @@ const pricingTiers = [
   {
     index: 2,
     name: "BUSINESS",
-    price: "£19",
+    price: "£19.99",
     priceSuffix: "/month",
-    priceId: "price_1S6cBq0k31jD9MVaRYKvxRek",
+    priceId: "price_1U0cSz12KkBkgivvPPqXCFRI",
     popular: false,
     features: [
       "5,000 requests/hour",
@@ -182,7 +186,7 @@ const Pricing = (): React.JSX.Element => {
     modalUpcoming?.currency ||
     modalInvoice?.currency ||
     modalProrationItems[0]?.currency ||
-    "usd";
+    "gbp";
   const estimatedDueNow = firstNumber(
     modalInvoice?.amount_due,
     modalUpcoming?.amount_due
@@ -228,7 +232,7 @@ const Pricing = (): React.JSX.Element => {
       if (!res.ok) return;
       const data = await res.json();
 
-      setUserTier(data.apiKeys[0].tier);
+      setUserTier(data.apiKeys[0]?.tier ?? null);
     } catch (_err) {
       /* ignore */
     }
@@ -243,17 +247,14 @@ const Pricing = (): React.JSX.Element => {
     setLoadingTier(tierName);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(
-        "/api/payments/create-checkout-session",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...buildAuthHeaders(token),
-          },
-          body: JSON.stringify({ priceId }),
-        }
-      );
+      const response = await fetch("/api/payments/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...buildAuthHeaders(token),
+        },
+        body: JSON.stringify({ priceId }),
+      });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
@@ -303,7 +304,7 @@ const Pricing = (): React.JSX.Element => {
         tierName,
       });
       setApiKey(data.apiKey);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(
         err instanceof Error ? err.message : "Failed to estimate upgrade"
       );
@@ -366,7 +367,7 @@ const Pricing = (): React.JSX.Element => {
       await fetchUserTier();
       closeUpgradeModal();
       setFeedbackMessage({ type: "success", text: "Upgrade successful" });
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Upgrade failed");
     } finally {
       setPerformingUpgrade(false);
@@ -463,7 +464,9 @@ const Pricing = (): React.JSX.Element => {
             aria-labelledby="upgrade-modal-title"
             onKeyDown={handleUpgradeModalKeyDown}
           >
-            <Typography variant="headingSmall" id="upgrade-modal-title">Subscription details</Typography>
+            <Typography variant="headingSmall" id="upgrade-modal-title">
+              Subscription details
+            </Typography>
             {apiKey && (
               <div className={styles.modalSection}>
                 <Typography variant="headingSmall" as="h4">
@@ -573,7 +576,11 @@ const Pricing = (): React.JSX.Element => {
       ) : null}
 
       <div className={styles.pricingHeader}>
-        <Typography variant="headingMedium" as="h2" className={styles.pricingHeading}>
+        <Typography
+          variant="headingMedium"
+          as="h2"
+          className={styles.pricingHeading}
+        >
           Plans that scale with your project
         </Typography>
         <Typography className={styles.pricingSubtitle}>
@@ -602,17 +609,27 @@ const Pricing = (): React.JSX.Element => {
           return (
             <div
               key={tier.name}
-              className={`${styles.tierCard} ${tier.popular ? styles.tierCardPopular : ""}`}
+              className={`${styles.tierCard} ${
+                tier.popular ? styles.tierCardPopular : ""
+              }`}
             >
               {tier.popular && (
                 <span className={styles.popularBadge}>MOST POPULAR</span>
               )}
-              <h3 className={`${styles.tierName} ${tier.popular ? styles.tierNamePopular : ""}`}>
+              <h3
+                className={`${styles.tierName} ${
+                  tier.popular ? styles.tierNamePopular : ""
+                }`}
+              >
                 {tier.name}
               </h3>
               <div className={styles.tierPriceRow}>
                 <span className={styles.tierPrice}>{tier.price}</span>
-                <span className={`${styles.tierPriceSuffix} ${tier.popular ? styles.tierPriceSuffixPopular : ""}`}>
+                <span
+                  className={`${styles.tierPriceSuffix} ${
+                    tier.popular ? styles.tierPriceSuffixPopular : ""
+                  }`}
+                >
                   {tier.priceSuffix}
                 </span>
               </div>
@@ -624,7 +641,9 @@ const Pricing = (): React.JSX.Element => {
               <ul className={styles.tierFeatures}>
                 {tier.features.map((f) => (
                   <li key={f} className={styles.tierFeatureItem}>
-                    <span className={styles.featureCheck} aria-hidden="true">✓</span>
+                    <span className={styles.featureCheck} aria-hidden="true">
+                      ✓
+                    </span>
                     {f}
                   </li>
                 ))}
@@ -652,7 +671,6 @@ const Pricing = (): React.JSX.Element => {
           );
         })}
       </div>
-
     </div>
   );
 };
