@@ -5,7 +5,7 @@ import AuthGate from "@/app/components/auth-gate/AuthGate";
 import Pricing from "@/app/features/pricing/pricing";
 import { useAuth } from "@/hooks/useAuth";
 import { buildAuthHeaders } from "@/lib/auth";
-import { getErrorMessage } from "@/lib/errors";
+import { getErrorMessage, getResponseMessage } from "@/lib/errors";
 import styles from "./page.module.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -229,10 +229,10 @@ export default function BillingPage(){
         },
         body: JSON.stringify({}),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       setCancelMessage(
-        data.message ||
+        getResponseMessage(data) ||
           "Subscription cancelled. It will expire at the end of the current billing period."
       );
       setBillingData((prev) =>
