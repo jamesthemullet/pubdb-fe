@@ -1,5 +1,5 @@
-import type React from "react";
 import type { Metadata } from "next";
+import type React from "react";
 import Typography from "@/app/components/typography/typography";
 import styles from "./style-guide.module.css";
 
