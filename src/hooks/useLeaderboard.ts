@@ -35,7 +35,7 @@ export function useLeaderboard(): {
         if (!ignore) {
           setLeaderboard(normalizeLeaderboard(payload));
         }
-      } catch (err) {
+      } catch (err: unknown) {
         if (!ignore) {
           setLeaderboardError(
             err instanceof Error ? err.message : "Unable to load leaderboard."

@@ -324,7 +324,7 @@ function EarnBadgesPanel({ nextBadges }: { nextBadges: NextBadge[] }) {
 
 // ── Client component ──────────────────────────────────────────────────────────
 
-export default function LeaderboardClient({ data }: { data: LeaderboardData }): React.JSX.Element {
+export default function LeaderboardClient({ data }: { data: LeaderboardData }){
   const { user } = useAuth();
   const router = useRouter();
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -393,6 +393,12 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }): 
             <ShareIcon /> Share
           </button>
         </div>
+      </div>
+
+      {/* Promo banner */}
+      <div className={styles.promoBanner}>
+        🎉 100+ contributions this month unlocks free Developer tier API
+        access. Developer only · 2026 introductory offer.
       </div>
 
       {/* Filter bar */}

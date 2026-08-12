@@ -4,26 +4,36 @@ import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
 import styles from "./InlineEditField.module.css";
 
+type Option = { value: string; label: string };
+
 type Props = {
   label: string;
-  value: boolean | null | undefined;
-  onSave: (value: boolean | null) => Promise<string | null>;
+  value: string | null | undefined;
+  options: Option[];
+  emptyLabel?: string;
+  onSave: (value: string | null) => Promise<string | null>;
   canEdit?: boolean;
   rowLayout?: boolean;
 };
 
-const BOOL_OPTIONS = [true, false, null] as (boolean | null)[];
-
-export default function InlineEditBooleanField({ label, value, onSave, canEdit, rowLayout }: Props){
+export default function InlineEditSelectField({
+  label,
+  value,
+  options,
+  emptyLabel = "Unknown",
+  onSave,
+  canEdit,
+  rowLayout,
+}: Props): React.JSX.Element {
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState<boolean | null>(null);
+  const [draft, setDraft] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const displayText = value == null ? "-" : value ? "Yes" : "No";
+  const displayText = options.find((o) => o.value === value)?.label ?? emptyLabel;
 
   function startEdit() {
-    setDraft(value ?? null);
+    setDraft(value ?? "");
     setError(null);
     setEditing(true);
   }
@@ -35,7 +45,7 @@ export default function InlineEditBooleanField({ label, value, onSave, canEdit, 
 
   async function save(): Promise<void> {
     setSaving(true);
-    const err = await onSave(draft);
+    const err = await onSave(draft || null);
     setSaving(false);
     if (err) {
       setError(err);
@@ -46,13 +56,17 @@ export default function InlineEditBooleanField({ label, value, onSave, canEdit, 
 
   const editControls = editing ? (
     <span className={styles.editWrapper}>
-      <span className={styles.boolOptions}>
-        {BOOL_OPTIONS.map((option) => (
-          <Button key={String(option)} size="xs" variant={draft === option ? "primary" : "secondary"} onClick={() => setDraft(option)}>
-            {option == null ? "Not set" : option ? "Yes" : "No"}
-          </Button>
+      <select
+        className={styles.selectInput}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        aria-label={label}
+      >
+        <option value="">{emptyLabel}</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>{option.label}</option>
         ))}
-      </span>
+      </select>
       <Button size="xs" onClick={() => void save()} disabled={saving} aria-label={`Save ${label}`}>✓</Button>
       <Button size="xs" variant="secondary" onClick={cancel} disabled={saving} aria-label="Cancel">✗</Button>
       {error && <Typography as="span" className={styles.inlineError}>{error}</Typography>}

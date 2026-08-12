@@ -1,5 +1,3 @@
-"use client";
-
 import type { ChangelogEntryType, ChangelogVersion } from "@/lib/normalizeChangelog";
 import styles from "./page.module.css";
 
@@ -52,7 +50,7 @@ function VersionEntry({ entry }: { entry: ChangelogVersion }) {
   );
 }
 
-export default function ChangelogClient({ versions }: { versions: ChangelogVersion[] }): React.JSX.Element {
+export default function ChangelogClient({ versions }: { versions: ChangelogVersion[] }){
   return (
     <div className={styles.page}>
       <div className={styles.header}>

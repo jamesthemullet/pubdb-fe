@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { FormEvent } from "react";
 import { useState } from "react";
 import styles from "./AuthGate.module.css";
 
@@ -11,7 +12,7 @@ type AuthGateProps = {
   onLogin?: () => void;
 };
 
-export default function AuthGate({ context, onLogin }: AuthGateProps): React.JSX.Element {
+export default function AuthGate({ context, onLogin }: AuthGateProps){
   const [mode, setMode] = useState<"register" | "login">("login");
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -21,7 +22,7 @@ export default function AuthGate({ context, onLogin }: AuthGateProps): React.JSX
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent): Promise<void> {
+  async function handleSubmit(e: FormEvent): Promise<void> {
     e.preventDefault();
     setLoading(true);
     setError(null);
