@@ -94,6 +94,14 @@ function normalizePeriod(value: unknown): LeaderboardPeriod {
             streak: typeof raw.streak === "number" ? raw.streak : 0,
             badges: normalizeBadges(raw.badges),
             nextBadges: normalizeNextBadges(raw.nextBadges),
+            rankChange:
+              typeof raw.rankChange === "number" ? raw.rankChange : null,
+            previousRank:
+              typeof raw.previousRank === "number" ? raw.previousRank : null,
+            previousTotalContributions:
+              typeof raw.previousTotalContributions === "number"
+                ? raw.previousTotalContributions
+                : null,
           };
         })
       : [],
