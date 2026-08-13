@@ -60,6 +60,8 @@ const SAMPLE_DASHBOARD_DATA = {
 	summary: { totalApiKeys: 1, totalUsage: 42 },
 };
 
+const SAMPLE_USAGE_DATA = { range: "30d", bucket: "day", series: [] };
+
 describe("Dashboard", () => {
 	const originalEnv = process.env;
 
@@ -397,6 +399,7 @@ describe("Dashboard", () => {
 		it("shows success message after cancellation", async () => {
 			vi.spyOn(globalThis, "fetch")
 				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
 				.mockResolvedValueOnce(
 					jsonResponse({ message: "Subscription cancelled successfully." }),
 				);
@@ -417,6 +420,7 @@ describe("Dashboard", () => {
 		it("shows error message when cancellation fails", async () => {
 			vi.spyOn(globalThis, "fetch")
 				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
 				.mockResolvedValueOnce(
 					jsonResponse({ message: "Failed to cancel" }, 500),
 				);
@@ -446,7 +450,7 @@ describe("Dashboard", () => {
 			fireEvent.click(screen.getByRole("button", { name: /Cancel subscription/ }));
 
 			await waitFor(() => {
-				expect(fetchSpy).toHaveBeenCalledTimes(1);
+				expect(fetchSpy).toHaveBeenCalledTimes(2);
 			});
 		});
 	});
@@ -477,6 +481,7 @@ describe("Dashboard", () => {
 		it("shows success message after forgot API key (no new key in response)", async () => {
 			vi.spyOn(globalThis, "fetch")
 				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
 				.mockResolvedValueOnce(
 					jsonResponse({
 						message: "API key reminder sent to your email.",
@@ -498,6 +503,7 @@ describe("Dashboard", () => {
 		it("shows error when forgot API key request fails", async () => {
 			vi.spyOn(globalThis, "fetch")
 				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
 				.mockResolvedValueOnce(
 					jsonResponse({ message: "Key not found" }, 404),
 				);
@@ -515,6 +521,7 @@ describe("Dashboard", () => {
 		it("opens modal with new key when API returns apiKey in response", async () => {
 			vi.spyOn(globalThis, "fetch")
 				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
 				.mockResolvedValueOnce(
 					jsonResponse({
 						message: "New key generated.",
@@ -545,6 +552,7 @@ describe("Dashboard", () => {
 		it("closes modal when Close button is clicked", async () => {
 			vi.spyOn(globalThis, "fetch")
 				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
 				.mockResolvedValueOnce(
 					jsonResponse({
 						message: "New key generated.",
@@ -582,6 +590,7 @@ describe("Dashboard", () => {
 		it("copies API key to clipboard successfully", async () => {
 			vi.spyOn(globalThis, "fetch")
 				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
 				.mockResolvedValueOnce(
 					jsonResponse({
 						message: "New key generated.",
@@ -621,6 +630,7 @@ describe("Dashboard", () => {
 		it("shows 'Copy failed' when clipboard is unavailable", async () => {
 			vi.spyOn(globalThis, "fetch")
 				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
 				.mockResolvedValueOnce(
 					jsonResponse({
 						message: "New key generated.",
@@ -698,6 +708,7 @@ describe("Dashboard", () => {
 		it("creates a new key and shows it in the reveal modal", async () => {
 			vi.spyOn(globalThis, "fetch")
 				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
 				.mockResolvedValueOnce(
 					jsonResponse(
 						{
@@ -743,6 +754,7 @@ describe("Dashboard", () => {
 		it("shows the 409 tier-limit error inside the add key modal", async () => {
 			vi.spyOn(globalThis, "fetch")
 				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
 				.mockResolvedValueOnce(
 					jsonResponse(
 						{
@@ -779,8 +791,10 @@ describe("Dashboard", () => {
 
 		it("revokes a key on confirm and refreshes the list", async () => {
 			let dashboardCallCount = 0;
-			vi.spyOn(globalThis, "fetch").mockImplementation(async (_input, init) => {
+			vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+				const url = typeof input === "string" ? input : input.toString();
 				const method = init?.method ?? "GET";
+				if (url.includes("/dashboard/usage")) return jsonResponse(SAMPLE_USAGE_DATA);
 				if (method === "DELETE") return jsonResponse({ success: true });
 				dashboardCallCount += 1;
 				return dashboardCallCount === 1
@@ -809,6 +823,7 @@ describe("Dashboard", () => {
 			const fetchSpy = vi
 				.spyOn(globalThis, "fetch")
 				.mockResolvedValueOnce(jsonResponse(data))
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
 				.mockResolvedValueOnce(jsonResponse({ success: true }))
 				.mockResolvedValueOnce(jsonResponse(data));
 			vi.spyOn(window, "confirm").mockReturnValue(true);
@@ -831,6 +846,7 @@ describe("Dashboard", () => {
 		it("shows an error message when revoke fails", async () => {
 			vi.spyOn(globalThis, "fetch")
 				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
+				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
 				.mockResolvedValueOnce(
 					jsonResponse({ error: "Key not found" }, 404),
 				);
@@ -858,7 +874,7 @@ describe("Dashboard", () => {
 			fireEvent.click(screen.getByRole("button", { name: "Revoke key" }));
 
 			await waitFor(() => {
-				expect(fetchSpy).toHaveBeenCalledTimes(1);
+				expect(fetchSpy).toHaveBeenCalledTimes(2);
 			});
 		});
 	});

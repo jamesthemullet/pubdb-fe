@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: "Forgot Password",
@@ -6,6 +7,6 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default function ForgotPasswordLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
+export default function ForgotPasswordLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

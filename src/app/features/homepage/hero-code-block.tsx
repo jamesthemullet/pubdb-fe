@@ -52,7 +52,7 @@ pubs = JSON.parse(res.body)['data']`,
 type Lang = keyof typeof CODE_EXAMPLES;
 const LANGS = Object.keys(CODE_EXAMPLES) as Lang[];
 
-export default function HeroCodeBlock(): React.JSX.Element {
+export default function HeroCodeBlock(){
   const [activeTab, setActiveTab] = useState<Lang>("curl");
   const [json, setJson] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

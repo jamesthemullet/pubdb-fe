@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useContributions } from "@/hooks/useContributions";
 import { buildAuthHeaders } from "@/lib/auth";
-import { getErrorMessage, isHttpErrorObject } from "@/lib/errors";
+import { getErrorMessage, getResponseMessage, isHttpErrorObject } from "@/lib/errors";
 import styles from "./dashboard.module.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -45,6 +45,18 @@ type GeneratedApiKeyResponse = {
   key?: string;
 };
 
+type TopEndpoint = { method: string; path: string; count: number };
+
+type UsageRange = "24h" | "7d" | "30d" | "90d";
+
+type UsagePoint = { timestamp: string; count: number };
+
+type UsageSeriesResponse = {
+  range: UsageRange;
+  bucket: "hour" | "day";
+  series: UsagePoint[];
+};
+
 type DashboardData = {
   user: {
     name: string;
@@ -56,17 +68,15 @@ type DashboardData = {
   apiKeys: ApiKey[];
   subscription?: Subscription;
   summary: { totalApiKeys: number; totalUsage: number };
+  topEndpoints?: TopEndpoint[];
 };
 
-// TODO: restore request volume chart once API returns time-series data
-// const CHART_BARS = [
-//   2200, 2550, 2300, 2850, 2650,
-//   2300, 1900, 1700, 1450, 1400,
-//   1600, 1800, 1700, 1650, 1800,
-//   2100, 2200, 2050, 1900, 1750,
-//   500,  600,  650,  580,  550,
-//   1100, 1200, 1290, 1380, 3200,
-// ].map((v, i) => ({ id: `c${i}`, v }));
+const RANGE_LABELS: Record<UsageRange, string> = {
+  "24h": "last 24 hours",
+  "7d": "last 7 days",
+  "30d": "last 30 days",
+  "90d": "last 90 days",
+};
 
 const TIER_KEY_LIMITS: Record<string, number> = {
   HOBBY: 1,
@@ -76,31 +86,29 @@ const TIER_KEY_LIMITS: Record<string, number> = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-// TODO: restore sparkline once API returns time-series usage data
-// const SPARKLINE = {
-//   requests: [180,210,190,240,220,280,260,300,280,320,290,340,320,380,360,410,390,420,400,440],
-// };
-//
-// function sparklinePoints(data: number[], w = 120, h = 32): string {
-//   const min = Math.min(...data);
-//   const max = Math.max(...data);
-//   const range = max - min || 1;
-//   return data
-//     .map((v, i) => {
-//       const x = (i / (data.length - 1)) * w;
-//       const y = h - 2 - ((v - min) / range) * (h - 4);
-//       return `${x.toFixed(1)},${y.toFixed(1)}`;
-//     })
-//     .join(" ");
-// }
-//
-// function Sparkline({ data, color }: { data: number[]; color: string }) {
-//   return (
-//     <svg width="120" height="32" aria-hidden="true" className={styles.sparklineSvg}>
-//       <polyline points={sparklinePoints(data)} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-//     </svg>
-//   );
-// }
+function niceCeil(value: number): number {
+  if (value <= 0) return 1;
+  const exp = Math.floor(Math.log10(value));
+  const base = 10 ** exp;
+  for (const step of [1, 2, 5, 10]) {
+    if (value <= step * base) return step * base;
+  }
+  return 10 * base;
+}
+
+function fmtCount(value: number): string {
+  if (value >= 1000) return `${(value / 1000).toFixed(1).replace(/\.0$/, "")}k`;
+  return `${value}`;
+}
+
+function fmtBucketLabel(iso: string | undefined, bucket: "hour" | "day"): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (bucket === "hour") {
+    return d.toLocaleTimeString(undefined, { hour: "numeric" });
+  }
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
 
 function fmtRelative(iso: string | null): string {
   if (!iso) return "never";
@@ -113,7 +121,66 @@ function fmtRelative(iso: string | null): string {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-// function BarChart() { ... } // TODO: restore with real time-series data
+function UsageBarChart({ data }: { data: UsageSeriesResponse }) {
+  const W = 900,
+    H = 180,
+    ML = 36,
+    MT = 10,
+    MB = 28;
+  const cW = W - ML,
+    cH = H - MT - MB;
+  const points = data.series;
+  const n = points.length;
+  const niceMax = niceCeil(Math.max(1, ...points.map((p) => p.count)));
+  const slotW = cW / Math.max(n, 1);
+  const bW = Math.max(slotW * 0.72, 3);
+  const gX = (slotW - bW) / 2;
+
+  const bX = (i: number) => ML + i * slotW + gX;
+  const bH = (v: number) => (v / niceMax) * cH;
+  const bY = (v: number) => MT + cH - bH(v);
+  const yPos = (v: number) => MT + cH - (v / niceMax) * cH;
+
+  const yLabels = [1, 2 / 3, 1 / 3, 0].map((f) => ({
+    v: Math.round(niceMax * f),
+    t: fmtCount(Math.round(niceMax * f)),
+  }));
+
+  const xLabelCount = Math.min(4, n);
+  const xLabels = Array.from({ length: xLabelCount }, (_, i) => {
+    const idx = Math.round((i / Math.max(xLabelCount - 1, 1)) * (n - 1));
+    return { idx, t: fmtBucketLabel(points[idx]?.timestamp, data.bucket) };
+  });
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className={styles.barChartSvg} aria-hidden="true">
+      {yLabels.map(({ v, t }) => (
+        <g key={v}>
+          <line x1={ML} y1={yPos(v)} x2={W} y2={yPos(v)} stroke="#e8e8e4" strokeWidth="1" />
+          <text x={ML - 6} y={yPos(v) + 4} textAnchor="end" fontSize="10" fill="#9ca3af">
+            {t}
+          </text>
+        </g>
+      ))}
+      {points.map((p, i) => (
+        <rect
+          key={p.timestamp}
+          x={bX(i)}
+          y={bY(p.count)}
+          width={bW}
+          height={Math.max(bH(p.count), p.count > 0 ? 1 : 0)}
+          fill={i === n - 1 ? "#2563eb" : "#555555"}
+          rx="2"
+        />
+      ))}
+      {xLabels.map(({ idx, t }) => (
+        <text key={idx} x={bX(idx) + bW / 2} y={H - 4} textAnchor="middle" fontSize="10" fill="#9ca3af">
+          {t}
+        </text>
+      ))}
+    </svg>
+  );
+}
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -152,6 +219,12 @@ const Dashboard = (): React.JSX.Element | null => {
     null
   );
   const [revokeError, setRevokeError] = useState<string | null>(null);
+  const [chartRange, setChartRange] = useState<UsageRange>("30d");
+  const [usageSeries, setUsageSeries] = useState<UsageSeriesResponse | null>(
+    null
+  );
+  const [usageLoading, setUsageLoading] = useState(true);
+  const [usageError, setUsageError] = useState<string | null>(null);
   const forgotKeyModalRef = useRef<HTMLDivElement>(null);
   const forgotKeyModalTriggerRef = useRef<HTMLElement | null>(null);
   const cancelAuthChangedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -229,6 +302,61 @@ const Dashboard = (): React.JSX.Element | null => {
     };
   }, []);
 
+  useEffect(() => {
+    async function fetchUsage(token: string, range: UsageRange): Promise<void> {
+      try {
+        setUsageError(null);
+        setUsageLoading(true);
+        const res = await fetch(`/api/auth/dashboard/usage?range=${range}`, {
+          headers: buildAuthHeaders(token),
+        });
+        if (!res.ok) {
+          const errorData: unknown = await res.json().catch(() => ({}));
+          throw { response: res, data: errorData };
+        }
+        const data = (await res.json()) as Partial<UsageSeriesResponse> | null;
+        setUsageSeries({
+          range: data?.range ?? range,
+          bucket: data?.bucket ?? "day",
+          series: Array.isArray(data?.series) ? data.series : [],
+        });
+      } catch (err: unknown) {
+        setUsageSeries(null);
+        if (isHttpErrorObject(err)) {
+          setUsageError(
+            err.data.message ||
+              err.data.error ||
+              `HTTP error! status: ${err.response.status}`
+          );
+        } else {
+          setUsageError(
+            err instanceof Error ? err.message : "Failed to load request volume"
+          );
+        }
+      } finally {
+        setUsageLoading(false);
+      }
+    }
+
+    function run(): void {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setUsageLoading(false);
+        setUsageSeries(null);
+        return;
+      }
+      fetchUsage(token, chartRange);
+    }
+
+    run();
+    window.addEventListener("authChanged", run);
+    window.addEventListener("storage", run);
+    return () => {
+      window.removeEventListener("authChanged", run);
+      window.removeEventListener("storage", run);
+    };
+  }, [chartRange]);
+
   async function handleCancelSubscription() {
     if (
       !confirm(
@@ -249,10 +377,10 @@ const Dashboard = (): React.JSX.Element | null => {
         },
         body: JSON.stringify({}),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       setCancelMessage(
-        data.message ||
+        getResponseMessage(data) ||
           "Subscription cancelled. It will expire at the end of the current billing period."
       );
       cancelAuthChangedTimeoutRef.current = setTimeout(
@@ -267,11 +395,6 @@ const Dashboard = (): React.JSX.Element | null => {
   }
 
   async function handleForgotApiKey(id: string, keyPrefix: string) {
-    const userEmail = dashboardData?.user.email;
-    if (!userEmail) {
-      setForgotKeyError("Unable to determine account email.");
-      return;
-    }
     try {
       setForgotKeyLoading(true);
       setForgotKeyError(null);
@@ -281,24 +404,26 @@ const Dashboard = (): React.JSX.Element | null => {
       setForgotKeyCopyStatus("idle");
       setForgotKeyTarget(id);
       const token = localStorage.getItem("token");
-      const res = await fetch("/api/auth/forgot-api-key", {
+      const res = await fetch(`/api/auth/keys/${encodeURIComponent(id)}/regenerate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...buildAuthHeaders(token),
         },
-        body: JSON.stringify({ keyPrefix, email: userEmail }),
+        body: JSON.stringify({}),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       setForgotKeyMessage(
-        data.message ||
+        getResponseMessage(data) ||
           "If this API key is eligible, instructions have been emailed to the account owner."
       );
-      if (data.apiKey) {
+      const raw = data as Record<string, unknown>;
+      if (raw.apiKey && typeof raw.apiKey === "object") {
+        const apiKey = raw.apiKey as GeneratedApiKeyResponse;
         setForgotKeyDetails({
-          ...data.apiKey,
-          keyPrefix: data.apiKey.keyPrefix || keyPrefix,
+          ...apiKey,
+          keyPrefix: apiKey.keyPrefix || keyPrefix,
         });
         setShowForgotKeyModal(true);
         setForgotKeyCopyStatus("idle");
@@ -345,16 +470,17 @@ const Dashboard = (): React.JSX.Element | null => {
         method: "POST",
         headers: buildAuthHeaders(token),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
-      const keyData: GeneratedApiKeyResponse = data.apiKey ?? data;
+      const raw = data as Record<string, unknown>;
+      const keyData: GeneratedApiKeyResponse = (raw.apiKey ?? raw) as GeneratedApiKeyResponse;
       setForgotKeyDetails(keyData);
       setShowForgotKeyModal(true);
       setForgotKeyCopyStatus("idle");
       const refreshRes = await fetch("/api/auth/dashboard", {
         headers: buildAuthHeaders(token),
       });
-      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+      if (refreshRes.ok) setDashboardData((await refreshRes.json()) as unknown as DashboardData);
     } catch (err: unknown) {
       setCreateKeyError(getErrorMessage(err, "Failed to create API key"));
     } finally {
@@ -386,9 +512,10 @@ const Dashboard = (): React.JSX.Element | null => {
         },
         body: JSON.stringify(addKeyName.trim() ? { name: addKeyName.trim() } : {}),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
-      const keyData: GeneratedApiKeyResponse = data.apiKey ?? data;
+      const raw = data as Record<string, unknown>;
+      const keyData: GeneratedApiKeyResponse = (raw.apiKey ?? raw) as GeneratedApiKeyResponse;
       setShowAddKeyModal(false);
       setForgotKeyDetails(keyData);
       setShowForgotKeyModal(true);
@@ -396,7 +523,7 @@ const Dashboard = (): React.JSX.Element | null => {
       const refreshRes = await fetch("/api/auth/dashboard", {
         headers: buildAuthHeaders(token),
       });
-      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+      if (refreshRes.ok) setDashboardData((await refreshRes.json()) as unknown as DashboardData);
     } catch (err: unknown) {
       setAddKeyError(getErrorMessage(err, "Failed to create API key"));
     } finally {
@@ -414,12 +541,12 @@ const Dashboard = (): React.JSX.Element | null => {
         method: "DELETE",
         headers: buildAuthHeaders(token),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       const refreshRes = await fetch("/api/auth/dashboard", {
         headers: buildAuthHeaders(token),
       });
-      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+      if (refreshRes.ok) setDashboardData((await refreshRes.json()) as unknown as DashboardData);
     } catch (err: unknown) {
       setRevokeError(getErrorMessage(err, "Failed to revoke API key"));
     } finally {
@@ -460,6 +587,7 @@ const Dashboard = (): React.JSX.Element | null => {
   }
 
   const subscription = dashboardData?.subscription;
+  const topEndpoints = dashboardData?.topEndpoints ?? [];
   const totalUsed = useMemo(
     () =>
       subscription
@@ -737,7 +865,34 @@ const Dashboard = (): React.JSX.Element | null => {
           {/* TODO: Pubs returned stat card — show once API returns total pub records served */}
         </div>
 
-        {/* TODO: Request volume chart — restore once API returns time-series request data */}
+        {/* Request volume chart */}
+        <div className={styles.chartSection}>
+          <div className={styles.chartHeader}>
+            <span className={styles.chartTitle}>Request volume</span>
+            <span className={styles.chartPeriod}>{RANGE_LABELS[chartRange]}</span>
+            <div className={styles.rangeButtons}>
+              {(["24h", "7d", "30d", "90d"] as const).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  className={chartRange === r ? styles.rangeActive : styles.rangeBtn}
+                  onClick={() => setChartRange(r)}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+          </div>
+          {usageLoading ? (
+            <p className={styles.muted}>Loading…</p>
+          ) : usageError ? (
+            <p className={styles.inlineError}>{usageError}</p>
+          ) : usageSeries && usageSeries.series.length > 0 ? (
+            <UsageBarChart data={usageSeries} />
+          ) : (
+            <p className={styles.muted}>No request data for this period.</p>
+          )}
+        </div>
 
         {/* Bottom row: keys + top endpoints */}
         <div className={styles.bottomRow}>
@@ -830,8 +985,12 @@ const Dashboard = (): React.JSX.Element | null => {
                         <button
                           type="button"
                           className={styles.btnOutline}
-                          disabled={isForgotLoading}
-                          onClick={() => handleForgotApiKey(identityKey, key.keyPrefix)}
+                          disabled={isForgotLoading || !key.id}
+                          title={key.id ? undefined : "This key can't be regenerated from here — contact support."}
+                          onClick={() => {
+                            if (!key.id) return;
+                            void handleForgotApiKey(key.id, key.keyPrefix);
+                          }}
                         >
                           {isForgotLoading
                             ? "Regenerating…"
@@ -885,9 +1044,10 @@ const Dashboard = (): React.JSX.Element | null => {
                                 <button
                                   type="button"
                                   className={styles.menuItem}
-                                  disabled={isForgotLoading}
+                                  disabled={isForgotLoading || !key.id}
                                   onClick={() => {
-                                    void handleForgotApiKey(identityKey, key.keyPrefix);
+                                    if (!key.id) return;
+                                    void handleForgotApiKey(key.id, key.keyPrefix);
                                     setOpenMenu(null);
                                   }}
                                 >
@@ -934,6 +1094,37 @@ const Dashboard = (): React.JSX.Element | null => {
               })
             )}
           </div>
+
+          {/* Top endpoints panel */}
+          {topEndpoints.length > 0 && (
+            <div className={styles.endpointsPanel}>
+              <div className={styles.endpointsPanelHeader}>
+                <span className={styles.endpointsTitle}>Top endpoints</span>
+              </div>
+              {topEndpoints.map((ep) => (
+                <div
+                  key={`${ep.method}-${ep.path}`}
+                  className={styles.endpointRow}
+                >
+                  <div className={styles.endpointLabel}>
+                    <span className={styles.endpointMethod}>{ep.method}</span>
+                    <code className={styles.endpointPath}>{ep.path}</code>
+                  </div>
+                  <div className={styles.endpointBarWrap}>
+                    <div
+                      className={styles.endpointBar}
+                      style={{
+                        width: `${(ep.count / topEndpoints[0].count) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <span className={styles.endpointCount}>
+                    {ep.count.toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {showNudge && (

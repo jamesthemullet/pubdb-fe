@@ -1,8 +1,10 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import type { ReactNode } from "react";
 import "./globals.css";
 import AccentedInit from "./components/AccentedInit";
+import Footer from "./components/footer/footer";
 import Sidebar from "./components/sidebar/sidebar";
 import Topbar from "./components/topbar/topbar";
 import styles from "./layout.module.css";
@@ -46,7 +48,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="en">
@@ -73,6 +75,7 @@ export default function RootLayout({
             <main id="main-content" className={styles.main}>
               {children}
             </main>
+            <Footer />
           </div>
         </div>
         <Analytics />

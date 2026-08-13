@@ -8,7 +8,7 @@ type OpeningHoursDisplayProps = {
 
 export default function OpeningHoursDisplay({
   value,
-}: OpeningHoursDisplayProps): React.JSX.Element {
+}: OpeningHoursDisplayProps){
   const normalized = normalizeOpeningHours(value);
 
   if (!normalized) {
