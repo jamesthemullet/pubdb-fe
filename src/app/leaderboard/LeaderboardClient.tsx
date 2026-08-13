@@ -149,6 +149,8 @@ function YourRankBanner({
         <img
           src={avatarUrl}
           alt=""
+          width={36}
+          height={36}
           className={styles.yourRankAvatar}
         />
       ) : (

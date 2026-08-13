@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import type { ReactElement } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Typography from "@/app/components/typography/typography";
@@ -38,6 +38,7 @@ function pubDisplayId(id: string | undefined): string {
 
 export default function PubPage(): ReactElement {
   const { id } = useParams();
+  const router = useRouter();
   const [pub, setPub] = useState<Pub | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -370,7 +371,7 @@ export default function PubPage(): ReactElement {
         method: "DELETE",
         headers: buildAuthHeaders(token),
       });
-      if (res.ok) window.location.href = "/pubs";
+      if (res.ok) router.push("/pubs");
     } catch { /* ignore */ }
   };
 
