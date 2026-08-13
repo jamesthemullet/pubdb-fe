@@ -73,7 +73,7 @@ function TypeBadge({ type }: { type: string }) {
   return <span className={styles.typeBadge}>{type}</span>;
 }
 
-export default function DocsPage(): React.JSX.Element {
+export default function DocsPage(){
   return (
     <div className={styles.page}>
       <DocNav />
@@ -176,6 +176,9 @@ export default function DocsPage(): React.JSX.Element {
               </div>
             ))}
           </div>
+          <p className={styles.sectionText}>
+            <strong>Note:</strong> the leaderboard updates every 5 minutes.
+          </p>
         </section>
 
         <section id="filtering" className={styles.section}>

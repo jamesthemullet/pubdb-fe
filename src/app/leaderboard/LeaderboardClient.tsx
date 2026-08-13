@@ -150,6 +150,8 @@ function YourRankBanner({
         <img
           src={avatarUrl}
           alt=""
+          width={36}
+          height={36}
           className={styles.yourRankAvatar}
         />
       ) : (
@@ -325,7 +327,7 @@ function EarnBadgesPanel({ nextBadges }: { nextBadges: NextBadge[] }) {
 
 // ── Client component ──────────────────────────────────────────────────────────
 
-export default function LeaderboardClient({ data }: { data: LeaderboardData }): React.JSX.Element {
+export default function LeaderboardClient({ data }: { data: LeaderboardData }){
   const { user } = useAuth();
   const router = useRouter();
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");

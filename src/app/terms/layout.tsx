@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: "Pub DB Terms of Service.",
 };
 
-export default function TermsLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
+export default function TermsLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

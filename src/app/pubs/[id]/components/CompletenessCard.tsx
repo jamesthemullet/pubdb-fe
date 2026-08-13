@@ -7,7 +7,7 @@ type Props = {
   onEdit?: () => void;
 };
 
-export default function CompletenessCard({ pub, onEdit }: Props): React.JSX.Element {
+export default function CompletenessCard({ pub, onEdit }: Props){
   const { score, missing } = pubCompletenessScore(pub);
 
   return (
