@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactElement } from "react";
+import { getServerApiUrl } from "@/lib/serverApiUrl";
 import HeroCodeBlock from "./features/homepage/hero-code-block";
 import Pricing from "./features/pricing/pricing";
 import styles from "./page.module.css";
@@ -28,7 +29,28 @@ export const metadata: Metadata = {
 //   { value: "4.2k", label: "developers using us" },
 // ];
 
-export default function Home(): ReactElement {
+async function fetchSamplePubJson(): Promise<string | null> {
+  try {
+    const res = await fetch(`${getServerApiUrl()}/pubs?limit=1`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    const data: unknown = await res.json();
+    if (typeof data === "object" && data !== null && "data" in data) {
+      const pubs = (data as { data: unknown }).data;
+      if (Array.isArray(pubs) && pubs.length > 0) {
+        return JSON.stringify(pubs[0], null, 2);
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function Home(): Promise<ReactElement> {
+  const samplePubJson = await fetchSamplePubJson();
+
   return (
     <div className={styles.page}>
       <div className={styles.earlyAccessBanner}>
@@ -62,7 +84,7 @@ export default function Home(): ReactElement {
           </div>
         </div>
         <div className={styles.heroCode}>
-          <HeroCodeBlock />
+          <HeroCodeBlock initialJson={samplePubJson} />
         </div>
       </section>
 
