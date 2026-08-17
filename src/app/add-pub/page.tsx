@@ -139,8 +139,12 @@ export default function AddPubPage(){
       if (!token) { setUser(null); return; }
       try {
         const res = await fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } });
-        if (res.ok) { const d = await res.json(); setUser({ email: d.email, approved: d.approved }); }
-        else setUser(null);
+        if (res.ok) {
+          const d: unknown = await res.json();
+          const payload = d != null && typeof d === "object" ? d as { email?: string; approved?: boolean } : null;
+          if (payload?.email) setUser({ email: payload.email, approved: payload.approved });
+          else setUser(null);
+        } else setUser(null);
       } catch { setUser(null); }
     }
     checkAuth();
@@ -174,19 +178,22 @@ export default function AddPubPage(){
         headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
+      const data: unknown = await res.json();
+      const responseId = data != null && typeof data === "object" && "id" in data
+        ? (data as { id: string }).id
+        : undefined;
       if (!res.ok) {
         const { formErrors: fe, fieldErrors: fle } = parseApiValidationErrors(data);
         setFormErrors(fe); setFieldErrors(fle);
-        if (res.status === 409 && data?.id) {
-          setEditLink(`/pubs/${data.id}`);
+        if (res.status === 409 && responseId) {
+          setEditLink(`/pubs/${responseId}`);
           if (fe.length === 0) setError("Pub already exists");
         } else if (fe.length === 0 && Object.keys(fle).length === 0) {
           setError("Unknown error");
         }
       } else {
         setSuccess("Pub submitted for review!");
-        setTimeout(() => router.push(`/pubs/${data.id}`), 1000);
+        setTimeout(() => router.push(`/pubs/${responseId}`), 1000);
       }
     } catch { setError("Network error"); }
     finally { setLoading(false); }
