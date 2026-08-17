@@ -391,7 +391,7 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }){
           <button
             type="button"
             className={styles.actionBtn}
-            onClick={handleShare}
+            onClick={() => { void handleShare(); }}
           >
             <ShareIcon /> Share
           </button>

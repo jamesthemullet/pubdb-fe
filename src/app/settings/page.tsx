@@ -10,6 +10,17 @@ import { useTheme } from "@/hooks/useTheme";
 import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
 
+// ── Shared types ─────────────────────────────────────────────────────────────
+
+type ApiErrorBody = {
+  error?: string;
+  errors?: { fieldErrors?: Record<string, string[]> };
+};
+
+function asApiError(data: unknown): ApiErrorBody | null {
+  return data != null && typeof data === "object" ? (data as ApiErrorBody) : null;
+}
+
 // ── Nav items ─────────────────────────────────────────────────────────────────
 
 type SettingsTab =
@@ -212,7 +223,7 @@ function ProfileTab({ user }: { user: AuthUser }) {
         body: JSON.stringify(body),
       });
 
-      const data = await res.json().catch(() => null);
+      const data = asApiError(await res.json().catch(() => null));
 
       if (res.ok) {
         setSaved(true);
@@ -375,7 +386,7 @@ function SecurityTab() {
         body: JSON.stringify({ currentPassword, newPassword }),
       });
 
-      const data = await res.json().catch(() => null);
+      const data = asApiError(await res.json().catch(() => null));
 
       if (res.ok) {
         setSaved(true);
@@ -607,7 +618,7 @@ function DangerTab() {
         return;
       }
 
-      const data = await res.json().catch(() => null);
+      const data = asApiError(await res.json().catch(() => null));
       if (res.status === 400 && data?.errors) {
         setError("Password is required.");
       } else if (res.status === 401) {

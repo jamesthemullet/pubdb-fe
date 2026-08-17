@@ -14,18 +14,7 @@ export type AuthUser = {
   pubEditAlertsEnabled?: boolean;
 } | null;
 
-type AuthPayload = {
-  email: string;
-  approved?: boolean;
-  admin?: boolean;
-  name?: string;
-  username?: string;
-  image?: string;
-  location?: string;
-  bio?: string;
-  usageLimitAlertsEnabled?: boolean;
-  pubEditAlertsEnabled?: boolean;
-};
+type AuthPayload = NonNullable<AuthUser>;
 
 function isAuthPayload(value: unknown): value is AuthPayload {
   if (typeof value !== "object" || value === null) return false;
