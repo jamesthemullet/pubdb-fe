@@ -604,7 +604,7 @@ function PubsContent(): ReactElement {
             {locationStatus === "loading"
               ? "Locating…"
               : coords
-                ? "Near me ✕"
+                ? <>Near me <span aria-hidden="true">✕</span></>
                 : "Near me"}
           </button>
           {locationStatus === "denied" && (
@@ -682,7 +682,7 @@ function PubsContent(): ReactElement {
           </button>
         </div>
       ) : filteredPubs.length === 0 ? (
-        <output className={styles.stateMsg}>
+        <output className={styles.stateMsg} aria-live="polite">
           No pubs found{debouncedSearchTerm ? " matching your search" : ""}.
         </output>
       ) : (
@@ -732,7 +732,7 @@ function PubsContent(): ReactElement {
               onClick={() => setPage((p) => p - 1)}
               disabled={!hasPrevPage}
             >
-              ← Previous
+              <span aria-hidden="true">←</span> Previous
             </button>
             <span className={styles.pageNum}>Page {page + 1}</span>
             <button
@@ -741,7 +741,7 @@ function PubsContent(): ReactElement {
               onClick={() => setPage((p) => p + 1)}
               disabled={!hasNextPage}
             >
-              Next →
+              Next <span aria-hidden="true">→</span>
             </button>
           </div>
         </div>
