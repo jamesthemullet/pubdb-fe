@@ -149,7 +149,7 @@ function YourRankBanner({
         // biome-ignore lint/performance/noImgElement: user-supplied external avatar URL, not an optimizable local asset
         <img
           src={avatarUrl}
-          alt=""
+          alt={entry.displayName || entry.username}
           width={36}
           height={36}
           className={styles.yourRankAvatar}

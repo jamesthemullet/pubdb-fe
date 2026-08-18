@@ -58,7 +58,7 @@ export default function SettingsPage() {
                   type="button"
                   className={`${styles.navItem} ${activeTab === id ? styles.navItemActive : ""} ${id === "danger" ? styles.navItemDanger : ""}`}
                   onClick={() => setActiveTab(id)}
-                  aria-current={activeTab === id ? "true" : undefined}
+                  aria-current={activeTab === id ? "page" : undefined}
                 >
                   <span className={styles.navIcon}>{icon}</span>
                   {label}
@@ -278,7 +278,7 @@ function ProfileTab({ user }: { user: AuthUser }) {
               // biome-ignore lint/performance/noImgElement: user-supplied external avatar URL, not an optimizable local asset
               <img
                 src={image}
-                alt=""
+                alt="Profile preview"
                 className={styles.avatarCircle}
                 style={{ objectFit: "cover" }}
               />
