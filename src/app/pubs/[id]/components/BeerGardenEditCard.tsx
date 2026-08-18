@@ -39,6 +39,7 @@ export default function BeerGardenEditCard({
           variant="secondary"
           size="sm"
           onClick={() => onRemove(index)}
+          aria-label={`Remove garden ${index + 1}`}
         >
           Remove
         </Button>

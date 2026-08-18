@@ -52,13 +52,13 @@ describe("BeerGardenEditCard", () => {
 
     it("renders the Remove button", () => {
       renderCard();
-      expect(screen.getByRole("button", { name: "Remove" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Remove garden 1" })).toBeInTheDocument();
     });
 
     it("calls onRemove with the correct index when Remove is clicked", () => {
       const onRemove = vi.fn();
       renderCard({}, 1, vi.fn(), onRemove);
-      fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+      fireEvent.click(screen.getByRole("button", { name: "Remove garden 2" }));
       expect(onRemove).toHaveBeenCalledWith(1);
     });
   });

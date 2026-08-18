@@ -4,6 +4,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
 import AccentedInit from "./components/AccentedInit";
+import Footer from "./components/footer/footer";
 import Sidebar from "./components/sidebar/sidebar";
 import Topbar from "./components/topbar/topbar";
 import styles from "./layout.module.css";
@@ -40,7 +41,7 @@ export const metadata: Metadata = {
     title: "Pub DB",
     description:
       "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
-    images: ["/og-default.png"],
+    images: [{ url: "/og-default.png", alt: "Pub DB" }],
   },
 };
 
@@ -74,6 +75,7 @@ export default function RootLayout({
             <main id="main-content" className={styles.main}>
               {children}
             </main>
+            <Footer />
           </div>
         </div>
         <Analytics />

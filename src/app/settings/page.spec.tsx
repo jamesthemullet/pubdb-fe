@@ -30,6 +30,14 @@ function openDangerZone() {
 	fireEvent.click(screen.getByRole("button", { name: /Danger zone/i }));
 }
 
+function submitDeleteForm() {
+	const form = screen.getByRole("button", { name: /Confirm delete/i }).closest("form");
+	if (!form) {
+		throw new Error("Confirm delete form not found");
+	}
+	return form;
+}
+
 describe("SettingsPage", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
@@ -126,7 +134,7 @@ describe("SettingsPage", () => {
 			target: { value: "my-password" },
 		});
 		await act(async () => {
-			fireEvent.submit(screen.getByRole("button", { name: /Confirm delete/i }).closest("form")!);
+			fireEvent.submit(submitDeleteForm());
 		});
 
 		expect(localStorage.getItem("token")).toBeNull();
@@ -152,7 +160,7 @@ describe("SettingsPage", () => {
 			target: { value: "wrong-password" },
 		});
 		await act(async () => {
-			fireEvent.submit(screen.getByRole("button", { name: /Confirm delete/i }).closest("form")!);
+			fireEvent.submit(submitDeleteForm());
 		});
 
 		await waitFor(() => {
@@ -178,7 +186,7 @@ describe("SettingsPage", () => {
 			target: { value: "x" },
 		});
 		await act(async () => {
-			fireEvent.submit(screen.getByRole("button", { name: /Confirm delete/i }).closest("form")!);
+			fireEvent.submit(submitDeleteForm());
 		});
 
 		await waitFor(() => {
@@ -202,7 +210,7 @@ describe("SettingsPage", () => {
 			target: { value: "my-password" },
 		});
 		await act(async () => {
-			fireEvent.submit(screen.getByRole("button", { name: /Confirm delete/i }).closest("form")!);
+			fireEvent.submit(submitDeleteForm());
 		});
 
 		await waitFor(() => {
