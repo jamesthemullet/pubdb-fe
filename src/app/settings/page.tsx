@@ -278,7 +278,7 @@ function ProfileTab({ user }: { user: AuthUser }) {
               // biome-ignore lint/performance/noImgElement: user-supplied external avatar URL, not an optimizable local asset
               <img
                 src={image}
-                alt="Profile photo preview"
+                alt="Profile preview"
                 className={styles.avatarCircle}
                 style={{ objectFit: "cover" }}
               />
