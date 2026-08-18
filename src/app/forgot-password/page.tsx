@@ -1,18 +1,19 @@
 "use client";
 import Link from "next/link";
+import type { FormEvent } from "react";
 import { useState } from "react";
 import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
 import styles from "./page.module.css";
 
-export default function ForgotPasswordPage(): React.JSX.Element {
+export default function ForgotPasswordPage(){
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent): Promise<void> {
+  async function handleSubmit(e: FormEvent): Promise<void> {
     e.preventDefault();
     setLoading(true);
     setError(null);

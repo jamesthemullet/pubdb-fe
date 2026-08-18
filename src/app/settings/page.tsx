@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import type { FormEvent, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import type { AuthUser } from "@/hooks/useAuth";
@@ -19,7 +20,7 @@ type SettingsTab =
   | "appearance"
   | "danger";
 
-const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
+const NAV_ITEMS: { id: SettingsTab; label: string; icon: ReactNode }[] = [
   { id: "profile", label: "Profile", icon: <ProfileIcon /> },
   { id: "security", label: "Security", icon: <SecurityIcon /> },
   { id: "notifications", label: "Notifications", icon: <BellIcon /> },
@@ -30,7 +31,7 @@ const NAV_ITEMS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function SettingsPage(): React.JSX.Element {
+export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const { user } = useAuth();
 
@@ -92,7 +93,7 @@ function FieldRow({
   label: string;
   hint?: string;
   htmlFor?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className={styles.fieldRow}>
@@ -109,7 +110,7 @@ function FieldRow({
   );
 }
 
-function Card({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+function Card({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
     <div className={styles.card}>
       <div className={styles.cardHeader}>
@@ -583,7 +584,7 @@ function DangerTab() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleDeleteAccount(e: React.FormEvent) {
+  async function handleDeleteAccount(e: FormEvent) {
     e.preventDefault();
     setError(null);
     setSubmitting(true);

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import styles from "./page.module.css";
 
-export function CopyButton({ text }: { text: string }): React.JSX.Element {
+export function CopyButton({ text }: { text: string }){
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {

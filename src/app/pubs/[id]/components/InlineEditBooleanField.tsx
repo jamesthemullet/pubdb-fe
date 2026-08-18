@@ -14,7 +14,7 @@ type Props = {
 
 const BOOL_OPTIONS = [true, false, null] as (boolean | null)[];
 
-export default function InlineEditBooleanField({ label, value, onSave, canEdit, rowLayout }: Props): React.JSX.Element {
+export default function InlineEditBooleanField({ label, value, onSave, canEdit, rowLayout }: Props){
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +48,7 @@ export default function InlineEditBooleanField({ label, value, onSave, canEdit, 
     <span className={styles.editWrapper}>
       <span className={styles.boolOptions}>
         {BOOL_OPTIONS.map((option) => (
-          <Button key={String(option)} size="xs" variant={draft === option ? "primary" : "secondary"} onClick={() => setDraft(option)}>
+          <Button key={String(option)} size="xs" variant={draft === option ? "primary" : "secondary"} aria-pressed={draft === option} onClick={() => setDraft(option)}>
             {option == null ? "Not set" : option ? "Yes" : "No"}
           </Button>
         ))}

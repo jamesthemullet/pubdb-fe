@@ -8,62 +8,54 @@ type OpeningHoursDisplayProps = {
 
 export default function OpeningHoursDisplay({
   value,
-}: OpeningHoursDisplayProps): React.JSX.Element {
+}: OpeningHoursDisplayProps){
   const normalized = normalizeOpeningHours(value);
 
   if (!normalized) {
     return (
-      <div>
+      <dl>
         {WEEKDAYS.map((day) => (
-          <div key={day}>
-            <Typography as="span" isBold>
-              {day}:
-            </Typography>{" "}
-            -
+          <div key={day} style={{ display: "flex", gap: "0.25em" }}>
+            <dt>
+              <Typography as="span" isBold>
+                {day}:
+              </Typography>
+            </dt>
+            {" "}
+            <dd>-</dd>
           </div>
         ))}
-      </div>
+      </dl>
     );
   }
 
   const lowerCaseMap = buildCaseInsensitiveMap(normalized);
 
   return (
-    <div>
+    <dl>
       {WEEKDAYS.map((day) => {
         const entry = lowerCaseMap[day.toLowerCase()];
+        let value: string;
         if (!entry) {
-          return (
-            <div key={day}>
-              <Typography as="span" isBold>
-                {day}:
-              </Typography>{" "}
-              -
-            </div>
-          );
+          value = "-";
+        } else if (entry.closed) {
+          value = "Closed";
+        } else {
+          value = `${entry.open || "-"} – ${entry.close || "-"}`;
         }
-        if (entry.closed) {
-          return (
-            <div key={day}>
-              <Typography as="span" isBold>
-                {day}:
-              </Typography>{" "}
-              Closed
-            </div>
-          );
-        }
-        const open = entry.open || "-";
-        const close = entry.close || "-";
         return (
-          <div key={day}>
-            <Typography as="span" isBold>
-              {day}:
-            </Typography>{" "}
-            {open} – {close}
+          <div key={day} style={{ display: "flex", gap: "0.25em" }}>
+            <dt>
+              <Typography as="span" isBold>
+                {day}:
+              </Typography>
+            </dt>
+            {" "}
+            <dd>{value}</dd>
           </div>
         );
       })}
-    </div>
+    </dl>
   );
 }
 

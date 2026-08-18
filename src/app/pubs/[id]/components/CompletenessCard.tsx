@@ -7,7 +7,7 @@ type Props = {
   onEdit?: () => void;
 };
 
-export default function CompletenessCard({ pub, onEdit }: Props): React.JSX.Element {
+export default function CompletenessCard({ pub, onEdit }: Props){
   const { score, missing } = pubCompletenessScore(pub);
 
   return (
@@ -31,7 +31,7 @@ export default function CompletenessCard({ pub, onEdit }: Props): React.JSX.Elem
       </div>
       {onEdit && (
         <button type="button" className={styles.improveBtn} onClick={onEdit}>
-          Improve this listing →
+          Improve this listing <span aria-hidden="true">→</span>
         </button>
       )}
     </div>

@@ -16,7 +16,7 @@ const getSafeInternalPath = (value: string | null | undefined): string | null =>
   }
 };
 
-export default function RegisterLoginPage(): React.JSX.Element {
+export default function RegisterLoginPage(){
   const [redirectTo, setRedirectTo] = useState("/");
 
   useEffect(() => {

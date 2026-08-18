@@ -59,6 +59,7 @@ function BadgeList({
           key={badge.key}
           className={styles.badge}
           data-variant={badgeVariant(index)}
+          role="img"
           aria-label={`${badge.name}: ${badge.description}`}
         >
           {badge.name}
@@ -149,6 +150,8 @@ function YourRankBanner({
         <img
           src={avatarUrl}
           alt={entry.displayName || entry.username}
+          width={36}
+          height={36}
           className={styles.yourRankAvatar}
         />
       ) : (
@@ -187,7 +190,7 @@ function YourRankBanner({
         className={styles.viewProfileBtn}
         onClick={onViewProfile}
       >
-        View profile →
+        View profile <span aria-hidden="true">→</span>
       </button>
     </div>
   );
@@ -324,7 +327,7 @@ function EarnBadgesPanel({ nextBadges }: { nextBadges: NextBadge[] }) {
 
 // ── Client component ──────────────────────────────────────────────────────────
 
-export default function LeaderboardClient({ data }: { data: LeaderboardData }): React.JSX.Element {
+export default function LeaderboardClient({ data }: { data: LeaderboardData }){
   const { user } = useAuth();
   const router = useRouter();
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
