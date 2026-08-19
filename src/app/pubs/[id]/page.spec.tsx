@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { clearBeerTypesCache } from "@/hooks/useBeerTypes";
 import { clearCountriesCache } from "@/hooks/useCountries";
+import { clearAuthCache } from "@/hooks/useAuth";
 
 import PubPage from "./page";
 
@@ -143,6 +144,7 @@ describe("PubPage", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		localStorage.clear();
+		clearAuthCache();
 		clearBeerTypesCache();
 		clearCountriesCache();
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
