@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useAuth } from "./useAuth";
+import { clearAuthCache, useAuth } from "./useAuth";
 
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -17,6 +17,7 @@ function makeJwt(payload: Record<string, unknown>): string {
 describe("useAuth", () => {
   beforeEach(() => {
     localStorage.clear();
+    clearAuthCache();
   });
 
   afterEach(() => {

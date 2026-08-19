@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { clearAuthCache } from "@/hooks/useAuth";
 
 vi.mock("@/app/features/pricing/pricing", () => ({
 	default: () => null,
@@ -111,6 +112,7 @@ describe("BillingPage", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		localStorage.clear();
+		clearAuthCache();
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
 	});
 
