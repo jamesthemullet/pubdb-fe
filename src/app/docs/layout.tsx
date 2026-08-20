@@ -11,6 +11,7 @@ export const metadata: Metadata = {
       "Explore the Pub DB REST API. Access over 12,000 pubs with a simple API key. Quickstart guides, endpoint reference, and code examples.",
   },
   twitter: {
+    card: "summary",
     title: "API Documentation | Pub DB",
     description:
       "Explore the Pub DB REST API. Access over 12,000 pubs with a simple API key. Quickstart guides, endpoint reference, and code examples.",

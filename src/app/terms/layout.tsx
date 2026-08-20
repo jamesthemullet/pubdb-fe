@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     description: "Read the Pub DB Terms of Service governing your use of the platform and API.",
   },
   twitter: {
+    card: "summary",
     title: "Terms of Service | Pub DB",
     description: "Read the Pub DB Terms of Service governing your use of the platform and API.",
   },
