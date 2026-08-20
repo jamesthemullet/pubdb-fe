@@ -472,7 +472,14 @@ export default function BillingPage(){
                         {u.limit.toLocaleString()}
                       </span>
                     </p>
-                    <div className={styles.usageBarWrap}>
+                    <div
+                      className={styles.usageBarWrap}
+                      role="progressbar"
+                      aria-valuenow={Math.round(u.pct)}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label={`${u.label} usage: ${u.used.toLocaleString()} of ${u.limit.toLocaleString()} used`}
+                    >
                       <div
                         className={styles.usageBar}
                         style={{ width: `${u.pct}%` }}

@@ -688,6 +688,7 @@ function PubsContent(): ReactElement {
       ) : (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
+            <caption className={styles.srOnly}>Pub results</caption>
             <thead>
               <tr>
                 <th className={styles.thName} scope="col">NAME</th>
@@ -697,7 +698,7 @@ function PubsContent(): ReactElement {
                 )}
                 {/* TODO: improve amenity display (icons unclear, title tooltip unreliable) before re-enabling */}
                 {/* <th className={styles.thAmenities}>AMENITIES</th> */}
-                <th className={styles.thArrow} aria-label="View" />
+                <th className={styles.thArrow} scope="col" aria-label="View" />
               </tr>
             </thead>
             <tbody

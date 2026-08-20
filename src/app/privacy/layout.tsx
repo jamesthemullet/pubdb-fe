@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     description: "Read the Pub DB Privacy Policy to understand how we collect, use, and protect your data.",
   },
   twitter: {
+    card: "summary",
     title: "Privacy Policy | Pub DB",
     description: "Read the Pub DB Privacy Policy to understand how we collect, use, and protect your data.",
   },

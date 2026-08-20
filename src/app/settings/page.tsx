@@ -58,7 +58,7 @@ export default function SettingsPage() {
                   type="button"
                   className={`${styles.navItem} ${activeTab === id ? styles.navItemActive : ""} ${id === "danger" ? styles.navItemDanger : ""}`}
                   onClick={() => setActiveTab(id)}
-                  aria-current={activeTab === id ? "page" : undefined}
+                  aria-current={activeTab === id ? "true" : undefined}
                 >
                   <span className={styles.navIcon}>{icon}</span>
                   {label}
@@ -501,9 +501,10 @@ function AlertToggleRow({
   }
 
   return (
-    <FieldRow label={label} hint={hint}>
+    <FieldRow label={label} hint={hint} htmlFor={field}>
       <label className={styles.toggleLabel}>
         <input
+          id={field}
           type="checkbox"
           className={styles.toggleInput}
           checked={enabled}
@@ -647,8 +648,9 @@ function DangerTab() {
 
       {confirming && (
         <form onSubmit={handleDeleteAccount} className={styles.dangerRow}>
-          <FieldRow label="Confirm password" hint="Enter your password to permanently delete your account.">
+          <FieldRow label="Confirm password" hint="Enter your password to permanently delete your account." htmlFor="danger-confirm-password">
             <input
+              id="danger-confirm-password"
               className={styles.textInput}
               type="password"
               placeholder="••••••••"
