@@ -13,6 +13,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
+  const ogImage = [{ url: "/og-default.png", width: 1200, height: 630, alt: "Pub DB" }];
   const fallback: Metadata = {
     title: "Pub Details",
     description:
@@ -21,11 +22,14 @@ export async function generateMetadata({
       title: "Pub Details | Pub DB",
       description:
         "View detailed information about this pub — location, amenities, opening hours, beer selection, and more.",
+      images: ogImage,
     },
     twitter: {
+      card: "summary_large_image",
       title: "Pub Details | Pub DB",
       description:
         "View detailed information about this pub — location, amenities, opening hours, beer selection, and more.",
+      images: ["/og-default.png"],
     },
   };
 
@@ -51,8 +55,17 @@ export async function generateMetadata({
     return {
       title,
       description,
-      openGraph: { title: `${title} | Pub DB`, description },
-      twitter: { title: `${title} | Pub DB`, description },
+      openGraph: {
+        title: `${title} | Pub DB`,
+        description,
+        images: ogImage,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${title} | Pub DB`,
+        description,
+        images: ["/og-default.png"],
+      },
     };
   } catch {
     return fallback;

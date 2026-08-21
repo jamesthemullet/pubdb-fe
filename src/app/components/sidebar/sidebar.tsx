@@ -104,7 +104,7 @@ export default function Sidebar(){
 
       <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ""}`}>
         <Link href="/" className={styles.logoRow} onClick={() => setMenuOpen(false)}>
-          <div className={styles.logoIcon}>P</div>
+          <div className={styles.logoIcon} aria-hidden="true">P</div>
           <span className={styles.logoText}>Pub DB</span>
         </Link>
 
