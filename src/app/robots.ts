@@ -5,15 +5,18 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        allow: ["/", "/pubs", "/docs", "/leaderboard", "/changelog", "/privacy", "/terms"],
         disallow: [
-          "/register",
+          "/profile",
           "/billing",
           "/settings",
           "/playground",
-          "/profile",
+          "/add-pub",
+          "/register",
           "/forgot-password",
           "/reset-password",
+          "/success",
+          "/api/",
         ],
       },
     ],

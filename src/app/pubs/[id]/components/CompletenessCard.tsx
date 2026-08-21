@@ -31,7 +31,7 @@ export default function CompletenessCard({ pub, onEdit }: Props){
       </div>
       {onEdit && (
         <button type="button" className={styles.improveBtn} onClick={onEdit}>
-          Improve this listing →
+          Improve this listing <span aria-hidden="true">→</span>
         </button>
       )}
     </div>
