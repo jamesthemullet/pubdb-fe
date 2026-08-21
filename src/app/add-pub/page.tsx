@@ -581,7 +581,7 @@ export default function AddPubPage(){
                 Open existing pub →
               </button>
             )}
-            {success && <p className={styles.successText}>{success}</p>}
+            {success && <p className={styles.successText} role="status">{success}</p>}
             <button type="submit" className={styles.submitBtn} disabled={loading}>
               ✓ {loading ? "Submitting…" : "Submit pub"}
             </button>

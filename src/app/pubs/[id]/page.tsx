@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import type { ReactElement } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Typography from "@/app/components/typography/typography";
@@ -38,6 +38,7 @@ function pubDisplayId(id: string | undefined): string {
 
 export default function PubPage(): ReactElement {
   const { id } = useParams();
+  const router = useRouter();
   const [pub, setPub] = useState<Pub | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -309,11 +310,14 @@ export default function PubPage(): ReactElement {
     [pub]
   );
 
-  const isSaveDisabled =
-    Object.values(fieldErrors).some(Boolean) ||
-    (["name", "city", "address", "postcode", "country"] as (keyof Pub)[]).some(
-      (f) => !editFields[f] || editFields[f]?.toString().trim() === ""
-    );
+  const isSaveDisabled = useMemo(
+    () =>
+      Object.values(fieldErrors).some(Boolean) ||
+      (["name", "city", "address", "postcode", "country"] as (keyof Pub)[]).some(
+        (f) => !editFields[f] || editFields[f]?.toString().trim() === ""
+      ),
+    [fieldErrors, editFields]
+  );
 
   const activeAmenities = useMemo(
     () => (pub ? PUB_AMENITY_FIELDS.filter(({ key }) => pub[key]) : []),
@@ -367,7 +371,7 @@ export default function PubPage(): ReactElement {
         method: "DELETE",
         headers: buildAuthHeaders(token),
       });
-      if (res.ok) window.location.href = "/pubs";
+      if (res.ok) router.push("/pubs");
     } catch { /* ignore */ }
   };
 
@@ -377,12 +381,12 @@ export default function PubPage(): ReactElement {
         {/* Breadcrumb */}
         <nav className={styles.editBreadcrumb} aria-label="Breadcrumb">
           <Link href="/pubs" className={styles.editBreadcrumbLink}>Pubs</Link>
-          <span className={styles.editBreadcrumbSep}>/</span>
+          <span className={styles.editBreadcrumbSep} aria-hidden="true">/</span>
           <span className={styles.editBreadcrumbLink}>{pub.city}</span>
-          <span className={styles.editBreadcrumbSep}>/</span>
+          <span className={styles.editBreadcrumbSep} aria-hidden="true">/</span>
           <code className={styles.editBreadcrumbCode}>{displayId}</code>
-          <span className={styles.editBreadcrumbSep}>/</span>
-          <strong className={styles.editBreadcrumbCurrent}>Edit</strong>
+          <span className={styles.editBreadcrumbSep} aria-hidden="true">/</span>
+          <strong className={styles.editBreadcrumbCurrent} aria-current="page">Edit</strong>
         </nav>
 
         {/* Edit page header */}
@@ -440,10 +444,10 @@ export default function PubPage(): ReactElement {
       {/* Breadcrumb */}
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
         <Link href="/pubs" className={styles.breadcrumbLink}>Pubs</Link>
-        <span className={styles.breadcrumbSep}>/</span>
+        <span className={styles.breadcrumbSep} aria-hidden="true">/</span>
         <span className={styles.breadcrumbLink}>{pub.city}</span>
-        <span className={styles.breadcrumbSep}>/</span>
-        <code className={styles.breadcrumbId}>{displayId}</code>
+        <span className={styles.breadcrumbSep} aria-hidden="true">/</span>
+        <code className={styles.breadcrumbId} aria-current="page">{displayId}</code>
       </nav>
 
       {/* Page header */}
@@ -508,8 +512,8 @@ export default function PubPage(): ReactElement {
             )}
           </div>
 
-          {/* Pub identity */}
-          <h2 className={styles.pubNameLarge}>{pub.name}</h2>
+          {/* Pub identity — aria-hidden: pub name is already the page h1 */}
+          <p className={styles.pubNameLarge} aria-hidden="true">{pub.name}</p>
           <p className={styles.pubAddress}>
             <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true" className={styles.pinIcon}>
               <path d="M8 2a4 4 0 0 1 4 4c0 3-4 8-4 8S4 9 4 6a4 4 0 0 1 4-4z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
@@ -1075,6 +1079,7 @@ function HistoryRowDetail({ changes }: { changes: string[] }): ReactElement | nu
             type="button"
             className={styles.historyMoreBtn}
             onClick={() => setExpanded(true)}
+            aria-expanded={false}
           >
             +{remaining} more
           </button>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
@@ -15,7 +16,8 @@ type Props = {
   onEdit: () => void;
 };
 
-export default function EditButton({ pubName, pubId, user, onEdit }: Props){
+export default function EditButton({ pubName, pubId, user, onEdit }: Props): React.JSX.Element {
+  const router = useRouter();
   const [deleteMessage, setDeleteMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -67,7 +69,7 @@ export default function EditButton({ pubName, pubId, user, onEdit }: Props){
         setDeleteMessage({ type: "error", text: errMsg });
       } else {
         setDeleteMessage({ type: "success", text: "Pub deleted successfully" });
-        window.location.href = "/pubs";
+        router.push("/pubs");
       }
     } catch (_err) {
       setDeleteMessage({ type: "error", text: "Network error" });
