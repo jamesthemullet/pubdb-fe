@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { getErrorMessage } from "@/lib/errors";
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { getErrorMessage } from "@/lib/errors";
 import styles from "./AuthGate.module.css";
 
 type AuthGateProps = {
