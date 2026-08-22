@@ -752,7 +752,7 @@ function PubsContent(): ReactElement {
 
 export default function Pubs(): ReactElement {
   return (
-    <Suspense>
+    <Suspense fallback={<div className={styles.page}><p>Loading pubs…</p></div>}>
       <PubsContent />
     </Suspense>
   );
