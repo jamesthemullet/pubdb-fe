@@ -18,6 +18,14 @@ export const metadata: Metadata = {
     title: "Pub DB",
     description:
       "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "Pub DB" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pub DB",
+    description:
+      "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
+    images: ["/og-default.png"],
   },
 };
 
