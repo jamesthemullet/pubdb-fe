@@ -30,7 +30,7 @@ describe("GET /api/playground/pubs/near", () => {
 
     const request = new Request(
       "http://localhost/api/playground/pubs/near?id=key_dev_abc&lat=51.5&lng=-0.12&radius=5",
-      { headers: { authorization: "Bearer user-token" } }
+      { headers: { cookie: "auth-token=user-token" } }
     );
 
     const response = await GET(request);

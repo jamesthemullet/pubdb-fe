@@ -38,8 +38,7 @@ export default function AuthGate({ context, onLogin }: AuthGateProps){
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || data.errors || "Unknown error");
-      } else if (mode === "login" && data.token) {
-        localStorage.setItem("token", data.token);
+      } else if (mode === "login") {
         window.dispatchEvent(new Event("authChanged"));
         onLogin?.();
       } else {
