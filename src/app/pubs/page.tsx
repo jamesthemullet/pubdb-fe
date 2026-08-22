@@ -12,7 +12,6 @@ import {
   type PubAmenityKey,
 } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
-import { buildAuthHeaders } from "@/lib/auth";
 import { isHttpErrorObject } from "@/lib/errors";
 import { pubCompletenessScore } from "@/lib/pubCompletenessScore";
 import type { Pub, PubType } from "@/types/pub";
@@ -239,10 +238,7 @@ function PubsContent(): ReactElement {
           params.set("lat", String(coords.lat));
           params.set("lng", String(coords.lng));
         }
-        const token = localStorage.getItem("token");
-        const res = await fetch(`/api/pubs?${params}`, {
-          headers: buildAuthHeaders(token),
-        });
+        const res = await fetch(`/api/pubs?${params}`);
         setResponseMs(Date.now() - t0);
 
         if (!res.ok) {

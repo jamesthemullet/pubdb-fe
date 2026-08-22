@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./sidebar.module.css";
 
 type Subscription = {
@@ -54,8 +53,7 @@ export default function Sidebar(){
 
   useEffect(() => {
     if (!user) { setPlanData(null); return; }
-    const token = localStorage.getItem("token");
-    fetch("/api/auth/dashboard", { headers: buildAuthHeaders(token) })
+    fetch("/api/auth/dashboard")
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data: { subscription?: Subscription }) => {
         const subscription = data.subscription;
@@ -70,8 +68,9 @@ export default function Sidebar(){
   }, [user]);
 
   const handleLogout = useCallback(() => {
-    localStorage.removeItem("token");
-    window.dispatchEvent(new Event("authChanged"));
+    fetch("/api/auth/logout", { method: "POST" }).finally(() => {
+      window.dispatchEvent(new Event("authChanged"));
+    });
     setMenuOpen(false);
   }, []);
 

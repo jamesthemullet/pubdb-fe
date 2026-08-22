@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
+import { getAuthHeader } from "../../../../utils/authCookie";
 
 export async function POST(
   request: Request,
@@ -10,9 +11,8 @@ export async function POST(
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      ...getAuthHeader(request),
     };
-    const authHeader = request.headers.get("authorization");
-    if (authHeader) headers.Authorization = authHeader;
     const body = await request.text();
     const response = await fetch(
       `${apiUrl}/auth/keys/${encodeURIComponent(id)}/regenerate`,

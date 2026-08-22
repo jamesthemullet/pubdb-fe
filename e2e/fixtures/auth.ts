@@ -1,33 +1,10 @@
 import type { Page } from "@playwright/test";
 
 /**
- * Build a minimal fake JWT whose payload contains the given email.
- * The signature is not valid — that's fine because the NavBar only
- * base64-decodes the payload; it never validates the signature.
- */
-export function makeFakeJwt(email: string): string {
-  const encode = (obj: object) =>
-    Buffer.from(JSON.stringify(obj)).toString("base64url");
-
-  const header = encode({ alg: "HS256", typ: "JWT" });
-  const payload = encode({ email, sub: "test-user-id", iat: Math.floor(Date.now() / 1000) });
-  return `${header}.${payload}.fakesignature`;
-}
-
-/**
- * Seed localStorage with a JWT before the page makes any requests.
- * Call this inside page.addInitScript so it runs before React hydrates.
- */
-export async function setAuthToken(page: Page, email: string): Promise<void> {
-  const token = makeFakeJwt(email);
-  await page.addInitScript((t) => {
-    localStorage.setItem("token", t);
-  }, token);
-}
-
-/**
- * Mock the /api/auth/me endpoint the useAuth hook calls on every page
- * to resolve the current user from the stored token.
+ * Mock the /api/auth/me endpoint the useAuth hook calls on every page to
+ * determine the current session. Auth state is now backed by a
+ * server-set httpOnly cookie the client can't read or seed directly, so
+ * mocking this endpoint is the only way to simulate being logged in.
  */
 export async function mockAuthMeEndpoint(
   page: Page,

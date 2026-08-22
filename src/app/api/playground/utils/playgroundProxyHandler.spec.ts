@@ -35,7 +35,7 @@ describe("createPlaygroundProxyHandler", () => {
   it("returns 400 when id is missing", async () => {
     const handler = createPlaygroundProxyHandler(() => "/api/v1/things");
     const request = new Request("http://localhost/api/playground/things", {
-      headers: { authorization: "Bearer user-token" },
+      headers: { cookie: "auth-token=user-token" },
     });
 
     const response = await handler(request);
@@ -53,7 +53,7 @@ describe("createPlaygroundProxyHandler", () => {
     const handler = createPlaygroundProxyHandler((params) => `/api/v1/things?${params.toString()}`);
     const request = new Request(
       "http://localhost/api/playground/things?id=key_dev_abc&hasCaskAle=true",
-      { headers: { authorization: "Bearer user-token" } }
+      { headers: { cookie: "auth-token=user-token" } }
     );
 
     const response = await handler(request);
@@ -89,7 +89,7 @@ describe("createPlaygroundProxyHandler", () => {
 
     const handler = createPlaygroundProxyHandler(() => "/api/v1/things");
     const request = new Request("http://localhost/api/playground/things?id=key_dev_abc", {
-      headers: { authorization: "Bearer user-token" },
+      headers: { cookie: "auth-token=user-token" },
     });
 
     const response = await handler(request);
@@ -106,7 +106,7 @@ describe("createPlaygroundProxyHandler", () => {
 
     const handler = createPlaygroundProxyHandler(() => "/api/v1/things");
     const request = new Request("http://localhost/api/playground/things?id=key_missing", {
-      headers: { authorization: "Bearer user-token" },
+      headers: { cookie: "auth-token=user-token" },
     });
 
     const response = await handler(request);
@@ -120,7 +120,7 @@ describe("createPlaygroundProxyHandler", () => {
 
     const handler = createPlaygroundProxyHandler(() => "/api/v1/things");
     const request = new Request("http://localhost/api/playground/things?id=key_dev_abc", {
-      headers: { authorization: "Bearer user-token" },
+      headers: { cookie: "auth-token=user-token" },
     });
 
     const response = await handler(request);

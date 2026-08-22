@@ -59,7 +59,7 @@ describe("PATCH /api/pubs/[id]", () => {
 
 		const request = new Request("http://localhost/api/pubs/42", {
 			method: "PATCH",
-			headers: { "Content-Type": "application/json", authorization: "Bearer user-token" },
+			headers: { "Content-Type": "application/json", cookie: "auth-token=user-token" },
 			body: JSON.stringify({ name: "Updated Pub" }),
 		});
 
@@ -113,7 +113,7 @@ describe("DELETE /api/pubs/[id]", () => {
 
 		const request = new Request("http://localhost/api/pubs/42", {
 			method: "DELETE",
-			headers: { authorization: "Bearer user-token" },
+			headers: { cookie: "auth-token=user-token" },
 		});
 
 		const response = await DELETE(request, { params: Promise.resolve({ id: "42" }) });

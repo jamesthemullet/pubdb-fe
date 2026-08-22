@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
+import { getAuthHeader, setAuthCookie } from "../../utils/authCookie";
 
 function buildHeaders(request: Request, includeContentType: boolean): Record<string, string> {
   const headers: Record<string, string> = {};
   if (includeContentType) headers["Content-Type"] = "application/json";
-  const authHeader = request.headers.get("authorization");
-  if (authHeader) headers.Authorization = authHeader;
-  return headers;
+  return { ...headers, ...getAuthHeader(request) };
+}
+
+function isLoginTokenPayload(value: unknown): value is { token: string; [key: string]: unknown } {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { token?: unknown }).token === "string"
+  );
 }
 
 export async function GET(
@@ -44,6 +51,14 @@ export async function POST(
       body,
     });
     const data: unknown = await response.json().catch(() => null);
+
+    if (action === "login" && response.ok && isLoginTokenPayload(data)) {
+      const { token, ...rest } = data;
+      const nextResponse = NextResponse.json(rest, { status: response.status });
+      setAuthCookie(nextResponse, token);
+      return nextResponse;
+    }
+
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     return NextResponse.json(
