@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 
 const NAV_ITEMS = [
@@ -13,8 +13,24 @@ const NAV_ITEMS = [
   { id: "errors", label: "Errors" },
 ];
 
+const VALID_IDS = new Set(NAV_ITEMS.map((item) => item.id));
+
+function hashToSection(hash: string): string {
+  const id = hash.replace(/^#/, "");
+  return VALID_IDS.has(id) ? id : "quick-start";
+}
+
 export function DocNav(){
   const [activeSection, setActiveSection] = useState("quick-start");
+
+  useEffect(() => {
+    setActiveSection(hashToSection(window.location.hash));
+    function onHashChange() {
+      setActiveSection(hashToSection(window.location.hash));
+    }
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   return (
     <nav className={styles.docsNav} aria-label="Documentation navigation">

@@ -3,10 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { clearBeerTypesCache } from "@/hooks/useBeerTypes";
 import { clearCountriesCache } from "@/hooks/useCountries";
 
-import PubPage from "./page";
+import PubPageClient from "./PubPageClient";
 
 vi.mock("next/navigation", () => ({
-	useParams: () => ({ id: "pub-123" }),
 	useRouter: () => ({ push: vi.fn() }),
 }));
 
@@ -70,8 +69,6 @@ const SAMPLE_PUB = {
 };
 
 type FetchMockOptions = {
-	pubData?: Record<string, unknown>;
-	pubStatus?: number;
 	patchData?: Record<string, unknown>;
 	patchStatus?: number;
 	authData?: Record<string, unknown> | null;
@@ -79,8 +76,6 @@ type FetchMockOptions = {
 };
 
 function setupFetchMock({
-	pubData = SAMPLE_PUB,
-	pubStatus = 200,
 	patchData,
 	patchStatus = 200,
 	authData = null,
@@ -104,9 +99,10 @@ function setupFetchMock({
 
 			if (/\/pubs\//.test(url)) {
 				if (init?.method === "PATCH") {
-					return jsonResponse(patchData ?? pubData, patchStatus);
+					return jsonResponse(patchData ?? SAMPLE_PUB, patchStatus);
 				}
-				return jsonResponse(pubData, pubStatus);
+				// history endpoint
+				return jsonResponse({ data: { history: [] } });
 			}
 
 			if (url.includes("/api/beer-types")) {
@@ -133,7 +129,7 @@ async function renderPageAsAdmin() {
 		authData: { email: "admin@example.com", approved: true, admin: true },
 		authStatus: 200,
 	});
-	render(<PubPage />);
+	render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
 	await screen.findByRole("heading", { name: "The Harp", level: 1 });
 	await screen.findByRole("button", { name: "Edit this pub" });
 	return fetchSpy;
@@ -148,32 +144,18 @@ describe("PubPage", () => {
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
 	});
 
-	describe("loading and fetch states", () => {
-		it("shows loading state initially", () => {
-			vi.spyOn(globalThis, "fetch").mockReturnValue(new Promise(() => {}));
-			render(<PubPage />);
-			expect(screen.getByText("Loading pub details…")).toBeInTheDocument();
-		});
-
-		it('shows "Pub not found" when the fetch returns a non-ok response', async () => {
-			setupFetchMock({ pubStatus: 404 });
-			render(<PubPage />);
-			expect(await screen.findByText("Pub not found")).toBeInTheDocument();
-		});
-
-		it('shows "Pub not found" when the fetch throws a network error', async () => {
-			vi.spyOn(globalThis, "fetch").mockRejectedValue(
-				new Error("Network error"),
-			);
-			render(<PubPage />);
-			expect(await screen.findByText("Pub not found")).toBeInTheDocument();
+	describe("initial data states", () => {
+		it('shows "Pub not found" when initialPub is null', () => {
+			setupFetchMock();
+			render(<PubPageClient id="pub-123" initialPub={null} />);
+			expect(screen.getByText("Pub not found")).toBeInTheDocument();
 		});
 	});
 
 	describe("pub display", () => {
 		it("renders the pub name as a heading", async () => {
 			setupFetchMock();
-			render(<PubPage />);
+			render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
 			expect(
 				await screen.findByRole("heading", { name: "The Harp", level: 1 }),
 			).toBeInTheDocument();
@@ -181,7 +163,7 @@ describe("PubPage", () => {
 
 		it("renders the pub city, address, and postcode", async () => {
 			setupFetchMock();
-			render(<PubPage />);
+			render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
 			await screen.findByRole("heading", { name: "The Harp", level: 1 });
 			expect(screen.getAllByText(/London/).length).toBeGreaterThan(0);
 			expect(screen.getAllByText(/47 Chandos Place/).length).toBeGreaterThan(0);
@@ -189,10 +171,8 @@ describe("PubPage", () => {
 		});
 
 		it("renders a pub image when imageUrl is present", async () => {
-			setupFetchMock({
-				pubData: { ...SAMPLE_PUB, imageUrl: "https://example.com/pub.jpg" },
-			});
-			render(<PubPage />);
+			setupFetchMock();
+			render(<PubPageClient id="pub-123" initialPub={{ ...SAMPLE_PUB, imageUrl: "https://example.com/pub.jpg" }} />);
 			await screen.findByRole("heading", { name: "The Harp", level: 1 });
 			const img = screen.getByRole("img", { name: "The Harp" });
 			expect(img).toHaveAttribute("src", "https://example.com/pub.jpg");
@@ -200,14 +180,14 @@ describe("PubPage", () => {
 
 		it("does not render an image when imageUrl is absent", async () => {
 			setupFetchMock();
-			render(<PubPage />);
+			render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
 			await screen.findByRole("heading", { name: "The Harp", level: 1 });
 			expect(screen.queryByRole("img")).not.toBeInTheDocument();
 		});
 
 		it("renders a clickable external website link", async () => {
 			setupFetchMock();
-			render(<PubPage />);
+			render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
 			await screen.findByRole("heading", { name: "The Harp", level: 1 });
 			const link = screen.getByRole("link", { name: "https://theharp.co.uk" });
 			expect(link).toHaveAttribute("href", "https://theharp.co.uk");
@@ -216,32 +196,28 @@ describe("PubPage", () => {
 		});
 
 		it("renders beer garden details when present", async () => {
-			setupFetchMock({
-				pubData: {
-					...SAMPLE_PUB,
-					beerGardens: [
-						{
-							id: "garden-1",
-							name: "Back Garden",
-							description: "A lovely garden",
-							isCovered: true,
-							isHeated: false,
-							petFriendly: true,
-						},
-					],
-				},
-			});
-			render(<PubPage />);
+			setupFetchMock();
+			render(<PubPageClient id="pub-123" initialPub={{
+				...SAMPLE_PUB,
+				beerGardens: [
+					{
+						id: "garden-1",
+						name: "Back Garden",
+						description: "A lovely garden",
+						isCovered: true,
+						isHeated: false,
+						petFriendly: true,
+					},
+				],
+			}} />);
 			await screen.findByRole("heading", { name: "The Harp", level: 1 });
 			fireEvent.click(screen.getByRole("tab", { name: "Garden" }));
 			expect(screen.getByText("Back Garden")).toBeInTheDocument();
 		});
 
 		it("renders boolean amenity fields correctly", async () => {
-			setupFetchMock({
-				pubData: { ...SAMPLE_PUB, hasFood: true, isDogFriendly: false },
-			});
-			render(<PubPage />);
+			setupFetchMock();
+			render(<PubPageClient id="pub-123" initialPub={{ ...SAMPLE_PUB, hasFood: true, isDogFriendly: false }} />);
 			await screen.findByRole("heading", { name: "The Harp", level: 1 });
 			expect(screen.getByText(/Food available/)).toBeInTheDocument();
 			expect(screen.getByText(/Dog friendly/)).toBeInTheDocument();
@@ -251,7 +227,7 @@ describe("PubPage", () => {
 	describe("auth states (EditButton)", () => {
 		it('shows a "Log in to edit this pub" link when no token is present', async () => {
 			setupFetchMock();
-			render(<PubPage />);
+			render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
 			const link = await screen.findByRole("link", {
 				name: "Log in to edit this pub",
 			});
@@ -268,7 +244,7 @@ describe("PubPage", () => {
 				},
 				authStatus: 200,
 			});
-			render(<PubPage />);
+			render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
 			expect(
 				await screen.findByText(
 					"Your account is not approved for editing.",
@@ -286,7 +262,7 @@ describe("PubPage", () => {
 				},
 				authStatus: 200,
 			});
-			render(<PubPage />);
+			render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
 			expect(
 				await screen.findByRole("button", { name: "Edit this pub" }),
 			).toBeInTheDocument();
@@ -302,7 +278,7 @@ describe("PubPage", () => {
 				},
 				authStatus: 200,
 			});
-			render(<PubPage />);
+			render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
 			await screen.findByRole("button", { name: "Edit this pub" });
 			expect(
 				screen.queryByRole("button", { name: "Delete this pub" }),
@@ -319,7 +295,7 @@ describe("PubPage", () => {
 				},
 				authStatus: 200,
 			});
-			render(<PubPage />);
+			render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
 			expect(
 				await screen.findByRole("button", { name: "Delete this pub" }),
 			).toBeInTheDocument();
@@ -342,7 +318,7 @@ describe("PubPage", () => {
 						throw new Error("API unavailable");
 					}
 					if (/\/pubs\//.test(url)) {
-						return jsonResponse(SAMPLE_PUB);
+						return jsonResponse({ data: { history: [] } });
 					}
 					if (url.includes("/api/beer-types")) {
 						return jsonResponse([]);
@@ -353,7 +329,7 @@ describe("PubPage", () => {
 					throw new Error(`Unexpected fetch URL: ${url}`);
 				},
 			);
-			render(<PubPage />);
+			render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
 			await screen.findByRole("heading", { level: 1, name: SAMPLE_PUB.name });
 			expect(
 				screen.queryByRole("button", { name: "Edit this pub" }),
