@@ -560,7 +560,7 @@ export default function AddPubPage(){
             )}
             {success && <p className={styles.successText} role="status">{success}</p>}
             <button type="submit" className={styles.submitBtn} disabled={loading}>
-              ✓ {loading ? "Submitting…" : "Submit pub"}
+              <span aria-hidden="true">✓</span> {loading ? "Submitting…" : "Submit pub"}
             </button>
           </div>
         </div>
