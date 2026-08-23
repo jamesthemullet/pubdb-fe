@@ -1,6 +1,6 @@
 import type { NextResponse } from "next/server";
 
-export const AUTH_COOKIE_NAME = "auth-token";
+const AUTH_COOKIE_NAME = "auth-token";
 
 function readCookie(request: Request, name: string): string | undefined {
   const cookieHeader = request.headers.get("cookie");
