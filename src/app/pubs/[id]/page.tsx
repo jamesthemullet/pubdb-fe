@@ -244,11 +244,11 @@ export default function PubPage(): ReactElement {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
+      const data: unknown = await res.json();
       if (!res.ok) {
         setSaveError(extractErrorMessage(data));
       } else {
-        setPub(data);
+        setPub(data as Pub);
         setEditing(false);
         setSaveError(null);
       }
@@ -296,9 +296,9 @@ export default function PubPage(): ReactElement {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
-        const data = await res.json();
+        const data: unknown = await res.json();
         if (!res.ok) return extractErrorMessage(data);
-        setPub(data);
+        setPub(data as Pub);
         return null;
       } catch {
         return "Network error";

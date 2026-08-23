@@ -157,19 +157,22 @@ export default function AddPubPage(){
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
+      const data: unknown = await res.json();
+      const responseId = data != null && typeof data === "object" && "id" in data
+        ? (data as { id: string }).id
+        : undefined;
       if (!res.ok) {
         const { formErrors: fe, fieldErrors: fle } = parseApiValidationErrors(data);
         setFormErrors(fe); setFieldErrors(fle);
-        if (res.status === 409 && data?.id) {
-          setEditLink(`/pubs/${data.id}`);
+        if (res.status === 409 && responseId) {
+          setEditLink(`/pubs/${responseId}`);
           if (fe.length === 0) setError("Pub already exists");
         } else if (fe.length === 0 && Object.keys(fle).length === 0) {
           setError("Unknown error");
         }
       } else {
         setSuccess("Pub submitted for review!");
-        setTimeout(() => router.push(`/pubs/${data.id}`), 1000);
+        setTimeout(() => router.push(`/pubs/${responseId}`), 1000);
       }
     } catch { setError("Network error"); }
     finally { setLoading(false); }

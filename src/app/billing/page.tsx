@@ -194,14 +194,14 @@ export default function BillingPage(){
     if (!user) return;
     fetch("/api/auth/dashboard")
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: DashboardData | null) => {
-        if (data) setDashboardData(data);
+      .then((raw: unknown) => {
+        if (raw != null) setDashboardData(raw as DashboardData);
       })
       .catch(() => {});
     fetch("/api/payments/billing")
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: BillingData | null) => {
-        if (data) setBillingData(data);
+      .then((raw: unknown) => {
+        if (raw != null) setBillingData(raw as BillingData);
       })
       .catch(() => {});
   }, [user]);
