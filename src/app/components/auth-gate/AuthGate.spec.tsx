@@ -74,11 +74,11 @@ describe("AuthGate", () => {
 		);
 	});
 
-	it("stores the token in localStorage and calls onLogin on successful login", async () => {
-		vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			jsonResponse({ token: "my-token" }),
-		);
+	it("dispatches authChanged and calls onLogin on successful login, without touching localStorage", async () => {
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ email: "test@example.com" }));
 		const onLogin = vi.fn();
+		const authChanged = vi.fn();
+		window.addEventListener("authChanged", authChanged);
 		render(<AuthGate onLogin={onLogin} />);
 
 		fireEvent.change(screen.getByLabelText("Email"), {
@@ -90,6 +90,8 @@ describe("AuthGate", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Log in" }));
 
 		await waitFor(() => expect(onLogin).toHaveBeenCalledTimes(1));
-		expect(localStorage.getItem("token")).toBe("my-token");
+		expect(authChanged).toHaveBeenCalledTimes(1);
+		expect(localStorage.getItem("token")).toBeNull();
+		window.removeEventListener("authChanged", authChanged);
 	});
 });

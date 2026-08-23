@@ -10,7 +10,6 @@ import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
-import { buildAuthHeaders } from "@/lib/auth";
 import type { BeerGarden, Pub, PubHistoryChange, PubHistoryEntry } from "@/types/pub";
 import addPubStyles from "../../add-pub/page.module.css";
 import CompletenessCard from "./components/CompletenessCard";
@@ -220,7 +219,6 @@ export default function PubPage(): ReactElement {
     }
     try {
       setSaveError(null);
-      const token = localStorage.getItem("token");
       const body: Record<string, unknown> = {};
       if (Array.isArray(editFields.beerTypeIds)) {
         body.beerTypes = editFields.beerTypeIds.map((beerTypeId) => ({ beerTypeId }));
@@ -243,7 +241,7 @@ export default function PubPage(): ReactElement {
       if (pub.createdAt) body.createdAt = pub.createdAt;
       const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       const data = await res.json();
@@ -263,7 +261,6 @@ export default function PubPage(): ReactElement {
     async (field: keyof Pub, value: unknown): Promise<string | null> => {
       if (!pub) return "No pub loaded";
       try {
-        const token = localStorage.getItem("token");
         const merged: Partial<Pub> = {
           ...pub,
           beerGardens: pub.beerGardens ? [...pub.beerGardens] : [],
@@ -296,7 +293,7 @@ export default function PubPage(): ReactElement {
         if (pub.createdAt) body.createdAt = pub.createdAt;
         const res = await fetch(`/api/pubs/${pub.id}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
         const data = await res.json();
@@ -366,10 +363,8 @@ export default function PubPage(): ReactElement {
   const handleDelete = async (): Promise<void> => {
     if (!confirm(`Are you sure you want to delete "${pub.name}"? This cannot be undone.`)) return;
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "DELETE",
-        headers: buildAuthHeaders(token),
       });
       if (res.ok) router.push("/pubs");
     } catch { /* ignore */ }

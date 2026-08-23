@@ -41,7 +41,7 @@ describe("GET /api/leaderboard", () => {
 
 		await GET(
 			new Request("http://localhost/api/leaderboard", {
-				headers: { authorization: "Bearer user-token" },
+				headers: { cookie: "auth-token=user-token" },
 			})
 		);
 

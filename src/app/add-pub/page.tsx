@@ -2,13 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
 import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-editor";
 import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey } from "@/constants/pubFormFields";
+import { useAuth } from "@/hooks/useAuth";
 import { useCountries } from "@/hooks/useCountries";
-import { buildAuthHeaders } from "@/lib/auth";
 import type { OpeningHoursMap, PubType } from "@/types/pub";
 import styles from "./page.module.css";
 
@@ -123,7 +123,7 @@ export default function AddPubPage(){
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [success, setSuccess] = useState<string | null>(null);
   const [editLink, setEditLink] = useState<string | null>(null);
-  const [user, setUser] = useState<{ email: string; approved?: boolean } | null>(null);
+  const { user } = useAuth();
 
   const { countries, countriesLoading, countriesError } = useCountries();
 
@@ -133,27 +133,10 @@ export default function AddPubPage(){
     `Hi PubDB team,\n\nPlease approve my account for editing pubs.\n\nAccount email: ${user?.email ?? "Unknown"}\n\nThanks!`
   )}`;
 
-  useEffect(() => {
-    async function checkAuth(): Promise<void> {
-      const token = localStorage.getItem("token");
-      if (!token) { setUser(null); return; }
-      try {
-        const res = await fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } });
-        if (res.ok) { const d = await res.json(); setUser({ email: d.email, approved: d.approved }); }
-        else setUser(null);
-      } catch { setUser(null); }
-    }
-    checkAuth();
-    window.addEventListener("authChanged", checkAuth);
-    window.addEventListener("storage", checkAuth);
-    return () => { window.removeEventListener("authChanged", checkAuth); window.removeEventListener("storage", checkAuth); };
-  }, []);
-
   async function handleSubmit(e: FormEvent): Promise<void> {
     e.preventDefault();
     setLoading(true); setError(null); setFormErrors([]); setFieldErrors({}); setSuccess(null); setEditLink(null);
     try {
-      const token = localStorage.getItem("token");
       const body: Record<string, unknown> = {
         name, city, country, address, postcode,
         area: area || undefined,
@@ -171,7 +154,7 @@ export default function AddPubPage(){
       };
       const res = await fetch("/api/pubs", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       const data = await res.json();

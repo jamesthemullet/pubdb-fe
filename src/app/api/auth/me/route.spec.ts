@@ -28,7 +28,7 @@ describe("GET /api/auth/me", () => {
 		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(payload));
 
 		const request = new Request("http://localhost/api/auth/me", {
-			headers: { authorization: "Bearer user-token" },
+			headers: { cookie: "auth-token=user-token" },
 		});
 
 		const response = await GET(request);
@@ -86,7 +86,7 @@ describe("PATCH /api/auth/me", () => {
 
 		const request = new Request("http://localhost/api/auth/me", {
 			method: "PATCH",
-			headers: { authorization: "Bearer user-token", "content-type": "application/json" },
+			headers: { cookie: "auth-token=user-token", "content-type": "application/json" },
 			body: JSON.stringify({ name: "Jane Doe" }),
 		});
 
@@ -110,7 +110,7 @@ describe("PATCH /api/auth/me", () => {
 
 		const request = new Request("http://localhost/api/auth/me", {
 			method: "PATCH",
-			headers: { authorization: "Bearer user-token" },
+			headers: { cookie: "auth-token=user-token" },
 			body: JSON.stringify({ name: "J" }),
 		});
 
@@ -126,7 +126,7 @@ describe("PATCH /api/auth/me", () => {
 
 		const request = new Request("http://localhost/api/auth/me", {
 			method: "PATCH",
-			headers: { authorization: "Bearer user-token" },
+			headers: { cookie: "auth-token=user-token" },
 			body: JSON.stringify({ username: "taken" }),
 		});
 

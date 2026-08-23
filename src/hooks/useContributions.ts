@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { buildAuthHeaders } from "@/lib/auth";
 
 type RecentPub = {
   id: string;
@@ -114,12 +113,8 @@ export function useContributions(): {
       setContributionsLoading(true);
       setContributionsError(null);
 
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
       try {
         const res = await fetch("/api/contributions", {
-          headers: buildAuthHeaders(token),
           signal: controller.signal,
         });
         if (!res.ok) {

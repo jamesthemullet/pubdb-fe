@@ -174,8 +174,7 @@ describe("useContributions", () => {
 		});
 	});
 
-	it("sends Authorization header when token is in localStorage", async () => {
-		localStorage.setItem("token", "test-token");
+	it("fetches without an explicit Authorization header, relying on the httpOnly auth cookie", async () => {
 		const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			jsonResponse({ totalAdded: 0, recentPubs: [], recentEdits: [] }),
 		);
@@ -183,19 +182,7 @@ describe("useContributions", () => {
 		await waitFor(() => expect(result.current.contributionsLoading).toBe(false));
 		expect(fetchSpy).toHaveBeenCalledWith(
 			"/api/contributions",
-			expect.objectContaining({ headers: { Authorization: "Bearer test-token" } }),
-		);
-	});
-
-	it("omits Authorization header when no token is present", async () => {
-		const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			jsonResponse({ totalAdded: 0, recentPubs: [], recentEdits: [] }),
-		);
-		const { result } = renderHook(() => useContributions());
-		await waitFor(() => expect(result.current.contributionsLoading).toBe(false));
-		expect(fetchSpy).toHaveBeenCalledWith(
-			"/api/contributions",
-			expect.objectContaining({ headers: {} }),
+			expect.not.objectContaining({ headers: expect.objectContaining({ Authorization: expect.anything() }) }),
 		);
 	});
 });
