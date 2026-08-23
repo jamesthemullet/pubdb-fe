@@ -1,81 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
 
-export type AuthUser = {
-  email: string;
-  approved?: boolean;
-  admin?: boolean;
-  name?: string;
-  username?: string;
-  image?: string;
-  location?: string;
-  bio?: string;
-  usageLimitAlertsEnabled?: boolean;
-  pubEditAlertsEnabled?: boolean;
-} | null;
+// Re-export AuthUser so existing `import type { AuthUser } from "@/hooks/useAuth"` keeps working.
+export type { AuthUser } from "@/contexts/AuthContext";
 
-type AuthPayload = {
-  email: string;
-  approved?: boolean;
-  admin?: boolean;
-  name?: string;
-  username?: string;
-  image?: string;
-  location?: string;
-  bio?: string;
-  usageLimitAlertsEnabled?: boolean;
-  pubEditAlertsEnabled?: boolean;
-};
+// useAuthContext is the single source of auth state across the app.
+// Every call to useAuth() reads from the shared AuthProvider at the root layout
+// instead of making its own /api/auth/me request.
+import { useAuthContext } from "@/contexts/AuthContext";
 
-function isAuthPayload(value: unknown): value is AuthPayload {
-  if (typeof value !== "object" || value === null) return false;
-  const obj = value as Record<string, unknown>;
-  return typeof obj.email === "string";
-}
-
-export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boolean } {
-  const [user, setUser] = useState<AuthUser>(null);
-
-  useEffect(() => {
-    async function checkAuth(): Promise<void> {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setUser(null);
-        return;
-      }
-      try {
-        const res = await fetch("/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const raw: unknown = await res.json();
-          if (isAuthPayload(raw)) {
-            setUser({
-              email: raw.email,
-              approved: raw.approved,
-              admin: raw.admin,
-              name: raw.name,
-              username: raw.username,
-              image: raw.image,
-              location: raw.location,
-              bio: raw.bio,
-              usageLimitAlertsEnabled: raw.usageLimitAlertsEnabled,
-              pubEditAlertsEnabled: raw.pubEditAlertsEnabled,
-            });
-            return;
-          }
-        }
-      } catch { /* network error */ }
-      setUser(null);
-    }
-    void checkAuth();
-    window.addEventListener("authChanged", checkAuth);
-    window.addEventListener("storage", checkAuth);
-    return () => {
-      window.removeEventListener("authChanged", checkAuth);
-      window.removeEventListener("storage", checkAuth);
-    };
-  }, []);
-
-  return { user, isApproved: !!user?.approved, isAdmin: !!user?.admin };
+export function useAuth(): ReturnType<typeof useAuthContext> {
+  return useAuthContext();
 }

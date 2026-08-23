@@ -2,11 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
 import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-editor";
 import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey } from "@/constants/pubFormFields";
+import { useAuth } from "@/hooks/useAuth";
 import { useCountries } from "@/hooks/useCountries";
 import { buildAuthHeaders } from "@/lib/auth";
 import type { OpeningHoursMap, PubType } from "@/types/pub";
@@ -91,6 +92,7 @@ const AMENITY_LABELS: Partial<Record<PubAmenityKey, string>> = {
 
 export default function AddPubPage(){
   const router = useRouter();
+  const { user } = useAuth();
 
   // Core fields
   const [name, setName] = useState("");
@@ -123,31 +125,17 @@ export default function AddPubPage(){
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [success, setSuccess] = useState<string | null>(null);
   const [editLink, setEditLink] = useState<string | null>(null);
-  const [user, setUser] = useState<{ email: string; approved?: boolean } | null>(null);
-
   const { countries, countriesLoading, countriesError } = useCountries();
 
-  const approvalMailto = `mailto:hello@thepubdb.com?subject=${encodeURIComponent(
-    "Approval request for PubDB editor access"
-  )}&body=${encodeURIComponent(
-    `Hi PubDB team,\n\nPlease approve my account for editing pubs.\n\nAccount email: ${user?.email ?? "Unknown"}\n\nThanks!`
-  )}`;
-
-  useEffect(() => {
-    async function checkAuth(): Promise<void> {
-      const token = localStorage.getItem("token");
-      if (!token) { setUser(null); return; }
-      try {
-        const res = await fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } });
-        if (res.ok) { const d = await res.json(); setUser({ email: d.email, approved: d.approved }); }
-        else setUser(null);
-      } catch { setUser(null); }
-    }
-    checkAuth();
-    window.addEventListener("authChanged", checkAuth);
-    window.addEventListener("storage", checkAuth);
-    return () => { window.removeEventListener("authChanged", checkAuth); window.removeEventListener("storage", checkAuth); };
-  }, []);
+  const approvalMailto = useMemo(
+    () =>
+      `mailto:hello@thepubdb.com?subject=${encodeURIComponent(
+        "Approval request for PubDB editor access"
+      )}&body=${encodeURIComponent(
+        `Hi PubDB team,\n\nPlease approve my account for editing pubs.\n\nAccount email: ${user?.email ?? "Unknown"}\n\nThanks!`
+      )}`,
+    [user?.email]
+  );
 
   async function handleSubmit(e: FormEvent): Promise<void> {
     e.preventDefault();
