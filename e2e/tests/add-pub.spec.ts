@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { makeFakeJwt } from "../fixtures/auth";
 
 const AUTH_ME_API = (url: URL) => url.pathname === "/api/auth/me";
 const ADD_PUB_API = (url: URL) => url.pathname === "/api/pubs";
@@ -20,10 +19,6 @@ function mockCountries(page: import("@playwright/test").Page) {
 }
 
 async function setApprovedUser(page: import("@playwright/test").Page) {
-  const token = makeFakeJwt("editor@example.com");
-  await page.addInitScript((t) => {
-    localStorage.setItem("token", t);
-  }, token);
   await page.route(AUTH_ME_API, (route) =>
     route.fulfill(jsonResponse({ email: "editor@example.com", approved: true }))
   );
@@ -46,10 +41,6 @@ test.describe("Add Pub (/add-pub)", () => {
   });
 
   test("shows approval prompt for unapproved users", async ({ page }) => {
-    const token = makeFakeJwt("pending@example.com");
-    await page.addInitScript((t) => {
-      localStorage.setItem("token", t);
-    }, token);
     await page.route(AUTH_ME_API, (route) =>
       route.fulfill(jsonResponse({ email: "pending@example.com", approved: false }))
     );

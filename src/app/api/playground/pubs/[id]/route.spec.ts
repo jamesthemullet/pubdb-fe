@@ -30,7 +30,7 @@ describe("GET /api/playground/pubs/[id]", () => {
 
     const request = new Request(
       "http://localhost/api/playground/pubs/pub_1?id=key_dev_abc",
-      { headers: { authorization: "Bearer user-token" } }
+      { headers: { cookie: "auth-token=user-token" } }
     );
 
     const response = await GET(request, { params: Promise.resolve({ id: "pub_1" }) });
