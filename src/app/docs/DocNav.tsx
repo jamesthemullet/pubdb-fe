@@ -25,7 +25,7 @@ export function DocNav(){
               href={`#${id}`}
               className={`${styles.navItem} ${activeSection === id ? styles.navItemActive : ""}`}
               onClick={() => setActiveSection(id)}
-              aria-current={activeSection === id ? "page" : undefined}
+              aria-current={activeSection === id ? "location" : undefined}
             >
               {label}
             </a>
