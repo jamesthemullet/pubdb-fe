@@ -26,10 +26,6 @@ vi.mock("@/hooks/useAuth", () => ({
 	useAuth: vi.fn(),
 }));
 
-vi.mock("@/lib/auth", () => ({
-	buildAuthHeaders: () => ({}),
-}));
-
 import { useAuth } from "@/hooks/useAuth";
 import Sidebar from "./sidebar";
 
@@ -75,6 +71,28 @@ describe("Sidebar", () => {
 		expect(screen.queryByRole("link", { name: "Register / Log in" })).not.toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Log out" })).toBeInTheDocument();
 		expect(screen.getByText("TE")).toBeInTheDocument();
+	});
+
+	it("logging out posts to /api/auth/logout and dispatches authChanged", async () => {
+		vi.mocked(useAuth).mockReturnValue({
+			user: { email: "test@example.com", approved: true },
+			isApproved: true,
+			isAdmin: false,
+		});
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValue(new Response(JSON.stringify({ success: true }), { status: 200 }));
+		const authChanged = vi.fn();
+		window.addEventListener("authChanged", authChanged);
+
+		render(<Sidebar />);
+		fireEvent.click(screen.getByRole("button", { name: "Log out" }));
+
+		await vi.waitFor(() =>
+			expect(fetchMock).toHaveBeenCalledWith("/api/auth/logout", { method: "POST" }),
+		);
+		await vi.waitFor(() => expect(authChanged).toHaveBeenCalledTimes(1));
+		window.removeEventListener("authChanged", authChanged);
 	});
 
 	it("toggles the mobile menu open and closed, and Escape key closes it", () => {

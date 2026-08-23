@@ -52,12 +52,20 @@ pubs = JSON.parse(res.body)['data']`,
 type Lang = keyof typeof CODE_EXAMPLES;
 const LANGS = Object.keys(CODE_EXAMPLES) as Lang[];
 
-export default function HeroCodeBlock(){
+type Props = {
+  initialJson?: string | null;
+};
+
+export default function HeroCodeBlock({ initialJson }: Props){
+  const hasServerData = typeof initialJson === "string";
   const [activeTab, setActiveTab] = useState<Lang>("curl");
-  const [json, setJson] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [json, setJson] = useState<string | null>(hasServerData ? initialJson : null);
+  const [loading, setLoading] = useState(!hasServerData);
 
   useEffect(() => {
+    // When the server already pre-fetched a sample pub, skip the client-side fetch.
+    if (typeof initialJson === "string") return;
+
     let ignore = false;
     const controller = new AbortController();
     fetch("/api/pubs?limit=1", { signal: controller.signal })
@@ -82,7 +90,7 @@ export default function HeroCodeBlock(){
       ignore = true;
       controller.abort();
     };
-  }, []);
+  }, [initialJson]);
 
   return (
     <div className={styles.codeBlock}>

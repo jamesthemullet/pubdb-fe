@@ -31,7 +31,7 @@ describe("PATCH /api/auth/me/password", () => {
 		const body = JSON.stringify({ currentPassword: "old", newPassword: "new" });
 		const request = new Request("http://localhost/api/auth/me/password", {
 			method: "PATCH",
-			headers: { authorization: "Bearer user-token", "content-type": "application/json" },
+			headers: { cookie: "auth-token=user-token", "content-type": "application/json" },
 			body,
 		});
 
