@@ -56,7 +56,7 @@ export type PubHistoryChange = {
 
 export type PubHistoryEntry = {
   id: string;
-  action: "CREATE" | "UPDATE" | "DELETE" | string;
+  action: string;
   timestamp: string;
   changedFields?: Record<string, PubHistoryChange>;
   /** Not yet returned by the API for every entry — falls back to "system" when absent. */

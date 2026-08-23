@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
+import { clearAuthCache } from "@/hooks/useAuth";
 import { clearCountriesCache } from "@/hooks/useCountries";
 
 import AddPubPage from "./page";
@@ -33,8 +34,6 @@ function jsonResponse(data: unknown, status = 200): Response {
 async function renderApprovedPageWithSubmitResult(
   submitResponse: Response | Error
 ): Promise<void> {
-  localStorage.setItem("token", "test-token");
-
   vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = toUrl(input);
 
@@ -100,6 +99,7 @@ describe("AddPubPage", () => {
 
   beforeEach(() => {
     clearCountriesCache();
+    clearAuthCache();
     vi.restoreAllMocks();
     pushMock.mockReset();
     localStorage.clear();
@@ -132,7 +132,6 @@ describe("AddPubPage", () => {
   });
 
   it("shows approval guidance and includes the user email in the mailto link", async () => {
-    localStorage.setItem("token", "test-token");
 
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
       const url = toUrl(input);
@@ -179,7 +178,6 @@ describe("AddPubPage", () => {
         expect.objectContaining({
           method: "POST",
           headers: expect.objectContaining({
-            Authorization: "Bearer test-token",
             "Content-Type": "application/json",
           }),
         })
@@ -198,9 +196,7 @@ describe("AddPubPage", () => {
     );
   });
 
-  it("submits without Authorization header when token is missing at submit time", async () => {
-    localStorage.setItem("token", "test-token");
-
+  it("submits without an explicit Authorization header, relying on the httpOnly auth cookie", async () => {
     const fetchSpy = vi
       .spyOn(globalThis, "fetch")
       .mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -226,7 +222,6 @@ describe("AddPubPage", () => {
     render(<AddPubPage />);
     await screen.findByRole("heading", { level: 1, name: "Add pub" });
 
-    localStorage.removeItem("token");
     submitCurrentForm();
 
     await waitFor(() => {
@@ -360,7 +355,6 @@ describe("AddPubPage", () => {
   });
 
   it("shows login prompt when auth check returns non-OK status", async () => {
-    localStorage.setItem("token", "test-token");
 
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
       const url = toUrl(input);
@@ -386,7 +380,6 @@ describe("AddPubPage", () => {
   });
 
   it("shows login prompt when auth check throws", async () => {
-    localStorage.setItem("token", "test-token");
 
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
       const url = toUrl(input);
@@ -412,7 +405,6 @@ describe("AddPubPage", () => {
   });
 
   it("shows an error option and disables the country selector when country fetch fails", async () => {
-    localStorage.setItem("token", "test-token");
 
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
@@ -442,7 +434,6 @@ describe("AddPubPage", () => {
   });
 
   it("shows Loading placeholder while countries are still fetching", async () => {
-    localStorage.setItem("token", "test-token");
 
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
       const url = toUrl(input);
@@ -469,7 +460,6 @@ describe("AddPubPage", () => {
   });
 
   it("submits cleared chainName as undefined and includes amenity selections", async () => {
-    localStorage.setItem("token", "test-token");
 
     let submittedBody: Record<string, unknown> | null = null;
 

@@ -71,9 +71,7 @@ describe("Pubs page", () => {
 	});
 
 	it("renders a list of pubs after fetch succeeds", async () => {
-		vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			jsonResponse({ data: SAMPLE_PUBS }),
-		);
+		vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
 
 		render(<Pubs />);
 
@@ -83,9 +81,7 @@ describe("Pubs page", () => {
 	});
 
 	it("renders pub links pointing to the correct detail pages", async () => {
-		vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			jsonResponse({ data: SAMPLE_PUBS }),
-		);
+		vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
 
 		render(<Pubs />);
 
@@ -94,9 +90,7 @@ describe("Pubs page", () => {
 	});
 
 	it("shows empty state when no pubs are returned", async () => {
-		vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			jsonResponse({ data: [] }),
-		);
+		vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: [] }));
 
 		render(<Pubs />);
 
@@ -106,9 +100,7 @@ describe("Pubs page", () => {
 	});
 
 	it("shows error message when fetch fails with HTTP error", async () => {
-		vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			jsonResponse({ error: "Internal server error" }, 500),
-		);
+		vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ error: "Internal server error" }, 500));
 
 		render(<Pubs />);
 
@@ -138,9 +130,7 @@ describe("Pubs page", () => {
 	});
 
 	it("shows the Add pub link when pubs are loaded", async () => {
-		vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			jsonResponse({ data: SAMPLE_PUBS }),
-		);
+		vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
 
 		render(<Pubs />);
 
@@ -226,9 +216,7 @@ describe("Pubs page", () => {
 
 
 		it("does not show match count when search term is empty", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ data: SAMPLE_PUBS }),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
 
 			render(<Pubs />);
 
@@ -240,9 +228,7 @@ describe("Pubs page", () => {
 
 	describe("edit status filter", () => {
 		it("hides the Show filter when the user is logged out", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ data: SAMPLE_PUBS }),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
 
 			render(<Pubs />);
 
@@ -252,7 +238,6 @@ describe("Pubs page", () => {
 		});
 
 		it("shows the Show filter when logged in, and sends editedByMe to the API", async () => {
-			localStorage.setItem("token", "test-token");
 			const fetchMock = mockAuthedFetch(() =>
 				jsonResponse({ data: SAMPLE_PUBS }),
 			);
@@ -272,8 +257,7 @@ describe("Pubs page", () => {
 			});
 		});
 
-		it("forwards the Bearer token on the pubs request", async () => {
-			localStorage.setItem("token", "test-token");
+		it("does not attach an explicit Authorization header on the pubs request, relying on the httpOnly auth cookie", async () => {
 			const fetchMock = mockAuthedFetch(() => jsonResponse({ data: SAMPLE_PUBS }));
 
 			render(<Pubs />);
@@ -285,11 +269,10 @@ describe("Pubs page", () => {
 			);
 			expect(
 				new Headers(pubsCall?.[1]?.headers).get("Authorization"),
-			).toBe("Bearer test-token");
+			).toBeNull();
 		});
 
-		it("shows an error when editedByMe is requested without a valid token", async () => {
-			localStorage.setItem("token", "expired-token");
+		it("shows an error when editedByMe is requested while unauthorized", async () => {
 			mockAuthedFetch(() => jsonResponse({ error: "Unauthorized" }, 401));
 
 			render(<Pubs />);
@@ -340,9 +323,7 @@ describe("Pubs page", () => {
 		};
 
 		it("sorts pubs by completeness score ascending and shows a completeness pill", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ data: [HIGH_SCORE_PUB, LOW_SCORE_PUB] }),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: [HIGH_SCORE_PUB, LOW_SCORE_PUB] }));
 
 			render(<Pubs />);
 
@@ -363,9 +344,7 @@ describe("Pubs page", () => {
 		it("requests the user's location when clicked", async () => {
 			const getCurrentPosition = vi.fn();
 			vi.stubGlobal("navigator", { geolocation: { getCurrentPosition } });
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ data: SAMPLE_PUBS }),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
 
 			render(<Pubs />);
 
@@ -379,9 +358,7 @@ describe("Pubs page", () => {
 
 		it("shows a message when the browser has no geolocation support", async () => {
 			vi.stubGlobal("navigator", {});
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ data: SAMPLE_PUBS }),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
 
 			render(<Pubs />);
 
@@ -404,9 +381,7 @@ describe("Pubs page", () => {
 					) => error?.({} as GeolocationPositionError),
 				},
 			});
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ data: SAMPLE_PUBS }),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
 
 			render(<Pubs />);
 
@@ -463,9 +438,7 @@ describe("Pubs page", () => {
 						} as GeolocationPosition),
 				},
 			});
-			const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ data: SAMPLE_PUBS }),
-			);
+			const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
 
 			render(<Pubs />);
 

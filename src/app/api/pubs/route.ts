@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
+import { getAuthHeader } from "../utils/authCookie";
 import { createApiProxyHandler } from "../utils/proxyHandler";
 
 export const GET = createApiProxyHandler("/pubs", {
@@ -11,9 +12,10 @@ export const GET = createApiProxyHandler("/pubs", {
 export async function POST(request: Request): Promise<Response> {
   const apiUrl = getServerApiUrl();
 
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const authHeader = request.headers.get("authorization");
-  if (authHeader) headers.Authorization = authHeader;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...getAuthHeader(request),
+  };
 
   try {
     const body = await request.text();

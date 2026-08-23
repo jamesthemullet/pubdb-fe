@@ -14,18 +14,7 @@ export type AuthUser = {
   pubEditAlertsEnabled?: boolean;
 } | null;
 
-type AuthPayload = {
-  email: string;
-  approved?: boolean;
-  admin?: boolean;
-  name?: string;
-  username?: string;
-  image?: string;
-  location?: string;
-  bio?: string;
-  usageLimitAlertsEnabled?: boolean;
-  pubEditAlertsEnabled?: boolean;
-};
+type AuthPayload = NonNullable<AuthUser>;
 
 function isAuthPayload(value: unknown): value is AuthPayload {
   if (typeof value !== "object" || value === null) return false;
@@ -36,7 +25,7 @@ function isAuthPayload(value: unknown): value is AuthPayload {
 // Module-level cache: avoids redundant /api/auth/me requests when multiple
 // components that use useAuth mount on the same page (e.g. Sidebar + page component).
 // undefined = not yet fetched; null = fetched, not authenticated.
-let authCache: AuthUser | undefined = undefined;
+let authCache: AuthUser | undefined ;
 
 /** Reset the in-memory auth cache. Exposed for testing only. */
 export function clearAuthCache(): void {
@@ -52,16 +41,8 @@ export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boole
         setUser(authCache);
         return;
       }
-      const token = localStorage.getItem("token");
-      if (!token) {
-        authCache = null;
-        setUser(null);
-        return;
-      }
       try {
-        const res = await fetch("/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch("/api/auth/me");
         if (res.ok) {
           const raw: unknown = await res.json();
           if (isAuthPayload(raw)) {
@@ -95,10 +76,8 @@ export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boole
     }
 
     window.addEventListener("authChanged", handleAuthChange);
-    window.addEventListener("storage", handleAuthChange);
     return () => {
       window.removeEventListener("authChanged", handleAuthChange);
-      window.removeEventListener("storage", handleAuthChange);
     };
   }, []);
 

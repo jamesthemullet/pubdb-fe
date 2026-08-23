@@ -127,7 +127,6 @@ describe("BillingPage", () => {
 	});
 
 	it("shows the hobby plan description when on the HOBBY tier", async () => {
-		localStorage.setItem("token", "test-token");
 		setupFetchMock({ billingData: BILLING_DATA_HOBBY });
 		render(<BillingPage />);
 		await waitFor(() => {
@@ -136,7 +135,6 @@ describe("BillingPage", () => {
 	});
 
 	it("displays the formatted GBP plan price after billing data loads", async () => {
-		localStorage.setItem("token", "test-token");
 		setupFetchMock({ billingData: BILLING_DATA_PAID });
 		render(<BillingPage />);
 		await waitFor(() => {
@@ -145,7 +143,6 @@ describe("BillingPage", () => {
 	});
 
 	it("shows a success message after the subscription is cancelled", async () => {
-		localStorage.setItem("token", "test-token");
 		vi.spyOn(window, "confirm").mockReturnValue(true);
 		setupFetchMock({
 			billingData: BILLING_DATA_PAID,

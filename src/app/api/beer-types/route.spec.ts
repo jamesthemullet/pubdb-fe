@@ -48,7 +48,7 @@ describe("GET /api/beer-types", () => {
     process.env.TESTING_API_KEY = "test-key";
 
     const request = new Request("http://localhost/api/beer-types", {
-      headers: { authorization: "Bearer token-123" },
+      headers: { cookie: "auth-token=token-123" },
     });
 
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(

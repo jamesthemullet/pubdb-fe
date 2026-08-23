@@ -1,7 +1,17 @@
 import { expect, test } from "@playwright/test";
-import { makeFakeJwt } from "../fixtures/auth";
 
 const DASHBOARD_API = "**/auth/dashboard";
+const AUTH_ME_API = "**/auth/me";
+
+function mockAuthenticated(page: import("@playwright/test").Page, email = "user@example.com") {
+  return page.route(AUTH_ME_API, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ email, approved: true }),
+    })
+  );
+}
 
 function dashboardResponse(tier = "HOBBY") {
   return {
@@ -45,10 +55,7 @@ test.describe("Profile page (/profile)", () => {
 
   test.describe("when authenticated", () => {
     test.beforeEach(async ({ page }) => {
-      const token = makeFakeJwt("user@example.com");
-      await page.addInitScript((t) => {
-        localStorage.setItem("token", t);
-      }, token);
+      await mockAuthenticated(page);
       await page.route(DASHBOARD_API, (route) =>
         route.fulfill(dashboardResponse())
       );
@@ -65,10 +72,7 @@ test.describe("Profile page (/profile)", () => {
   });
 
   test("shows error and Try Again button when dashboard API fails", async ({ page }) => {
-    const token = makeFakeJwt("user@example.com");
-    await page.addInitScript((t) => {
-      localStorage.setItem("token", t);
-    }, token);
+    await mockAuthenticated(page);
     await page.route(DASHBOARD_API, (route) =>
       route.fulfill({
         status: 500,

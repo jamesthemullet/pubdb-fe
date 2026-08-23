@@ -34,7 +34,7 @@ export default function RegisterLoginPage(){
 
   return (
     <div className={styles.page}>
-      <AuthGate onLogin={handleLogin} />
+      <AuthGate onLogin={handleLogin} headingLevel={1} />
     </div>
   );
 }

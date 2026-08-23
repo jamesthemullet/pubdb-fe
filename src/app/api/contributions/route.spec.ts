@@ -26,7 +26,7 @@ describe("GET /api/contributions", () => {
 
 		const response = await GET(
 			new Request("http://localhost/api/contributions", {
-				headers: { authorization: "Bearer user-token" },
+				headers: { cookie: "auth-token=user-token" },
 			})
 		);
 
@@ -47,7 +47,7 @@ describe("GET /api/contributions", () => {
 
 		await GET(
 			new Request("http://localhost/api/contributions", {
-				headers: { authorization: "Bearer my-secret-token" },
+				headers: { cookie: "auth-token=my-secret-token" },
 			})
 		);
 
