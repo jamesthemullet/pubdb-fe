@@ -22,14 +22,14 @@ describe("/api/auth/dashboard/usage", () => {
 		process.env = originalEnv;
 	});
 
-	it("forwards the range query param and Authorization header to the backend", async () => {
+	it("forwards the range query param and Authorization header derived from the auth-token cookie to the backend", async () => {
 		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			jsonResponse({ range: "7d", bucket: "day", series: [] }),
 		);
 
 		await GET(
 			new Request("http://localhost/api/auth/dashboard/usage?range=7d", {
-				headers: { authorization: "Bearer user-token" },
+				headers: { cookie: "auth-token=user-token" },
 			}),
 		);
 

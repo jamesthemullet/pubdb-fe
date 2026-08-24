@@ -29,7 +29,7 @@ describe("GET /api/playground/stats", () => {
       .mockResolvedValueOnce(jsonResponse({ success: true, data: {} }));
 
     const request = new Request("http://localhost/api/playground/stats?id=key_dev_abc", {
-      headers: { authorization: "Bearer user-token" },
+      headers: { cookie: "auth-token=user-token" },
     });
 
     const response = await GET(request);

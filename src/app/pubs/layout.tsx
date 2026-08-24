@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     title: "Browse Pubs | Pub DB",
     description:
       "Search and browse thousands of pubs from around the world. Filter by location, amenities, beer types, and more.",
+    images: [{ url: "/og-default.png", alt: "Pub DB" }],
   },
 };
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
+import { getAuthHeader } from "../../utils/authCookie";
 import { createApiProxyHandler } from "../../utils/proxyHandler";
 
 export function GET(request: Request, { params }: { params: Promise<{ id: string }> }): Promise<Response> {
@@ -13,9 +14,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const apiUrl = getServerApiUrl();
 
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const authHeader = request.headers.get("authorization");
-  if (authHeader) headers.Authorization = authHeader;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...getAuthHeader(request),
+  };
 
   try {
     const body = await request.text();
@@ -38,9 +40,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const { id } = await params;
   const apiUrl = getServerApiUrl();
 
-  const headers: Record<string, string> = {};
-  const authHeader = request.headers.get("authorization");
-  if (authHeader) headers.Authorization = authHeader;
+  const headers: Record<string, string> = getAuthHeader(request);
 
   try {
     const response = await fetch(`${apiUrl}/pubs/${id}`, {
