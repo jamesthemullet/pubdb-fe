@@ -10,7 +10,7 @@ import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
-import type { BeerGarden, Pub, PubHistoryChange, PubHistoryEntry } from "@/types/pub";
+import type { BeerGarden, OpeningHoursMap, Pub, PubHistoryChange, PubHistoryEntry } from "@/types/pub";
 import addPubStyles from "../../add-pub/page.module.css";
 import CompletenessCard from "./components/CompletenessCard";
 import EditButton from "./components/EditButton";
@@ -714,7 +714,7 @@ function checkOpenNow(
   todayFull: string
 ): boolean {
   if (!oh) return false;
-  const map: Record<string, { open?: string; close?: string; closed?: boolean }> = {};
+  const map: OpeningHoursMap = {};
   Object.entries(oh).forEach(([k, v]) => { map[k.toLowerCase()] = v; });
   const entry = map[todayFull.toLowerCase()];
   if (!entry || entry.closed || !entry.open || !entry.close) return false;
@@ -737,7 +737,7 @@ function HoursTab({ pub }: { pub: Pub }): ReactElement {
   const isOpenNow = checkOpenNow(pub.openingHours, todayFull);
 
   const oh = pub.openingHours;
-  const map: Record<string, { open?: string; close?: string; closed?: boolean }> = {};
+  const map: OpeningHoursMap = {};
   if (oh) {
     Object.entries(oh).forEach(([k, v]) => { map[k.toLowerCase()] = v; });
   }
