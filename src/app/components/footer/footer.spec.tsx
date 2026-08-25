@@ -8,7 +8,7 @@ describe("Footer", () => {
     render(<Footer />);
     const year = new Date().getFullYear().toString();
     expect(screen.getByText(new RegExp(year))).toBeInTheDocument();
-    expect(screen.getByText(new RegExp("Pub DB"))).toBeInTheDocument();
+    expect(screen.getByText(/Pub DB/)).toBeInTheDocument();
   });
 
   it("renders a Terms link pointing to /terms", () => {

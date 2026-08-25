@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextResponse } from "next/server";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { clearAuthCookie, getAuthHeader, setAuthCookie } from "./authCookie";
 
@@ -43,19 +43,13 @@ describe("getAuthHeader", () => {
 });
 
 describe("setAuthCookie", () => {
-  const originalEnv = process.env;
-
-  beforeEach(() => {
-    process.env = { ...originalEnv };
-  });
-
   afterEach(() => {
-    process.env = originalEnv;
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
   });
 
   it("calls response.cookies.set with the correct name and options", () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
     const response = NextResponse.json({});
     const setCookieSpy = vi.spyOn(response.cookies, "set");
 
@@ -71,7 +65,7 @@ describe("setAuthCookie", () => {
   });
 
   it("sets secure:false in non-production environments", () => {
-    process.env.NODE_ENV = "test";
+    vi.stubEnv("NODE_ENV", "test");
     const response = NextResponse.json({});
     const setCookieSpy = vi.spyOn(response.cookies, "set");
 
