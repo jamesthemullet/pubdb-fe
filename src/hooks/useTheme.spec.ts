@@ -1,5 +1,6 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 import { useTheme } from "./useTheme";
 
 describe("useTheme", () => {
@@ -13,20 +14,19 @@ describe("useTheme", () => {
     document.documentElement.removeAttribute("data-theme");
   });
 
-  it("defaults to light when no theme is stored in localStorage", async () => {
+  it("defaults to light theme when localStorage is empty", () => {
     const { result } = renderHook(() => useTheme());
-    await waitFor(() => expect(result.current.theme).toBe("light"));
+    expect(result.current.theme).toBe("light");
   });
 
-  it("reads dark from localStorage on mount", async () => {
+  it("reads the stored theme from localStorage on mount", () => {
     localStorage.setItem("theme", "dark");
     const { result } = renderHook(() => useTheme());
-    await waitFor(() => expect(result.current.theme).toBe("dark"));
+    expect(result.current.theme).toBe("dark");
   });
 
-  it("setTheme updates state, localStorage, and the data-theme attribute", async () => {
+  it("setTheme updates the theme state, localStorage, and data-theme attribute", () => {
     const { result } = renderHook(() => useTheme());
-    await waitFor(() => expect(result.current.theme).toBe("light"));
 
     act(() => {
       result.current.setTheme("dark");
@@ -37,9 +37,8 @@ describe("useTheme", () => {
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
   });
 
-  it("toggleTheme switches from light to dark", async () => {
+  it("toggleTheme switches from light to dark", () => {
     const { result } = renderHook(() => useTheme());
-    await waitFor(() => expect(result.current.theme).toBe("light"));
 
     act(() => {
       result.current.toggleTheme();
@@ -48,10 +47,9 @@ describe("useTheme", () => {
     expect(result.current.theme).toBe("dark");
   });
 
-  it("toggleTheme switches from dark back to light", async () => {
+  it("toggleTheme switches from dark to light", () => {
     localStorage.setItem("theme", "dark");
     const { result } = renderHook(() => useTheme());
-    await waitFor(() => expect(result.current.theme).toBe("dark"));
 
     act(() => {
       result.current.toggleTheme();
@@ -60,15 +58,25 @@ describe("useTheme", () => {
     expect(result.current.theme).toBe("light");
   });
 
-  it("responds to an external themeChanged event dispatched by another component", async () => {
+  it("updates theme state when a themeChanged event is dispatched externally", async () => {
     const { result } = renderHook(() => useTheme());
-    await waitFor(() => expect(result.current.theme).toBe("light"));
 
     act(() => {
       localStorage.setItem("theme", "dark");
       window.dispatchEvent(new Event("themeChanged"));
     });
 
-    await waitFor(() => expect(result.current.theme).toBe("dark"));
+    expect(result.current.theme).toBe("dark");
+  });
+
+  it("updates theme state when a storage event is dispatched", async () => {
+    const { result } = renderHook(() => useTheme());
+
+    act(() => {
+      localStorage.setItem("theme", "dark");
+      window.dispatchEvent(new Event("storage"));
+    });
+
+    expect(result.current.theme).toBe("dark");
   });
 });

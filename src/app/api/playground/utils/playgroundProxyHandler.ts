@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
+import { getAuthHeader } from "../../utils/authCookie";
 
 type PlaygroundTokenResponse = { token: string; tier?: string; expiresIn?: number };
 
@@ -25,7 +26,7 @@ export function createPlaygroundProxyHandler(
 ): (request: Request) => Promise<Response> {
   return async (request: Request) => {
     const apiUrl = getServerApiUrl();
-    const authHeader = request.headers.get("authorization");
+    const authHeader = getAuthHeader(request).Authorization;
     if (!authHeader) {
       return NextResponse.json({ error: "Missing token" }, { status: 401 });
     }

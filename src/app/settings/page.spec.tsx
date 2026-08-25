@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({
 	useRouter: vi.fn(() => ({ push: vi.fn() })),
@@ -30,15 +30,18 @@ function openDangerZone() {
 	fireEvent.click(screen.getByRole("button", { name: /Danger zone/i }));
 }
 
+function submitDeleteForm() {
+	const form = screen.getByRole("button", { name: /Confirm delete/i }).closest("form");
+	if (!form) {
+		throw new Error("Confirm delete form not found");
+	}
+	return form;
+}
+
 describe("SettingsPage", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
-		localStorage.clear();
 		vi.mocked(useAuth).mockReturnValue({ user: null, isApproved: false, isAdmin: false });
-	});
-
-	afterEach(() => {
-		localStorage.clear();
 	});
 
 	it("shows an auth gate when the user is not authenticated", () => {
@@ -107,8 +110,7 @@ describe("SettingsPage", () => {
 		expect(screen.getByRole("button", { name: /Delete account/i })).toBeInTheDocument();
 	});
 
-	it("on success clears the token, dispatches authChanged, and redirects to /", async () => {
-		localStorage.setItem("token", "test-token");
+	it("on success clears the auth cookie via /api/auth/logout, dispatches authChanged, and redirects to /", async () => {
 		const push = vi.fn();
 		vi.mocked(useRouter).mockReturnValue({ push } as unknown as ReturnType<typeof useRouter>);
 		vi.mocked(useAuth).mockReturnValue({
@@ -116,7 +118,9 @@ describe("SettingsPage", () => {
 			isApproved: true,
 			isAdmin: false,
 		});
-		vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 200 }));
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValue(new Response(null, { status: 200 }));
 		const dispatchSpy = vi.spyOn(window, "dispatchEvent");
 
 		render(<SettingsPage />);
@@ -126,16 +130,15 @@ describe("SettingsPage", () => {
 			target: { value: "my-password" },
 		});
 		await act(async () => {
-			fireEvent.submit(screen.getByRole("button", { name: /Confirm delete/i }).closest("form")!);
+			fireEvent.submit(submitDeleteForm());
 		});
 
-		expect(localStorage.getItem("token")).toBeNull();
+		expect(fetchMock).toHaveBeenCalledWith("/api/auth/logout", { method: "POST" });
 		expect(dispatchSpy).toHaveBeenCalledWith(expect.any(Event));
 		expect(push).toHaveBeenCalledWith("/");
 	});
 
 	it("shows 'Incorrect password.' for a 401 with 'Invalid credentials'", async () => {
-		localStorage.setItem("token", "test-token");
 		vi.mocked(useAuth).mockReturnValue({
 			user: { email: "alice@example.com", approved: true },
 			isApproved: true,
@@ -152,7 +155,7 @@ describe("SettingsPage", () => {
 			target: { value: "wrong-password" },
 		});
 		await act(async () => {
-			fireEvent.submit(screen.getByRole("button", { name: /Confirm delete/i }).closest("form")!);
+			fireEvent.submit(submitDeleteForm());
 		});
 
 		await waitFor(() => {
@@ -161,7 +164,6 @@ describe("SettingsPage", () => {
 	});
 
 	it("shows 'Password is required.' for a 400 response with errors", async () => {
-		localStorage.setItem("token", "test-token");
 		vi.mocked(useAuth).mockReturnValue({
 			user: { email: "alice@example.com", approved: true },
 			isApproved: true,
@@ -178,7 +180,7 @@ describe("SettingsPage", () => {
 			target: { value: "x" },
 		});
 		await act(async () => {
-			fireEvent.submit(screen.getByRole("button", { name: /Confirm delete/i }).closest("form")!);
+			fireEvent.submit(submitDeleteForm());
 		});
 
 		await waitFor(() => {
@@ -187,7 +189,6 @@ describe("SettingsPage", () => {
 	});
 
 	it("shows a generic error message when fetch throws", async () => {
-		localStorage.setItem("token", "test-token");
 		vi.mocked(useAuth).mockReturnValue({
 			user: { email: "alice@example.com", approved: true },
 			isApproved: true,
@@ -202,7 +203,7 @@ describe("SettingsPage", () => {
 			target: { value: "my-password" },
 		});
 		await act(async () => {
-			fireEvent.submit(screen.getByRole("button", { name: /Confirm delete/i }).closest("form")!);
+			fireEvent.submit(submitDeleteForm());
 		});
 
 		await waitFor(() => {

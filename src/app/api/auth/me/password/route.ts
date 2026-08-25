@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
+import { getAuthHeader } from "../../../utils/authCookie";
 
 export async function PATCH(request: Request): Promise<Response> {
   const apiUrl = getServerApiUrl();
   try {
     const body = await request.text();
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    const authHeader = request.headers.get("authorization");
-    if (authHeader) headers.Authorization = authHeader;
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...getAuthHeader(request),
+    };
 
     const response = await fetch(`${apiUrl}/auth/me/password`, {
       method: "PATCH",

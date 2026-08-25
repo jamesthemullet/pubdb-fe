@@ -79,10 +79,6 @@ function normalizeNextBadges(value: unknown): NextBadge[] {
   return Array.isArray(value) ? value.filter(isNextBadge) : [];
 }
 
-function normalizeNullableNumber(value: unknown): number | null {
-  return typeof value === "number" ? value : null;
-}
-
 function normalizePeriod(value: unknown): LeaderboardPeriod {
   if (typeof value !== "object" || value === null) {
     return { since: null, leaderboard: [] };
@@ -91,30 +87,23 @@ function normalizePeriod(value: unknown): LeaderboardPeriod {
   return {
     since: typeof obj.since === "string" ? obj.since : null,
     leaderboard: Array.isArray(obj.leaderboard)
-      ? obj.leaderboard.filter(isLeaderboardEntry).map((entry) => ({
-          ...entry,
-          streak:
-            typeof (entry as unknown as { streak?: unknown }).streak ===
-            "number"
-              ? (entry as unknown as { streak: number }).streak
-              : 0,
-          badges: normalizeBadges(
-            (entry as unknown as { badges?: unknown }).badges
-          ),
-          nextBadges: normalizeNextBadges(
-            (entry as unknown as { nextBadges?: unknown }).nextBadges
-          ),
-          rankChange: normalizeNullableNumber(
-            (entry as unknown as { rankChange?: unknown }).rankChange
-          ),
-          previousRank: normalizeNullableNumber(
-            (entry as unknown as { previousRank?: unknown }).previousRank
-          ),
-          previousTotalContributions: normalizeNullableNumber(
-            (entry as unknown as { previousTotalContributions?: unknown })
-              .previousTotalContributions
-          ),
-        }))
+      ? obj.leaderboard.filter(isLeaderboardEntry).map((entry) => {
+          const raw = entry as unknown as Record<string, unknown>;
+          return {
+            ...entry,
+            streak: typeof raw.streak === "number" ? raw.streak : 0,
+            badges: normalizeBadges(raw.badges),
+            nextBadges: normalizeNextBadges(raw.nextBadges),
+            rankChange:
+              typeof raw.rankChange === "number" ? raw.rankChange : null,
+            previousRank:
+              typeof raw.previousRank === "number" ? raw.previousRank : null,
+            previousTotalContributions:
+              typeof raw.previousTotalContributions === "number"
+                ? raw.previousTotalContributions
+                : null,
+          };
+        })
       : [],
   };
 }

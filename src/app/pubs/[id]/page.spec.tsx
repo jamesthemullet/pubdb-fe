@@ -7,6 +7,7 @@ import PubPage from "./page";
 
 vi.mock("next/navigation", () => ({
 	useParams: () => ({ id: "pub-123" }),
+	useRouter: () => ({ push: vi.fn() }),
 }));
 
 vi.mock("next/link", () => ({
@@ -127,7 +128,6 @@ function setupFetchMock({
 }
 
 async function renderPageAsAdmin() {
-	localStorage.setItem("token", "header.payload.signature");
 	const fetchSpy = setupFetchMock({
 		authData: { email: "admin@example.com", approved: true, admin: true },
 		authStatus: 200,
@@ -258,7 +258,6 @@ describe("PubPage", () => {
 		});
 
 		it("shows the approval message for unapproved users", async () => {
-			localStorage.setItem("token", "header.payload.signature");
 			setupFetchMock({
 				authData: {
 					email: "user@example.com",
@@ -276,7 +275,6 @@ describe("PubPage", () => {
 		});
 
 		it("shows the Edit button for an approved non-admin user", async () => {
-			localStorage.setItem("token", "header.payload.signature");
 			setupFetchMock({
 				authData: {
 					email: "editor@example.com",
@@ -292,7 +290,6 @@ describe("PubPage", () => {
 		});
 
 		it("does not show the Delete button for non-admin approved users", async () => {
-			localStorage.setItem("token", "header.payload.signature");
 			setupFetchMock({
 				authData: {
 					email: "editor@example.com",
@@ -309,7 +306,6 @@ describe("PubPage", () => {
 		});
 
 		it("shows the Delete button only for admin users", async () => {
-			localStorage.setItem("token", "header.payload.signature");
 			setupFetchMock({
 				authData: {
 					email: "admin@example.com",
@@ -325,14 +321,6 @@ describe("PubPage", () => {
 		});
 
 		it("treats user as unauthenticated when /auth/me is unavailable", async () => {
-			const payload = btoa(
-				JSON.stringify({
-					email: "admin@example.com",
-					approved: true,
-					admin: true,
-				}),
-			);
-			localStorage.setItem("token", `header.${payload}.signature`);
 			vi.spyOn(globalThis, "fetch").mockImplementation(
 				async (input, _init?) => {
 					const url =

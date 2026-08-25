@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import type { ReactElement } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Typography from "@/app/components/typography/typography";
@@ -10,7 +10,6 @@ import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
-import { buildAuthHeaders } from "@/lib/auth";
 import type { BeerGarden, Pub, PubHistoryChange, PubHistoryEntry } from "@/types/pub";
 import addPubStyles from "../../add-pub/page.module.css";
 import CompletenessCard from "./components/CompletenessCard";
@@ -38,6 +37,7 @@ function pubDisplayId(id: string | undefined): string {
 
 export default function PubPage(): ReactElement {
   const { id } = useParams();
+  const router = useRouter();
   const [pub, setPub] = useState<Pub | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -219,7 +219,6 @@ export default function PubPage(): ReactElement {
     }
     try {
       setSaveError(null);
-      const token = localStorage.getItem("token");
       const body: Record<string, unknown> = {};
       if (Array.isArray(editFields.beerTypeIds)) {
         body.beerTypes = editFields.beerTypeIds.map((beerTypeId) => ({ beerTypeId }));
@@ -242,14 +241,14 @@ export default function PubPage(): ReactElement {
       if (pub.createdAt) body.createdAt = pub.createdAt;
       const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
+      const data: unknown = await res.json();
       if (!res.ok) {
         setSaveError(extractErrorMessage(data));
       } else {
-        setPub(data);
+        setPub(data as Pub);
         setEditing(false);
         setSaveError(null);
       }
@@ -262,7 +261,6 @@ export default function PubPage(): ReactElement {
     async (field: keyof Pub, value: unknown): Promise<string | null> => {
       if (!pub) return "No pub loaded";
       try {
-        const token = localStorage.getItem("token");
         const merged: Partial<Pub> = {
           ...pub,
           beerGardens: pub.beerGardens ? [...pub.beerGardens] : [],
@@ -295,12 +293,12 @@ export default function PubPage(): ReactElement {
         if (pub.createdAt) body.createdAt = pub.createdAt;
         const res = await fetch(`/api/pubs/${pub.id}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
-        const data = await res.json();
+        const data: unknown = await res.json();
         if (!res.ok) return extractErrorMessage(data);
-        setPub(data);
+        setPub(data as Pub);
         return null;
       } catch {
         return "Network error";
@@ -365,12 +363,10 @@ export default function PubPage(): ReactElement {
   const handleDelete = async (): Promise<void> => {
     if (!confirm(`Are you sure you want to delete "${pub.name}"? This cannot be undone.`)) return;
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "DELETE",
-        headers: buildAuthHeaders(token),
       });
-      if (res.ok) window.location.href = "/pubs";
+      if (res.ok) router.push("/pubs");
     } catch { /* ignore */ }
   };
 
@@ -380,12 +376,12 @@ export default function PubPage(): ReactElement {
         {/* Breadcrumb */}
         <nav className={styles.editBreadcrumb} aria-label="Breadcrumb">
           <Link href="/pubs" className={styles.editBreadcrumbLink}>Pubs</Link>
-          <span className={styles.editBreadcrumbSep}>/</span>
+          <span className={styles.editBreadcrumbSep} aria-hidden="true">/</span>
           <span className={styles.editBreadcrumbLink}>{pub.city}</span>
-          <span className={styles.editBreadcrumbSep}>/</span>
+          <span className={styles.editBreadcrumbSep} aria-hidden="true">/</span>
           <code className={styles.editBreadcrumbCode}>{displayId}</code>
-          <span className={styles.editBreadcrumbSep}>/</span>
-          <strong className={styles.editBreadcrumbCurrent}>Edit</strong>
+          <span className={styles.editBreadcrumbSep} aria-hidden="true">/</span>
+          <strong className={styles.editBreadcrumbCurrent} aria-current="page">Edit</strong>
         </nav>
 
         {/* Edit page header */}
@@ -443,10 +439,10 @@ export default function PubPage(): ReactElement {
       {/* Breadcrumb */}
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
         <Link href="/pubs" className={styles.breadcrumbLink}>Pubs</Link>
-        <span className={styles.breadcrumbSep}>/</span>
+        <span className={styles.breadcrumbSep} aria-hidden="true">/</span>
         <span className={styles.breadcrumbLink}>{pub.city}</span>
-        <span className={styles.breadcrumbSep}>/</span>
-        <code className={styles.breadcrumbId}>{displayId}</code>
+        <span className={styles.breadcrumbSep} aria-hidden="true">/</span>
+        <code className={styles.breadcrumbId} aria-current="page">{displayId}</code>
       </nav>
 
       {/* Page header */}
@@ -511,8 +507,8 @@ export default function PubPage(): ReactElement {
             )}
           </div>
 
-          {/* Pub identity */}
-          <h2 className={styles.pubNameLarge}>{pub.name}</h2>
+          {/* Pub identity — aria-hidden: pub name is already the page h1 */}
+          <p className={styles.pubNameLarge} aria-hidden="true">{pub.name}</p>
           <p className={styles.pubAddress}>
             <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true" className={styles.pinIcon}>
               <path d="M8 2a4 4 0 0 1 4 4c0 3-4 8-4 8S4 9 4 6a4 4 0 0 1 4-4z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
@@ -1078,6 +1074,7 @@ function HistoryRowDetail({ changes }: { changes: string[] }): ReactElement | nu
             type="button"
             className={styles.historyMoreBtn}
             onClick={() => setExpanded(true)}
+            aria-expanded={false}
           >
             +{remaining} more
           </button>

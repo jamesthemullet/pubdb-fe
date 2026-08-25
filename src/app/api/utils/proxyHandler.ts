@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
+import { getAuthHeader } from "./authCookie";
 
 export function createApiProxyHandler(
   endpointPath: string,
@@ -12,10 +13,7 @@ export function createApiProxyHandler(
     const headers: Record<string, string> = {};
     if (apiKey && options?.includeApiKey !== false) headers["X-API-Key"] = apiKey;
     if (options?.forwardAuth) {
-      const authHeader = request.headers.get("authorization");
-      if (authHeader) {
-        headers.Authorization = authHeader;
-      }
+      Object.assign(headers, getAuthHeader(request));
     }
 
     try {

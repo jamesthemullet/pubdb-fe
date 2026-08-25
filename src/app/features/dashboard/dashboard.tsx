@@ -4,9 +4,9 @@ import Link from "next/link";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
+import { useAuth } from "@/hooks/useAuth";
 import { useContributions } from "@/hooks/useContributions";
-import { buildAuthHeaders } from "@/lib/auth";
-import { getErrorMessage, isHttpErrorObject } from "@/lib/errors";
+import { getErrorMessage, getResponseMessage, isHttpErrorObject } from "@/lib/errors";
 import styles from "./dashboard.module.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -185,6 +185,7 @@ function UsageBarChart({ data }: { data: UsageSeriesResponse }) {
 // ── Main component ────────────────────────────────────────────────────────────
 
 const Dashboard = (): React.JSX.Element | null => {
+  const { user: authUser } = useAuth();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
   );
@@ -193,7 +194,6 @@ const Dashboard = (): React.JSX.Element | null => {
   const [expandedEdits, setExpandedEdits] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [cancelMessage, setCancelMessage] = useState<string | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
@@ -248,12 +248,10 @@ const Dashboard = (): React.JSX.Element | null => {
   }
 
   useEffect(() => {
-    async function fetchDashboard(token: string): Promise<void> {
+    async function fetchDashboard(): Promise<void> {
       try {
         setError(null);
-        const res = await fetch("/api/auth/dashboard", {
-          headers: buildAuthHeaders(token),
-        });
+        const res = await fetch("/api/auth/dashboard");
         if (!res.ok) {
           const errorData: unknown = await res.json();
           throw { response: res, data: errorData };
@@ -277,39 +275,19 @@ const Dashboard = (): React.JSX.Element | null => {
       }
     }
 
-    const token = localStorage.getItem("token");
-    if (!token) {
+    if (!authUser) {
       setLoading(false);
-    } else {
-      setIsAuthenticated(true);
-      fetchDashboard(token);
+      return;
     }
-
-    const handleAuthChange = () => {
-      const t = localStorage.getItem("token");
-      setIsAuthenticated(!!t);
-      if (t) {
-        fetchDashboard(t);
-      } else {
-        setLoading(false);
-      }
-    };
-    window.addEventListener("authChanged", handleAuthChange);
-    window.addEventListener("storage", handleAuthChange);
-    return () => {
-      window.removeEventListener("authChanged", handleAuthChange);
-      window.removeEventListener("storage", handleAuthChange);
-    };
-  }, []);
+    fetchDashboard();
+  }, [authUser]);
 
   useEffect(() => {
-    async function fetchUsage(token: string, range: UsageRange): Promise<void> {
+    async function fetchUsage(range: UsageRange): Promise<void> {
       try {
         setUsageError(null);
         setUsageLoading(true);
-        const res = await fetch(`/api/auth/dashboard/usage?range=${range}`, {
-          headers: buildAuthHeaders(token),
-        });
+        const res = await fetch(`/api/auth/dashboard/usage?range=${range}`);
         if (!res.ok) {
           const errorData: unknown = await res.json().catch(() => ({}));
           throw { response: res, data: errorData };
@@ -338,24 +316,13 @@ const Dashboard = (): React.JSX.Element | null => {
       }
     }
 
-    function run(): void {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setUsageLoading(false);
-        setUsageSeries(null);
-        return;
-      }
-      fetchUsage(token, chartRange);
+    if (!authUser) {
+      setUsageLoading(false);
+      setUsageSeries(null);
+      return;
     }
-
-    run();
-    window.addEventListener("authChanged", run);
-    window.addEventListener("storage", run);
-    return () => {
-      window.removeEventListener("authChanged", run);
-      window.removeEventListener("storage", run);
-    };
-  }, [chartRange]);
+    fetchUsage(chartRange);
+  }, [authUser, chartRange]);
 
   async function handleCancelSubscription() {
     if (
@@ -368,19 +335,17 @@ const Dashboard = (): React.JSX.Element | null => {
       setCancelling(true);
       setCancelError(null);
       setCancelMessage(null);
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/payments/cancel-subscription", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({}),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       setCancelMessage(
-        data.message ||
+        getResponseMessage(data) ||
           "Subscription cancelled. It will expire at the end of the current billing period."
       );
       cancelAuthChangedTimeoutRef.current = setTimeout(
@@ -403,25 +368,25 @@ const Dashboard = (): React.JSX.Element | null => {
       setShowForgotKeyModal(false);
       setForgotKeyCopyStatus("idle");
       setForgotKeyTarget(id);
-      const token = localStorage.getItem("token");
       const res = await fetch(`/api/auth/keys/${encodeURIComponent(id)}/regenerate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({}),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       setForgotKeyMessage(
-        data.message ||
+        getResponseMessage(data) ||
           "If this API key is eligible, instructions have been emailed to the account owner."
       );
-      if (data.apiKey) {
+      const raw = data as Record<string, unknown>;
+      if (raw.apiKey && typeof raw.apiKey === "object") {
+        const apiKey = raw.apiKey as GeneratedApiKeyResponse;
         setForgotKeyDetails({
-          ...data.apiKey,
-          keyPrefix: data.apiKey.keyPrefix || keyPrefix,
+          ...apiKey,
+          keyPrefix: apiKey.keyPrefix || keyPrefix,
         });
         setShowForgotKeyModal(true);
         setForgotKeyCopyStatus("idle");
@@ -463,21 +428,18 @@ const Dashboard = (): React.JSX.Element | null => {
       setForgotKeyDetails(null);
       setShowForgotKeyModal(false);
       setForgotKeyCopyStatus("idle");
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/payments/subscribe-to-hobby", {
         method: "POST",
-        headers: buildAuthHeaders(token),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
-      const keyData: GeneratedApiKeyResponse = data.apiKey ?? data;
+      const raw = data as Record<string, unknown>;
+      const keyData: GeneratedApiKeyResponse = (raw.apiKey ?? raw) as GeneratedApiKeyResponse;
       setForgotKeyDetails(keyData);
       setShowForgotKeyModal(true);
       setForgotKeyCopyStatus("idle");
-      const refreshRes = await fetch("/api/auth/dashboard", {
-        headers: buildAuthHeaders(token),
-      });
-      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+      const refreshRes = await fetch("/api/auth/dashboard");
+      if (refreshRes.ok) setDashboardData((await refreshRes.json()) as unknown as DashboardData);
     } catch (err: unknown) {
       setCreateKeyError(getErrorMessage(err, "Failed to create API key"));
     } finally {
@@ -500,26 +462,23 @@ const Dashboard = (): React.JSX.Element | null => {
     try {
       setAddKeyLoading(true);
       setAddKeyError(null);
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/auth/keys", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify(addKeyName.trim() ? { name: addKeyName.trim() } : {}),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
-      const keyData: GeneratedApiKeyResponse = data.apiKey ?? data;
+      const raw = data as Record<string, unknown>;
+      const keyData: GeneratedApiKeyResponse = (raw.apiKey ?? raw) as GeneratedApiKeyResponse;
       setShowAddKeyModal(false);
       setForgotKeyDetails(keyData);
       setShowForgotKeyModal(true);
       setForgotKeyCopyStatus("idle");
-      const refreshRes = await fetch("/api/auth/dashboard", {
-        headers: buildAuthHeaders(token),
-      });
-      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+      const refreshRes = await fetch("/api/auth/dashboard");
+      if (refreshRes.ok) setDashboardData((await refreshRes.json()) as unknown as DashboardData);
     } catch (err: unknown) {
       setAddKeyError(getErrorMessage(err, "Failed to create API key"));
     } finally {
@@ -532,17 +491,13 @@ const Dashboard = (): React.JSX.Element | null => {
     try {
       setRevokingKeyId(id);
       setRevokeError(null);
-      const token = localStorage.getItem("token");
       const res = await fetch(`/api/auth/keys/${encodeURIComponent(id)}`, {
         method: "DELETE",
-        headers: buildAuthHeaders(token),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
-      const refreshRes = await fetch("/api/auth/dashboard", {
-        headers: buildAuthHeaders(token),
-      });
-      if (refreshRes.ok) setDashboardData(await refreshRes.json());
+      const refreshRes = await fetch("/api/auth/dashboard");
+      if (refreshRes.ok) setDashboardData((await refreshRes.json()) as unknown as DashboardData);
     } catch (err: unknown) {
       setRevokeError(getErrorMessage(err, "Failed to revoke API key"));
     } finally {
@@ -610,7 +565,7 @@ const Dashboard = (): React.JSX.Element | null => {
     totalUsedPct >= 75 &&
     !nudgeDismissed;
 
-  if (!isAuthenticated) {
+  if (!authUser) {
     return <AuthGate context="API keys" />;
   }
 

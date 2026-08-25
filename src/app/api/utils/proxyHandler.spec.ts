@@ -41,7 +41,7 @@ describe("createApiProxyHandler", () => {
     await expect(response.json()).resolves.toEqual(payload);
   });
 
-  it("forwards Authorization header when forwardAuth is true", async () => {
+  it("forwards Authorization header derived from the auth-token cookie when forwardAuth is true", async () => {
     process.env.TESTING_API_KEY = "test-key";
 
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
@@ -53,7 +53,7 @@ describe("createApiProxyHandler", () => {
 
     const handler = createApiProxyHandler("/api/v1/things", { forwardAuth: true });
     const request = new Request("http://localhost/api/things", {
-      headers: { authorization: "Bearer user-token" },
+      headers: { cookie: "auth-token=user-token" },
     });
 
     await handler(request);
@@ -79,7 +79,7 @@ describe("createApiProxyHandler", () => {
 
     const handler = createApiProxyHandler("/api/v1/things");
     const request = new Request("http://localhost/api/things", {
-      headers: { authorization: "Bearer user-token" },
+      headers: { cookie: "auth-token=user-token" },
     });
 
     await handler(request);
@@ -102,7 +102,7 @@ describe("createApiProxyHandler", () => {
 
     const handler = createApiProxyHandler("/api/v1/things", { forwardAuth: false });
     const request = new Request("http://localhost/api/things", {
-      headers: { authorization: "Bearer user-token" },
+      headers: { cookie: "auth-token=user-token" },
     });
 
     await handler(request);

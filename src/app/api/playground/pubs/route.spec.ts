@@ -30,7 +30,7 @@ describe("GET /api/playground/pubs", () => {
 
     const request = new Request(
       "http://localhost/api/playground/pubs?id=key_dev_abc&page=2&limit=10",
-      { headers: { authorization: "Bearer user-token" } }
+      { headers: { cookie: "auth-token=user-token" } }
     );
 
     const response = await GET(request);

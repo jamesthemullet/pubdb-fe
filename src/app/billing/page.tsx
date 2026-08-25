@@ -4,8 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import Pricing from "@/app/features/pricing/pricing";
 import { useAuth } from "@/hooks/useAuth";
-import { buildAuthHeaders } from "@/lib/auth";
-import { getErrorMessage } from "@/lib/errors";
+import { getErrorMessage, getResponseMessage } from "@/lib/errors";
 import styles from "./page.module.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -193,18 +192,16 @@ export default function BillingPage(){
 
   useEffect(() => {
     if (!user) return;
-    const token = localStorage.getItem("token");
-    const headers = buildAuthHeaders(token);
-    fetch("/api/auth/dashboard", { headers })
+    fetch("/api/auth/dashboard")
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: DashboardData | null) => {
-        if (data) setDashboardData(data);
+      .then((raw: unknown) => {
+        if (raw != null) setDashboardData(raw as DashboardData);
       })
       .catch(() => {});
-    fetch("/api/payments/billing", { headers })
+    fetch("/api/payments/billing")
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: BillingData | null) => {
-        if (data) setBillingData(data);
+      .then((raw: unknown) => {
+        if (raw != null) setBillingData(raw as BillingData);
       })
       .catch(() => {});
   }, [user]);
@@ -220,19 +217,17 @@ export default function BillingPage(){
       setCancelling(true);
       setCancelError(null);
       setCancelMessage(null);
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/payments/cancel-subscription", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({}),
       });
-      const data = await res.json().catch(() => ({}));
+      const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) throw data || new Error(`HTTP error ${res.status}`);
       setCancelMessage(
-        data.message ||
+        getResponseMessage(data) ||
           "Subscription cancelled. It will expire at the end of the current billing period."
       );
       setBillingData((prev) =>
@@ -472,7 +467,14 @@ export default function BillingPage(){
                         {u.limit.toLocaleString()}
                       </span>
                     </p>
-                    <div className={styles.usageBarWrap}>
+                    <div
+                      className={styles.usageBarWrap}
+                      role="progressbar"
+                      aria-valuenow={Math.round(u.pct)}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label={`${u.label} usage: ${u.used.toLocaleString()} of ${u.limit.toLocaleString()} used`}
+                    >
                       <div
                         className={styles.usageBar}
                         style={{ width: `${u.pct}%` }}

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import { useAuth } from "@/hooks/useAuth";
-import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
 
 type ApiKey = {
@@ -159,8 +158,7 @@ export default function PlaygroundPage(){
 
   useEffect(() => {
     if (!user) return;
-    const token = localStorage.getItem("token");
-    fetch("/api/auth/dashboard", { headers: buildAuthHeaders(token) })
+    fetch("/api/auth/dashboard")
       .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((data: DashboardData) => {
         setApiKeys(data.apiKeys);
@@ -202,10 +200,9 @@ export default function PlaygroundPage(){
     setResultError(null);
 
     const { proxyUrl, publicPath } = buildProxyRequest(endpoint, values, selectedKeyId);
-    const token = localStorage.getItem("token");
     const start = performance.now();
     try {
-      const res = await fetch(proxyUrl, { headers: buildAuthHeaders(token) });
+      const res = await fetch(proxyUrl);
       const latencyMs = Math.round(performance.now() - start);
       const body = await res.json().catch(() => null);
       const entry: TryResult = {

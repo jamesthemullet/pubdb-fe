@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { makeFakeJwt } from "../fixtures/auth";
 
 // The detail page fetches from the Next.js proxy routes /api/pubs/42 and /api/auth/me (port 3000).
 const PUB_API = (url: URL) => url.pathname === "/api/pubs/42";
@@ -63,12 +62,9 @@ test.describe("Pub detail (/pubs/[id])", () => {
 
   test.describe("with an authenticated approved user", () => {
     test.beforeEach(async ({ page }) => {
-      // Seed a token so EditButton can read it from localStorage
-      const token = makeFakeJwt("editor@example.com");
-      await page.addInitScript((t) => {
-        localStorage.setItem("token", t);
-      }, token);
-
+      // The auth-token cookie is httpOnly and set by the server; the client
+      // determines auth state solely by calling /api/auth/me, so mocking
+      // that route is enough to simulate a logged-in session here.
       await page.route(AUTH_ME_API, (route) =>
         route.fulfill({
           status: 200,
