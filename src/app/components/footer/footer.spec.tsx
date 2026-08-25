@@ -1,25 +1,35 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
-
-vi.mock("next/link", () => ({
-	default: ({ href, children }: { href: string; children: React.ReactNode }) => (
-		<a href={href}>{children}</a>
-	),
-}));
+import { describe, expect, it } from "vitest";
 
 import Footer from "./footer";
 
 describe("Footer", () => {
-	it("renders copyright with current year and navigation links to Terms and Privacy", () => {
-		render(<Footer />);
+  it("renders the copyright notice with the current year", () => {
+    render(<Footer />);
+    const year = new Date().getFullYear().toString();
+    expect(screen.getByText(new RegExp(year))).toBeInTheDocument();
+    expect(screen.getByText(/Pub DB/)).toBeInTheDocument();
+  });
 
-		const year = new Date().getFullYear();
-		expect(screen.getByText(new RegExp(`${year} Pub DB`))).toBeInTheDocument();
+  it("renders a Terms link pointing to /terms", () => {
+    render(<Footer />);
+    const terms = screen.getByRole("link", { name: "Terms" });
+    expect(terms).toHaveAttribute("href", "/terms");
+  });
 
-		const termsLink = screen.getByRole("link", { name: "Terms" });
-		expect(termsLink).toHaveAttribute("href", "/terms");
+  it("renders a Privacy link pointing to /privacy", () => {
+    render(<Footer />);
+    const privacy = screen.getByRole("link", { name: "Privacy" });
+    expect(privacy).toHaveAttribute("href", "/privacy");
+  });
 
-		const privacyLink = screen.getByRole("link", { name: "Privacy" });
-		expect(privacyLink).toHaveAttribute("href", "/privacy");
-	});
+  it("renders a footer landmark element", () => {
+    render(<Footer />);
+    expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+  });
+
+  it("renders the navigation landmark with an accessible label", () => {
+    render(<Footer />);
+    expect(screen.getByRole("navigation", { name: "Footer" })).toBeInTheDocument();
+  });
 });
