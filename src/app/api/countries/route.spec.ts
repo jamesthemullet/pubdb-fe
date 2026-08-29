@@ -1,52 +1,21 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+import { COUNTRIES } from "@/data/countries";
 import { GET } from "./route";
 
 describe("GET /api/countries", () => {
-	beforeEach(() => {
-		vi.restoreAllMocks();
-	});
-
-	afterEach(() => {
-		vi.restoreAllMocks();
-	});
-
-	it("returns country data with a Cache-Control header on success", async () => {
-		const payload = [{ name: { common: "United Kingdom" }, cca2: "GB" }];
-		vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			new Response(JSON.stringify(payload), {
-				status: 200,
-				headers: { "content-type": "application/json" },
-			})
-		);
-
+	it("returns the bundled country list with a Cache-Control header", async () => {
 		const response = await GET();
 
 		expect(response.status).toBe(200);
-		await expect(response.json()).resolves.toEqual(payload);
+		await expect(response.json()).resolves.toEqual(COUNTRIES);
 		expect(response.headers.get("Cache-Control")).toMatch(/public/);
 		expect(response.headers.get("Cache-Control")).toMatch(/s-maxage=/);
 	});
 
-	it("returns an error JSON with the upstream status when upstream is not ok", async () => {
-		vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			new Response(JSON.stringify({ message: "Service Unavailable" }), {
-				status: 503,
-				headers: { "content-type": "application/json" },
-			})
-		);
-
+	it("includes an entry for the United Kingdom", async () => {
 		const response = await GET();
+		const data: typeof COUNTRIES = await response.json();
 
-		expect(response.status).toBe(503);
-		await expect(response.json()).resolves.toEqual({ error: "Failed to fetch countries" });
-	});
-
-	it("returns 502 with an error JSON when fetch throws", async () => {
-		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network error"));
-
-		const response = await GET();
-
-		expect(response.status).toBe(502);
-		await expect(response.json()).resolves.toEqual({ error: "Failed to fetch countries" });
+		expect(data).toContainEqual({ name: { common: "United Kingdom" }, cca2: "GB" });
 	});
 });
