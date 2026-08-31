@@ -259,7 +259,7 @@ describe("PubPage", () => {
 			expect(link).toHaveAttribute("href", "/register");
 		});
 
-		it("shows the approval message for unapproved users", async () => {
+		it("shows the Edit button for an unapproved user, deferring to the API to enforce quota", async () => {
 			setupFetchMock({
 				authData: {
 					email: "user@example.com",
@@ -270,9 +270,7 @@ describe("PubPage", () => {
 			});
 			render(<PubPage />);
 			expect(
-				await screen.findByText(
-					"Your account is not approved for editing.",
-				),
+				await screen.findByRole("button", { name: "Edit this pub" }),
 			).toBeInTheDocument();
 		});
 
@@ -370,6 +368,21 @@ describe("PubPage", () => {
 			expect(
 				screen.getAllByRole("button", { name: /cancel/i })[0],
 			).toBeInTheDocument();
+		});
+
+		it("shows the unapproved-account banner in edit mode for an unapproved user", async () => {
+			setupFetchMock({
+				authData: {
+					email: "user@example.com",
+					approved: false,
+					admin: false,
+				},
+				authStatus: 200,
+			});
+			render(<PubPage />);
+			fireEvent.click(await screen.findByRole("button", { name: "Edit this pub" }));
+			await waitForSaveButton();
+			expect(screen.getByText(/up to 10 free contributions/i)).toBeInTheDocument();
 		});
 
 		it("returns to view mode when Cancel is clicked", async () => {
