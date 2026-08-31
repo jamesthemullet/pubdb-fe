@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
+import { clearAuthCache } from "@/hooks/useAuth";
 import { clearCountriesCache } from "@/hooks/useCountries";
 
 import AddPubPage from "./page";
@@ -98,6 +99,7 @@ describe("AddPubPage", () => {
 
   beforeEach(() => {
     clearCountriesCache();
+    clearAuthCache();
     vi.restoreAllMocks();
     pushMock.mockReset();
     localStorage.clear();

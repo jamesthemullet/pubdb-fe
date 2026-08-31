@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { clearAuthCache } from "@/hooks/useAuth";
 
 vi.mock("@/hooks/useContributions", () => ({
 	useContributions: () => ({
@@ -117,6 +118,7 @@ describe("Dashboard", () => {
 
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		clearAuthCache();
 		process.env = { ...originalEnv };
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
 	});
