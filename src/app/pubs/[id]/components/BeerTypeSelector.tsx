@@ -17,7 +17,7 @@ export default function BeerTypeSelector({
   loading,
   error,
   onToggle,
-}: Props) {
+}: Props): React.JSX.Element {
   return (
     <fieldset>
       <legend>Beer Types</legend>

@@ -6,6 +6,7 @@ import { Suspense, useEffect, useState } from "react";
 import Button from "@/app/components/button/button";
 import Input from "@/app/components/input/Input";
 import Typography from "@/app/components/typography/typography";
+import { getApiError, getResponseMessage } from "@/lib/errors";
 import styles from "./page.module.css";
 
 function ResetPasswordForm(): ReactElement {
@@ -50,12 +51,12 @@ function ResetPasswordForm(): ReactElement {
         body: JSON.stringify({ token, password }),
       });
 
-      const data = await res.json();
+      const data: unknown = await res.json();
 
       if (!res.ok) {
-        setError(data.error || data.errors || "Unknown error");
+        setError(getApiError(data));
       } else {
-        setMessage(data.message);
+        setMessage(getResponseMessage(data) ?? null);
         setPassword("");
         setConfirmPassword("");
       }

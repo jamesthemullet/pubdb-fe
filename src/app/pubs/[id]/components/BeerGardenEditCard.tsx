@@ -25,7 +25,7 @@ export default function BeerGardenEditCard({
   index,
   onUpdate,
   onRemove,
-}: Props) {
+}: Props): React.JSX.Element {
   return (
     <div
       key={garden.id || `garden-${index}`}
