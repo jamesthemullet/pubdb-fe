@@ -45,7 +45,14 @@
   color: var(--text-color);
 }
 
-.navItemActive {
+/* CSS-only active state: highlight the matching nav link when a section is URL-targeted */
+:global(:root:has(#quick-start:target)) .navItem[href="#quick-start"],
+:global(:root:has(#authentication:target)) .navItem[href="#authentication"],
+:global(:root:has(#endpoints:target)) .navItem[href="#endpoints"],
+:global(:root:has(#filtering:target)) .navItem[href="#filtering"],
+:global(:root:has(#pagination:target)) .navItem[href="#pagination"],
+:global(:root:has(#rate-limits:target)) .navItem[href="#rate-limits"],
+:global(:root:has(#errors:target)) .navItem[href="#errors"] {
   color: var(--text-color);
   font-weight: 600;
 }
