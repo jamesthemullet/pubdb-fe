@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import type { ReactElement } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Typography from "@/app/components/typography/typography";
+import UnapprovedBanner from "@/app/components/unapproved-banner/UnapprovedBanner";
 import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
@@ -51,7 +52,7 @@ export default function PubPage(): ReactElement {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
 
-  const { user, isApproved } = useAuth();
+  const { user } = useAuth();
   const { countries, countriesLoading, countriesError } = useCountries();
   const { beerTypeOptions, beerTypesLoading, beerTypesError } = useBeerTypes();
 
@@ -407,6 +408,8 @@ export default function PubPage(): ReactElement {
           </div>
         </div>
 
+        {user && !user.approved && <UnapprovedBanner email={user.email} />}
+
         <PubEditView
           pub={pub}
           pubDisplayId={displayId}
@@ -481,7 +484,7 @@ export default function PubPage(): ReactElement {
         </div>
       )}
 
-      <CompletenessCard pub={pub} onEdit={isApproved ? handleEditClick : undefined} />
+      <CompletenessCard pub={pub} onEdit={user ? handleEditClick : undefined} />
 
       {/* Two-column body */}
       <div className={styles.body}>
@@ -573,7 +576,7 @@ export default function PubPage(): ReactElement {
                 <PubDisplayView
                   pub={pub}
                   getCountryName={getCountryName}
-                  canEdit={isApproved}
+                  canEdit={!!user}
                   onInlineSave={handleInlineSave}
                 />
               )}

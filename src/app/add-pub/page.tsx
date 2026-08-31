@@ -5,6 +5,7 @@ import type { FormEvent, ReactNode } from "react";
 import { useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
+import UnapprovedBanner from "@/app/components/unapproved-banner/UnapprovedBanner";
 import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-editor";
 import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
@@ -127,12 +128,6 @@ export default function AddPubPage(){
 
   const { countries, countriesLoading, countriesError } = useCountries();
 
-  const approvalMailto = `mailto:hello@thepubdb.com?subject=${encodeURIComponent(
-    "Approval request for PubDB editor access"
-  )}&body=${encodeURIComponent(
-    `Hi PubDB team,\n\nPlease approve my account for editing pubs.\n\nAccount email: ${user?.email ?? "Unknown"}\n\nThanks!`
-  )}`;
-
   async function handleSubmit(e: FormEvent): Promise<void> {
     e.preventDefault();
     setLoading(true); setError(null); setFormErrors([]); setFieldErrors({}); setSuccess(null); setEditLink(null);
@@ -183,21 +178,12 @@ export default function AddPubPage(){
     return <AuthGate context="Add pub" />;
   }
 
-  if (!user.approved) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.gateCard}>
-          <p className={styles.gateText}>Your account isn't approved for editing yet.</p>
-          <a href={approvalMailto} className={styles.gateLink}>Request approval by email</a>
-        </div>
-      </div>
-    );
-  }
-
   const amenityFields = PUB_AMENITY_FIELDS.filter((f) => f.key !== "isIndependent");
 
   return (
     <div className={styles.page}>
+      {!user.approved && <UnapprovedBanner email={user.email} />}
+
       {/* ── Header ── */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
