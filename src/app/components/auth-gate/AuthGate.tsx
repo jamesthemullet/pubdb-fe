@@ -10,9 +10,11 @@ type AuthGateProps = {
   context?: string;
   /** Called after a successful login so the parent can re-check auth. */
   onLogin?: () => void;
+  /** Heading level for the form title. Use 1 when AuthGate is the primary page content. Defaults to 2. */
+  headingLevel?: 1 | 2;
 };
 
-export default function AuthGate({ context, onLogin }: AuthGateProps){
+export default function AuthGate({ context, onLogin, headingLevel = 2 }: AuthGateProps){
   const [mode, setMode] = useState<"register" | "login">("login");
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -38,8 +40,7 @@ export default function AuthGate({ context, onLogin }: AuthGateProps){
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || data.errors || "Unknown error");
-      } else if (mode === "login" && data.token) {
-        localStorage.setItem("token", data.token);
+      } else if (mode === "login") {
         window.dispatchEvent(new Event("authChanged"));
         onLogin?.();
       } else {
@@ -58,13 +59,15 @@ export default function AuthGate({ context, onLogin }: AuthGateProps){
     setSuccess(null);
   }
 
+  const Heading = `h${headingLevel}` as "h1" | "h2";
+
   return (
     <div className={styles.wrap}>
       {context && <p className={styles.context}>{context}</p>}
 
-      <h2 className={styles.title}>
+      <Heading className={styles.title}>
         {mode === "register" ? "Create an account" : "Log in"}
-      </h2>
+      </Heading>
 
       {mode === "register" && (
         <p className={styles.subtitle}>

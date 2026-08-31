@@ -14,18 +14,7 @@ export type AuthUser = {
   pubEditAlertsEnabled?: boolean;
 } | null;
 
-type AuthPayload = {
-  email: string;
-  approved?: boolean;
-  admin?: boolean;
-  name?: string;
-  username?: string;
-  image?: string;
-  location?: string;
-  bio?: string;
-  usageLimitAlertsEnabled?: boolean;
-  pubEditAlertsEnabled?: boolean;
-};
+type AuthPayload = NonNullable<AuthUser>;
 
 function isAuthPayload(value: unknown): value is AuthPayload {
   if (typeof value !== "object" || value === null) return false;
@@ -38,15 +27,8 @@ export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boole
 
   useEffect(() => {
     async function checkAuth(): Promise<void> {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setUser(null);
-        return;
-      }
       try {
-        const res = await fetch("/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch("/api/auth/me");
         if (res.ok) {
           const raw: unknown = await res.json();
           if (isAuthPayload(raw)) {
@@ -70,10 +52,8 @@ export function useAuth(): { user: AuthUser; isApproved: boolean; isAdmin: boole
     }
     void checkAuth();
     window.addEventListener("authChanged", checkAuth);
-    window.addEventListener("storage", checkAuth);
     return () => {
       window.removeEventListener("authChanged", checkAuth);
-      window.removeEventListener("storage", checkAuth);
     };
   }, []);
 

@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
+import { getAuthHeader } from "../../utils/authCookie";
 
 function buildHeaders(request: Request, includeContentType: boolean): Record<string, string> {
   const headers: Record<string, string> = {};
   if (includeContentType) headers["Content-Type"] = "application/json";
-  const authHeader = request.headers.get("authorization");
-  if (authHeader) headers.Authorization = authHeader;
-  return headers;
+  return { ...headers, ...getAuthHeader(request) };
 }
 
 export async function GET(

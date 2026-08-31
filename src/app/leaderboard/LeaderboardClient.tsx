@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -146,10 +147,9 @@ function YourRankBanner({
     <div className={styles.yourRankBanner}>
       <span className={styles.yourRankLabel}>YOUR RANK</span>
       {avatarUrl ? (
-        // biome-ignore lint/performance/noImgElement: user-supplied external avatar URL, not an optimizable local asset
-        <img
+        <Image
           src={avatarUrl}
-          alt=""
+          alt={entry.displayName || entry.username}
           width={36}
           height={36}
           className={styles.yourRankAvatar}
@@ -241,7 +241,7 @@ function TopThisWeekPanel({ entries }: { entries: LeaderboardEntry[] }) {
           <span className={styles.weekName}>
             {entry.displayName || entry.username}
           </span>
-          <div className={styles.weekBarWrap}>
+          <div className={styles.weekBarWrap} aria-hidden="true">
             <div
               className={styles.weekBar}
               style={{ width: `${(entry[metric] / maxValue) * 100}%` }}
@@ -391,7 +391,7 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }){
           <button
             type="button"
             className={styles.actionBtn}
-            onClick={handleShare}
+            onClick={() => { void handleShare(); }}
           >
             <ShareIcon /> Share
           </button>
@@ -400,7 +400,7 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }){
 
       {/* Promo banner */}
       <div className={styles.promoBanner}>
-        🎉 100+ contributions this month unlocks free Developer tier API
+        <span aria-hidden="true">🎉</span> 100+ contributions this month unlocks free Developer tier API
         access. Developer only · 2026 introductory offer.
       </div>
 
@@ -424,7 +424,7 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }){
           </div>
         </div>
         <div className={styles.filterMeta}>
-          <span className={styles.snapshotDot} />
+          <span className={styles.snapshotDot} aria-hidden="true" />
           <span>
             {data.generatedAt
               ? `Snapshot ${new Date(data.generatedAt).toLocaleTimeString([], {

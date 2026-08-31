@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/app/features/pricing/pricing", () => ({
 	default: () => null,
@@ -110,12 +110,7 @@ function setupFetchMock({
 describe("BillingPage", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
-		localStorage.clear();
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
-	});
-
-	afterEach(() => {
-		localStorage.clear();
 	});
 
 	it("shows an AuthGate when the user is not authenticated", () => {
@@ -125,7 +120,6 @@ describe("BillingPage", () => {
 	});
 
 	it("shows the hobby plan description when on the HOBBY tier", async () => {
-		localStorage.setItem("token", "test-token");
 		setupFetchMock({ billingData: BILLING_DATA_HOBBY });
 		render(<BillingPage />);
 		await waitFor(() => {
@@ -134,7 +128,6 @@ describe("BillingPage", () => {
 	});
 
 	it("displays the formatted GBP plan price after billing data loads", async () => {
-		localStorage.setItem("token", "test-token");
 		setupFetchMock({ billingData: BILLING_DATA_PAID });
 		render(<BillingPage />);
 		await waitFor(() => {
@@ -143,7 +136,6 @@ describe("BillingPage", () => {
 	});
 
 	it("shows a success message after the subscription is cancelled", async () => {
-		localStorage.setItem("token", "test-token");
 		vi.spyOn(window, "confirm").mockReturnValue(true);
 		setupFetchMock({
 			billingData: BILLING_DATA_PAID,

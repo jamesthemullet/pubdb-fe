@@ -1,65 +1,82 @@
 import { act, renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { useTheme } from "./useTheme";
 
 describe("useTheme", () => {
-	beforeEach(() => {
-		localStorage.clear();
-		document.documentElement.removeAttribute("data-theme");
-	});
+  beforeEach(() => {
+    localStorage.clear();
+    document.documentElement.removeAttribute("data-theme");
+  });
 
-	afterEach(() => {
-		vi.restoreAllMocks();
-		localStorage.clear();
-		document.documentElement.removeAttribute("data-theme");
-	});
+  afterEach(() => {
+    localStorage.clear();
+    document.documentElement.removeAttribute("data-theme");
+  });
 
-	it("reads the stored theme from localStorage on mount", async () => {
-		localStorage.setItem("theme", "dark");
+  it("defaults to light theme when localStorage is empty", () => {
+    const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe("light");
+  });
 
-		const { result } = renderHook(() => useTheme());
+  it("reads the stored theme from localStorage on mount", () => {
+    localStorage.setItem("theme", "dark");
+    const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe("dark");
+  });
 
-		await act(async () => {});
+  it("setTheme updates the theme state, localStorage, and data-theme attribute", () => {
+    const { result } = renderHook(() => useTheme());
 
-		expect(result.current.theme).toBe("dark");
-	});
+    act(() => {
+      result.current.setTheme("dark");
+    });
 
-	it("defaults to light when localStorage has no stored theme", async () => {
-		const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe("dark");
+    expect(localStorage.getItem("theme")).toBe("dark");
+    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+  });
 
-		await act(async () => {});
+  it("toggleTheme switches from light to dark", () => {
+    const { result } = renderHook(() => useTheme());
 
-		expect(result.current.theme).toBe("light");
-	});
+    act(() => {
+      result.current.toggleTheme();
+    });
 
-	it("toggleTheme switches from light to dark and persists to localStorage", async () => {
-		const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe("dark");
+  });
 
-		await act(async () => {});
-		expect(result.current.theme).toBe("light");
+  it("toggleTheme switches from dark to light", () => {
+    localStorage.setItem("theme", "dark");
+    const { result } = renderHook(() => useTheme());
 
-		act(() => {
-			result.current.toggleTheme();
-		});
+    act(() => {
+      result.current.toggleTheme();
+    });
 
-		expect(result.current.theme).toBe("dark");
-		expect(localStorage.getItem("theme")).toBe("dark");
-		expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
-	});
+    expect(result.current.theme).toBe("light");
+  });
 
-	it("toggleTheme switches from dark to light", async () => {
-		localStorage.setItem("theme", "dark");
+  it("updates theme state when a themeChanged event is dispatched externally", async () => {
+    const { result } = renderHook(() => useTheme());
 
-		const { result } = renderHook(() => useTheme());
+    act(() => {
+      localStorage.setItem("theme", "dark");
+      window.dispatchEvent(new Event("themeChanged"));
+    });
 
-		await act(async () => {});
+    expect(result.current.theme).toBe("dark");
+  });
 
-		act(() => {
-			result.current.toggleTheme();
-		});
+  it("updates theme state when a storage event is dispatched", async () => {
+    const { result } = renderHook(() => useTheme());
 
-		expect(result.current.theme).toBe("light");
-		expect(localStorage.getItem("theme")).toBe("light");
-	});
+    act(() => {
+      localStorage.setItem("theme", "dark");
+      window.dispatchEvent(new Event("storage"));
+    });
+
+    expect(result.current.theme).toBe("dark");
+  });
 });

@@ -5,7 +5,7 @@ export default function Footer(){
   return (
     <footer className={styles.footer}>
       <span className={styles.copy}>&copy; {new Date().getFullYear()} Pub DB</span>
-      <nav className={styles.links}>
+      <nav className={styles.links} aria-label="Footer">
         <Link href="/terms" className={styles.link}>
           Terms
         </Link>

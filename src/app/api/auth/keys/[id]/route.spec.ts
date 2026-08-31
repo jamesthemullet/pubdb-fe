@@ -22,7 +22,7 @@ describe("/api/auth/keys/[id]", () => {
 		process.env = originalEnv;
 	});
 
-	it("forwards DELETE to the backend with the auth header and encoded id", async () => {
+	it("forwards DELETE to the backend with the auth header derived from the cookie and encoded id", async () => {
 		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			jsonResponse({ success: true }),
 		);
@@ -30,7 +30,7 @@ describe("/api/auth/keys/[id]", () => {
 		const response = await DELETE(
 			new Request("http://localhost/api/auth/keys/key_ab12cd34", {
 				method: "DELETE",
-				headers: { authorization: "Bearer user-token" },
+				headers: { cookie: "auth-token=user-token" },
 			}),
 			{ params: Promise.resolve({ id: "key_ab12cd34" }) },
 		);

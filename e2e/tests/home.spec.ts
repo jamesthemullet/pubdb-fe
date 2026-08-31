@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { mockDashboardEndpoint, setAuthToken } from "../fixtures/auth";
+import { mockAuthMeEndpoint, mockDashboardEndpoint } from "../fixtures/auth";
 
 test.describe("Home page", () => {
   test("renders heading and hero description", async ({ page }) => {
@@ -38,7 +38,7 @@ test.describe("Home page", () => {
   test.describe("Pricing — authenticated", () => {
     test("shows Current plan for the user's active tier", async ({ page }) => {
       await mockDashboardEndpoint(page, "HOBBY");
-      await setAuthToken(page, "tester@example.com");
+      await mockAuthMeEndpoint(page, "tester@example.com");
       await page.goto("/");
 
       await expect(page.getByRole("button", { name: "Current plan" })).toBeVisible();

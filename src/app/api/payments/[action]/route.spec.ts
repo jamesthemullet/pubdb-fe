@@ -30,7 +30,7 @@ describe("/api/payments/[action]", () => {
 
 		await GET(
 			new Request("http://localhost/api/payments/billing", {
-				headers: { authorization: "Bearer user-token" },
+				headers: { cookie: "auth-token=user-token" },
 			}),
 			{ params: Promise.resolve({ action: "billing" }) },
 		);
@@ -52,7 +52,7 @@ describe("/api/payments/[action]", () => {
 		await POST(
 			new Request("http://localhost/api/payments/create-checkout-session", {
 				method: "POST",
-				headers: { authorization: "Bearer user-token" },
+				headers: { cookie: "auth-token=user-token" },
 				body: JSON.stringify({ priceId: "price_123" }),
 			}),
 			{ params: Promise.resolve({ action: "create-checkout-session" }) },
