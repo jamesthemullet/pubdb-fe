@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
 import { useAuth } from "@/hooks/useAuth";
+import { getApiError } from "@/lib/errors";
 import styles from "./pricing.module.css";
 
 type ProrationItem = {
@@ -228,9 +229,9 @@ const Pricing = (): React.JSX.Element => {
     try {
       const res = await fetch("/api/auth/dashboard");
       if (!res.ok) return;
-      const data = await res.json();
+      const data = (await res.json()) as { apiKeys?: Array<{ tier?: string }> };
 
-      setUserTier(data.apiKeys[0]?.tier ?? null);
+      setUserTier(data.apiKeys?.[0]?.tier ?? null);
     } catch (_err) {
       /* ignore */
     }
@@ -252,15 +253,13 @@ const Pricing = (): React.JSX.Element => {
         body: JSON.stringify({ priceId }),
       });
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message ||
-            errorData.error ||
-            "Failed to create checkout session"
-        );
+        const errorData: unknown = await response.json().catch(() => null);
+        throw new Error(getApiError(errorData, "Failed to create checkout session"));
       }
-      const data = await response.json();
-      window.location.href = data.url;
+      const data = (await response.json()) as { url?: string };
+      if (typeof data.url === "string") {
+        window.location.href = data.url;
+      }
     } catch (error) {
       setFeedbackMessage({
         type: "error",
@@ -284,20 +283,20 @@ const Pricing = (): React.JSX.Element => {
         body: JSON.stringify({ priceId }),
       });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Failed to get upgrade estimate");
+        const err: unknown = await res.json().catch(() => null);
+        throw new Error(getApiError(err, "Failed to get upgrade estimate"));
       }
-      const data = await res.json();
+      const data = (await res.json()) as UpcomingBill & { upcoming?: UpcomingBill; apiKey?: ApiKey };
       if (data.needsCheckout) {
         await subscribe(priceId, tierName);
         return;
       }
       setUpgradeModal({
         priceId,
-        upcoming: data.upcoming || data,
+        upcoming: data.upcoming ?? data,
         tierName,
       });
-      setApiKey(data.apiKey);
+      setApiKey(data.apiKey ?? null);
     } catch (err: unknown) {
       setError(
         err instanceof Error ? err.message : "Failed to estimate upgrade"
@@ -353,8 +352,8 @@ const Pricing = (): React.JSX.Element => {
         body: JSON.stringify({ priceId }),
       });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Failed to perform upgrade");
+        const err: unknown = await res.json().catch(() => null);
+        throw new Error(getApiError(err, "Failed to perform upgrade"));
       }
       await fetchUserTier();
       closeUpgradeModal();
@@ -385,21 +384,17 @@ const Pricing = (): React.JSX.Element => {
           },
         });
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(
-            errorData.message ||
-              errorData.error ||
-              "Failed to subscribe to Hobby tier"
-          );
+          const errorData: unknown = await response.json().catch(() => null);
+          throw new Error(getApiError(errorData, "Failed to subscribe to Hobby tier"));
         }
-        const data = await response.json();
+        const data = (await response.json()) as { apiKey?: ApiKey };
         setUserTier("HOBBY");
         setUpgradeModal({
           priceId: "",
           upcoming: null,
           tierName: "Hobby",
         });
-        setApiKey(data.apiKey);
+        setApiKey(data.apiKey ?? null);
       } catch (error) {
         setFeedbackMessage({
           type: "error",

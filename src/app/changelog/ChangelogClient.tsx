@@ -7,7 +7,7 @@ const TYPE_LABEL: Record<ChangelogEntryType, string> = {
   fixed: "Fixed",
 };
 
-function TypeBadge({ type }: { type: ChangelogEntryType }) {
+function TypeBadge({ type }: { type: ChangelogEntryType }): React.JSX.Element {
   return (
     <span className={`${styles.typeBadge} ${styles[`type${type}`]}`}>
       {TYPE_LABEL[type]}
@@ -25,7 +25,7 @@ function formatDate(date: string): string {
   });
 }
 
-function VersionEntry({ entry }: { entry: ChangelogVersion }) {
+function VersionEntry({ entry }: { entry: ChangelogVersion }): React.JSX.Element {
   return (
     <div className={styles.versionEntry}>
       <div className={styles.versionRail}>
@@ -50,7 +50,7 @@ function VersionEntry({ entry }: { entry: ChangelogVersion }) {
   );
 }
 
-export default function ChangelogClient({ versions }: { versions: ChangelogVersion[] }){
+export default function ChangelogClient({ versions }: { versions: ChangelogVersion[] }): React.JSX.Element {
   return (
     <div className={styles.page}>
       <div className={styles.header}>

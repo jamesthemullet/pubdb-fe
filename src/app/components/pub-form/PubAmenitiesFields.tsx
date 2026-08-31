@@ -21,7 +21,7 @@ export default function PubAmenitiesFields({
   containerClassName,
   labelClassName,
   idPrefix = "amenity",
-}: PubAmenitiesFieldsProps) {
+}: PubAmenitiesFieldsProps): React.JSX.Element {
   return (
     <div className={`${styles.container} ${containerClassName ?? ""}`}>
       {PUB_AMENITY_FIELDS.map((amenityField) => {
