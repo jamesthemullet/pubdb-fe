@@ -182,9 +182,12 @@ describe("Dashboard", () => {
 
 			await waitFor(() => {
 				expect(
-					screen.getByText(/Account pending approval/),
+					screen.getByText(/account isn't approved yet/i),
 				).toBeInTheDocument();
 			});
+			expect(
+				screen.getByRole("link", { name: "Chase approval by email" }),
+			).toBeInTheDocument();
 		});
 
 		it("shows email not verified warning when email unverified", async () => {

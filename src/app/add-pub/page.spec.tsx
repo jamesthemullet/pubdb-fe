@@ -129,9 +129,8 @@ describe("AddPubPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows approval guidance and includes the user email in the mailto link", async () => {
-
-    vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
+  it("lets an unapproved user see and submit the form, showing the quota message on a 403", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = toUrl(input);
 
       if (url.endsWith("/auth/me")) {
@@ -139,26 +138,30 @@ describe("AddPubPage", () => {
       }
 
       if (url.includes("/api/countries")) {
-        return jsonResponse([{ name: { common: "France" }, cca2: "FR" }]);
+        return jsonResponse([{ name: { common: "United Kingdom" }, cca2: "GB" }]);
+      }
+
+      if (url.endsWith("/pubs") && init?.method === "POST") {
+        return jsonResponse(
+          { error: "Free accounts are limited to 10 contributions. Upgrade your plan to keep contributing." },
+          403
+        );
       }
 
       throw new Error(`Unexpected fetch URL: ${url}`);
     });
 
     render(<AddPubPage />);
+    await screen.findByRole("heading", { level: 1, name: "Add pub" });
+
+    expect(screen.getByText(/up to 10 free contributions/i)).toBeInTheDocument();
+
+    fillRequiredInputs();
+    submitCurrentForm();
 
     expect(
-      await screen.findByText(/isn't approved for editing/i)
+      await screen.findByText(/Free accounts are limited to 10 contributions/i)
     ).toBeInTheDocument();
-
-    const approvalLink = screen.getByRole("link", {
-      name: "Request approval by email",
-    });
-
-    expect(approvalLink).toHaveAttribute("href");
-    expect(approvalLink.getAttribute("href")).toContain(
-      encodeURIComponent("Account email: alice@example.com")
-    );
   });
 
   it("submits the form and redirects to the created pub", async () => {

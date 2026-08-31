@@ -29,19 +29,6 @@ export default function EditButton({ pubName, pubId, user, onEdit }: Props): Rea
       </div>
     );
   }
-  if (!user.approved) {
-    return (
-      <div className={styles.editButtonMessage}>
-        <Typography>Your account is not approved for editing.</Typography>
-        <Typography>
-          Please email{" "}
-          <a href="mailto:hello@thepubdb.com">hello@thepubdb.com</a> to request
-          approval.
-        </Typography>
-      </div>
-    );
-  }
-
   async function handleDelete() {
     if (
       !confirm(
