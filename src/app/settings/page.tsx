@@ -7,8 +7,18 @@ import AuthGate from "@/app/components/auth-gate/AuthGate";
 import type { AuthUser } from "@/hooks/useAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
-import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
+
+// ── Shared types ─────────────────────────────────────────────────────────────
+
+type ApiErrorBody = {
+  error?: string;
+  errors?: { fieldErrors?: Record<string, string[]> };
+};
+
+function asApiError(data: unknown): ApiErrorBody | null {
+  return data != null && typeof data === "object" ? (data as ApiErrorBody) : null;
+}
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
 
@@ -202,17 +212,15 @@ function ProfileTab({ user }: { user: AuthUser }) {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/auth/me", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify(body),
       });
 
-      const data = await res.json().catch(() => null);
+      const data = asApiError(await res.json().catch(() => null));
 
       if (res.ok) {
         setSaved(true);
@@ -278,7 +286,7 @@ function ProfileTab({ user }: { user: AuthUser }) {
               // biome-ignore lint/performance/noImgElement: user-supplied external avatar URL, not an optimizable local asset
               <img
                 src={image}
-                alt=""
+                alt="Profile preview"
                 className={styles.avatarCircle}
                 style={{ objectFit: "cover" }}
               />
@@ -365,17 +373,15 @@ function SecurityTab() {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/auth/me/password", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({ currentPassword, newPassword }),
       });
 
-      const data = await res.json().catch(() => null);
+      const data = asApiError(await res.json().catch(() => null));
 
       if (res.ok) {
         setSaved(true);
@@ -471,12 +477,10 @@ function AlertToggleRow({
     setSaving(true);
 
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/auth/me", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({ [field]: next }),
       });
@@ -501,9 +505,10 @@ function AlertToggleRow({
   }
 
   return (
-    <FieldRow label={label} hint={hint}>
+    <FieldRow label={label} hint={hint} htmlFor={field}>
       <label className={styles.toggleLabel}>
         <input
+          id={field}
           type="checkbox"
           className={styles.toggleInput}
           checked={enabled}
@@ -590,24 +595,22 @@ function DangerTab() {
     setSubmitting(true);
 
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/auth/me", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({ password }),
       });
 
       if (res.ok) {
-        localStorage.removeItem("token");
+        await fetch("/api/auth/logout", { method: "POST" });
         window.dispatchEvent(new Event("authChanged"));
         router.push("/");
         return;
       }
 
-      const data = await res.json().catch(() => null);
+      const data = asApiError(await res.json().catch(() => null));
       if (res.status === 400 && data?.errors) {
         setError("Password is required.");
       } else if (res.status === 401) {
@@ -647,8 +650,9 @@ function DangerTab() {
 
       {confirming && (
         <form onSubmit={handleDeleteAccount} className={styles.dangerRow}>
-          <FieldRow label="Confirm password" hint="Enter your password to permanently delete your account.">
+          <FieldRow label="Confirm password" hint="Enter your password to permanently delete your account." htmlFor="danger-confirm-password">
             <input
+              id="danger-confirm-password"
               className={styles.textInput}
               type="password"
               placeholder="••••••••"

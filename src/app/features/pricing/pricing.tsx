@@ -4,7 +4,7 @@ import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
-import { buildAuthHeaders } from "@/lib/auth";
+import { useAuth } from "@/hooks/useAuth";
 import styles from "./pricing.module.css";
 
 type ProrationItem = {
@@ -157,6 +157,7 @@ const pricingTiers = [
 ];
 
 const Pricing = (): React.JSX.Element => {
+  const { user } = useAuth();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<{
     type: "success" | "error";
@@ -223,12 +224,9 @@ const Pricing = (): React.JSX.Element => {
   const nextPaymentDisplay = formatDateTime(nextPaymentTimestamp);
 
   const fetchUserTier = useCallback(async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    if (!user) return;
     try {
-      const res = await fetch("/api/auth/dashboard", {
-        headers: buildAuthHeaders(token),
-      });
+      const res = await fetch("/api/auth/dashboard");
       if (!res.ok) return;
       const data = await res.json();
 
@@ -236,7 +234,7 @@ const Pricing = (): React.JSX.Element => {
     } catch (_err) {
       /* ignore */
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchUserTier();
@@ -246,12 +244,10 @@ const Pricing = (): React.JSX.Element => {
     if (!priceId) return;
     setLoadingTier(tierName);
     try {
-      const token = localStorage.getItem("token");
       const response = await fetch("/api/payments/create-checkout-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({ priceId }),
       });
@@ -280,12 +276,10 @@ const Pricing = (): React.JSX.Element => {
 
   const requestUpgradeEstimate = async (priceId: string, tierName: string) => {
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/payments/upgrade-estimate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({ priceId }),
       });
@@ -351,12 +345,10 @@ const Pricing = (): React.JSX.Element => {
   const performUpgrade = async (priceId: string) => {
     setPerformingUpgrade(true);
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/payments/perform-upgrade", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({ priceId }),
       });
@@ -375,13 +367,12 @@ const Pricing = (): React.JSX.Element => {
   };
 
   const handleTierSelection = async (tier: (typeof pricingTiers)[0]) => {
-    const token = localStorage.getItem("token");
     if (tier.name === userTier) {
       window.location.href = "/";
       return;
     }
     if (tier.name === "HOBBY") {
-      if (!token) {
+      if (!user) {
         setError("Please log in to manage subscriptions");
         window.location.href = "/register";
         return;
@@ -391,7 +382,6 @@ const Pricing = (): React.JSX.Element => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...buildAuthHeaders(token),
           },
         });
         if (!response.ok) {
@@ -421,7 +411,7 @@ const Pricing = (): React.JSX.Element => {
       }
       return;
     }
-    if (!token) {
+    if (!user) {
       setError("Please log in to manage subscriptions");
       window.location.href = "/register";
       return;

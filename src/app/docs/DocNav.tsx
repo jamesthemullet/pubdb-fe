@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import styles from "./page.module.css";
 
 const NAV_ITEMS = [
@@ -14,8 +11,6 @@ const NAV_ITEMS = [
 ];
 
 export function DocNav(){
-  const [activeSection, setActiveSection] = useState("quick-start");
-
   return (
     <nav className={styles.docsNav} aria-label="Documentation navigation">
       <ul className={styles.navList}>
@@ -23,9 +18,7 @@ export function DocNav(){
           <li key={id}>
             <a
               href={`#${id}`}
-              className={`${styles.navItem} ${activeSection === id ? styles.navItemActive : ""}`}
-              onClick={() => setActiveSection(id)}
-              aria-current={activeSection === id ? "true" : undefined}
+              className={styles.navItem}
             >
               {label}
             </a>

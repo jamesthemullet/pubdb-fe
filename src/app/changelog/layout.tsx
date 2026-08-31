@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Changelog | Pub DB",
     description: "Every notable change to the Pub DB API, newest first.",
+    images: [{ url: "/og-default.png", alt: "Pub DB" }],
   },
 };
 

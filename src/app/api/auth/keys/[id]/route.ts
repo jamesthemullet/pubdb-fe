@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
+import { getAuthHeader } from "../../../utils/authCookie";
 
 export async function DELETE(
   request: Request,
@@ -8,9 +9,7 @@ export async function DELETE(
   const { id } = await params;
   const apiUrl = getServerApiUrl();
   try {
-    const headers: Record<string, string> = {};
-    const authHeader = request.headers.get("authorization");
-    if (authHeader) headers.Authorization = authHeader;
+    const headers: Record<string, string> = getAuthHeader(request);
     const response = await fetch(`${apiUrl}/auth/keys/${encodeURIComponent(id)}`, {
       method: "DELETE",
       headers,

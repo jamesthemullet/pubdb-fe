@@ -1,52 +1,58 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-vi.mock("@/hooks/useTheme", () => ({
-  useTheme: vi.fn(),
-}));
-
-import { useTheme } from "@/hooks/useTheme";
 import Topbar from "./topbar";
 
 describe("Topbar", () => {
-  it("renders the What's new link pointing to /changelog", () => {
-    vi.mocked(useTheme).mockReturnValue({
-      theme: "light",
-      toggleTheme: vi.fn(),
-      setTheme: vi.fn(),
-    });
+  beforeEach(() => {
+    localStorage.clear();
+    document.documentElement.removeAttribute("data-theme");
+  });
 
+  afterEach(() => {
+    localStorage.clear();
+    document.documentElement.removeAttribute("data-theme");
+  });
+
+  it("renders a 'What's new' link pointing to /changelog", () => {
     render(<Topbar />);
-
-    const link = screen.getByRole("link", { name: /what's new/i });
+    const link = screen.getByRole("link", { name: /what.s new/i });
     expect(link).toHaveAttribute("href", "/changelog");
   });
 
-  it("flips the theme toggle aria-label based on current theme", () => {
-    const toggleTheme = vi.fn();
+  it("renders a header landmark element", () => {
+    render(<Topbar />);
+    expect(screen.getByRole("banner")).toBeInTheDocument();
+  });
 
-    vi.mocked(useTheme).mockReturnValue({
-      theme: "light",
-      toggleTheme,
-      setTheme: vi.fn(),
-    });
+  it("renders the theme toggle button with an accessible label", () => {
+    render(<Topbar />);
+    const button = screen.getByRole("button", { name: /switch to dark mode/i });
+    expect(button).toBeInTheDocument();
+  });
 
-    const { rerender } = render(<Topbar />);
-    expect(screen.getByRole("button")).toHaveAttribute(
-      "aria-label",
-      "Switch to dark mode"
-    );
+  it("shows 'Switch to dark mode' label when the current theme is light", () => {
+    localStorage.setItem("theme", "light");
+    render(<Topbar />);
+    expect(
+      screen.getByRole("button", { name: "Switch to dark mode" })
+    ).toBeInTheDocument();
+  });
 
-    vi.mocked(useTheme).mockReturnValue({
-      theme: "dark",
-      toggleTheme,
-      setTheme: vi.fn(),
-    });
+  it("shows 'Switch to light mode' label when the current theme is dark", () => {
+    localStorage.setItem("theme", "dark");
+    render(<Topbar />);
+    const button = screen.getByRole("button", { name: "Switch to light mode" });
+    expect(button).toBeInTheDocument();
+  });
 
-    rerender(<Topbar />);
-    expect(screen.getByRole("button")).toHaveAttribute(
-      "aria-label",
-      "Switch to light mode"
-    );
+  it("toggles the theme when the button is clicked", () => {
+    render(<Topbar />);
+    const button = screen.getByRole("button", { name: "Switch to dark mode" });
+    fireEvent.click(button);
+    expect(
+      screen.getByRole("button", { name: "Switch to light mode" })
+    ).toBeInTheDocument();
+    expect(localStorage.getItem("theme")).toBe("dark");
   });
 });

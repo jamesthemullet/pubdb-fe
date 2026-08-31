@@ -42,7 +42,7 @@ describe("GET /api/pubs/[id]/history", () => {
 		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse([]));
 
 		const request = new Request("http://localhost/api/pubs/abc/history", {
-			headers: { authorization: "Bearer user-token" },
+			headers: { cookie: "auth-token=user-token" },
 		});
 		await GET(request, { params: Promise.resolve({ id: "abc" }) });
 
