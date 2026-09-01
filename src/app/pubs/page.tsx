@@ -118,7 +118,7 @@ function PubsContent(): ReactElement {
     new Set()
   );
   const [sortBy, setSortBy] = useState<SortOption>(
-    isSortOption(urlSort) ? urlSort : "name-asc"
+    isSortOption(urlSort) ? urlSort : "newest"
   );
   const [editStatusFilter, setEditStatusFilter] =
     useState<EditStatusFilter>("all");
@@ -188,7 +188,9 @@ function PubsContent(): ReactElement {
         break;
       case "newest":
       case "oldest": {
-        const ts = new Map(pubs.map((p) => [p.id, Date.parse(p.createdAt ?? "")]));
+        const ts = new Map(
+          pubs.map((p) => [p.id, Date.parse(p.updatedAt ?? p.createdAt ?? "")])
+        );
         const dir = sortBy === "newest" ? -1 : 1;
         sorted.sort((a, b) => dir * ((ts.get(a.id) ?? 0) - (ts.get(b.id) ?? 0)));
         break;
@@ -283,7 +285,7 @@ function PubsContent(): ReactElement {
     setPage(0);
     setSearchTerm("");
     setActiveAmenities(new Set());
-    setSortBy("name-asc");
+    setSortBy("newest");
     setEditStatusFilter("all");
     setTypeFilter("");
     setCoords(null);
@@ -301,7 +303,7 @@ function PubsContent(): ReactElement {
   const hasActiveFilters =
     debouncedSearchTerm ||
     activeAmenities.size > 0 ||
-    sortBy !== "name-asc" ||
+    sortBy !== "newest" ||
     editStatusFilter !== "all" ||
     !!typeFilter ||
     !!coords;
@@ -445,10 +447,10 @@ function PubsContent(): ReactElement {
               fullWidth={false}
             >
               {coords && <option value="distance">Distance (nearest)</option>}
+              <option value="newest">Recently updated</option>
+              <option value="oldest">Least recently updated</option>
               <option value="name-asc">Name (A–Z)</option>
               <option value="name-desc">Name (Z–A)</option>
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
               <option value="needs-attention">Needs attention</option>
             </Dropdown>
 
