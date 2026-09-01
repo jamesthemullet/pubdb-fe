@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactElement } from "react";
@@ -24,6 +25,7 @@ type SortOption =
   | "oldest"
   | "needs-attention";
 type EditStatusFilter = "all" | "edited" | "not-edited";
+type ViewMode = "list" | "grid";
 
 function pubLocation(pub: Pub): string {
   const area = pub.area || pub.borough || null;
@@ -103,6 +105,71 @@ const PubRow = memo(function PubRow({
   );
 });
 
+const CARD_AMENITY_COUNT = 3;
+
+const PubCard = memo(function PubCard({
+  pub,
+  completenessScore,
+}: {
+  pub: Pub;
+  completenessScore?: number;
+}): ReactElement {
+  const activeAmenities = PUB_AMENITY_FIELDS.filter(
+    ({ key }) => pub[key]
+  );
+  const visible = activeAmenities.slice(0, CARD_AMENITY_COUNT);
+  const remaining = activeAmenities.length - visible.length;
+  const initials = pub.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+
+  return (
+    <Link href={`/pubs/${pub.id}`} className={styles.pubCard} data-id={pub.id}>
+      <div className={styles.cardImage}>
+        {pub.imageUrl ? (
+          <Image
+            src={pub.imageUrl}
+            alt=""
+            fill
+            sizes="(max-width: 768px) 50vw, 220px"
+            className={styles.cardImagePhoto}
+          />
+        ) : (
+          <span className={styles.cardImageInitials}>{initials}</span>
+        )}
+        {(pub.area || pub.borough) && (
+          <span className={styles.cardAreaTag}>{pub.area || pub.borough}</span>
+        )}
+      </div>
+      <div className={styles.cardBody}>
+        <div className={styles.cardTitleRow}>
+          <span className={styles.cardName}>{pub.name}</span>
+        </div>
+        <span className={styles.cardLocation}>{pubLocation(pub)}</span>
+        {completenessScore !== undefined && (
+          <span className={styles.completenessPill}>
+            {completenessScore}% complete
+          </span>
+        )}
+        <div className={styles.cardBadges}>
+          {visible.map(({ key, label }) => (
+            <span key={key} className={styles.cardBadge}>
+              {label}
+            </span>
+          ))}
+          {remaining > 0 && (
+            <span className={styles.cardBadge}>+{remaining}</span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+});
+
 function PubsContent(): ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -122,6 +189,7 @@ function PubsContent(): ReactElement {
   );
   const [editStatusFilter, setEditStatusFilter] =
     useState<EditStatusFilter>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [typeFilter, setTypeFilter] = useState<PubType | "">("");
   const [showAllFilters, setShowAllFilters] = useState(false);
   const [responseMs, setResponseMs] = useState<number | null>(null);
@@ -452,12 +520,14 @@ function PubsContent(): ReactElement {
               <option value="needs-attention">Needs attention</option>
             </Dropdown>
 
-            {/* TODO: implement grid and map view modes with real view-mode state and conditional rendering */}
-            {/* <fieldset className={styles.viewToggle} aria-label="View mode">
+            <fieldset className={styles.viewToggle} aria-label="View mode">
               <button
                 type="button"
-                className={`${styles.viewBtn} ${styles.viewBtnActive}`}
-                aria-pressed="true"
+                className={`${styles.viewBtn} ${
+                  viewMode === "grid" ? styles.viewBtnActive : ""
+                }`}
+                aria-pressed={viewMode === "grid"}
+                onClick={() => setViewMode("grid")}
               >
                 <svg
                   width="14"
@@ -510,8 +580,11 @@ function PubsContent(): ReactElement {
               </button>
               <button
                 type="button"
-                className={styles.viewBtn}
-                aria-pressed="false"
+                className={`${styles.viewBtn} ${
+                  viewMode === "list" ? styles.viewBtnActive : ""
+                }`}
+                aria-pressed={viewMode === "list"}
+                onClick={() => setViewMode("list")}
               >
                 <svg
                   width="14"
@@ -528,40 +601,7 @@ function PubsContent(): ReactElement {
                 </svg>
                 List
               </button>
-              <button
-                type="button"
-                className={styles.viewBtn}
-                aria-pressed="false"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  aria-hidden="true"
-                >
-                  <circle
-                    cx="7"
-                    cy="7"
-                    r="5.5"
-                    stroke="currentColor"
-                    strokeWidth="1.3"
-                    fill="none"
-                  />
-                  <path
-                    d="M7 1.5C7 1.5 4 4 4 7s3 5.5 3 5.5"
-                    stroke="currentColor"
-                    strokeWidth="1.3"
-                  />
-                  <path
-                    d="M7 1.5c0 0 3 2.5 3 5.5s-3 5.5-3 5.5"
-                    stroke="currentColor"
-                    strokeWidth="1.3"
-                  />
-                  <path d="M1.5 7h11" stroke="currentColor" strokeWidth="1.3" />
-                </svg>
-                Map
-              </button>
-            </fieldset> */}
+            </fieldset>
           </div>
         </div>
 
@@ -681,6 +721,38 @@ function PubsContent(): ReactElement {
         <output className={styles.stateMsg} aria-live="polite">
           No pubs found{debouncedSearchTerm ? " matching your search" : ""}.
         </output>
+      ) : viewMode === "grid" ? (
+        <div className={styles.tableWrap}>
+          <div className={styles.pubGrid}>
+            {filteredPubs.map((pub) => (
+              <PubCard
+                key={pub.id}
+                pub={pub}
+                completenessScore={completenessScores?.get(pub.id)}
+              />
+            ))}
+          </div>
+
+          <div className={styles.pagination}>
+            <button
+              type="button"
+              className={styles.pageBtn}
+              onClick={() => setPage((p) => p - 1)}
+              disabled={!hasPrevPage}
+            >
+              <span aria-hidden="true">←</span> Previous
+            </button>
+            <span className={styles.pageNum}>Page {page + 1}</span>
+            <button
+              type="button"
+              className={styles.pageBtn}
+              onClick={() => setPage((p) => p + 1)}
+              disabled={!hasNextPage}
+            >
+              Next <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </div>
       ) : (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
