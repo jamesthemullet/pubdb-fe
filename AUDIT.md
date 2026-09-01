@@ -8,11 +8,12 @@ leaves checked items alone. `[fe]`/`[api]` tags mark which repo a finding applie
 ## Run log
 
 - 2026-09-01 — initial audit: 55 findings (17 test coverage, 18 accessibility, 2 performance, 9 SEO, 4 responsive/UX, 12 security, 15 code quality — some findings span multiple counts)
+- 2026-09-01 — resolved: added unit tests for the untested `POST /api/pubs` handler (test coverage section)
 
 ## 1. Test coverage — unit gaps and e2e
 
 - [ ] [fe] `yarn test:coverage` currently fails before producing a coverage report — 140/632 tests throw `TypeError: Cannot read properties of undefined (reading 'clear')` at `localStorage.clear()` in `beforeEach`/`afterEach` across 13 spec files: `src/app/components/auth-gate/AuthGate.spec.tsx`, `src/app/components/sidebar/sidebar.spec.tsx`, `src/app/components/topbar/topbar.spec.tsx`, `src/app/pubs/[id]/page.spec.tsx`, `src/app/add-pub/page.spec.tsx`, `src/app/billing/page.spec.tsx`, `src/app/pubs/page.spec.tsx`, `src/app/register/page.spec.tsx`, `src/app/success/page.spec.tsx`, `src/hooks/useAuth.spec.ts`, `src/hooks/useBeerTypes.spec.ts`, `src/hooks/useContributions.spec.ts`, `src/hooks/useTheme.spec.ts`. Fix this before per-file coverage numbers can be trusted. (found: 2026-09-01)
-- [ ] [fe] `src/app/api/pubs/route.ts` — the `POST` handler (lines 12-35, backs the add-pub form submission) has zero test coverage; only `GET` is tested in `route.spec.ts`. (found: 2026-09-01)
+- [x] [fe] `src/app/api/pubs/route.ts` — the `POST` handler (lines 12-35, backs the add-pub form submission) has zero test coverage; only `GET` is tested in `route.spec.ts`. (found: 2026-09-01) (resolved: 2026-09-01, PR #TBD)
 - [ ] [fe] `src/app/api/auth/me/route.ts` — `PATCH` (profile update, lines 12-34) and `DELETE` (account deletion, lines 36-58) handlers are completely untested; only `GET` is covered. (found: 2026-09-01)
 - [ ] [fe] `src/app/settings/page.tsx` — Profile tab's save flow (display name/username edits, 409/400/401 error handling, ~lines 200-571) plus the Security, Notifications, API preferences, and Appearance tabs have no tests; `page.spec.tsx` covers only the Danger-zone tab. (found: 2026-09-01)
 - [ ] [fe] `src/app/features/dashboard/dashboard.tsx` — the "Your contributions" section (recent-pubs list, expandable per-pub edit-type pills via `toggleEditTypes`, ~lines 1108-1195) has no test coverage. (found: 2026-09-01)
