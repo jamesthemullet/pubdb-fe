@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { clearAuthCache } from "@/hooks/useAuth";
 
 import Pubs from "./page";
 
@@ -53,6 +54,7 @@ describe("Pubs page", () => {
 		process.env = { ...originalEnv };
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
 		localStorage.clear();
+		clearAuthCache();
 	});
 
 	afterEach(() => {
