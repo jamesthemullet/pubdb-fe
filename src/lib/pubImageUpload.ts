@@ -1,6 +1,6 @@
 import type { Pub } from "@/types/pub";
 
-export const MAX_PUB_IMAGE_BYTES = 8 * 1024 * 1024;
+const MAX_PUB_IMAGE_BYTES = 8 * 1024 * 1024;
 
 export type PubImageUploadResult = { pub: Pub } | { error: string };
 
@@ -11,7 +11,10 @@ export function validatePubImageSize(file: File): string | null {
   return null;
 }
 
-export async function uploadPubImage(pubId: string, file: File): Promise<PubImageUploadResult> {
+export async function uploadPubImage(
+  pubId: string,
+  file: File
+): Promise<PubImageUploadResult> {
   const sizeError = validatePubImageSize(file);
   if (sizeError) return { error: sizeError };
 
@@ -26,7 +29,10 @@ export async function uploadPubImage(pubId: string, file: File): Promise<PubImag
     const data: unknown = await res.json().catch(() => null);
     if (!res.ok) {
       const message =
-        data && typeof data === "object" && "error" in data && typeof (data as { error: unknown }).error === "string"
+        data &&
+        typeof data === "object" &&
+        "error" in data &&
+        typeof (data as { error: unknown }).error === "string"
           ? (data as { error: string }).error
           : "Failed to upload image";
       return { error: message };
