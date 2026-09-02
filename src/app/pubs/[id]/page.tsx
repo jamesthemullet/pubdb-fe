@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import type { ReactElement } from "react";
+import type { ChangeEvent, ReactElement } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Typography from "@/app/components/typography/typography";
 import UnapprovedBanner from "@/app/components/unapproved-banner/UnapprovedBanner";
@@ -11,6 +11,7 @@ import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
+import { uploadPubImage } from "@/lib/pubImageUpload";
 import type { BeerGarden, OpeningHoursMap, Pub, PubHistoryChange, PubHistoryEntry } from "@/types/pub";
 import addPubStyles from "../../add-pub/page.module.css";
 import CompletenessCard from "./components/CompletenessCard";
@@ -51,6 +52,8 @@ export default function PubPage(): ReactElement {
   const [history, setHistory] = useState<PubHistoryEntry[] | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
 
   const { user } = useAuth();
   const { countries, countriesLoading, countriesError } = useCountries();
@@ -361,6 +364,21 @@ export default function PubPage(): ReactElement {
 
   const displayId = pubDisplayId(pub.id);
 
+  const handlePhotoChange = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !pub) return;
+    setUploadingImage(true);
+    setImageUploadError(null);
+    const result = await uploadPubImage(pub.id, file);
+    setUploadingImage(false);
+    if ("error" in result) {
+      setImageUploadError(result.error);
+    } else {
+      setPub(result.pub);
+    }
+  };
+
   const handleDelete = async (): Promise<void> => {
     if (!confirm(`Are you sure you want to delete "${pub.name}"? This cannot be undone.`)) return;
     try {
@@ -504,11 +522,25 @@ export default function PubPage(): ReactElement {
             ) : (
               <div className={styles.imagePlaceholder}>
                 <span className={styles.imageInitials}>{pubInitials(pub.name)}</span>
-                {/* TODO: implement image upload */}
-                <span className={styles.imageSlotLabel}>Image functionality coming soon</span>
+                {!user && <span className={styles.imageSlotLabel}>No photo yet</span>}
               </div>
             )}
+            {user && (
+              <label className={styles.imageUploadBtn}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                  disabled={uploadingImage}
+                  className={styles.imageUploadInput}
+                />
+                {uploadingImage ? "Uploading…" : pub.imageUrl ? "Change photo" : "Upload photo"}
+              </label>
+            )}
           </div>
+          {imageUploadError && (
+            <p className={styles.errorText} role="alert">{imageUploadError}</p>
+          )}
 
           {/* Pub identity — aria-hidden: pub name is already the page h1 */}
           <p className={styles.pubNameLarge} aria-hidden="true">{pub.name}</p>
