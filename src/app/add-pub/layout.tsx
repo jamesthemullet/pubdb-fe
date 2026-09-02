@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Add a Pub | Pub DB",
     description: "Contribute to the Pub DB database by adding a new pub. Help build the world's best pub database.",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "Pub DB" }],
   },
   twitter: {
     card: "summary",
