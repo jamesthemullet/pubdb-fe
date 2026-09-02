@@ -28,7 +28,9 @@ browser (see `pubdb-fe/src/app/api/playground/utils/playgroundProxyHandler.ts` f
 
 User asks to "audit the site", "find ways to improve pubdb", "do a full review of the app", or
 similar whole-app requests covering either or both repos. If they ask about a single PR or the
-current diff, use `/code-review` instead.
+current diff, use `/code-review` instead. If they ask to audit just `pub-api` / "this repo"
+while working in `pub-api` / the backend only, use the sibling `full-audit-api` skill instead —
+it writes to `pub-api/AUDIT.md` only, not the shared file below.
 
 ## Output
 
