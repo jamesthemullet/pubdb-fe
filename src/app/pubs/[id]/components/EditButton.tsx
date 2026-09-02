@@ -6,7 +6,6 @@ import { useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
 import type { AuthUser } from "@/hooks/useAuth";
-import { buildAuthHeaders } from "@/lib/auth";
 import styles from "../page.module.css";
 
 type Props = {
@@ -30,19 +29,6 @@ export default function EditButton({ pubName, pubId, user, onEdit }: Props): Rea
       </div>
     );
   }
-  if (!user.approved) {
-    return (
-      <div className={styles.editButtonMessage}>
-        <Typography>Your account is not approved for editing.</Typography>
-        <Typography>
-          Please email{" "}
-          <a href="mailto:hello@thepubdb.com">hello@thepubdb.com</a> to request
-          approval.
-        </Typography>
-      </div>
-    );
-  }
-
   async function handleDelete() {
     if (
       !confirm(
@@ -52,10 +38,8 @@ export default function EditButton({ pubName, pubId, user, onEdit }: Props): Rea
       return;
     }
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch(`/api/pubs/${pubId}`, {
         method: "DELETE",
-        headers: buildAuthHeaders(token),
       });
       if (!res.ok) {
         const data: unknown = await res.json();

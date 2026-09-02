@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { clearAuthCache } from "@/hooks/useAuth";
 import { clearBeerTypesCache } from "@/hooks/useBeerTypes";
 import { clearCountriesCache } from "@/hooks/useCountries";
 
@@ -124,7 +125,6 @@ function setupFetchMock({
 }
 
 async function renderPageAsAdmin() {
-	localStorage.setItem("token", "header.payload.signature");
 	const fetchSpy = setupFetchMock({
 		authData: { email: "admin@example.com", approved: true, admin: true },
 		authStatus: 200,
@@ -139,6 +139,7 @@ describe("PubPage", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		localStorage.clear();
+		clearAuthCache();
 		clearBeerTypesCache();
 		clearCountriesCache();
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
@@ -234,8 +235,7 @@ describe("PubPage", () => {
 			expect(link).toHaveAttribute("href", "/register");
 		});
 
-		it("shows the approval message for unapproved users", async () => {
-			localStorage.setItem("token", "header.payload.signature");
+		it("shows the Edit button for an unapproved user, deferring to the API to enforce quota", async () => {
 			setupFetchMock({
 				authData: {
 					email: "user@example.com",
@@ -246,14 +246,11 @@ describe("PubPage", () => {
 			});
 			render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
 			expect(
-				await screen.findByText(
-					"Your account is not approved for editing.",
-				),
+				await screen.findByRole("button", { name: "Edit this pub" }),
 			).toBeInTheDocument();
 		});
 
 		it("shows the Edit button for an approved non-admin user", async () => {
-			localStorage.setItem("token", "header.payload.signature");
 			setupFetchMock({
 				authData: {
 					email: "editor@example.com",
@@ -269,7 +266,6 @@ describe("PubPage", () => {
 		});
 
 		it("does not show the Delete button for non-admin approved users", async () => {
-			localStorage.setItem("token", "header.payload.signature");
 			setupFetchMock({
 				authData: {
 					email: "editor@example.com",
@@ -286,7 +282,6 @@ describe("PubPage", () => {
 		});
 
 		it("shows the Delete button only for admin users", async () => {
-			localStorage.setItem("token", "header.payload.signature");
 			setupFetchMock({
 				authData: {
 					email: "admin@example.com",
@@ -302,14 +297,6 @@ describe("PubPage", () => {
 		});
 
 		it("treats user as unauthenticated when /auth/me is unavailable", async () => {
-			const payload = btoa(
-				JSON.stringify({
-					email: "admin@example.com",
-					approved: true,
-					admin: true,
-				}),
-			);
-			localStorage.setItem("token", `header.${payload}.signature`);
 			vi.spyOn(globalThis, "fetch").mockImplementation(
 				async (input, _init?) => {
 					const url =
@@ -357,6 +344,21 @@ describe("PubPage", () => {
 			expect(
 				screen.getAllByRole("button", { name: /cancel/i })[0],
 			).toBeInTheDocument();
+		});
+
+		it("shows the unapproved-account banner in edit mode for an unapproved user", async () => {
+			setupFetchMock({
+				authData: {
+					email: "user@example.com",
+					approved: false,
+					admin: false,
+				},
+				authStatus: 200,
+			});
+			render(<PubPageClient id="pub-123" initialPub={SAMPLE_PUB} />);
+			fireEvent.click(await screen.findByRole("button", { name: "Edit this pub" }));
+			await waitForSaveButton();
+			expect(screen.getByText(/up to 10 free contributions/i)).toBeInTheDocument();
 		});
 
 		it("returns to view mode when Cancel is clicked", async () => {

@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { clearAuthCache } from "@/hooks/useAuth";
 
 vi.mock("@/app/features/pricing/pricing", () => ({
 	default: () => null,
@@ -111,6 +112,7 @@ describe("BillingPage", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		localStorage.clear();
+		clearAuthCache();
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
 	});
 
@@ -125,7 +127,6 @@ describe("BillingPage", () => {
 	});
 
 	it("shows the hobby plan description when on the HOBBY tier", async () => {
-		localStorage.setItem("token", "test-token");
 		setupFetchMock({ billingData: BILLING_DATA_HOBBY });
 		render(<BillingPage />);
 		await waitFor(() => {
@@ -134,7 +135,6 @@ describe("BillingPage", () => {
 	});
 
 	it("displays the formatted GBP plan price after billing data loads", async () => {
-		localStorage.setItem("token", "test-token");
 		setupFetchMock({ billingData: BILLING_DATA_PAID });
 		render(<BillingPage />);
 		await waitFor(() => {
@@ -143,7 +143,6 @@ describe("BillingPage", () => {
 	});
 
 	it("shows a success message after the subscription is cancelled", async () => {
-		localStorage.setItem("token", "test-token");
 		vi.spyOn(window, "confirm").mockReturnValue(true);
 		setupFetchMock({
 			billingData: BILLING_DATA_PAID,

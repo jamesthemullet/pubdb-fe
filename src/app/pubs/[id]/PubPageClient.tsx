@@ -3,15 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { ReactElement } from "react";
+import type { ChangeEvent, ReactElement } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Typography from "@/app/components/typography/typography";
+import UnapprovedBanner from "@/app/components/unapproved-banner/UnapprovedBanner";
 import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
-import { buildAuthHeaders } from "@/lib/auth";
-import type { BeerGarden, Pub, PubHistoryChange, PubHistoryEntry } from "@/types/pub";
+import { uploadPubImage } from "@/lib/pubImageUpload";
+import type { BeerGarden, OpeningHoursMap, Pub, PubHistoryChange, PubHistoryEntry } from "@/types/pub";
 import addPubStyles from "../../add-pub/page.module.css";
 import CompletenessCard from "./components/CompletenessCard";
 import EditButton from "./components/EditButton";
@@ -55,8 +56,10 @@ export default function PubPageClient({
   const [history, setHistory] = useState<PubHistoryEntry[] | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
 
-  const { user, isApproved } = useAuth();
+  const { user } = useAuth();
   const { countries, countriesLoading, countriesError } = useCountries();
   const { beerTypeOptions, beerTypesLoading, beerTypesError } = useBeerTypes();
 
@@ -204,7 +207,6 @@ export default function PubPageClient({
     }
     try {
       setSaveError(null);
-      const token = localStorage.getItem("token");
       const body: Record<string, unknown> = {};
       if (Array.isArray(editFields.beerTypeIds)) {
         body.beerTypes = editFields.beerTypeIds.map((beerTypeId) => ({ beerTypeId }));
@@ -227,14 +229,14 @@ export default function PubPageClient({
       if (pub.createdAt) body.createdAt = pub.createdAt;
       const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
+      const data: unknown = await res.json();
       if (!res.ok) {
         setSaveError(extractErrorMessage(data));
       } else {
-        setPub(data);
+        setPub(data as Pub);
         setEditing(false);
         setSaveError(null);
       }
@@ -247,7 +249,6 @@ export default function PubPageClient({
     async (field: keyof Pub, value: unknown): Promise<string | null> => {
       if (!pub) return "No pub loaded";
       try {
-        const token = localStorage.getItem("token");
         const merged: Partial<Pub> = {
           ...pub,
           beerGardens: pub.beerGardens ? [...pub.beerGardens] : [],
@@ -280,12 +281,12 @@ export default function PubPageClient({
         if (pub.createdAt) body.createdAt = pub.createdAt;
         const res = await fetch(`/api/pubs/${pub.id}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
-        const data = await res.json();
+        const data: unknown = await res.json();
         if (!res.ok) return extractErrorMessage(data);
-        setPub(data);
+        setPub(data as Pub);
         return null;
       } catch {
         return "Network error";
@@ -339,13 +340,26 @@ export default function PubPageClient({
 
   const displayId = pubDisplayId(pub.id);
 
+  const handlePhotoChange = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !pub) return;
+    setUploadingImage(true);
+    setImageUploadError(null);
+    const result = await uploadPubImage(pub.id, file);
+    setUploadingImage(false);
+    if ("error" in result) {
+      setImageUploadError(result.error);
+    } else {
+      setPub(result.pub);
+    }
+  };
+
   const handleDelete = async (): Promise<void> => {
     if (!confirm(`Are you sure you want to delete "${pub.name}"? This cannot be undone.`)) return;
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch(`/api/pubs/${pub.id}`, {
         method: "DELETE",
-        headers: buildAuthHeaders(token),
       });
       if (res.ok) router.push("/pubs");
     } catch { /* ignore */ }
@@ -387,6 +401,8 @@ export default function PubPageClient({
             </button>
           </div>
         </div>
+
+        {user && !user.approved && <UnapprovedBanner email={user.email} />}
 
         <PubEditView
           pub={pub}
@@ -462,7 +478,7 @@ export default function PubPageClient({
         </div>
       )}
 
-      <CompletenessCard pub={pub} onEdit={isApproved ? handleEditClick : undefined} />
+      <CompletenessCard pub={pub} onEdit={user ? handleEditClick : undefined} />
 
       {/* Two-column body */}
       <div className={styles.body}>
@@ -482,11 +498,25 @@ export default function PubPageClient({
             ) : (
               <div className={styles.imagePlaceholder}>
                 <span className={styles.imageInitials}>{pubInitials(pub.name)}</span>
-                {/* TODO: implement image upload */}
-                <span className={styles.imageSlotLabel}>Image functionality coming soon</span>
+                {!user && <span className={styles.imageSlotLabel}>No photo yet</span>}
               </div>
             )}
+            {user && (
+              <label className={styles.imageUploadBtn}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                  disabled={uploadingImage}
+                  className={styles.imageUploadInput}
+                />
+                {uploadingImage ? "Uploading…" : pub.imageUrl ? "Change photo" : "Upload photo"}
+              </label>
+            )}
           </div>
+          {imageUploadError && (
+            <p className={styles.errorText} role="alert">{imageUploadError}</p>
+          )}
 
           {/* Pub identity — aria-hidden: pub name is already the page h1 */}
           <p className={styles.pubNameLarge} aria-hidden="true">{pub.name}</p>
@@ -554,7 +584,7 @@ export default function PubPageClient({
                 <PubDisplayView
                   pub={pub}
                   getCountryName={getCountryName}
-                  canEdit={isApproved}
+                  canEdit={!!user}
                   onInlineSave={handleInlineSave}
                 />
               )}
@@ -695,7 +725,7 @@ function checkOpenNow(
   todayFull: string
 ): boolean {
   if (!oh) return false;
-  const map: Record<string, { open?: string; close?: string; closed?: boolean }> = {};
+  const map: OpeningHoursMap = {};
   Object.entries(oh).forEach(([k, v]) => { map[k.toLowerCase()] = v; });
   const entry = map[todayFull.toLowerCase()];
   if (!entry || entry.closed || !entry.open || !entry.close) return false;
@@ -718,7 +748,7 @@ function HoursTab({ pub }: { pub: Pub }): ReactElement {
   const isOpenNow = checkOpenNow(pub.openingHours, todayFull);
 
   const oh = pub.openingHours;
-  const map: Record<string, { open?: string; close?: string; closed?: boolean }> = {};
+  const map: OpeningHoursMap = {};
   if (oh) {
     Object.entries(oh).forEach(([k, v]) => { map[k.toLowerCase()] = v; });
   }

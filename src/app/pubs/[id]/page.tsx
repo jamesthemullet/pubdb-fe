@@ -1,5 +1,5 @@
-import type { Pub } from "@/types/pub";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
+import type { Pub } from "@/types/pub";
 import PubPageClient from "./PubPageClient";
 
 export default async function PubDetailPage({

@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { clearAuthCache } from "@/hooks/useAuth";
 
 import Pricing from "./pricing";
 
@@ -15,6 +16,9 @@ function toUrl(input: RequestInfo | URL): string {
   if (input instanceof URL) return input.toString();
   return input.url;
 }
+
+const AUTHENTICATED_ME = () => jsonResponse({ email: "test@example.com" });
+const UNAUTHENTICATED_ME = () => jsonResponse({}, 401);
 
 const mockDashboardResponse = (tier = "DEVELOPER") =>
   jsonResponse({ apiKeys: [{ tier }] });
@@ -49,8 +53,10 @@ const mockApiKey = {
 };
 
 beforeEach(() => {
+  clearAuthCache();
   vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
     const url = toUrl(input);
+    if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
     if (url.endsWith("/auth/dashboard")) {
       return mockDashboardResponse("HOBBY");
     }
@@ -65,7 +71,6 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  localStorage.clear();
 });
 
 describe("Pricing component", () => {
@@ -103,6 +108,7 @@ describe("Pricing component", () => {
     beforeEach(() => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return UNAUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard")) {
           return jsonResponse({}, 401);
         }
@@ -116,7 +122,7 @@ describe("Pricing component", () => {
       expect(buttons.length).toBeGreaterThan(0);
     });
 
-    it("redirects to /register when clicking a paid tier without a token", async () => {
+    it("redirects to /register when clicking a paid tier without being logged in", async () => {
       render(<Pricing />);
       // Three Subscribe buttons are rendered; index 1 is the DEVELOPER tier
       const subscribeButtons = screen.getAllByRole("button", {
@@ -131,9 +137,9 @@ describe("Pricing component", () => {
 
   describe("with authenticated user on HOBBY tier", () => {
     beforeEach(() => {
-      localStorage.setItem("token", "test-token");
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard")) {
           return mockDashboardResponse("HOBBY");
         }
@@ -167,9 +173,9 @@ describe("Pricing component", () => {
 
   describe("with authenticated user on DEVELOPER tier", () => {
     beforeEach(() => {
-      localStorage.setItem("token", "test-token");
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard")) {
           return mockDashboardResponse("DEVELOPER");
         }
@@ -194,13 +200,10 @@ describe("Pricing component", () => {
   });
 
   describe("upgrade flow", () => {
-    beforeEach(() => {
-      localStorage.setItem("token", "test-token");
-    });
-
     it("opens the upgrade modal with estimated charges", async () => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard"))
           return mockDashboardResponse("HOBBY");
         if (
@@ -229,6 +232,7 @@ describe("Pricing component", () => {
     it("shows API key details in the modal", async () => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard"))
           return mockDashboardResponse("HOBBY");
         if (
@@ -258,6 +262,7 @@ describe("Pricing component", () => {
     it("shows breakdown line items", async () => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard"))
           return mockDashboardResponse("HOBBY");
         if (
@@ -287,6 +292,7 @@ describe("Pricing component", () => {
     it("closes the modal when Close is clicked", async () => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard"))
           return mockDashboardResponse("HOBBY");
         if (
@@ -319,6 +325,7 @@ describe("Pricing component", () => {
     it("performs the upgrade and shows success message", async () => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard"))
           return mockDashboardResponse("HOBBY");
         if (
@@ -355,6 +362,7 @@ describe("Pricing component", () => {
     it("redirects to checkout when needsCheckout is true", async () => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard"))
           return mockDashboardResponse("HOBBY");
         if (
@@ -385,6 +393,7 @@ describe("Pricing component", () => {
     it("shows error message when upgrade estimate fails", async () => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard"))
           return mockDashboardResponse("HOBBY");
         if (
@@ -406,13 +415,10 @@ describe("Pricing component", () => {
   });
 
   describe("HOBBY subscription flow", () => {
-    beforeEach(() => {
-      localStorage.setItem("token", "test-token");
-    });
-
     it("subscribes to hobby and shows the modal with API key", async () => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard"))
           return mockDashboardResponse("DEVELOPER");
         if (
@@ -435,6 +441,7 @@ describe("Pricing component", () => {
     it("shows error when hobby subscription fails", async () => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard")) return jsonResponse({}, 401);
         if (
           url.endsWith("/payments/subscribe-to-hobby") &&
@@ -462,6 +469,7 @@ describe("Pricing component", () => {
     it("dismisses the feedback banner when × is clicked", async () => {
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard"))
           return mockDashboardResponse("HOBBY");
         if (
@@ -473,7 +481,6 @@ describe("Pricing component", () => {
         throw new Error(`Unexpected fetch: ${url}`);
       });
 
-      localStorage.setItem("token", "test-token");
       render(<Pricing />);
 
       fireEvent.click(
@@ -491,9 +498,9 @@ describe("Pricing component", () => {
 
   describe("formatCurrency", () => {
     it("displays formatted currency in modal", async () => {
-      localStorage.setItem("token", "test-token");
       vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = toUrl(input);
+        if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();
         if (url.endsWith("/auth/dashboard"))
           return mockDashboardResponse("HOBBY");
         if (

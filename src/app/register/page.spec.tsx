@@ -68,9 +68,9 @@ describe("RegisterLoginPage", () => {
       ).toHaveAttribute("href", "/forgot-password");
     });
 
-    it("calls login API, stores token, and dispatches authChanged", async () => {
+    it("calls login API and dispatches authChanged, without storing anything in localStorage", async () => {
       vi.spyOn(globalThis, "fetch").mockResolvedValue(
-        jsonResponse({ token: "jwt-abc" })
+        jsonResponse({ email: "user@example.com" })
       );
       const localStorageSpy = vi.spyOn(Storage.prototype, "setItem");
       const dispatchSpy = vi.spyOn(window, "dispatchEvent");
@@ -82,10 +82,10 @@ describe("RegisterLoginPage", () => {
       fireEvent.click(screen.getByRole("button", { name: "Log in" }));
 
       await waitFor(() =>
-        expect(localStorageSpy).toHaveBeenCalledWith("token", "jwt-abc")
+        expect(dispatchSpy).toHaveBeenCalledWith(expect.any(Event))
       );
 
-      expect(dispatchSpy).toHaveBeenCalledWith(expect.any(Event));
+      expect(localStorageSpy).not.toHaveBeenCalledWith("token", expect.anything());
     });
 
     it("shows API error on failed login", async () => {

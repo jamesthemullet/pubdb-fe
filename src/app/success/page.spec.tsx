@@ -181,9 +181,7 @@ describe("SuccessPage", () => {
 			});
 		});
 
-		it("sends an auth header when a token is present in localStorage", async () => {
-			localStorage.setItem("token", "mytoken123");
-
+		it("verifies the session without an explicit Authorization header, relying on the httpOnly auth cookie", async () => {
 			const fetchSpy = vi
 				.spyOn(globalThis, "fetch")
 				.mockResolvedValue(jsonResponse(SAMPLE_STATUS));
@@ -193,10 +191,8 @@ describe("SuccessPage", () => {
 			await waitFor(() => {
 				expect(fetchSpy).toHaveBeenCalledWith(
 					expect.any(String),
-					expect.objectContaining({
-						headers: expect.objectContaining({
-							Authorization: "Bearer mytoken123",
-						}),
+					expect.not.objectContaining({
+						headers: expect.objectContaining({ Authorization: expect.anything() }),
 					}),
 				);
 			});

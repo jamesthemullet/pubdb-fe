@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -146,8 +147,7 @@ function YourRankBanner({
     <div className={styles.yourRankBanner}>
       <span className={styles.yourRankLabel}>YOUR RANK</span>
       {avatarUrl ? (
-        // biome-ignore lint/performance/noImgElement: user-supplied external avatar URL, not an optimizable local asset
-        <img
+        <Image
           src={avatarUrl}
           alt={entry.displayName || entry.username}
           width={36}
@@ -391,7 +391,7 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }){
           <button
             type="button"
             className={styles.actionBtn}
-            onClick={handleShare}
+            onClick={() => { void handleShare(); }}
           >
             <ShareIcon /> Share
           </button>
