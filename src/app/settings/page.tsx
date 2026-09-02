@@ -68,7 +68,7 @@ export default function SettingsPage() {
                   type="button"
                   className={`${styles.navItem} ${activeTab === id ? styles.navItemActive : ""} ${id === "danger" ? styles.navItemDanger : ""}`}
                   onClick={() => setActiveTab(id)}
-                  aria-current={activeTab === id ? "true" : undefined}
+                  aria-current={activeTab === id ? true : undefined}
                 >
                   <span className={styles.navIcon}>{icon}</span>
                   {label}
@@ -336,8 +336,8 @@ function ProfileTab({ user }: { user: AuthUser }) {
       </Card>
 
       <Card title="Contact">
-        <FieldRow label="Email" htmlFor="settings-email">
-          <span id="settings-email" className={styles.fieldHint}>{user?.email}</span>
+        <FieldRow label="Email">
+          <span className={styles.fieldHint}>{user?.email}</span>
         </FieldRow>
       </Card>
 
@@ -412,7 +412,7 @@ function SecurityTab() {
     <>
       <Card title="Password" description="Update your login password.">
         <FieldRow label="Current password" htmlFor="settings-current-password">
-          <input id="settings-current-password" className={styles.textInput} type="password" placeholder="••••••••" />
+          <input id="settings-current-password" className={styles.textInput} type="password" placeholder="••••••••" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
         </FieldRow>
         <FieldRow label="New password" hint="6–128 characters." htmlFor="settings-new-password">
           <input
