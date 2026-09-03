@@ -1,10 +1,15 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render as rtlRender, screen, waitFor } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
-import { clearAuthCache } from "@/hooks/useAuth";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { clearCountriesCache } from "@/hooks/useCountries";
 
 import AddPubPage from "./page";
+
+function render(ui: ReactElement) {
+  return rtlRender(<AuthProvider>{ui}</AuthProvider>);
+}
 
 const pushMock = vi.fn();
 
@@ -99,7 +104,6 @@ describe("AddPubPage", () => {
 
   beforeEach(() => {
     clearCountriesCache();
-    clearAuthCache();
     vi.restoreAllMocks();
     pushMock.mockReset();
     localStorage.clear();

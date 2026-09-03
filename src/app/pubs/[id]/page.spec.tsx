@@ -1,10 +1,15 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render as rtlRender, screen, waitFor } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { clearAuthCache } from "@/hooks/useAuth";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { clearBeerTypesCache } from "@/hooks/useBeerTypes";
 import { clearCountriesCache } from "@/hooks/useCountries";
 
 import PubPage from "./page";
+
+function render(ui: ReactElement) {
+	return rtlRender(<AuthProvider>{ui}</AuthProvider>);
+}
 
 vi.mock("next/navigation", () => ({
 	useParams: () => ({ id: "pub-123" }),
@@ -143,7 +148,6 @@ describe("PubPage", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		localStorage.clear();
-		clearAuthCache();
 		clearBeerTypesCache();
 		clearCountriesCache();
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";

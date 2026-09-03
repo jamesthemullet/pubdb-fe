@@ -231,11 +231,15 @@ const Dashboard = (): React.JSX.Element | null => {
   const cancelAuthChangedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
+  const forgotKeyCopyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
       if (cancelAuthChangedTimeoutRef.current) {
         clearTimeout(cancelAuthChangedTimeoutRef.current);
+      }
+      if (forgotKeyCopyTimeoutRef.current) {
+        clearTimeout(forgotKeyCopyTimeoutRef.current);
       }
     };
   }, []);
@@ -409,7 +413,8 @@ const Dashboard = (): React.JSX.Element | null => {
     try {
       await navigator.clipboard.writeText(forgotKeyDetails.key);
       setForgotKeyCopyStatus("copied");
-      setTimeout(() => setForgotKeyCopyStatus("idle"), 2000);
+      if (forgotKeyCopyTimeoutRef.current) clearTimeout(forgotKeyCopyTimeoutRef.current);
+      forgotKeyCopyTimeoutRef.current = setTimeout(() => setForgotKeyCopyStatus("idle"), 2000);
     } catch {
       setForgotKeyCopyStatus("error");
     }
