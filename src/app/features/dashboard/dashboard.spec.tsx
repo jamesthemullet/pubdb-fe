@@ -1,5 +1,7 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render as rtlRender, screen, waitFor } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 vi.mock("@/hooks/useContributions", () => ({
 	useContributions: () => ({
@@ -11,11 +13,27 @@ vi.mock("@/hooks/useContributions", () => ({
 
 import Dashboard from "./dashboard";
 
+function render(ui: ReactElement) {
+	return rtlRender(<AuthProvider>{ui}</AuthProvider>);
+}
+
 function jsonResponse(data: unknown, status = 200): Response {
 	return new Response(JSON.stringify(data), {
 		status,
 		headers: { "content-type": "application/json" },
 	});
+}
+
+function toUrl(input: RequestInfo | URL): string {
+	if (typeof input === "string") return input;
+	if (input instanceof URL) return input.toString();
+	return input.url;
+}
+
+function authMeResponse(authenticated = true): Response {
+	return authenticated
+		? jsonResponse({ email: "alice@example.com" })
+		: jsonResponse({}, 401);
 }
 
 const SAMPLE_API_KEY = {
@@ -62,6 +80,44 @@ const SAMPLE_DASHBOARD_DATA = {
 
 const SAMPLE_USAGE_DATA = { range: "30d", bucket: "day", series: [] };
 
+type FetchRouterOptions = {
+	dashboardData?: unknown;
+	usageData?: unknown;
+	authenticated?: boolean;
+	onRequest?: (
+		url: string,
+		init?: RequestInit,
+	) => Response | Promise<Response> | undefined;
+};
+
+function createDashboardFetchMock(options: FetchRouterOptions = {}) {
+	let dashboardData: unknown = options.dashboardData ?? SAMPLE_DASHBOARD_DATA;
+	const usageData = options.usageData ?? SAMPLE_USAGE_DATA;
+	const authenticated = options.authenticated ?? true;
+	const onRequest = options.onRequest;
+
+	const spy = vi
+		.spyOn(globalThis, "fetch")
+		.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+			const url = toUrl(input);
+			if (url.includes("/auth/me")) return authMeResponse(authenticated);
+			if (url.includes("/dashboard/usage")) return jsonResponse(usageData);
+			if (onRequest) {
+				const custom = await onRequest(url, init);
+				if (custom) return custom;
+			}
+			if (url.includes("/auth/dashboard")) return jsonResponse(dashboardData);
+			throw new Error(`Unexpected fetch: ${url} ${init?.method ?? "GET"}`);
+		});
+
+	return {
+		spy,
+		setDashboardData(next: unknown) {
+			dashboardData = next;
+		},
+	};
+}
+
 describe("Dashboard", () => {
 	const originalEnv = process.env;
 
@@ -69,30 +125,23 @@ describe("Dashboard", () => {
 		vi.restoreAllMocks();
 		process.env = { ...originalEnv };
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
-		localStorage.clear();
 	});
 
 	afterEach(() => {
 		process.env = originalEnv;
-		localStorage.clear();
 	});
 
 	describe("authentication", () => {
 		it("shows a sign-in prompt when not authenticated", () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
+			createDashboardFetchMock({ authenticated: false });
 
 			render(<Dashboard />);
 
 			expect(screen.getByRole("heading", { name: "Log in" })).toBeInTheDocument();
 		});
 
-		it("fetches dashboard data when token is present", async () => {
-			localStorage.setItem("token", "test-token");
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
+		it("fetches dashboard data when logged in", async () => {
+			createDashboardFetchMock();
 
 			render(<Dashboard />);
 
@@ -101,15 +150,22 @@ describe("Dashboard", () => {
 			});
 		});
 
-		it("reacts to authChanged event by showing dashboard when token is added", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
+		it("reacts to authChanged event by showing dashboard when the user logs in", async () => {
+			let authenticated = false;
+			vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
+				const url = toUrl(input);
+				if (url.includes("/auth/me")) return authMeResponse(authenticated);
+				if (url.includes("/dashboard/usage")) return jsonResponse(SAMPLE_USAGE_DATA);
+				if (url.includes("/auth/dashboard")) return jsonResponse(SAMPLE_DASHBOARD_DATA);
+				throw new Error(`Unexpected fetch: ${url}`);
+			});
 
 			render(<Dashboard />);
-			expect(screen.getByRole("heading", { name: "Log in" })).toBeInTheDocument();
+			await waitFor(() => {
+				expect(screen.getByRole("heading", { name: "Log in" })).toBeInTheDocument();
+			});
 
-			localStorage.setItem("token", "test-token");
+			authenticated = true;
 			act(() => {
 				window.dispatchEvent(new Event("authChanged"));
 			});
@@ -121,24 +177,23 @@ describe("Dashboard", () => {
 	});
 
 	describe("dashboard data display", () => {
-		beforeEach(() => {
-			localStorage.setItem("token", "test-token");
-		});
-
 		it("shows pending approval warning when not approved", async () => {
 			const data = {
 				...SAMPLE_DASHBOARD_DATA,
 				user: { ...SAMPLE_DASHBOARD_DATA.user, approved: false },
 			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
+			createDashboardFetchMock({ dashboardData: data });
 
 			render(<Dashboard />);
 
 			await waitFor(() => {
 				expect(
-					screen.getByText(/Account pending approval/),
+					screen.getByText(/account isn't approved yet/i),
 				).toBeInTheDocument();
 			});
+			expect(
+				screen.getByRole("link", { name: "Chase approval by email" }),
+			).toBeInTheDocument();
 		});
 
 		it("shows email not verified warning when email unverified", async () => {
@@ -146,7 +201,7 @@ describe("Dashboard", () => {
 				...SAMPLE_DASHBOARD_DATA,
 				user: { ...SAMPLE_DASHBOARD_DATA.user, emailVerified: false },
 			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
+			createDashboardFetchMock({ dashboardData: data });
 
 			render(<Dashboard />);
 
@@ -161,7 +216,7 @@ describe("Dashboard", () => {
 				apiKeys: [],
 				summary: { totalApiKeys: 0, totalUsage: 0 },
 			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
+			createDashboardFetchMock({ dashboardData: data });
 
 			render(<Dashboard />);
 
@@ -180,7 +235,7 @@ describe("Dashboard", () => {
 				subscription: undefined,
 				summary: { totalApiKeys: 0, totalUsage: 0 },
 			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
+			createDashboardFetchMock({ dashboardData: data });
 
 			render(<Dashboard />);
 
@@ -194,7 +249,7 @@ describe("Dashboard", () => {
 				...SAMPLE_DASHBOARD_DATA,
 				apiKeys: [{ ...SAMPLE_API_KEY, id: undefined }],
 			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
+			createDashboardFetchMock({ dashboardData: data });
 
 			render(<Dashboard />);
 
@@ -204,9 +259,7 @@ describe("Dashboard", () => {
 		});
 
 		it("renders API key card with name and masked prefix", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
+			createDashboardFetchMock();
 
 			render(<Dashboard />);
 
@@ -217,9 +270,7 @@ describe("Dashboard", () => {
 		});
 
 		it("renders the tier badge", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
+			createDashboardFetchMock();
 
 			render(<Dashboard />);
 
@@ -229,9 +280,7 @@ describe("Dashboard", () => {
 		});
 
 		it("renders the key's lifetime usage count", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
+			createDashboardFetchMock();
 
 			render(<Dashboard />);
 
@@ -241,9 +290,7 @@ describe("Dashboard", () => {
 		});
 
 		it("renders the account-level monthly usage total from the subscription", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
+			createDashboardFetchMock();
 
 			render(<Dashboard />);
 
@@ -254,9 +301,7 @@ describe("Dashboard", () => {
 		});
 
 		it("shows last used time when lastUsed is present", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
+			createDashboardFetchMock();
 
 			render(<Dashboard />);
 
@@ -270,7 +315,7 @@ describe("Dashboard", () => {
 				...SAMPLE_DASHBOARD_DATA,
 				apiKeys: [{ ...SAMPLE_API_KEY, lastUsed: null }],
 			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
+			createDashboardFetchMock({ dashboardData: data });
 
 			render(<Dashboard />);
 
@@ -281,14 +326,13 @@ describe("Dashboard", () => {
 	});
 
 	describe("error handling", () => {
-		beforeEach(() => {
-			localStorage.setItem("token", "test-token");
-		});
-
 		it("shows error message when fetch fails with network error", async () => {
-			vi.spyOn(globalThis, "fetch").mockRejectedValue(
-				new Error("Network failure"),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
+				const url = toUrl(input);
+				if (url.includes("/auth/me")) return authMeResponse(true);
+				if (url.includes("/dashboard/usage")) return jsonResponse(SAMPLE_USAGE_DATA);
+				throw new Error("Network failure");
+			});
 
 			render(<Dashboard />);
 
@@ -300,9 +344,12 @@ describe("Dashboard", () => {
 		});
 
 		it("shows error message from API error response", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ message: "Unauthorized access" }, 401),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
+				const url = toUrl(input);
+				if (url.includes("/auth/me")) return authMeResponse(true);
+				if (url.includes("/dashboard/usage")) return jsonResponse(SAMPLE_USAGE_DATA);
+				return jsonResponse({ message: "Unauthorized access" }, 401);
+			});
 
 			render(<Dashboard />);
 
@@ -314,9 +361,12 @@ describe("Dashboard", () => {
 		});
 
 		it("shows error.error field when message is absent", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse({ error: "Token expired" }, 403),
-			);
+			vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
+				const url = toUrl(input);
+				if (url.includes("/auth/me")) return authMeResponse(true);
+				if (url.includes("/dashboard/usage")) return jsonResponse(SAMPLE_USAGE_DATA);
+				return jsonResponse({ error: "Token expired" }, 403);
+			});
 
 			render(<Dashboard />);
 
@@ -328,7 +378,12 @@ describe("Dashboard", () => {
 		});
 
 		it("shows Try again button in error state", async () => {
-			vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("fail"));
+			vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
+				const url = toUrl(input);
+				if (url.includes("/auth/me")) return authMeResponse(true);
+				if (url.includes("/dashboard/usage")) return jsonResponse(SAMPLE_USAGE_DATA);
+				throw new Error("fail");
+			});
 
 			render(<Dashboard />);
 
@@ -341,19 +396,13 @@ describe("Dashboard", () => {
 	});
 
 	describe("cancel subscription", () => {
-		beforeEach(() => {
-			localStorage.setItem("token", "test-token");
-		});
-
 		async function openKeyMenu() {
 			await screen.findByText("My Key");
 			fireEvent.click(screen.getByRole("button", { name: /More options for My Key/ }));
 		}
 
 		it("shows cancel subscription option in key menu for non-HOBBY ACTIVE keys", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
+			createDashboardFetchMock();
 
 			render(<Dashboard />);
 			await openKeyMenu();
@@ -368,7 +417,7 @@ describe("Dashboard", () => {
 				...SAMPLE_DASHBOARD_DATA,
 				apiKeys: [{ ...SAMPLE_API_KEY, tier: "HOBBY" }],
 			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
+			createDashboardFetchMock({ dashboardData: data });
 
 			render(<Dashboard />);
 			await openKeyMenu();
@@ -386,7 +435,7 @@ describe("Dashboard", () => {
 				...SAMPLE_DASHBOARD_DATA,
 				apiKeys: [{ ...SAMPLE_API_KEY, keyStatus: "INACTIVE" }],
 			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
+			createDashboardFetchMock({ dashboardData: data });
 
 			render(<Dashboard />);
 			await openKeyMenu();
@@ -397,12 +446,14 @@ describe("Dashboard", () => {
 		});
 
 		it("shows success message after cancellation", async () => {
-			vi.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
-				.mockResolvedValueOnce(
-					jsonResponse({ message: "Subscription cancelled successfully." }),
-				);
+			createDashboardFetchMock({
+				onRequest: (url, init) => {
+					if (url.includes("/payments/cancel-subscription") && init?.method === "POST") {
+						return jsonResponse({ message: "Subscription cancelled successfully." });
+					}
+					return undefined;
+				},
+			});
 			vi.spyOn(window, "confirm").mockReturnValue(true);
 
 			render(<Dashboard />);
@@ -418,12 +469,14 @@ describe("Dashboard", () => {
 		});
 
 		it("shows error message when cancellation fails", async () => {
-			vi.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
-				.mockResolvedValueOnce(
-					jsonResponse({ message: "Failed to cancel" }, 500),
-				);
+			createDashboardFetchMock({
+				onRequest: (url, init) => {
+					if (url.includes("/payments/cancel-subscription") && init?.method === "POST") {
+						return jsonResponse({ message: "Failed to cancel" }, 500);
+					}
+					return undefined;
+				},
+			});
 			vi.spyOn(window, "confirm").mockReturnValue(true);
 
 			render(<Dashboard />);
@@ -439,9 +492,7 @@ describe("Dashboard", () => {
 		});
 
 		it("does not cancel when user dismisses the confirm dialog", async () => {
-			const fetchSpy = vi
-				.spyOn(globalThis, "fetch")
-				.mockResolvedValue(jsonResponse(SAMPLE_DASHBOARD_DATA));
+			const { spy: fetchSpy } = createDashboardFetchMock();
 			vi.spyOn(window, "confirm").mockReturnValue(false);
 
 			render(<Dashboard />);
@@ -450,25 +501,19 @@ describe("Dashboard", () => {
 			fireEvent.click(screen.getByRole("button", { name: /Cancel subscription/ }));
 
 			await waitFor(() => {
-				expect(fetchSpy).toHaveBeenCalledTimes(2);
+				expect(fetchSpy).toHaveBeenCalledTimes(3);
 			});
 		});
 	});
 
 	describe("forgot API key", () => {
-		beforeEach(() => {
-			localStorage.setItem("token", "test-token");
-		});
-
 		async function openKeyMenu() {
 			await screen.findByText("My Key");
 			fireEvent.click(screen.getByRole("button", { name: /More options for My Key/ }));
 		}
 
 		it("shows Forgot API key option in key menu for non-HOBBY ACTIVE keys", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
+			createDashboardFetchMock();
 
 			render(<Dashboard />);
 			await openKeyMenu();
@@ -479,14 +524,14 @@ describe("Dashboard", () => {
 		});
 
 		it("shows success message after forgot API key (no new key in response)", async () => {
-			vi.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
-				.mockResolvedValueOnce(
-					jsonResponse({
-						message: "API key reminder sent to your email.",
-					}),
-				);
+			createDashboardFetchMock({
+				onRequest: (url, init) => {
+					if (url.includes("/regenerate") && init?.method === "POST") {
+						return jsonResponse({ message: "API key reminder sent to your email." });
+					}
+					return undefined;
+				},
+			});
 
 			render(<Dashboard />);
 			await openKeyMenu();
@@ -501,12 +546,14 @@ describe("Dashboard", () => {
 		});
 
 		it("shows error when forgot API key request fails", async () => {
-			vi.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
-				.mockResolvedValueOnce(
-					jsonResponse({ message: "Key not found" }, 404),
-				);
+			createDashboardFetchMock({
+				onRequest: (url, init) => {
+					if (url.includes("/regenerate") && init?.method === "POST") {
+						return jsonResponse({ message: "Key not found" }, 404);
+					}
+					return undefined;
+				},
+			});
 
 			render(<Dashboard />);
 			await openKeyMenu();
@@ -519,22 +566,24 @@ describe("Dashboard", () => {
 		});
 
 		it("opens modal with new key when API returns apiKey in response", async () => {
-			vi.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
-				.mockResolvedValueOnce(
-					jsonResponse({
-						message: "New key generated.",
-						apiKey: {
-							name: "My Key",
-							tier: "PRO",
-							keyStatus: "ACTIVE",
-							keyPrefix: "pk_abc",
-							key: "pk_abc_supersecretkey",
-							permissions: ["read"],
-						},
-					}),
-				);
+			createDashboardFetchMock({
+				onRequest: (url, init) => {
+					if (url.includes("/regenerate") && init?.method === "POST") {
+						return jsonResponse({
+							message: "New key generated.",
+							apiKey: {
+								name: "My Key",
+								tier: "PRO",
+								keyStatus: "ACTIVE",
+								keyPrefix: "pk_abc",
+								key: "pk_abc_supersecretkey",
+								permissions: ["read"],
+							},
+						});
+					}
+					return undefined;
+				},
+			});
 
 			render(<Dashboard />);
 			await openKeyMenu();
@@ -550,22 +599,24 @@ describe("Dashboard", () => {
 		});
 
 		it("closes modal when Close button is clicked", async () => {
-			vi.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
-				.mockResolvedValueOnce(
-					jsonResponse({
-						message: "New key generated.",
-						apiKey: {
-							name: "My Key",
-							tier: "PRO",
-							keyStatus: "ACTIVE",
-							keyPrefix: "pk_abc",
-							key: "pk_abc_supersecretkey",
-							permissions: [],
-						},
-					}),
-				);
+			createDashboardFetchMock({
+				onRequest: (url, init) => {
+					if (url.includes("/regenerate") && init?.method === "POST") {
+						return jsonResponse({
+							message: "New key generated.",
+							apiKey: {
+								name: "My Key",
+								tier: "PRO",
+								keyStatus: "ACTIVE",
+								keyPrefix: "pk_abc",
+								key: "pk_abc_supersecretkey",
+								permissions: [],
+							},
+						});
+					}
+					return undefined;
+				},
+			});
 
 			render(<Dashboard />);
 			await openKeyMenu();
@@ -588,22 +639,24 @@ describe("Dashboard", () => {
 		});
 
 		it("copies API key to clipboard successfully", async () => {
-			vi.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
-				.mockResolvedValueOnce(
-					jsonResponse({
-						message: "New key generated.",
-						apiKey: {
-							name: "My Key",
-							tier: "PRO",
-							keyStatus: "ACTIVE",
-							keyPrefix: "pk_abc",
-							key: "pk_abc_supersecretkey",
-							permissions: [],
-						},
-					}),
-				);
+			createDashboardFetchMock({
+				onRequest: (url, init) => {
+					if (url.includes("/regenerate") && init?.method === "POST") {
+						return jsonResponse({
+							message: "New key generated.",
+							apiKey: {
+								name: "My Key",
+								tier: "PRO",
+								keyStatus: "ACTIVE",
+								keyPrefix: "pk_abc",
+								key: "pk_abc_supersecretkey",
+								permissions: [],
+							},
+						});
+					}
+					return undefined;
+				},
+			});
 
 			const clipboardWriteSpy = vi.fn().mockResolvedValue(undefined);
 			Object.defineProperty(navigator, "clipboard", {
@@ -628,22 +681,24 @@ describe("Dashboard", () => {
 		});
 
 		it("shows 'Copy failed' when clipboard is unavailable", async () => {
-			vi.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
-				.mockResolvedValueOnce(
-					jsonResponse({
-						message: "New key generated.",
-						apiKey: {
-							name: "My Key",
-							tier: "PRO",
-							keyStatus: "ACTIVE",
-							keyPrefix: "pk_abc",
-							key: "pk_abc_supersecretkey",
-							permissions: [],
-						},
-					}),
-				);
+			createDashboardFetchMock({
+				onRequest: (url, init) => {
+					if (url.includes("/regenerate") && init?.method === "POST") {
+						return jsonResponse({
+							message: "New key generated.",
+							apiKey: {
+								name: "My Key",
+								tier: "PRO",
+								keyStatus: "ACTIVE",
+								keyPrefix: "pk_abc",
+								key: "pk_abc_supersecretkey",
+								permissions: [],
+							},
+						});
+					}
+					return undefined;
+				},
+			});
 
 			Object.defineProperty(navigator, "clipboard", {
 				value: undefined,
@@ -668,14 +723,8 @@ describe("Dashboard", () => {
 	});
 
 	describe("add API key", () => {
-		beforeEach(() => {
-			localStorage.setItem("token", "test-token");
-		});
-
 		it("shows '+ Add key' button when keys already exist", async () => {
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(
-				jsonResponse(SAMPLE_DASHBOARD_DATA),
-			);
+			createDashboardFetchMock();
 
 			render(<Dashboard />);
 			await screen.findByText("My Key");
@@ -691,7 +740,7 @@ describe("Dashboard", () => {
 				apiKeys: [{ ...SAMPLE_API_KEY, tier: "HOBBY" }],
 				subscription: { ...SAMPLE_SUBSCRIPTION, tier: "HOBBY" },
 			};
-			vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(data));
+			createDashboardFetchMock({ dashboardData: data });
 
 			render(<Dashboard />);
 			await screen.findByText("My Key");
@@ -706,33 +755,33 @@ describe("Dashboard", () => {
 		});
 
 		it("creates a new key and shows it in the reveal modal", async () => {
-			vi.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
-				.mockResolvedValueOnce(
-					jsonResponse(
-						{
-							apiKey: {
-								name: "Staging key",
-								tier: "PRO",
-								keyStatus: "ACTIVE",
-								keyPrefix: "pk_pro_staging",
-								key: "pk_pro_staging_secret",
-								permissions: ["read:pubs"],
+			const { setDashboardData } = createDashboardFetchMock({
+				onRequest: (url, init) => {
+					if (url.endsWith("/auth/keys") && init?.method === "POST") {
+						setDashboardData({
+							...SAMPLE_DASHBOARD_DATA,
+							apiKeys: [
+								SAMPLE_API_KEY,
+								{ ...SAMPLE_API_KEY, name: "Staging key", keyPrefix: "pk_pro_staging" },
+							],
+						});
+						return jsonResponse(
+							{
+								apiKey: {
+									name: "Staging key",
+									tier: "PRO",
+									keyStatus: "ACTIVE",
+									keyPrefix: "pk_pro_staging",
+									key: "pk_pro_staging_secret",
+									permissions: ["read:pubs"],
+								},
 							},
-						},
-						201,
-					),
-				)
-				.mockResolvedValueOnce(
-					jsonResponse({
-						...SAMPLE_DASHBOARD_DATA,
-						apiKeys: [
-							SAMPLE_API_KEY,
-							{ ...SAMPLE_API_KEY, name: "Staging key", keyPrefix: "pk_pro_staging" },
-						],
-					}),
-				);
+							201,
+						);
+					}
+					return undefined;
+				},
+			});
 
 			render(<Dashboard />);
 			await screen.findByText("My Key");
@@ -752,18 +801,20 @@ describe("Dashboard", () => {
 		});
 
 		it("shows the 409 tier-limit error inside the add key modal", async () => {
-			vi.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
-				.mockResolvedValueOnce(
-					jsonResponse(
-						{
-							error:
-								"Your PRO plan allows up to 3 API keys. Delete an existing key or upgrade your plan to create another.",
-						},
-						409,
-					),
-				);
+			createDashboardFetchMock({
+				onRequest: (url, init) => {
+					if (url.endsWith("/auth/keys") && init?.method === "POST") {
+						return jsonResponse(
+							{
+								error:
+									"Your PRO plan allows up to 3 API keys. Delete an existing key or upgrade your plan to create another.",
+							},
+							409,
+						);
+					}
+					return undefined;
+				},
+			});
 
 			render(<Dashboard />);
 			await screen.findByText("My Key");
@@ -780,10 +831,6 @@ describe("Dashboard", () => {
 	});
 
 	describe("revoke API key", () => {
-		beforeEach(() => {
-			localStorage.setItem("token", "test-token");
-		});
-
 		async function openKeyMenu() {
 			await screen.findByText("My Key");
 			fireEvent.click(screen.getByRole("button", { name: /More options for My Key/ }));
@@ -792,8 +839,9 @@ describe("Dashboard", () => {
 		it("revokes a key on confirm and refreshes the list", async () => {
 			let dashboardCallCount = 0;
 			vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
-				const url = typeof input === "string" ? input : input.toString();
+				const url = toUrl(input);
 				const method = init?.method ?? "GET";
+				if (url.includes("/auth/me")) return authMeResponse(true);
 				if (url.includes("/dashboard/usage")) return jsonResponse(SAMPLE_USAGE_DATA);
 				if (method === "DELETE") return jsonResponse({ success: true });
 				dashboardCallCount += 1;
@@ -820,12 +868,15 @@ describe("Dashboard", () => {
 		it("revokes the specific key's id, not just the first key, even when keyPrefix is shared", async () => {
 			const secondKey = { ...SAMPLE_API_KEY, id: "key_2", name: "Second Key" };
 			const data = { ...SAMPLE_DASHBOARD_DATA, apiKeys: [SAMPLE_API_KEY, secondKey] };
-			const fetchSpy = vi
-				.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(data))
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
-				.mockResolvedValueOnce(jsonResponse({ success: true }))
-				.mockResolvedValueOnce(jsonResponse(data));
+			const { spy: fetchSpy } = createDashboardFetchMock({
+				dashboardData: data,
+				onRequest: (url, init) => {
+					if (url.includes("/auth/keys/key_2") && init?.method === "DELETE") {
+						return jsonResponse({ success: true });
+					}
+					return undefined;
+				},
+			});
 			vi.spyOn(window, "confirm").mockReturnValue(true);
 
 			render(<Dashboard />);
@@ -844,12 +895,14 @@ describe("Dashboard", () => {
 		});
 
 		it("shows an error message when revoke fails", async () => {
-			vi.spyOn(globalThis, "fetch")
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_DASHBOARD_DATA))
-				.mockResolvedValueOnce(jsonResponse(SAMPLE_USAGE_DATA))
-				.mockResolvedValueOnce(
-					jsonResponse({ error: "Key not found" }, 404),
-				);
+			createDashboardFetchMock({
+				onRequest: (url, init) => {
+					if (url.includes("/auth/keys/") && init?.method === "DELETE") {
+						return jsonResponse({ error: "Key not found" }, 404);
+					}
+					return undefined;
+				},
+			});
 			vi.spyOn(window, "confirm").mockReturnValue(true);
 
 			render(<Dashboard />);
@@ -863,9 +916,7 @@ describe("Dashboard", () => {
 		});
 
 		it("does not revoke when the user dismisses the confirm dialog", async () => {
-			const fetchSpy = vi
-				.spyOn(globalThis, "fetch")
-				.mockResolvedValue(jsonResponse(SAMPLE_DASHBOARD_DATA));
+			const { spy: fetchSpy } = createDashboardFetchMock();
 			vi.spyOn(window, "confirm").mockReturnValue(false);
 
 			render(<Dashboard />);
@@ -874,7 +925,7 @@ describe("Dashboard", () => {
 			fireEvent.click(screen.getByRole("button", { name: "Revoke key" }));
 
 			await waitFor(() => {
-				expect(fetchSpy).toHaveBeenCalledTimes(2);
+				expect(fetchSpy).toHaveBeenCalledTimes(3);
 			});
 		});
 	});

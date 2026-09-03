@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 export type AuthUser = {
   email: string;
@@ -39,15 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function checkAuth(): Promise<void> {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setUser(null);
-        return;
-      }
       try {
-        const res = await fetch("/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch("/api/auth/me");
         if (res.ok) {
           const raw: unknown = await res.json();
           if (isAuthPayload(raw)) {

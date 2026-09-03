@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: "Pub DB",
     description:
       "Browse and contribute to probably the world's best database of pubs. Search pubs by name, city, or address.",
-    images: ["/og-default.png"],
+    images: [{ url: "/og-default.png", alt: "Pub DB" }],
   },
 };
 

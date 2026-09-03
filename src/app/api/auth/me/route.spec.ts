@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { GET, PATCH } from "./route";
+import { DELETE, GET, PATCH } from "./route";
 
 function jsonResponse(data: unknown, status = 200): Response {
 	return new Response(JSON.stringify(data), {
@@ -28,7 +28,7 @@ describe("GET /api/auth/me", () => {
 		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(payload));
 
 		const request = new Request("http://localhost/api/auth/me", {
-			headers: { authorization: "Bearer user-token" },
+			headers: { cookie: "auth-token=user-token" },
 		});
 
 		const response = await GET(request);
@@ -86,7 +86,7 @@ describe("PATCH /api/auth/me", () => {
 
 		const request = new Request("http://localhost/api/auth/me", {
 			method: "PATCH",
-			headers: { authorization: "Bearer user-token", "content-type": "application/json" },
+			headers: { cookie: "auth-token=user-token", "content-type": "application/json" },
 			body: JSON.stringify({ name: "Jane Doe" }),
 		});
 
@@ -110,7 +110,7 @@ describe("PATCH /api/auth/me", () => {
 
 		const request = new Request("http://localhost/api/auth/me", {
 			method: "PATCH",
-			headers: { authorization: "Bearer user-token" },
+			headers: { cookie: "auth-token=user-token" },
 			body: JSON.stringify({ name: "J" }),
 		});
 
@@ -126,7 +126,7 @@ describe("PATCH /api/auth/me", () => {
 
 		const request = new Request("http://localhost/api/auth/me", {
 			method: "PATCH",
-			headers: { authorization: "Bearer user-token" },
+			headers: { cookie: "auth-token=user-token" },
 			body: JSON.stringify({ username: "taken" }),
 		});
 
@@ -134,5 +134,75 @@ describe("PATCH /api/auth/me", () => {
 
 		expect(response.status).toBe(409);
 		await expect(response.json()).resolves.toEqual(errorPayload);
+	});
+});
+
+describe("DELETE /api/auth/me", () => {
+	const originalEnv = process.env;
+
+	beforeEach(() => {
+		vi.restoreAllMocks();
+		process.env = { ...originalEnv };
+		process.env.API_URL = "https://api.example.com";
+		process.env.TESTING_API_KEY = "test-key";
+	});
+
+	afterEach(() => {
+		process.env = originalEnv;
+	});
+
+	it("forwards the caller's Authorization header and body to the upstream API", async () => {
+		const payload = { success: true };
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(payload));
+
+		const request = new Request("http://localhost/api/auth/me", {
+			method: "DELETE",
+			headers: { cookie: "auth-token=user-token", "content-type": "application/json" },
+			body: JSON.stringify({ password: "correct-password" }),
+		});
+
+		const response = await DELETE(request);
+
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://api.example.com/auth/me",
+			{
+				method: "DELETE",
+				headers: { "Content-Type": "application/json", Authorization: "Bearer user-token" },
+				body: JSON.stringify({ password: "correct-password" }),
+			},
+		);
+		expect(response.status).toBe(200);
+		await expect(response.json()).resolves.toEqual(payload);
+	});
+
+	it("returns 401 with the upstream error body when the password is wrong", async () => {
+		const errorPayload = { error: "Incorrect password" };
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(errorPayload, 401));
+
+		const request = new Request("http://localhost/api/auth/me", {
+			method: "DELETE",
+			headers: { cookie: "auth-token=user-token" },
+			body: JSON.stringify({ password: "wrong" }),
+		});
+
+		const response = await DELETE(request);
+
+		expect(response.status).toBe(401);
+		await expect(response.json()).resolves.toEqual(errorPayload);
+	});
+
+	it("returns 500 when the upstream request throws", async () => {
+		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("network down"));
+
+		const request = new Request("http://localhost/api/auth/me", {
+			method: "DELETE",
+			headers: { cookie: "auth-token=user-token" },
+			body: JSON.stringify({ password: "correct-password" }),
+		});
+
+		const response = await DELETE(request);
+
+		expect(response.status).toBe(500);
+		await expect(response.json()).resolves.toEqual({ error: "network down" });
 	});
 });

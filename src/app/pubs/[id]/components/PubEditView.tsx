@@ -123,6 +123,8 @@ export default function PubEditView({
             type="text"
             value={editFields.name ?? ""}
             onChange={(e) => onFieldChange("name", e.target.value)}
+            aria-invalid={!!fieldErrors.nameError}
+            aria-describedby={fieldErrors.nameError ? "edit-name-error" : undefined}
           />
           {fieldErrors.nameError && (
             <FieldErrorList errors={[fieldErrors.nameError]} className={styles.errorText} idPrefix="edit-name" />
@@ -183,6 +185,8 @@ export default function PubEditView({
               value={editFields.website ?? ""}
               onChange={(e) => onFieldChange("website", e.target.value)}
               placeholder="https://..."
+              aria-invalid={!!fieldErrors.websiteError}
+              aria-describedby={fieldErrors.websiteError ? "edit-website-error" : undefined}
             />
             {fieldErrors.websiteError && (
               <FieldErrorList errors={[fieldErrors.websiteError]} className={styles.errorText} idPrefix="edit-website" />
@@ -195,6 +199,8 @@ export default function PubEditView({
               className={`${styles.textInput} ${fieldErrors.phoneError ? styles.inputError : ""}`}
               type="tel"
               value={editFields.phone ?? ""}
+              aria-invalid={!!fieldErrors.phoneError}
+              aria-describedby={fieldErrors.phoneError ? "edit-phone-error" : undefined}
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\+?[0-9\-\s]*$/.test(value) || value === "") {
@@ -320,6 +326,8 @@ export default function PubEditView({
             value={editFields.address ?? ""}
             onChange={(e) => onFieldChange("address", e.target.value)}
             placeholder="e.g. 44 Dean Street"
+            aria-invalid={!!fieldErrors.addressError}
+            aria-describedby={fieldErrors.addressError ? "edit-address-error" : undefined}
           />
           {fieldErrors.addressError && (
             <FieldErrorList errors={[fieldErrors.addressError]} className={styles.errorText} idPrefix="edit-address" />
@@ -338,6 +346,8 @@ export default function PubEditView({
               type="text"
               value={editFields.city ?? ""}
               onChange={(e) => onFieldChange("city", e.target.value)}
+              aria-invalid={!!fieldErrors.cityError}
+              aria-describedby={fieldErrors.cityError ? "edit-city-error" : undefined}
             />
             {fieldErrors.cityError && (
               <FieldErrorList errors={[fieldErrors.cityError]} className={styles.errorText} idPrefix="edit-city" />
@@ -369,6 +379,8 @@ export default function PubEditView({
               type="text"
               value={editFields.postcode ?? ""}
               onChange={(e) => onFieldChange("postcode", e.target.value)}
+              aria-invalid={!!fieldErrors.postcodeError}
+              aria-describedby={fieldErrors.postcodeError ? "edit-postcode-error" : undefined}
             />
             {fieldErrors.postcodeError && (
               <FieldErrorList errors={[fieldErrors.postcodeError]} className={styles.errorText} idPrefix="edit-postcode" />
@@ -383,6 +395,8 @@ export default function PubEditView({
               value={editFields.country ?? ""}
               onChange={(e) => onFieldChange("country", e.target.value)}
               disabled={!!countriesError}
+              aria-invalid={!!fieldErrors.countryError}
+              aria-describedby={fieldErrors.countryError ? "edit-country-error" : undefined}
             >
               <option value="">
                 {countriesLoading ? "Loading…" : countriesError ? "Failed to load" : "Select country"}
@@ -510,7 +524,7 @@ export default function PubEditView({
             <h2 className={styles.sectionTitle}>Opening hours</h2>
             <p className={styles.sectionDesc}>Update the pub's regular weekly schedule.</p>
           </div>
-          <span className={`${styles.chevron} ${hoursOpen ? styles.chevronOpen : ""}`}>↓</span>
+          <span className={`${styles.chevron} ${hoursOpen ? styles.chevronOpen : ""}`} aria-hidden="true">↓</span>
         </button>
         {hoursOpen && (
           <div id="pub-hours-section" className={styles.collapsibleBody}>
@@ -541,7 +555,7 @@ export default function PubEditView({
             <h2 className={styles.sectionTitle}>Beer types</h2>
             <p className={styles.sectionDesc}>Select the beer types available at this pub.</p>
           </div>
-          <span className={`${styles.chevron} ${beerTypesOpen ? styles.chevronOpen : ""}`}>↓</span>
+          <span className={`${styles.chevron} ${beerTypesOpen ? styles.chevronOpen : ""}`} aria-hidden="true">↓</span>
         </button>
         {beerTypesOpen && (
           <div id="pub-beer-types-section" className={styles.collapsibleBody}>
@@ -574,7 +588,7 @@ export default function PubEditView({
             <h2 className={styles.sectionTitle}>Beer gardens</h2>
             <p className={styles.sectionDesc}>Add or edit outdoor spaces for this pub.</p>
           </div>
-          <span className={`${styles.chevron} ${beerGardensOpen ? styles.chevronOpen : ""}`}>↓</span>
+          <span className={`${styles.chevron} ${beerGardensOpen ? styles.chevronOpen : ""}`} aria-hidden="true">↓</span>
         </button>
         {beerGardensOpen && (
           <div id="pub-beer-gardens-section" className={styles.collapsibleBody}>

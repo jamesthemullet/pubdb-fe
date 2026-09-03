@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { buildAuthHeaders } from "@/lib/auth";
 import type { BeerType } from "@/types/pub";
 
 export type { BeerType };
@@ -60,14 +59,8 @@ export function useBeerTypes(): {
 			setBeerTypesLoading(true);
 			setBeerTypesError(null);
 
-			const token =
-				typeof window !== "undefined"
-					? localStorage.getItem("token")
-					: null;
-
 			try {
 				const res = await fetch("/api/beer-types", {
-					headers: buildAuthHeaders(token),
 					signal: controller.signal,
 				});
 				if (!res.ok) {

@@ -14,7 +14,7 @@ const NAV_ITEMS = [
 ];
 
 export function DocNav(){
-  const [activeSection, setActiveSection] = useState("quick-start");
+  const [activeSection, setActiveSection] = useState(NAV_ITEMS[0].id);
 
   return (
     <nav className={styles.docsNav} aria-label="Documentation navigation">
@@ -25,7 +25,7 @@ export function DocNav(){
               href={`#${id}`}
               className={`${styles.navItem} ${activeSection === id ? styles.navItemActive : ""}`}
               onClick={() => setActiveSection(id)}
-              aria-current={activeSection === id ? "page" : undefined}
+              aria-current={activeSection === id ? "location" : undefined}
             >
               {label}
             </a>

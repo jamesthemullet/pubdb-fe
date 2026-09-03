@@ -1,15 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { FormEvent, ReactNode } from "react";
-import { useMemo, useState } from "react";
+import type { ChangeEvent, FormEvent, ReactNode } from "react";
+import { useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
+import UnapprovedBanner from "@/app/components/unapproved-banner/UnapprovedBanner";
 import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-editor";
 import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useCountries } from "@/hooks/useCountries";
-import { buildAuthHeaders } from "@/lib/auth";
+import { uploadPubImage, validatePubImageSize } from "@/lib/pubImageUpload";
 import type { OpeningHoursMap, PubType } from "@/types/pub";
 import styles from "./page.module.css";
 
@@ -106,6 +107,9 @@ export default function AddPubPage(){
   const [phone, setPhone] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [chainName, setChainName] = useState("");
   const [operator, setOperator] = useState("");
   const [type, setType] = useState<PubType | "">("");
@@ -127,21 +131,22 @@ export default function AddPubPage(){
   const [editLink, setEditLink] = useState<string | null>(null);
   const { countries, countriesLoading, countriesError } = useCountries();
 
-  const approvalMailto = useMemo(
-    () =>
-      `mailto:hello@thepubdb.com?subject=${encodeURIComponent(
-        "Approval request for PubDB editor access"
-      )}&body=${encodeURIComponent(
-        `Hi PubDB team,\n\nPlease approve my account for editing pubs.\n\nAccount email: ${user?.email ?? "Unknown"}\n\nThanks!`
-      )}`,
-    [user?.email]
-  );
+  function handlePhotoChange(e: ChangeEvent<HTMLInputElement>): void {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) {
+      setPhotoFile(null);
+      setPhotoError(null);
+      return;
+    }
+    const sizeError = validatePubImageSize(file);
+    setPhotoError(sizeError);
+    setPhotoFile(sizeError ? null : file);
+  }
 
   async function handleSubmit(e: FormEvent): Promise<void> {
     e.preventDefault();
     setLoading(true); setError(null); setFormErrors([]); setFieldErrors({}); setSuccess(null); setEditLink(null);
     try {
-      const token = localStorage.getItem("token");
       const body: Record<string, unknown> = {
         name, city, country, address, postcode,
         area: area || undefined,
@@ -159,22 +164,37 @@ export default function AddPubPage(){
       };
       const res = await fetch("/api/pubs", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...buildAuthHeaders(token) },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
+      const data: unknown = await res.json();
+      const responseId = data != null && typeof data === "object" && "id" in data
+        ? (data as { id: string }).id
+        : undefined;
       if (!res.ok) {
         const { formErrors: fe, fieldErrors: fle } = parseApiValidationErrors(data);
         setFormErrors(fe); setFieldErrors(fle);
-        if (res.status === 409 && data?.id) {
-          setEditLink(`/pubs/${data.id}`);
+        if (res.status === 409 && responseId) {
+          setEditLink(`/pubs/${responseId}`);
           if (fe.length === 0) setError("Pub already exists");
         } else if (fe.length === 0 && Object.keys(fle).length === 0) {
           setError("Unknown error");
         }
+      } else if (photoFile && responseId) {
+        setUploadingPhoto(true);
+        const uploadResult = await uploadPubImage(responseId, photoFile);
+        setUploadingPhoto(false);
+        if ("error" in uploadResult) {
+          setSuccess("Pub submitted for review, but the photo upload failed.");
+          setPhotoError(uploadResult.error);
+          setEditLink(`/pubs/${responseId}`);
+        } else {
+          setSuccess("Pub submitted for review!");
+          setTimeout(() => router.push(`/pubs/${responseId}`), 1000);
+        }
       } else {
         setSuccess("Pub submitted for review!");
-        setTimeout(() => router.push(`/pubs/${data.id}`), 1000);
+        setTimeout(() => router.push(`/pubs/${responseId}`), 1000);
       }
     } catch { setError("Network error"); }
     finally { setLoading(false); }
@@ -185,21 +205,12 @@ export default function AddPubPage(){
     return <AuthGate context="Add pub" />;
   }
 
-  if (!user.approved) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.gateCard}>
-          <p className={styles.gateText}>Your account isn't approved for editing yet.</p>
-          <a href={approvalMailto} className={styles.gateLink}>Request approval by email</a>
-        </div>
-      </div>
-    );
-  }
-
   const amenityFields = PUB_AMENITY_FIELDS.filter((f) => f.key !== "isIndependent");
 
   return (
     <div className={styles.page}>
+      {!user.approved && <UnapprovedBanner email={user.email} />}
+
       {/* ── Header ── */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
@@ -219,9 +230,9 @@ export default function AddPubPage(){
             type="submit"
             form="add-pub-form"
             className={styles.submitBtn}
-            disabled={loading}
+            disabled={loading || uploadingPhoto}
           >
-            <span aria-hidden="true">✓</span> {loading ? "Submitting…" : "Submit pub"}
+            <span aria-hidden="true">✓</span> {uploadingPhoto ? "Uploading photo…" : loading ? "Submitting…" : "Submit pub"}
           </button>
         </div>
       </div>
@@ -356,6 +367,21 @@ export default function AddPubPage(){
                 placeholder="e.g. Greene King"
               />
             </div>
+          </div>
+
+          <div className={styles.fieldBlock}>
+            <label className={styles.fieldLabel} htmlFor="photo">Upload photo <span className={styles.optLabel}>(optional, max 8MB)</span></label>
+            <input
+              id="photo"
+              className={styles.textInput}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+            />
+            {photoFile && !photoError && (
+              <p className={styles.sectionDesc}>{photoFile.name} selected — uploaded after the pub is created.</p>
+            )}
+            {photoError && <FieldErrorList errors={[photoError]} className={styles.errorText} idPrefix="photo" />}
           </div>
 
           <div className={styles.fieldGrid2}>
@@ -565,7 +591,7 @@ export default function AddPubPage(){
             )}
             {success && <p className={styles.successText} role="status">{success}</p>}
             <button type="submit" className={styles.submitBtn} disabled={loading}>
-              ✓ {loading ? "Submitting…" : "Submit pub"}
+              <span aria-hidden="true">✓</span> {loading ? "Submitting…" : "Submit pub"}
             </button>
           </div>
         </div>

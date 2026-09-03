@@ -7,8 +7,18 @@ import AuthGate from "@/app/components/auth-gate/AuthGate";
 import type { AuthUser } from "@/hooks/useAuth";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
-import { buildAuthHeaders } from "@/lib/auth";
 import styles from "./page.module.css";
+
+// ── Shared types ─────────────────────────────────────────────────────────────
+
+type ApiErrorBody = {
+  error?: string;
+  errors?: { fieldErrors?: Record<string, string[]> };
+};
+
+function asApiError(data: unknown): ApiErrorBody | null {
+  return data != null && typeof data === "object" ? (data as ApiErrorBody) : null;
+}
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
 
@@ -58,7 +68,7 @@ export default function SettingsPage() {
                   type="button"
                   className={`${styles.navItem} ${activeTab === id ? styles.navItemActive : ""} ${id === "danger" ? styles.navItemDanger : ""}`}
                   onClick={() => setActiveTab(id)}
-                  aria-current={activeTab === id ? "page" : undefined}
+                  aria-current={activeTab === id ? true : undefined}
                 >
                   <span className={styles.navIcon}>{icon}</span>
                   {label}
@@ -202,17 +212,15 @@ function ProfileTab({ user }: { user: AuthUser }) {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/auth/me", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify(body),
       });
 
-      const data = await res.json().catch(() => null);
+      const data = asApiError(await res.json().catch(() => null));
 
       if (res.ok) {
         setSaved(true);
@@ -328,8 +336,8 @@ function ProfileTab({ user }: { user: AuthUser }) {
       </Card>
 
       <Card title="Contact">
-        <FieldRow label="Email" htmlFor="settings-email">
-          <span id="settings-email" className={styles.fieldHint}>{user?.email}</span>
+        <FieldRow label="Email">
+          <span className={styles.fieldHint}>{user?.email}</span>
         </FieldRow>
       </Card>
 
@@ -365,17 +373,15 @@ function SecurityTab() {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/auth/me/password", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({ currentPassword, newPassword }),
       });
 
-      const data = await res.json().catch(() => null);
+      const data = asApiError(await res.json().catch(() => null));
 
       if (res.ok) {
         setSaved(true);
@@ -406,7 +412,14 @@ function SecurityTab() {
     <>
       <Card title="Password" description="Update your login password.">
         <FieldRow label="Current password" htmlFor="settings-current-password">
-          <input id="settings-current-password" className={styles.textInput} type="password" placeholder="••••••••" />
+          <input
+            id="settings-current-password"
+            className={styles.textInput}
+            type="password"
+            placeholder="••••••••"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+          />
         </FieldRow>
         <FieldRow label="New password" hint="6–128 characters." htmlFor="settings-new-password">
           <input
@@ -471,12 +484,10 @@ function AlertToggleRow({
     setSaving(true);
 
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/auth/me", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({ [field]: next }),
       });
@@ -501,9 +512,10 @@ function AlertToggleRow({
   }
 
   return (
-    <FieldRow label={label} hint={hint}>
+    <FieldRow label={label} hint={hint} htmlFor={field}>
       <label className={styles.toggleLabel}>
         <input
+          id={field}
           type="checkbox"
           className={styles.toggleInput}
           checked={enabled}
@@ -590,24 +602,22 @@ function DangerTab() {
     setSubmitting(true);
 
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch("/api/auth/me", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          ...buildAuthHeaders(token),
         },
         body: JSON.stringify({ password }),
       });
 
       if (res.ok) {
-        localStorage.removeItem("token");
+        await fetch("/api/auth/logout", { method: "POST" });
         window.dispatchEvent(new Event("authChanged"));
         router.push("/");
         return;
       }
 
-      const data = await res.json().catch(() => null);
+      const data = asApiError(await res.json().catch(() => null));
       if (res.status === 400 && data?.errors) {
         setError("Password is required.");
       } else if (res.status === 401) {
@@ -647,8 +657,9 @@ function DangerTab() {
 
       {confirming && (
         <form onSubmit={handleDeleteAccount} className={styles.dangerRow}>
-          <FieldRow label="Confirm password" hint="Enter your password to permanently delete your account.">
+          <FieldRow label="Confirm password" hint="Enter your password to permanently delete your account." htmlFor="danger-confirm-password">
             <input
+              id="danger-confirm-password"
               className={styles.textInput}
               type="password"
               placeholder="••••••••"

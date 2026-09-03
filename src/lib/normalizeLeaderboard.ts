@@ -88,7 +88,7 @@ function normalizePeriod(value: unknown): LeaderboardPeriod {
     since: typeof obj.since === "string" ? obj.since : null,
     leaderboard: Array.isArray(obj.leaderboard)
       ? obj.leaderboard.filter(isLeaderboardEntry).map((entry) => {
-          const raw = entry as unknown as Record<string, unknown>;
+          const raw = entry as Record<string, unknown>;
           return {
             ...entry,
             streak: typeof raw.streak === "number" ? raw.streak : 0,
@@ -125,15 +125,16 @@ export function normalizeLeaderboard(payload: unknown): LeaderboardData {
 
   if (typeof payload !== "object" || payload === null) return fallback;
   const root = payload as Record<string, unknown>;
-  const data = root.data as Record<string, unknown> | undefined;
-  if (typeof data !== "object" || data === null) return fallback;
+  const rawData: unknown = root.data;
+  if (typeof rawData !== "object" || rawData === null) return fallback;
+  const data = rawData as Record<string, unknown>;
 
-  const rawPeriods = data.periods as Record<string, unknown> | undefined;
+  const rawPeriods: unknown = data.periods;
   const periods = emptyPeriods();
   for (const key of PERIOD_KEYS) {
     periods[key] = normalizePeriod(
       typeof rawPeriods === "object" && rawPeriods !== null
-        ? rawPeriods[key]
+        ? (rawPeriods as Record<string, unknown>)[key]
         : undefined
     );
   }
