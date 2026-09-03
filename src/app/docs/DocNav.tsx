@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import styles from "./page.module.css";
 
 const NAV_ITEMS = [
@@ -11,6 +14,8 @@ const NAV_ITEMS = [
 ];
 
 export function DocNav(){
+  const [activeSection, setActiveSection] = useState(NAV_ITEMS[0].id);
+
   return (
     <nav className={styles.docsNav} aria-label="Documentation navigation">
       <ul className={styles.navList}>
