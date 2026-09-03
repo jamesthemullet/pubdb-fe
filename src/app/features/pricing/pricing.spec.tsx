@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { clearAuthCache } from "@/hooks/useAuth";
 
 import Pricing from "./pricing";
 
@@ -52,6 +53,7 @@ const mockApiKey = {
 };
 
 beforeEach(() => {
+  clearAuthCache();
   vi.spyOn(globalThis, "fetch").mockImplementation(async (input: RequestInfo | URL) => {
     const url = toUrl(input);
     if (url.endsWith("/auth/me")) return AUTHENTICATED_ME();

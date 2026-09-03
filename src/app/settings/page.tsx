@@ -336,8 +336,8 @@ function ProfileTab({ user }: { user: AuthUser }) {
       </Card>
 
       <Card title="Contact">
-        <FieldRow label="Email" htmlFor="settings-email">
-          <span id="settings-email" className={styles.fieldHint}>{user?.email}</span>
+        <FieldRow label="Email">
+          <span className={styles.fieldHint}>{user?.email}</span>
         </FieldRow>
       </Card>
 

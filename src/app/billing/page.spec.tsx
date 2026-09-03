@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { clearAuthCache } from "@/hooks/useAuth";
 
 vi.mock("@/app/features/pricing/pricing", () => ({
 	default: () => null,
@@ -110,7 +111,13 @@ function setupFetchMock({
 describe("BillingPage", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		localStorage.clear();
+		clearAuthCache();
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
+	});
+
+	afterEach(() => {
+		localStorage.clear();
 	});
 
 	it("shows an AuthGate when the user is not authenticated", () => {
