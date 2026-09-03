@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Terms of Service | Pub DB",
     description: "Read the Pub DB Terms of Service governing your use of the platform and API.",
-    images: ["/og-default.png"],
+    images: [{ url: "/og-default.png", alt: "Pub DB" }],
   },
 };
 
