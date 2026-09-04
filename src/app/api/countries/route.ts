@@ -1,34 +1,17 @@
 import { NextResponse } from "next/server";
+import { COUNTRIES } from "@/data/countries";
 
-// Countries change essentially never, so cache aggressively both in Next's
-// data cache and at the CDN edge.
-const REVALIDATE_SECONDS = 60 * 60 * 24 * 30; // 30 days
+// Countries change essentially never, so this is served from a bundled
+// static list rather than fetched from a third party. (It previously
+// called restcountries.com, but that API's v3.1 endpoint was deprecated
+// and its v5 replacement requires a paid-tier API key — see
+// https://restcountries.com/docs/countries/legacy-api-deprecation.)
+const CACHE_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
 export async function GET(): Promise<Response> {
-  try {
-    const res = await fetch(
-      "https://restcountries.com/v3.1/all?fields=name,cca2",
-      { next: { revalidate: REVALIDATE_SECONDS } }
-    );
-
-    if (!res.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch countries" },
-        { status: res.status }
-      );
-    }
-
-    const data = await res.json();
-
-    return NextResponse.json(data, {
-      headers: {
-        "Cache-Control": `public, s-maxage=${REVALIDATE_SECONDS}, stale-while-revalidate=86400`,
-      },
-    });
-  } catch {
-    return NextResponse.json(
-      { error: "Failed to fetch countries" },
-      { status: 502 }
-    );
-  }
+  return NextResponse.json(COUNTRIES, {
+    headers: {
+      "Cache-Control": `public, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=86400`,
+    },
+  });
 }
