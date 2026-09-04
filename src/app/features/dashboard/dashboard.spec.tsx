@@ -1,5 +1,7 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render as rtlRender, screen, waitFor } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 vi.mock("@/hooks/useContributions", () => ({
 	useContributions: () => ({
@@ -10,6 +12,10 @@ vi.mock("@/hooks/useContributions", () => ({
 }));
 
 import Dashboard from "./dashboard";
+
+function render(ui: ReactElement) {
+	return rtlRender(<AuthProvider>{ui}</AuthProvider>);
+}
 
 function jsonResponse(data: unknown, status = 200): Response {
 	return new Response(JSON.stringify(data), {
@@ -182,9 +188,12 @@ describe("Dashboard", () => {
 
 			await waitFor(() => {
 				expect(
-					screen.getByText(/Account pending approval/),
+					screen.getByText(/account isn't approved yet/i),
 				).toBeInTheDocument();
 			});
+			expect(
+				screen.getByRole("link", { name: "Chase approval by email" }),
+			).toBeInTheDocument();
 		});
 
 		it("shows email not verified warning when email unverified", async () => {

@@ -1,5 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { useAuth } from "./useAuth";
 
 function jsonResponse(data: unknown, status = 200): Response {
@@ -9,6 +11,10 @@ function jsonResponse(data: unknown, status = 200): Response {
   });
 }
 
+function wrapper({ children }: { children: ReactNode }) {
+  return <AuthProvider>{children}</AuthProvider>;
+}
+
 describe("useAuth", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -16,7 +22,7 @@ describe("useAuth", () => {
 
   it("returns null user and false flags when /auth/me reports no session", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({}, 401));
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
     await waitFor(() => expect(result.current.user).toBeNull());
     expect(result.current.isApproved).toBe(false);
     expect(result.current.isAdmin).toBe(false);
@@ -26,7 +32,7 @@ describe("useAuth", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       jsonResponse({ email: "alice@example.com", approved: true, admin: false })
     );
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
     await waitFor(() => expect(result.current.user).not.toBeNull());
     expect(result.current.user?.email).toBe("alice@example.com");
     expect(result.current.isApproved).toBe(true);
@@ -35,7 +41,7 @@ describe("useAuth", () => {
 
   it("returns null user when /auth/me throws a network error", async () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network error"));
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
     await waitFor(() => expect(result.current.user).toBeNull());
     expect(result.current.isAdmin).toBe(false);
     expect(result.current.isApproved).toBe(false);
@@ -47,7 +53,7 @@ describe("useAuth", () => {
       .mockResolvedValueOnce(jsonResponse({}, 401))
       .mockResolvedValueOnce(jsonResponse({ email: "bob@example.com" }));
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
     await waitFor(() => expect(result.current.user).toBeNull());
 
     window.dispatchEvent(new Event("authChanged"));
