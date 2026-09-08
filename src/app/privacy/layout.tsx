@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Privacy Policy | Pub DB",
     description: "Read the Pub DB Privacy Policy to understand how we collect, use, and protect your data.",
-    images: ["/og-default.png"],
+    images: [{ url: "/og-default.png", alt: "Pub DB" }],
   },
 };
 

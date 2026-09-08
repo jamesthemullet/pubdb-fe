@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import styles from "./page.module.css";
 
@@ -18,6 +18,7 @@ const getSafeInternalPath = (value: string | null | undefined): string | null =>
 
 export default function RegisterLoginPage(){
   const [redirectTo, setRedirectTo] = useState("/");
+  const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -28,8 +29,14 @@ export default function RegisterLoginPage(){
     sessionStorage.setItem("lastUrl", window.location.pathname);
   }, []);
 
+  useEffect(() => {
+    return () => clearTimeout(redirectTimeoutRef.current);
+  }, []);
+
   function handleLogin() {
-    setTimeout(() => { window.location.href = redirectTo || "/"; }, 300);
+    redirectTimeoutRef.current = setTimeout(() => {
+      if (typeof window !== "undefined") window.location.href = redirectTo || "/";
+    }, 300);
   }
 
   return (

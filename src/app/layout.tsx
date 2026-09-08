@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
+import { AuthProvider } from "@/contexts/AuthContext";
 import AccentedInit from "./components/AccentedInit";
 import Footer from "./components/footer/footer";
 import Sidebar from "./components/sidebar/sidebar";
@@ -65,21 +66,23 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${inter.variable} ${jetbrainsMono.variable}`}
       >
-        <a href="#main-content" className={styles.skipLink}>
-          Skip to main content
-        </a>
-        <div className={styles.appShell}>
-          <Sidebar />
-          <div className={styles.contentArea}>
-            <Topbar />
-            <main id="main-content" className={styles.main}>
-              {children}
-            </main>
-            <Footer />
+        <AuthProvider>
+          <a href="#main-content" className={styles.skipLink}>
+            Skip to main content
+          </a>
+          <div className={styles.appShell}>
+            <Sidebar />
+            <div className={styles.contentArea}>
+              <Topbar />
+              <main id="main-content" className={styles.main}>
+                {children}
+              </main>
+              <Footer />
+            </div>
           </div>
-        </div>
-        <Analytics />
-        <AccentedInit />
+          <Analytics />
+          <AccentedInit />
+        </AuthProvider>
       </body>
     </html>
   );
