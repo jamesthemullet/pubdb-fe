@@ -22,8 +22,9 @@ export async function GET(
 ): Promise<Response> {
   const { action } = await params;
   const apiUrl = getServerApiUrl();
+  const { search } = new URL(request.url);
   try {
-    const response = await fetch(`${apiUrl}/auth/${action}`, {
+    const response = await fetch(`${apiUrl}/auth/${action}${search}`, {
       headers: buildHeaders(request, false),
       cache: "no-store",
     });
