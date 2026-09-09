@@ -31,7 +31,7 @@ export default function OpeningHoursEditor({
 }: {
   value?: Partial<Record<string, Partial<DayHours>>> | null;
   onChange: (val: OpeningHours) => void;
-}) {
+}): React.JSX.Element {
   const [hours, setHours] = useState<OpeningHours>(() =>
     Object.fromEntries(
       DAYS.map((day) => [

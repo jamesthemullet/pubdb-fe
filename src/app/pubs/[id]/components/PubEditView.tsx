@@ -86,7 +86,7 @@ export default function PubEditView({
   beerTypesLoading,
   beerTypesError,
   setFieldErrors,
-}: Props) {
+}: Props): React.JSX.Element {
   const [hoursOpen, setHoursOpen] = useState(false);
   const [beerTypesOpen, setBeerTypesOpen] = useState(false);
   const [beerGardensOpen, setBeerGardensOpen] = useState(false);

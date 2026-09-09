@@ -51,7 +51,7 @@ function BadgeList({
 }: {
   badges: Badge[];
   className: string;
-}) {
+}): React.JSX.Element | null {
   if (badges.length === 0) return null;
   return (
     <div className={className}>
@@ -86,7 +86,7 @@ function PodiumCard({
   position: 1 | 2 | 3;
   elevated?: boolean;
   isYou?: boolean;
-}) {
+}): React.JSX.Element {
   const medal = MEDAL[position];
   return (
     <div
@@ -142,7 +142,7 @@ function YourRankBanner({
   entry: LeaderboardEntry;
   avatarUrl?: string;
   onViewProfile: () => void;
-}) {
+}): React.JSX.Element {
   return (
     <div className={styles.yourRankBanner}>
       <span className={styles.yourRankLabel}>YOUR RANK</span>
@@ -201,7 +201,7 @@ const WEEK_METRICS: { key: "totalAdded" | "totalEdits"; label: string }[] = [
   { key: "totalEdits", label: "by edits" },
 ];
 
-function TopThisWeekPanel({ entries }: { entries: LeaderboardEntry[] }) {
+function TopThisWeekPanel({ entries }: { entries: LeaderboardEntry[] }): React.JSX.Element | null {
   const [metric, setMetric] = useState<"totalAdded" | "totalEdits">(
     "totalAdded"
   );
@@ -254,7 +254,7 @@ function TopThisWeekPanel({ entries }: { entries: LeaderboardEntry[] }) {
   );
 }
 
-function ClimbingFastestPanel({ entries }: { entries: LeaderboardEntry[] }) {
+function ClimbingFastestPanel({ entries }: { entries: LeaderboardEntry[] }): React.JSX.Element | null {
   const climbers = useMemo(
     () =>
       entries
@@ -298,7 +298,7 @@ function ClimbingFastestPanel({ entries }: { entries: LeaderboardEntry[] }) {
   );
 }
 
-function EarnBadgesPanel({ nextBadges }: { nextBadges: NextBadge[] }) {
+function EarnBadgesPanel({ nextBadges }: { nextBadges: NextBadge[] }): React.JSX.Element | null {
   if (nextBadges.length === 0) return null;
   return (
     <div className={styles.sidebarPanel}>
@@ -327,7 +327,7 @@ function EarnBadgesPanel({ nextBadges }: { nextBadges: NextBadge[] }) {
 
 // ── Client component ──────────────────────────────────────────────────────────
 
-export default function LeaderboardClient({ data }: { data: LeaderboardData }){
+export default function LeaderboardClient({ data }: { data: LeaderboardData }): React.JSX.Element {
   const { user } = useAuth();
   const router = useRouter();
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -584,7 +584,7 @@ export default function LeaderboardClient({ data }: { data: LeaderboardData }){
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
-function ShareIcon() {
+function ShareIcon(): React.JSX.Element {
   return (
     <svg
       width="13"

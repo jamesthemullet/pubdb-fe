@@ -10,7 +10,7 @@ export default function FieldErrorList({
   errors,
   className,
   idPrefix,
-}: FieldErrorListProps) {
+}: FieldErrorListProps): React.JSX.Element | null {
   if (!errors || errors.length === 0) {
     return null;
   }
