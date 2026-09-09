@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { getApiError } from "@/lib/errors";
 import styles from "./AuthGate.module.css";
 
 type AuthGateProps = {
@@ -14,7 +15,7 @@ type AuthGateProps = {
   headingLevel?: 1 | 2;
 };
 
-export default function AuthGate({ context, onLogin, headingLevel = 2 }: AuthGateProps){
+export default function AuthGate({ context, onLogin, headingLevel = 2 }: AuthGateProps): React.JSX.Element {
   const [mode, setMode] = useState<"register" | "login">("login");
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -37,9 +38,9 @@ export default function AuthGate({ context, onLogin, headingLevel = 2 }: AuthGat
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
+      const data: unknown = await res.json();
       if (!res.ok) {
-        setError(data.error || data.errors || "Unknown error");
+        setError(getApiError(data));
       } else if (mode === "login") {
         window.dispatchEvent(new Event("authChanged"));
         onLogin?.();

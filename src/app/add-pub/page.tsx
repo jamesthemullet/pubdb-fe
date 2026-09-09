@@ -93,6 +93,7 @@ const AMENITY_LABELS: Partial<Record<PubAmenityKey, string>> = {
 
 export default function AddPubPage(){
   const router = useRouter();
+  const { user } = useAuth();
 
   // Core fields
   const [name, setName] = useState("");
@@ -128,8 +129,6 @@ export default function AddPubPage(){
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [success, setSuccess] = useState<string | null>(null);
   const [editLink, setEditLink] = useState<string | null>(null);
-  const { user } = useAuth();
-
   const { countries, countriesLoading, countriesError } = useCountries();
 
   function handlePhotoChange(e: ChangeEvent<HTMLInputElement>): void {
