@@ -1,11 +1,34 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { buildPubJsonLd, type PubForJsonLd } from "@/lib/pubJsonLd";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
 
-type PubMetaShape = {
-  name?: string;
-  city?: string;
-};
+const SITE_URL = "https://www.thepubdb.com";
+
+type PubMetaShape = Partial<PubForJsonLd>;
+
+async function fetchPubForLayout(id: string): Promise<PubMetaShape | null> {
+  try {
+    const apiUrl = getServerApiUrl();
+    const apiKey = process.env.TESTING_API_KEY;
+    const headers: Record<string, string> = apiKey ? { "X-API-Key": apiKey } : {};
+    const res = await fetch(`${apiUrl}/api/v1/pubs/${id}`, {
+      headers,
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    const raw: unknown = await res.json().catch(() => null);
+    const pub =
+      raw !== null && typeof raw === "object" && !Array.isArray(raw)
+        ? "data" in raw
+          ? (raw as { data: PubMetaShape }).data
+          : (raw as PubMetaShape)
+        : null;
+    return pub?.name ? pub : null;
+  } catch {
+    return null;
+  }
+}
 
 export async function generateMetadata({
   params,
@@ -34,21 +57,7 @@ export async function generateMetadata({
   };
 
   try {
-    const apiUrl = getServerApiUrl();
-    const apiKey = process.env.TESTING_API_KEY;
-    const headers: Record<string, string> = apiKey ? { "X-API-Key": apiKey } : {};
-    const res = await fetch(`${apiUrl}/api/v1/pubs/${id}`, {
-      headers,
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return fallback;
-    const raw: unknown = await res.json().catch(() => null);
-    const pub: PubMetaShape =
-      raw !== null && typeof raw === "object" && !Array.isArray(raw)
-        ? "data" in raw
-          ? (raw as { data: PubMetaShape }).data
-          : (raw as PubMetaShape)
-        : {};
+    const pub = await fetchPubForLayout(id);
     if (!pub?.name) return fallback;
     const title = pub.city ? `${pub.name} — ${pub.city}` : pub.name;
     const description = `View details, amenities, opening hours, and more for ${pub.name}${pub.city ? ` in ${pub.city}` : ""}.`;
@@ -72,6 +81,29 @@ export async function generateMetadata({
   }
 }
 
-export default function PubLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+export default async function PubLayout({
+  children,
+  params,
+}: {
+  children: ReactNode;
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const pub = await fetchPubForLayout(id);
+  const hasRequiredFields = pub?.name && pub.address && pub.city && pub.postcode && pub.country;
+
+  if (!hasRequiredFields) return <>{children}</>;
+
+  const jsonLd = buildPubJsonLd(pub as PubForJsonLd, `${SITE_URL}/pubs/${id}`);
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD requires inline script content; data is JSON-serialized, not raw HTML.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      {children}
+    </>
+  );
 }
