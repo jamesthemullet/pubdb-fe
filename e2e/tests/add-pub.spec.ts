@@ -40,13 +40,35 @@ test.describe("Add Pub (/add-pub)", () => {
     await expect(page.getByRole("button", { name: "Log in" })).toBeVisible();
   });
 
-  test("shows approval prompt for unapproved users", async ({ page }) => {
+  test("shows the unapproved-account banner but still lets unapproved users use the form", async ({ page }) => {
     await page.route(AUTH_ME_API, (route) =>
       route.fulfill(jsonResponse({ email: "pending@example.com", approved: false }))
     );
     await mockCountries(page);
     await page.goto("/add-pub");
-    await expect(page.getByText(/Your account isn't approved for editing yet/)).toBeVisible();
+    await expect(page.getByText(/up to 10 free contributions/i)).toBeVisible();
+    await expect(page.getByLabel(/pub name/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /submit pub/i }).first()).toBeVisible();
+  });
+
+  test("shows the API's quota message when an unapproved user hits the free-contribution limit", async ({ page }) => {
+    await page.route(AUTH_ME_API, (route) =>
+      route.fulfill(jsonResponse({ email: "pending@example.com", approved: false }))
+    );
+    await mockCountries(page);
+    await page.route(ADD_PUB_API, (route) =>
+      route.fulfill(
+        jsonResponse(
+          { error: "Free accounts are limited to 10 contributions. Upgrade your plan to keep contributing." },
+          403
+        )
+      )
+    );
+    await page.goto("/add-pub");
+    await fillRequiredFields(page);
+    await page.getByRole("button", { name: /submit pub/i }).first().click();
+
+    await expect(page.getByText(/Free accounts are limited to 10 contributions/)).toBeVisible();
   });
 
   test.describe("with an approved user", () => {

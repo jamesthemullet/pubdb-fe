@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     title: "Leaderboard | Pub DB",
     description:
       "See who has contributed the most to the Pub DB database. Rankings by pubs added across different time periods.",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "Pub DB" }],
   },
   twitter: {
     card: "summary_large_image",

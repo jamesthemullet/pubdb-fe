@@ -1,15 +1,24 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render as rtlRender, screen, waitFor } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 vi.mock("@/hooks/useContributions", () => ({
-	useContributions: () => ({
-		contributions: { totalAdded: 0, recentPubs: [], editsByPub: [] },
-		contributionsLoading: false,
-		contributionsError: null,
-	}),
+	useContributions: vi.fn(),
 }));
 
+import { useContributions } from "@/hooks/useContributions";
 import Dashboard from "./dashboard";
+
+const DEFAULT_CONTRIBUTIONS = {
+	contributions: { totalAdded: 0, recentPubs: [], editsByPub: [] },
+	contributionsLoading: false,
+	contributionsError: null,
+};
+
+function render(ui: ReactElement) {
+	return rtlRender(<AuthProvider>{ui}</AuthProvider>);
+}
 
 function jsonResponse(data: unknown, status = 200): Response {
 	return new Response(JSON.stringify(data), {
@@ -117,6 +126,7 @@ describe("Dashboard", () => {
 
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		vi.mocked(useContributions).mockReturnValue(DEFAULT_CONTRIBUTIONS);
 		process.env = { ...originalEnv };
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
 	});
@@ -182,9 +192,12 @@ describe("Dashboard", () => {
 
 			await waitFor(() => {
 				expect(
-					screen.getByText(/Account pending approval/),
+					screen.getByText(/account isn't approved yet/i),
 				).toBeInTheDocument();
 			});
+			expect(
+				screen.getByRole("link", { name: "Chase approval by email" }),
+			).toBeInTheDocument();
 		});
 
 		it("shows email not verified warning when email unverified", async () => {
@@ -918,6 +931,133 @@ describe("Dashboard", () => {
 			await waitFor(() => {
 				expect(fetchSpy).toHaveBeenCalledTimes(3);
 			});
+		});
+	});
+
+	describe("contributions section", () => {
+		it("shows a loading message while contributions are loading", async () => {
+			vi.mocked(useContributions).mockReturnValue({
+				contributions: null,
+				contributionsLoading: true,
+				contributionsError: null,
+			});
+			createDashboardFetchMock();
+
+			render(<Dashboard />);
+
+			await screen.findByText("My Key");
+			expect(screen.getByText("Loading…")).toBeInTheDocument();
+		});
+
+		it("shows an error message when contributions fail to load", async () => {
+			vi.mocked(useContributions).mockReturnValue({
+				contributions: null,
+				contributionsLoading: false,
+				contributionsError: "Unable to load contributions.",
+			});
+			createDashboardFetchMock();
+
+			render(<Dashboard />);
+
+			await screen.findByText("My Key");
+			expect(
+				screen.getByText("Unable to load contributions."),
+			).toBeInTheDocument();
+		});
+
+		it("renders recent pubs added", async () => {
+			vi.mocked(useContributions).mockReturnValue({
+				contributions: {
+					totalAdded: 2,
+					recentPubs: [
+						{ id: "pub_1", name: "The Crown", city: "Leeds", createdAt: "2024-04-01T00:00:00.000Z" },
+					],
+					editsByPub: [],
+				},
+				contributionsLoading: false,
+				contributionsError: null,
+			});
+			createDashboardFetchMock();
+
+			render(<Dashboard />);
+
+			await screen.findByText("2 pubs added");
+			expect(
+				screen.getByRole("link", { name: "The Crown" }),
+			).toHaveAttribute("href", "/pubs/pub_1");
+			expect(screen.getByText(/— Leeds/)).toBeInTheDocument();
+		});
+
+		it("expands and collapses edit-type pills for a pub via the toggle button", async () => {
+			vi.mocked(useContributions).mockReturnValue({
+				contributions: {
+					totalAdded: 0,
+					recentPubs: [],
+					editsByPub: [
+						{
+							pubId: "pub_2",
+							pubName: "The Anchor",
+							city: "Bristol",
+							editCount: 2,
+							editTypes: ["name", "openingHours"],
+						},
+					],
+				},
+				contributionsLoading: false,
+				contributionsError: null,
+			});
+			createDashboardFetchMock();
+
+			render(<Dashboard />);
+
+			const toggleButton = await screen.findByRole("button", {
+				name: "Show fields",
+			});
+			expect(toggleButton).toHaveAttribute("aria-expanded", "false");
+			expect(screen.queryByText("name")).not.toBeInTheDocument();
+
+			fireEvent.click(toggleButton);
+
+			expect(
+				screen.getByRole("button", { name: "Hide" }),
+			).toHaveAttribute("aria-expanded", "true");
+			expect(screen.getByText("name")).toBeInTheDocument();
+			expect(screen.getByText("openingHours")).toBeInTheDocument();
+
+			fireEvent.click(screen.getByRole("button", { name: "Hide" }));
+
+			expect(
+				screen.getByRole("button", { name: "Show fields" }),
+			).toHaveAttribute("aria-expanded", "false");
+			expect(screen.queryByText("name")).not.toBeInTheDocument();
+		});
+
+		it("does not render a toggle button when an edited pub has no edit types", async () => {
+			vi.mocked(useContributions).mockReturnValue({
+				contributions: {
+					totalAdded: 0,
+					recentPubs: [],
+					editsByPub: [
+						{
+							pubId: "pub_3",
+							pubName: "The Feathers",
+							city: "York",
+							editCount: 1,
+							editTypes: [],
+						},
+					],
+				},
+				contributionsLoading: false,
+				contributionsError: null,
+			});
+			createDashboardFetchMock();
+
+			render(<Dashboard />);
+
+			await screen.findByText("The Feathers");
+			expect(
+				screen.queryByRole("button", { name: /Show fields/ }),
+			).not.toBeInTheDocument();
 		});
 	});
 });

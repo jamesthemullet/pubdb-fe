@@ -584,6 +584,115 @@
   color: var(--text-muted);
 }
 
+/* ── Grid view ── */
+.pubGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.pubCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--background);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.1s, box-shadow 0.1s;
+}
+
+.pubCard:hover {
+  border-color: var(--text-muted);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+}
+
+.cardImage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 10;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--surface-alt),
+    var(--surface-alt) 10px,
+    var(--surface) 10px,
+    var(--surface) 20px
+  );
+}
+
+.cardImagePhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardImageInitials {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.cardAreaTag {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 0.85rem 0.85rem;
+}
+
+.cardTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.cardName {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--text-color);
+}
+
+.cardLocation {
+  font-size: 0.8125rem;
+  color: var(--accent);
+}
+
+.cardBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+
+.cardBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 /* ── Pagination ── */
 .pagination {
   display: flex;

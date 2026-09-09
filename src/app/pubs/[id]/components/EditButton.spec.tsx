@@ -23,7 +23,7 @@ describe("EditButton (pub detail)", () => {
 		).toHaveAttribute("href", "/register");
 	});
 
-	it("shows the approval message when user is not approved", () => {
+	it("shows the edit button for an unapproved user, deferring to the API to enforce quota", () => {
 		const user: AuthUser = { email: "user@example.com", approved: false };
 		render(
 			<EditButton
@@ -34,7 +34,7 @@ describe("EditButton (pub detail)", () => {
 			/>,
 		);
 		expect(
-			screen.getByText("Your account is not approved for editing."),
+			screen.getByRole("button", { name: "Edit this pub" }),
 		).toBeInTheDocument();
 	});
 
