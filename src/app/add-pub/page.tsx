@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { FormEvent, ReactNode } from "react";
+import type { ChangeEvent, FormEvent, ReactNode } from "react";
 import { useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
@@ -10,6 +10,7 @@ import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-edito
 import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useCountries } from "@/hooks/useCountries";
+import { uploadPubImage, validatePubImageSize } from "@/lib/pubImageUpload";
 import type { OpeningHoursMap, PubType } from "@/types/pub";
 import styles from "./page.module.css";
 
@@ -92,6 +93,7 @@ const AMENITY_LABELS: Partial<Record<PubAmenityKey, string>> = {
 
 export default function AddPubPage(){
   const router = useRouter();
+  const { user } = useAuth();
 
   // Core fields
   const [name, setName] = useState("");
@@ -105,6 +107,9 @@ export default function AddPubPage(){
   const [phone, setPhone] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [chainName, setChainName] = useState("");
   const [operator, setOperator] = useState("");
   const [type, setType] = useState<PubType | "">("");
@@ -124,9 +129,19 @@ export default function AddPubPage(){
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [success, setSuccess] = useState<string | null>(null);
   const [editLink, setEditLink] = useState<string | null>(null);
-  const { user } = useAuth();
-
   const { countries, countriesLoading, countriesError } = useCountries();
+
+  function handlePhotoChange(e: ChangeEvent<HTMLInputElement>): void {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) {
+      setPhotoFile(null);
+      setPhotoError(null);
+      return;
+    }
+    const sizeError = validatePubImageSize(file);
+    setPhotoError(sizeError);
+    setPhotoFile(sizeError ? null : file);
+  }
 
   async function handleSubmit(e: FormEvent): Promise<void> {
     e.preventDefault();
@@ -164,6 +179,18 @@ export default function AddPubPage(){
           if (fe.length === 0) setError("Pub already exists");
         } else if (fe.length === 0 && Object.keys(fle).length === 0) {
           setError("Unknown error");
+        }
+      } else if (photoFile && responseId) {
+        setUploadingPhoto(true);
+        const uploadResult = await uploadPubImage(responseId, photoFile);
+        setUploadingPhoto(false);
+        if ("error" in uploadResult) {
+          setSuccess("Pub submitted for review, but the photo upload failed.");
+          setPhotoError(uploadResult.error);
+          setEditLink(`/pubs/${responseId}`);
+        } else {
+          setSuccess("Pub submitted for review!");
+          setTimeout(() => router.push(`/pubs/${responseId}`), 1000);
         }
       } else {
         setSuccess("Pub submitted for review!");
@@ -203,9 +230,9 @@ export default function AddPubPage(){
             type="submit"
             form="add-pub-form"
             className={styles.submitBtn}
-            disabled={loading}
+            disabled={loading || uploadingPhoto}
           >
-            <span aria-hidden="true">✓</span> {loading ? "Submitting…" : "Submit pub"}
+            <span aria-hidden="true">✓</span> {uploadingPhoto ? "Uploading photo…" : loading ? "Submitting…" : "Submit pub"}
           </button>
         </div>
       </div>
@@ -340,6 +367,21 @@ export default function AddPubPage(){
                 placeholder="e.g. Greene King"
               />
             </div>
+          </div>
+
+          <div className={styles.fieldBlock}>
+            <label className={styles.fieldLabel} htmlFor="photo">Upload photo <span className={styles.optLabel}>(optional, max 8MB)</span></label>
+            <input
+              id="photo"
+              className={styles.textInput}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+            />
+            {photoFile && !photoError && (
+              <p className={styles.sectionDesc}>{photoFile.name} selected — uploaded after the pub is created.</p>
+            )}
+            {photoError && <FieldErrorList errors={[photoError]} className={styles.errorText} idPrefix="photo" />}
           </div>
 
           <div className={styles.fieldGrid2}>

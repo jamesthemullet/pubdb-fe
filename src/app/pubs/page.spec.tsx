@@ -1,8 +1,13 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render as rtlRender, screen, waitFor } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clearAuthCache } from "@/hooks/useAuth";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 import Pubs from "./page";
+
+function render(ui: ReactElement) {
+	return rtlRender(<AuthProvider>{ui}</AuthProvider>);
+}
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -54,7 +59,6 @@ describe("Pubs page", () => {
 		process.env = { ...originalEnv };
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
 		localStorage.clear();
-		clearAuthCache();
 	});
 
 	afterEach(() => {
