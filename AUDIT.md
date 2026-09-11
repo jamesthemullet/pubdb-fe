@@ -17,6 +17,7 @@ leaves checked items alone. `[fe]`/`[api]` tags mark which repo a finding applie
 - 2026-09-08 — scheduled maintenance run: resolved the `dashboard.tsx` "Your contributions" section test-coverage finding (section 1) — added 5 unit tests covering the loading/error states, recent-pubs-added list, and the `toggleEditTypes` expand/collapse behavior for edit-type pills.
 - 2026-09-09 — scheduled maintenance run: resolved the `src/app/settings/page.tsx` test-coverage finding (section 1) — added 37 unit tests (up from 10) covering the Profile tab's save flow (field editing, partial PATCH body, 409/400/401 handling), the Security tab's password-change flow (mismatch validation, 400/401/429 handling), the Notifications and API preferences toggle rows (optimistic update + revert-on-failure), and the Appearance tab's theme selection.
 - 2026-09-10 — scheduled maintenance run: resolved the `src/app/playground/page.tsx` test-coverage finding (section 1) — added 10 unit tests covering the auth gate, API-key loading/error/empty states, key-picker default selection, immediate-send for parameterless endpoints, param-form expand/collapse and required-field gating, network-error handling, and request history record/revisit behavior. Statement coverage for the file went from 0% to 82.17%.
+- 2026-09-11 — scheduled maintenance run: resolved the sidebar pub-count nav-badge contrast finding (section 2) — bumped `.navBadge` color from `#666666` to `#8c8c8c` in `sidebar.module.css` (4.96:1 on the `#1e1e1e` badge background, up from 2.9:1), same pattern as the earlier nav-section-label contrast fix (PR #354).
 
 ## 1. Test coverage — unit gaps and e2e
 
@@ -50,7 +51,7 @@ leaves checked items alone. `[fe]`/`[api]` tags mark which repo a finding applie
 ## 2. Accessibility
 
 - [x] [fe] Sidebar (every authenticated page) — nav section labels "WORKSPACE"/"ACCOUNT" render at 2.53:1 contrast (#555555 on #111111), fails WCAG AA 4.5:1. `src/app/components/sidebar/sidebar.tsx` / `sidebar.module.css`. (found: 2026-09-01) (resolved: 2026-09-04, PR #354)
-- [ ] [fe] Sidebar (every page) — pub-count nav badge (e.g. "12.4k") renders at 2.9:1 contrast (#666666 on #1e1e1e), fails AA. `src/app/components/sidebar/sidebar.module.css`. (found: 2026-09-01)
+- [x] [fe] Sidebar (every page) — pub-count nav badge (e.g. "12.4k") renders at 2.9:1 contrast (#666666 on #1e1e1e), fails AA. `src/app/components/sidebar/sidebar.module.css`. (found: 2026-09-01) (resolved: 2026-09-11, PR #TBD — bumped `.navBadge` color from `#666666` to `#8c8c8c` (4.96:1 on `#1e1e1e`, up from 2.9:1))
 - [ ] [fe] Sidebar (every page) — account chip's avatar-initial and username text fail AA color-contrast. `src/app/components/sidebar/sidebar.module.css`. (found: 2026-09-01)
 - [ ] [fe] Home page (`/`) — hero description, "Free tier" CTA note, code-tab labels (curl/node/python/ruby), contribute paragraph, and footer/Terms/Privacy links fail AA color-contrast (axe: 14 nodes on this page). (found: 2026-09-01)
 - [ ] [fe] Home page (`/`) — the hero curl-response code panel is a scrollable region that isn't keyboard-focusable, so keyboard-only users cannot scroll its content (axe: scrollable-region-focusable). (found: 2026-09-01)
