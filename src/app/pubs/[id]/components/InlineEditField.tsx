@@ -29,7 +29,7 @@ export default function InlineEditField({
   canEdit,
   rowLayout,
   valueClassName,
-}: Props) {
+}: Props): React.JSX.Element {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);

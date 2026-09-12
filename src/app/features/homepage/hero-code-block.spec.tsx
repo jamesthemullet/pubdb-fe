@@ -1,121 +1,137 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import HeroCodeBlock from "./hero-code-block";
 
 function mockFetchWith(payload: unknown, ok = true) {
-	return vi.spyOn(globalThis, "fetch").mockResolvedValue(
-		new Response(JSON.stringify(payload), { status: ok ? 200 : 500 }),
-	);
+  return vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response(JSON.stringify(payload), { status: ok ? 200 : 500 }),
+  );
 }
 
 describe("HeroCodeBlock", () => {
-	afterEach(() => {
-		vi.restoreAllMocks();
-	});
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
-	it("renders all four language tabs with curl selected by default", async () => {
-		mockFetchWith({ data: [{ id: 1 }] });
-		render(<HeroCodeBlock />);
+  it("renders the provided JSON immediately and does not fetch when initialJson is a string", () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    const jsonStr = '{"name":"The Crown","city":"London"}';
 
-		// Wait for the async fetch to settle so no act() warnings leak
-		await waitFor(() =>
-			expect(screen.queryByRole("status")).not.toBeInTheDocument(),
-		).catch(() => undefined);
+    render(<HeroCodeBlock initialJson={jsonStr} />);
 
-		const tabs = ["curl", "node", "python", "ruby"];
-		for (const lang of tabs) {
-			expect(screen.getByRole("tab", { name: lang })).toBeInTheDocument();
-		}
-		expect(screen.getByRole("tab", { name: "curl" })).toHaveAttribute("aria-selected", "true");
-		expect(screen.getByRole("tab", { name: "node" })).toHaveAttribute("aria-selected", "false");
-	});
+    expect(screen.getByText(jsonStr)).toBeInTheDocument();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
 
-	it("clicking a tab makes it active and shows its code", async () => {
-		mockFetchWith({ data: [] });
-		render(<HeroCodeBlock />);
+  it("renders all four language tabs with curl selected by default", async () => {
+    mockFetchWith({ data: [{ id: 1 }] });
+    render(<HeroCodeBlock />);
 
-		fireEvent.click(screen.getByRole("tab", { name: "python" }));
+    // Wait for the async fetch to settle so no act() warnings leak
+    await waitFor(() =>
+      expect(screen.queryByRole("status")).not.toBeInTheDocument(),
+    ).catch(() => undefined);
 
-		expect(screen.getByRole("tab", { name: "python" })).toHaveAttribute("aria-selected", "true");
-		expect(screen.getByRole("tab", { name: "curl" })).toHaveAttribute("aria-selected", "false");
-		expect(screen.getByRole("tabpanel")).toHaveTextContent("import requests");
+    const tabs = ["curl", "node", "python", "ruby"];
+    for (const lang of tabs) {
+      expect(screen.getByRole("tab", { name: lang })).toBeInTheDocument();
+    }
+    expect(screen.getByRole("tab", { name: "curl" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "node" })).toHaveAttribute("aria-selected", "false");
+  });
 
-		// Let the background fetch settle
-		await waitFor(() => {}).catch(() => undefined);
-	});
+  it("clicking a tab makes it active and shows its code", async () => {
+    mockFetchWith({ data: [] });
+    render(<HeroCodeBlock />);
 
-	it("ArrowRight keyboard navigation advances the active tab", async () => {
-		mockFetchWith({ data: [] });
-		render(<HeroCodeBlock />);
+    fireEvent.click(screen.getByRole("tab", { name: "python" }));
 
-		// curl is active (index 0); ArrowRight should move to node (index 1)
-		fireEvent.keyDown(screen.getByRole("tablist"), { key: "ArrowRight" });
+    expect(screen.getByRole("tab", { name: "python" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "curl" })).toHaveAttribute("aria-selected", "false");
+    expect(screen.getByRole("tabpanel")).toHaveTextContent("import requests");
 
-		expect(screen.getByRole("tab", { name: "node" })).toHaveAttribute("aria-selected", "true");
-		expect(screen.getByRole("tab", { name: "curl" })).toHaveAttribute("aria-selected", "false");
+    // Let the background fetch settle
+    await waitFor(() => {}).catch(() => undefined);
+  });
 
-		await waitFor(() => {}).catch(() => undefined);
-	});
+  it("ArrowRight moves focus through tabs and wraps from last back to first", () => {
+    render(<HeroCodeBlock initialJson="{}" />);
+    const tablist = screen.getByRole("tablist");
+    const tabs = screen.getAllByRole("tab");
 
-	it("Home and End keyboard shortcuts jump to the first and last tab", async () => {
-		mockFetchWith({ data: [] });
-		render(<HeroCodeBlock />);
+    // Initial selection is the first tab (curl)
+    expect(tabs[0]).toHaveAttribute("aria-selected", "true");
 
-		const tablist = screen.getByRole("tablist");
+    // Cycle forward through all four tabs
+    fireEvent.keyDown(tablist, { key: "ArrowRight" });
+    expect(tabs[1]).toHaveAttribute("aria-selected", "true");
 
-		fireEvent.keyDown(tablist, { key: "End" });
-		expect(screen.getByRole("tab", { name: "ruby" })).toHaveAttribute("aria-selected", "true");
+    fireEvent.keyDown(tablist, { key: "ArrowRight" });
+    expect(tabs[2]).toHaveAttribute("aria-selected", "true");
 
-		fireEvent.keyDown(tablist, { key: "Home" });
-		expect(screen.getByRole("tab", { name: "curl" })).toHaveAttribute("aria-selected", "true");
+    fireEvent.keyDown(tablist, { key: "ArrowRight" });
+    expect(tabs[3]).toHaveAttribute("aria-selected", "true");
 
-		await waitFor(() => {}).catch(() => undefined);
-	});
+    // One more ArrowRight wraps back to the first tab
+    fireEvent.keyDown(tablist, { key: "ArrowRight" });
+    expect(tabs[0]).toHaveAttribute("aria-selected", "true");
+  });
 
-	it("displays initialJson immediately without a client-side fetch", () => {
-		const fetchSpy = vi.spyOn(globalThis, "fetch");
-		const sampleJson = JSON.stringify({ id: 1, name: "The Crown" }, null, 2);
+  it("ArrowLeft wraps from first to last tab; Home and End jump to boundary tabs", () => {
+    render(<HeroCodeBlock initialJson="{}" />);
+    const tablist = screen.getByRole("tablist");
+    const tabs = screen.getAllByRole("tab");
 
-		render(<HeroCodeBlock initialJson={sampleJson} />);
+    // End → last tab
+    fireEvent.keyDown(tablist, { key: "End" });
+    expect(tabs[tabs.length - 1]).toHaveAttribute("aria-selected", "true");
 
-		expect(screen.getByText(/The Crown/)).toBeInTheDocument();
-		expect(fetchSpy).not.toHaveBeenCalled();
-	});
+    // Home → first tab
+    fireEvent.keyDown(tablist, { key: "Home" });
+    expect(tabs[0]).toHaveAttribute("aria-selected", "true");
 
-	it("shows the fallback message when the client-side fetch fails", async () => {
-		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network error"));
+    // ArrowLeft from first wraps to last
+    fireEvent.keyDown(tablist, { key: "ArrowLeft" });
+    expect(tabs[tabs.length - 1]).toHaveAttribute("aria-selected", "true");
+  });
 
-		render(<HeroCodeBlock />);
+  it("fetches a sample pub and displays the JSON when initialJson is not provided", async () => {
+    const samplePub = { id: "pub_001", name: "The Anchor" };
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ data: [samplePub] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
 
-		await waitFor(() => {
-			expect(screen.getByText(/response will appear here/)).toBeInTheDocument();
-		});
-	});
+    await act(async () => {
+      render(<HeroCodeBlock />);
+    });
 
-	it("shows the fallback message when the API returns a non-ok status", async () => {
-		mockFetchWith({}, false);
+    await waitFor(() =>
+      expect(screen.getByText(/"name": "The Anchor"/)).toBeInTheDocument(),
+    );
+    expect(fetch).toHaveBeenCalledWith("/api/pubs?limit=1", expect.objectContaining({ signal: expect.any(AbortSignal) }));
+  });
 
-		render(<HeroCodeBlock />);
+  it("shows the fallback message when the client-side fetch fails", async () => {
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network error"));
 
-		await waitFor(() => {
-			expect(screen.getByText(/response will appear here/)).toBeInTheDocument();
-		});
-	});
+    render(<HeroCodeBlock />);
 
-	it("ArrowRight wraps from the last tab back to the first", async () => {
-		mockFetchWith({ data: [] });
-		render(<HeroCodeBlock />);
+    await waitFor(() => {
+      expect(screen.getByText(/response will appear here/)).toBeInTheDocument();
+    });
+  });
 
-		const tablist = screen.getByRole("tablist");
+  it("shows the fallback message when the API returns a non-ok status", async () => {
+    mockFetchWith({}, false);
 
-		// Jump to the last tab (ruby) then wrap around with ArrowRight
-		fireEvent.keyDown(tablist, { key: "End" });
-		expect(screen.getByRole("tab", { name: "ruby" })).toHaveAttribute("aria-selected", "true");
+    render(<HeroCodeBlock />);
 
-		fireEvent.keyDown(tablist, { key: "ArrowRight" });
-		expect(screen.getByRole("tab", { name: "curl" })).toHaveAttribute("aria-selected", "true");
-
-		await waitFor(() => {}).catch(() => undefined);
-	});
+    await waitFor(() => {
+      expect(screen.getByText(/response will appear here/)).toBeInTheDocument();
+    });
+  });
 });

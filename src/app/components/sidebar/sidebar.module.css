@@ -163,7 +163,7 @@
 
 .navBadge {
   font-size: 11px;
-  color: #666666;
+  color: #8c8c8c;
   background: #1e1e1e;
   border-radius: 10px;
   padding: 1px 7px;
@@ -253,7 +253,7 @@
 .userAvatar {
   width: 28px;
   height: 28px;
-  background: #4a90e2;
+  background: #2171cf;
   border-radius: 50%;
   display: flex;
   align-items: center;
