@@ -8,6 +8,7 @@
   "schedule": [
     "after 4am and before 5am"
   ],
+  "rebaseWhen": "conflicted",
   "packageRules": [
     {
       "matchUpdateTypes": [
