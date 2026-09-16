@@ -131,23 +131,34 @@ export default function HeroCodeBlock({ initialJson }: Props){
         ))}
       </div>
 
-      <pre
+      <div
         id="hero-code-panel"
         role="tabpanel"
         aria-labelledby={`hero-tab-${activeTab}`}
         className={styles.requestCode}
+        // biome-ignore lint/a11y/noNoninteractiveTabindex: scrollable tabpanel content needs keyboard focus to be scrollable (axe: scrollable-region-focusable)
+        tabIndex={0}
       >
-        <code>{CODE_EXAMPLES[activeTab]}</code>
-      </pre>
+        <pre>
+          <code>{CODE_EXAMPLES[activeTab]}</code>
+        </pre>
+      </div>
 
       <div className={styles.separator} />
 
       {loading ? (
         <div className={styles.skeleton} />
       ) : json ? (
-        <pre className={styles.responseCode}>
-          <code>{json}</code>
-        </pre>
+        <section
+          className={styles.responseCode}
+          aria-label="Example API response"
+          // biome-ignore lint/a11y/noNoninteractiveTabindex: scrollable response panel needs keyboard focus to be scrollable (axe: scrollable-region-focusable)
+          tabIndex={0}
+        >
+          <pre>
+            <code>{json}</code>
+          </pre>
+        </section>
       ) : (
         <p className={styles.fallback}>{"// response will appear here"}</p>
       )}
