@@ -851,13 +851,20 @@
 
 .codeBlock {
   padding: 1rem 1.25rem 1.25rem;
-  margin: 0;
   font-family: var(--font-jetbrains-mono), monospace;
   font-size: 0.8125rem;
   line-height: 1.7;
   color: #e2e2e2;
-  white-space: pre;
   overflow-x: auto;
+}
+
+.codeBlock pre {
+  margin: 0;
+  white-space: pre;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
 }
 
 /* JSON panel */
@@ -911,14 +918,21 @@
 
 .jsonBlock {
   padding: 1rem 1.25rem;
-  margin: 0;
   font-family: var(--font-jetbrains-mono), monospace;
   font-size: 0.8125rem;
   line-height: 1.65;
   color: var(--text-muted);
-  white-space: pre;
   overflow-x: auto;
   background: var(--surface);
+}
+
+.jsonBlock pre {
+  margin: 0;
+  white-space: pre;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
 }
 
 /* ── Responsive ── */
