@@ -143,6 +143,7 @@ function UsageBarChart({ data }: { data: UsageSeriesResponse }) {
   const yPos = (v: number) => MT + cH - (v / niceMax) * cH;
 
   const yLabels = [1, 2 / 3, 1 / 3, 0].map((f) => ({
+    f,
     v: Math.round(niceMax * f),
     t: fmtCount(Math.round(niceMax * f)),
   }));
@@ -155,8 +156,8 @@ function UsageBarChart({ data }: { data: UsageSeriesResponse }) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className={styles.barChartSvg} aria-hidden="true">
-      {yLabels.map(({ v, t }) => (
-        <g key={v}>
+      {yLabels.map(({ f, v, t }) => (
+        <g key={f}>
           <line x1={ML} y1={yPos(v)} x2={W} y2={yPos(v)} stroke="#e8e8e4" strokeWidth="1" />
           <text x={ML - 6} y={yPos(v) + 4} textAnchor="end" fontSize="10" fill="#9ca3af">
             {t}

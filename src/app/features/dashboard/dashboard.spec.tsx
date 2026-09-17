@@ -1060,4 +1060,30 @@ describe("Dashboard", () => {
 			).not.toBeInTheDocument();
 		});
 	});
+
+	describe("request volume chart", () => {
+		it("does not render duplicate React keys when the chart's y-axis max is small", async () => {
+			const consoleErrorSpy = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => {});
+			createDashboardFetchMock({
+				usageData: {
+					range: "30d",
+					bucket: "day",
+					series: [
+						{ timestamp: "2024-04-01T00:00:00.000Z", count: 0 },
+						{ timestamp: "2024-04-02T00:00:00.000Z", count: 1 },
+					],
+				},
+			});
+
+			render(<Dashboard />);
+
+			await screen.findByText("Request volume");
+
+			for (const call of consoleErrorSpy.mock.calls) {
+				expect(String(call[0])).not.toMatch(/same key/i);
+			}
+		});
+	});
 });
