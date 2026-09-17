@@ -677,12 +677,16 @@ export default function PubPage(): ReactElement {
                 {copied === "code" ? "Copied!" : "Copy"}
               </button>
             </div>
-            <pre
+            <div
               id="pub-code-panel"
               role="tabpanel"
               aria-labelledby={`pub-code-tab-${codeTab}`}
               className={styles.codeBlock}
-            ><code>{codeByTab[codeTab]}</code></pre>
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: scrollable tabpanel content needs keyboard focus to be scrollable (axe: scrollable-region-focusable)
+              tabIndex={0}
+            >
+              <pre><code>{codeByTab[codeTab]}</code></pre>
+            </div>
           </div>
 
           {/* Raw response */}
@@ -702,7 +706,14 @@ export default function PubPage(): ReactElement {
                 </svg>
               </button>
             </div>
-            <pre className={styles.jsonBlock}><code>{jsonPreview}</code></pre>
+            <section
+              className={styles.jsonBlock}
+              aria-label="Raw API response JSON"
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: scrollable response panel needs keyboard focus to be scrollable (axe: scrollable-region-focusable)
+              tabIndex={0}
+            >
+              <pre><code>{jsonPreview}</code></pre>
+            </section>
           </div>
         </div>
       </div>

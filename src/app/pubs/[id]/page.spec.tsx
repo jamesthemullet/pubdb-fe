@@ -253,6 +253,17 @@ describe("PubPage", () => {
 		});
 	});
 
+	describe("API panel", () => {
+		it("makes the scrollable request and JSON response panels keyboard-focusable", async () => {
+			setupFetchMock();
+			render(<PubPage />);
+			await screen.findByRole("heading", { name: "The Harp", level: 1 });
+
+			expect(document.getElementById("pub-code-panel")).toHaveAttribute("tabIndex", "0");
+			expect(screen.getByLabelText("Raw API response JSON")).toHaveAttribute("tabIndex", "0");
+		});
+	});
+
 	describe("auth states (EditButton)", () => {
 		it('shows a "Log in to edit this pub" link when no token is present', async () => {
 			setupFetchMock();
