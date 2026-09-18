@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactElement } from "react";
-import { memo, Suspense, useEffect, useMemo, useState } from "react";
+import { memo, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import {
   getPubTypeLabel,
@@ -193,6 +193,9 @@ function PubsContent(): ReactElement {
   const [typeFilter, setTypeFilter] = useState<PubType | "">("");
   const [showAllFilters, setShowAllFilters] = useState(false);
   const [responseMs, setResponseMs] = useState<number | null>(null);
+  const [surpriseState, setSurpriseState] = useState<
+    "idle" | "loading" | "not-found"
+  >("idle");
   const [locationStatus, setLocationStatus] = useState<
     "idle" | "loading" | "granted" | "denied" | "unsupported"
   >("idle");
@@ -201,6 +204,43 @@ function PubsContent(): ReactElement {
   );
   const { user } = useAuth();
   const isLoggedIn = !!user;
+
+  const buildFilterParams = useCallback((): URLSearchParams => {
+    const params = new URLSearchParams();
+    if (debouncedSearchTerm) params.set("search", debouncedSearchTerm);
+    for (const amenity of activeAmenities) {
+      params.append(`amenities[${amenity}]`, "true");
+    }
+    if (typeFilter) params.set("type", typeFilter);
+    return params;
+  }, [debouncedSearchTerm, activeAmenities, typeFilter]);
+
+  async function handleSurpriseMe(): Promise<void> {
+    setSurpriseState("loading");
+    try {
+      const params = buildFilterParams();
+      const res = await fetch(`/api/pubs/random?${params}`);
+
+      if (res.status === 404) {
+        setSurpriseState("not-found");
+        return;
+      }
+      if (!res.ok) {
+        const errorData = (await res.json().catch(() => ({}))) as ApiErrorResponse;
+        setError(
+          errorData.message || errorData.error || "Failed to find a random pub"
+        );
+        setSurpriseState("idle");
+        return;
+      }
+
+      const data = (await res.json()) as { data: Pub };
+      router.push(`/pubs/${data.data.id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to find a random pub");
+      setSurpriseState("idle");
+    }
+  }
 
   function handleNearMe() {
     if (coords) {
@@ -288,20 +328,15 @@ function PubsContent(): ReactElement {
     async function fetchPubs() {
       setLoading(true);
       setError(null);
+      setSurpriseState("idle");
       const t0 = Date.now();
       try {
-        const params = new URLSearchParams({
-          limit: String(PAGE_SIZE),
-          page: String(page + 1),
-        });
-        if (debouncedSearchTerm) params.set("search", debouncedSearchTerm);
-        for (const amenity of activeAmenities) {
-          params.append(`amenities[${amenity}]`, "true");
-        }
+        const params = buildFilterParams();
+        params.set("limit", String(PAGE_SIZE));
+        params.set("page", String(page + 1));
         if (editStatusFilter !== "all") {
           params.set("editedByMe", editStatusFilter === "edited" ? "true" : "false");
         }
-        if (typeFilter) params.set("type", typeFilter);
         if (coords) {
           params.set("lat", String(coords.lat));
           params.set("lng", String(coords.lng));
@@ -332,7 +367,7 @@ function PubsContent(): ReactElement {
       }
     }
     fetchPubs();
-  }, [page, debouncedSearchTerm, activeAmenities, editStatusFilter, typeFilter, coords]);
+  }, [page, buildFilterParams, editStatusFilter, coords]);
 
   const hasNextPage = pubs.length === PAGE_SIZE;
   const hasPrevPage = page > 0;
@@ -651,6 +686,37 @@ function PubsContent(): ReactElement {
           {locationStatus === "unsupported" && (
             <span className={styles.locationMessage}>
               Location isn&apos;t supported in this browser
+            </span>
+          )}
+
+          <button
+            type="button"
+            className={styles.btnOutline}
+            onClick={handleSurpriseMe}
+            disabled={surpriseState === "loading"}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+              <rect
+                x="1"
+                y="1"
+                width="10"
+                height="10"
+                rx="2"
+                stroke="currentColor"
+                strokeWidth="1.3"
+                fill="none"
+              />
+              <circle cx="4" cy="4" r="0.9" fill="currentColor" />
+              <circle cx="8" cy="4" r="0.9" fill="currentColor" />
+              <circle cx="6" cy="6" r="0.9" fill="currentColor" />
+              <circle cx="4" cy="8" r="0.9" fill="currentColor" />
+              <circle cx="8" cy="8" r="0.9" fill="currentColor" />
+            </svg>
+            {surpriseState === "loading" ? "Finding a pub…" : "Surprise me"}
+          </button>
+          {surpriseState === "not-found" && (
+            <span className={styles.locationMessage}>
+              No pub matches your current filters
             </span>
           )}
         </div>
