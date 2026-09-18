@@ -30,5 +30,6 @@ jobs:
           check "/"
           check "/api/beer-types"
           check "/api/pubs"
+          check "/pubs/cmovvnqw801lxk8ftw7hn97ts"
 
           exit $FAIL
