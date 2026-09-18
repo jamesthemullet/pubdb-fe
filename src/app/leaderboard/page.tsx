@@ -14,9 +14,15 @@ export default async function LeaderboardPage(){
       `${apiUrl}/api/v1/contributors/leaderboard`,
       { next: { revalidate: 300 }, headers }
     );
-    if (res.ok) payload = await res.json();
-  } catch {
-    // render with empty data on network failure
+    if (res.ok) {
+      payload = await res.json();
+    } else {
+      // biome-ignore lint/suspicious/noConsole: server-side error logging for a silent fallback
+      console.error(`Failed to fetch leaderboard: ${res.status}`);
+    }
+  } catch (error) {
+    // biome-ignore lint/suspicious/noConsole: server-side error logging for a silent fallback
+    console.error("Failed to fetch leaderboard:", error);
   }
   const data = normalizeLeaderboard(payload);
   return <LeaderboardClient data={data} />;
