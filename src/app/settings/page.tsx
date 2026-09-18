@@ -289,6 +289,8 @@ function ProfileTab({ user }: { user: AuthUser }) {
                 alt="Profile preview"
                 className={styles.avatarCircle}
                 style={{ objectFit: "cover" }}
+                loading="eager"
+                fetchPriority="high"
               />
             ) : (
               <span className={styles.avatarCircle}>{initialsFor(name, username, user?.email ?? "")}</span>
