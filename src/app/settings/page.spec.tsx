@@ -244,6 +244,18 @@ describe("SettingsPage", () => {
 			expect(screen.getByLabelText("Bio")).toHaveValue("Pub enthusiast");
 		});
 
+		it("renders the avatar preview with eager loading so it isn't deprioritized as the page's LCP element", () => {
+			vi.mocked(useAuth).mockReturnValue({
+				user: { ...profileUser, image: "https://example.com/avatar.jpg" },
+				isApproved: true,
+				isAdmin: false,
+			});
+			render(<SettingsPage />);
+			const avatar = screen.getByAltText("Profile preview");
+			expect(avatar).toHaveAttribute("loading", "eager");
+			expect(avatar).toHaveAttribute("fetchPriority", "high");
+		});
+
 		it("disables Save changes until a field is edited", () => {
 			render(<SettingsPage />);
 			expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
