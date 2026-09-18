@@ -31,5 +31,8 @@ jobs:
           check "/api/beer-types"
           check "/api/pubs"
           check "/pubs/cmovvnqw801lxk8ftw7hn97ts"
+          check "/pubs"
+          check "/api/leaderboard"
+          check "/api/pubs/random"
 
           exit $FAIL
