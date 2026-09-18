@@ -14,9 +14,15 @@ export default async function ChangelogPage(){
       next: { revalidate: 300 },
       headers,
     });
-    if (res.ok) payload = await res.json();
-  } catch {
-    // render with empty data on network failure
+    if (res.ok) {
+      payload = await res.json();
+    } else {
+      // biome-ignore lint/suspicious/noConsole: server-side error logging for a silent fallback
+      console.error(`Failed to fetch changelog: ${res.status}`);
+    }
+  } catch (error) {
+    // biome-ignore lint/suspicious/noConsole: server-side error logging for a silent fallback
+    console.error("Failed to fetch changelog:", error);
   }
   const versions = normalizeChangelog(payload);
   return <ChangelogClient versions={versions} />;
