@@ -19,9 +19,13 @@ vi.mock("next/link", () => ({
 	}) => <a href={href}>{children}</a>,
 }));
 
+const mockSearchParams = new Map<string, string>();
+
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
-	useSearchParams: () => ({ get: () => null }),
+	useSearchParams: () => ({
+		get: (key: string) => mockSearchParams.get(key) ?? null,
+	}),
 }));
 
 function jsonResponse(data: unknown, status = 200): Response {
@@ -60,6 +64,7 @@ describe("Pubs page", () => {
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
 		localStorage.clear();
 		__clearPubsResponseCacheForTests();
+		mockSearchParams.clear();
 	});
 
 	afterEach(() => {
@@ -465,6 +470,34 @@ describe("Pubs page", () => {
 					screen.getByRole("button", { name: /near me/i }),
 				).toHaveAttribute("aria-pressed", "false");
 			});
+
+			vi.unstubAllGlobals();
+		});
+
+		it("restores an active Near me filter from the URL, without re-requesting location", async () => {
+			mockSearchParams.set("lat", "51.5");
+			mockSearchParams.set("lng", "-0.1");
+			const getCurrentPosition = vi.fn();
+			vi.stubGlobal("navigator", { geolocation: { getCurrentPosition } });
+			const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+				jsonResponse({ data: SAMPLE_PUBS.map((p) => ({ ...p, distance: 1.2 })) }),
+			);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+
+			expect(getCurrentPosition).not.toHaveBeenCalled();
+			expect(
+				screen.getByRole("button", { name: /near me/i }),
+			).toHaveAttribute("aria-pressed", "true");
+
+			const pubsCalls = fetchMock.mock.calls.filter((call) =>
+				(call[0] as string).includes("/api/pubs"),
+			);
+			const url = new URL(pubsCalls[pubsCalls.length - 1][0] as string, "http://localhost");
+			expect(url.searchParams.get("lat")).toBe("51.5");
+			expect(url.searchParams.get("lng")).toBe("-0.1");
 
 			vi.unstubAllGlobals();
 		});

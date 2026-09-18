@@ -222,6 +222,8 @@ function PubsContent(): ReactElement {
   const urlEdit = searchParams.get("edited") ?? "";
   const urlView = searchParams.get("view") ?? "";
   const urlPage = searchParams.get("page") ?? "";
+  const urlLat = searchParams.get("lat") ?? "";
+  const urlLng = searchParams.get("lng") ?? "";
   const [pubs, setPubs] = useState<Pub[]>([]);
   const [page, setPage] = useState(() => {
     const parsed = Number.parseInt(urlPage, 10);
@@ -251,11 +253,16 @@ function PubsContent(): ReactElement {
   const [surpriseState, setSurpriseState] = useState<
     "idle" | "loading" | "not-found"
   >("idle");
+  const getInitialCoords = () => {
+    const lat = Number.parseFloat(urlLat);
+    const lng = Number.parseFloat(urlLng);
+    return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+  };
   const [locationStatus, setLocationStatus] = useState<
     "idle" | "loading" | "granted" | "denied" | "unsupported"
-  >("idle");
+  >(() => (getInitialCoords() ? "granted" : "idle"));
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
-    null
+    getInitialCoords
   );
   const { user } = useAuth();
   const isLoggedIn = !!user;
@@ -456,6 +463,10 @@ function PubsContent(): ReactElement {
     if (editStatusFilter !== "all") params.set("edited", editStatusFilter);
     if (viewMode !== "list") params.set("view", viewMode);
     if (page > 0) params.set("page", String(page + 1));
+    if (coords) {
+      params.set("lat", String(coords.lat));
+      params.set("lng", String(coords.lng));
+    }
 
     const query = params.toString();
     router.replace(query ? `/pubs?${query}` : "/pubs", { scroll: false });
@@ -468,6 +479,7 @@ function PubsContent(): ReactElement {
     editStatusFilter,
     viewMode,
     page,
+    coords,
   ]);
 
   const hasNextPage = pubs.length === PAGE_SIZE;
