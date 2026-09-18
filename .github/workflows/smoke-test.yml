@@ -1,0 +1,34 @@
+name: Post-Deploy Smoke Test
+
+on:
+  deployment_status
+
+jobs:
+  smoke-test:
+    if: |
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Production'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check key production endpoints
+        run: |
+          set -e
+          BASE_URL="https://www.thepubdb.com"
+          FAIL=0
+
+          check() {
+            local path="$1"
+            local code
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL$path")
+            echo "$path -> $code"
+            if [ "$code" -ge 400 ]; then
+              echo "::error::$path returned $code"
+              FAIL=1
+            fi
+          }
+
+          check "/"
+          check "/api/beer-types"
+          check "/api/pubs"
+
+          exit $FAIL
