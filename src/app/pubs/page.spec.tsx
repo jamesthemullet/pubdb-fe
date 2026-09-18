@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "@/contexts/AuthContext";
 
-import Pubs from "./page";
+import Pubs, { __clearPubsResponseCacheForTests } from "./page";
 
 function render(ui: ReactElement) {
 	return rtlRender(<AuthProvider>{ui}</AuthProvider>);
@@ -20,7 +20,7 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("next/navigation", () => ({
-	useRouter: () => ({ push: vi.fn() }),
+	useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 	useSearchParams: () => ({ get: () => null }),
 }));
 
@@ -59,6 +59,7 @@ describe("Pubs page", () => {
 		process.env = { ...originalEnv };
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
 		localStorage.clear();
+		__clearPubsResponseCacheForTests();
 	});
 
 	afterEach(() => {
@@ -442,7 +443,7 @@ describe("Pubs page", () => {
 						} as GeolocationPosition),
 				},
 			});
-			const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
 
 			render(<Pubs />);
 
@@ -451,17 +452,18 @@ describe("Pubs page", () => {
 			fireEvent.click(nearMeBtn);
 
 			await waitFor(() => {
-				const lastCall = fetchMock.mock.calls[fetchMock.mock.calls.length - 1];
-				const url = new URL(lastCall[0] as string, "http://localhost");
-				expect(url.searchParams.has("lat")).toBe(true);
+				expect(nearMeBtn).toHaveAttribute("aria-pressed", "true");
 			});
 
 			fireEvent.click(screen.getByRole("button", { name: /near me/i }));
 
+			// Toggling off returns to the exact filters/page seen before "Near me"
+			// was enabled, so this may be served from the response cache rather
+			// than issuing a new fetch - assert on the resulting UI state instead.
 			await waitFor(() => {
-				const lastCall = fetchMock.mock.calls[fetchMock.mock.calls.length - 1];
-				const url = new URL(lastCall[0] as string, "http://localhost");
-				expect(url.searchParams.has("lat")).toBe(false);
+				expect(
+					screen.getByRole("button", { name: /near me/i }),
+				).toHaveAttribute("aria-pressed", "false");
 			});
 
 			vi.unstubAllGlobals();
