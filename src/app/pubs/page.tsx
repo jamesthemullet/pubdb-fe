@@ -4,7 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactElement } from "react";
-import { memo, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  memo,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Dropdown from "@/app/components/dropdown/Dropdown";
 import {
   getPubTypeLabel,
@@ -50,6 +58,40 @@ type ApiErrorResponse = { message?: string; error?: string };
 const PAGE_SIZE = 50;
 
 const VISIBLE_FILTER_COUNT = 6;
+
+// Keyed by the full query string sent to /api/pubs. Lets a back-navigation to
+// this page reuse the results it already fetched instead of calling the API
+// again for filters/page the user just saw.
+const PUBS_RESPONSE_CACHE = new Map<
+  string,
+  { data: Pub[]; responseMs: number }
+>();
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const pubsCacheTimestamps = new Map<string, number>();
+
+function getCachedPubsResponse(
+  key: string
+): { data: Pub[]; responseMs: number } | undefined {
+  const timestamp = pubsCacheTimestamps.get(key);
+  if (timestamp === undefined || Date.now() - timestamp > CACHE_TTL_MS) {
+    return undefined;
+  }
+  return PUBS_RESPONSE_CACHE.get(key);
+}
+
+function setCachedPubsResponse(
+  key: string,
+  value: { data: Pub[]; responseMs: number }
+): void {
+  PUBS_RESPONSE_CACHE.set(key, value);
+  pubsCacheTimestamps.set(key, Date.now());
+}
+
+/** Test-only: the cache is module-scoped, so specs must reset it between runs. */
+export function __clearPubsResponseCacheForTests(): void {
+  PUBS_RESPONSE_CACHE.clear();
+  pubsCacheTimestamps.clear();
+}
 
 const PubRow = memo(function PubRow({
   pub,
@@ -175,32 +217,52 @@ function PubsContent(): ReactElement {
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
   const urlSort = searchParams.get("sort") ?? "";
+  const urlAmenities = searchParams.get("amenities") ?? "";
+  const urlType = searchParams.get("type") ?? "";
+  const urlEdit = searchParams.get("edited") ?? "";
+  const urlView = searchParams.get("view") ?? "";
+  const urlPage = searchParams.get("page") ?? "";
+  const urlLat = searchParams.get("lat") ?? "";
+  const urlLng = searchParams.get("lng") ?? "";
   const [pubs, setPubs] = useState<Pub[]>([]);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(() => {
+    const parsed = Number.parseInt(urlPage, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed - 1 : 0;
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState(urlQuery);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(urlQuery);
   const [activeAmenities, setActiveAmenities] = useState<Set<PubAmenityKey>>(
-    new Set()
+    () => new Set(urlAmenities.split(",").filter(Boolean) as PubAmenityKey[])
   );
   const [sortBy, setSortBy] = useState<SortOption>(
     isSortOption(urlSort) ? urlSort : "name-asc"
   );
-  const [editStatusFilter, setEditStatusFilter] =
-    useState<EditStatusFilter>("all");
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
-  const [typeFilter, setTypeFilter] = useState<PubType | "">("");
+  const [editStatusFilter, setEditStatusFilter] = useState<EditStatusFilter>(
+    urlEdit === "edited" || urlEdit === "not-edited" ? urlEdit : "all"
+  );
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    urlView === "grid" ? "grid" : "list"
+  );
+  const [typeFilter, setTypeFilter] = useState<PubType | "">(
+    (urlType as PubType | "") || ""
+  );
   const [showAllFilters, setShowAllFilters] = useState(false);
   const [responseMs, setResponseMs] = useState<number | null>(null);
   const [surpriseState, setSurpriseState] = useState<
     "idle" | "loading" | "not-found"
   >("idle");
+  const getInitialCoords = () => {
+    const lat = Number.parseFloat(urlLat);
+    const lng = Number.parseFloat(urlLng);
+    return Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null;
+  };
   const [locationStatus, setLocationStatus] = useState<
     "idle" | "loading" | "granted" | "denied" | "unsupported"
-  >("idle");
+  >(() => (getInitialCoords() ? "granted" : "idle"));
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
-    null
+    getInitialCoords
   );
   const { user } = useAuth();
   const isLoggedIn = !!user;
@@ -273,7 +335,12 @@ function PubsContent(): ReactElement {
     }
   }, [isLoggedIn, editStatusFilter]);
 
+  const isFirstQuerySync = useRef(true);
   useEffect(() => {
+    if (isFirstQuerySync.current) {
+      isFirstQuerySync.current = false;
+      return;
+    }
     setSearchTerm(urlQuery);
     setDebouncedSearchTerm(urlQuery);
     setPage(0);
@@ -326,23 +393,34 @@ function PubsContent(): ReactElement {
 
   useEffect(() => {
     async function fetchPubs() {
-      setLoading(true);
       setError(null);
       setSurpriseState("idle");
+
+      const params = buildFilterParams();
+      params.set("limit", String(PAGE_SIZE));
+      params.set("page", String(page + 1));
+      if (editStatusFilter !== "all") {
+        params.set("editedByMe", editStatusFilter === "edited" ? "true" : "false");
+      }
+      if (coords) {
+        params.set("lat", String(coords.lat));
+        params.set("lng", String(coords.lng));
+      }
+      const cacheKey = params.toString();
+      const cached = getCachedPubsResponse(cacheKey);
+      if (cached) {
+        setPubs(cached.data);
+        setResponseMs(cached.responseMs);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
       const t0 = Date.now();
       try {
-        const params = buildFilterParams();
-        params.set("limit", String(PAGE_SIZE));
-        params.set("page", String(page + 1));
-        if (editStatusFilter !== "all") {
-          params.set("editedByMe", editStatusFilter === "edited" ? "true" : "false");
-        }
-        if (coords) {
-          params.set("lat", String(coords.lat));
-          params.set("lng", String(coords.lng));
-        }
         const res = await fetch(`/api/pubs?${params}`);
-        setResponseMs(Date.now() - t0);
+        const responseMs = Date.now() - t0;
+        setResponseMs(responseMs);
 
         if (!res.ok) {
           const errorData = (await res.json()) as ApiErrorResponse;
@@ -350,7 +428,9 @@ function PubsContent(): ReactElement {
         }
 
         const data = (await res.json()) as PubsApiResponse;
-        setPubs(data.data ?? []);
+        const pubsData = data.data ?? [];
+        setPubs(pubsData);
+        setCachedPubsResponse(cacheKey, { data: pubsData, responseMs });
       } catch (err: unknown) {
         setResponseMs(null);
         if (isHttpErrorObject(err)) {
@@ -368,6 +448,39 @@ function PubsContent(): ReactElement {
     }
     fetchPubs();
   }, [page, buildFilterParams, editStatusFilter, coords]);
+
+  // Keep the URL in sync with the current filters so that navigating to a
+  // pub's detail page and back restores this exact filtered/sorted view
+  // instead of resetting to the defaults.
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (debouncedSearchTerm) params.set("q", debouncedSearchTerm);
+    if (activeAmenities.size > 0) {
+      params.set("amenities", Array.from(activeAmenities).join(","));
+    }
+    if (typeFilter) params.set("type", typeFilter);
+    if (sortBy !== "name-asc") params.set("sort", sortBy);
+    if (editStatusFilter !== "all") params.set("edited", editStatusFilter);
+    if (viewMode !== "list") params.set("view", viewMode);
+    if (page > 0) params.set("page", String(page + 1));
+    if (coords) {
+      params.set("lat", String(coords.lat));
+      params.set("lng", String(coords.lng));
+    }
+
+    const query = params.toString();
+    router.replace(query ? `/pubs?${query}` : "/pubs", { scroll: false });
+  }, [
+    router,
+    debouncedSearchTerm,
+    activeAmenities,
+    typeFilter,
+    sortBy,
+    editStatusFilter,
+    viewMode,
+    page,
+    coords,
+  ]);
 
   const hasNextPage = pubs.length === PAGE_SIZE;
   const hasPrevPage = page > 0;

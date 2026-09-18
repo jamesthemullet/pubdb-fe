@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "@/contexts/AuthContext";
 
-import Pubs from "./page";
+import Pubs, { __clearPubsResponseCacheForTests } from "./page";
 
 function render(ui: ReactElement) {
 	return rtlRender(<AuthProvider>{ui}</AuthProvider>);
@@ -19,9 +19,13 @@ vi.mock("next/link", () => ({
 	}) => <a href={href}>{children}</a>,
 }));
 
+const mockSearchParams = new Map<string, string>();
+
 vi.mock("next/navigation", () => ({
-	useRouter: () => ({ push: vi.fn() }),
-	useSearchParams: () => ({ get: () => null }),
+	useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+	useSearchParams: () => ({
+		get: (key: string) => mockSearchParams.get(key) ?? null,
+	}),
 }));
 
 function jsonResponse(data: unknown, status = 200): Response {
@@ -59,6 +63,8 @@ describe("Pubs page", () => {
 		process.env = { ...originalEnv };
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
 		localStorage.clear();
+		__clearPubsResponseCacheForTests();
+		mockSearchParams.clear();
 	});
 
 	afterEach(() => {
@@ -442,7 +448,7 @@ describe("Pubs page", () => {
 						} as GeolocationPosition),
 				},
 			});
-			const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
 
 			render(<Pubs />);
 
@@ -451,18 +457,47 @@ describe("Pubs page", () => {
 			fireEvent.click(nearMeBtn);
 
 			await waitFor(() => {
-				const lastCall = fetchMock.mock.calls[fetchMock.mock.calls.length - 1];
-				const url = new URL(lastCall[0] as string, "http://localhost");
-				expect(url.searchParams.has("lat")).toBe(true);
+				expect(nearMeBtn).toHaveAttribute("aria-pressed", "true");
 			});
 
 			fireEvent.click(screen.getByRole("button", { name: /near me/i }));
 
+			// Toggling off returns to the exact filters/page seen before "Near me"
+			// was enabled, so this may be served from the response cache rather
+			// than issuing a new fetch - assert on the resulting UI state instead.
 			await waitFor(() => {
-				const lastCall = fetchMock.mock.calls[fetchMock.mock.calls.length - 1];
-				const url = new URL(lastCall[0] as string, "http://localhost");
-				expect(url.searchParams.has("lat")).toBe(false);
+				expect(
+					screen.getByRole("button", { name: /near me/i }),
+				).toHaveAttribute("aria-pressed", "false");
 			});
+
+			vi.unstubAllGlobals();
+		});
+
+		it("restores an active Near me filter from the URL, without re-requesting location", async () => {
+			mockSearchParams.set("lat", "51.5");
+			mockSearchParams.set("lng", "-0.1");
+			const getCurrentPosition = vi.fn();
+			vi.stubGlobal("navigator", { geolocation: { getCurrentPosition } });
+			const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+				jsonResponse({ data: SAMPLE_PUBS.map((p) => ({ ...p, distance: 1.2 })) }),
+			);
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+
+			expect(getCurrentPosition).not.toHaveBeenCalled();
+			expect(
+				screen.getByRole("button", { name: /near me/i }),
+			).toHaveAttribute("aria-pressed", "true");
+
+			const pubsCalls = fetchMock.mock.calls.filter((call) =>
+				(call[0] as string).includes("/api/pubs"),
+			);
+			const url = new URL(pubsCalls[pubsCalls.length - 1][0] as string, "http://localhost");
+			expect(url.searchParams.get("lat")).toBe("51.5");
+			expect(url.searchParams.get("lng")).toBe("-0.1");
 
 			vi.unstubAllGlobals();
 		});
