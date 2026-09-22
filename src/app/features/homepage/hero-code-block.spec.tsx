@@ -134,4 +134,15 @@ describe("HeroCodeBlock", () => {
       expect(screen.getByText(/response will appear here/)).toBeInTheDocument();
     });
   });
+
+  it("makes the scrollable request and response panels keyboard-focusable", async () => {
+    mockFetchWith({ data: [{ id: 1 }] });
+    render(<HeroCodeBlock />);
+
+    expect(screen.getByRole("tabpanel")).toHaveAttribute("tabIndex", "0");
+
+    await waitFor(() =>
+      expect(screen.getByLabelText("Example API response")).toHaveAttribute("tabIndex", "0"),
+    );
+  });
 });
