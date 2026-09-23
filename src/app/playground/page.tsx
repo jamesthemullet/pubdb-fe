@@ -302,7 +302,11 @@ export default function PlaygroundPage(){
                     <span className={styles.endpointDesc}>{endpoint.description}</span>
                     <button
                       type="button"
-                      className={styles.tryBtn}
+                      className={
+                        hasParams && !isExpanded
+                          ? `${styles.tryBtn} ${styles.configureBtn}`
+                          : styles.tryBtn
+                      }
                       disabled={!selectedKeyId || isRunning}
                       onClick={() => toggleExpanded(endpoint)}
                     >
