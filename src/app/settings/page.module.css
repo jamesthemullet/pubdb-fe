@@ -78,7 +78,7 @@
 }
 
 .navItemDanger {
-  color: #dc2626;
+  color: var(--danger-text);
   margin-top: 0.5rem;
 }
 
