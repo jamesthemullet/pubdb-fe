@@ -160,6 +160,16 @@
   background: var(--surface);
 }
 
+.configureBtn {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.configureBtn:not(:disabled):hover {
+  background: var(--accent);
+  color: #fff;
+}
+
 .paramForm {
   display: flex;
   flex-wrap: wrap;

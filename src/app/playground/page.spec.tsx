@@ -140,6 +140,28 @@ describe("PlaygroundPage", () => {
 		expect(sendButton).toBeEnabled();
 	});
 
+	it("styles Configure buttons differently from Try it buttons", async () => {
+		vi.mocked(useAuth).mockReturnValue({ user: AUTHENTICATED_USER, isApproved: true, isAdmin: false });
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ apiKeys: [SAMPLE_KEY] }));
+
+		render(<PlaygroundPage />);
+		await screen.findByLabelText("Using key");
+
+		const tryItButton = within(endpointRow("/api/v1/beer-types")).getByRole("button", {
+			name: "Try it →",
+		});
+		const configureButton = within(endpointRow("/api/v1/pubs/:id")).getByRole("button", {
+			name: "Configure →",
+		});
+		expect(configureButton.className).not.toBe(tryItButton.className);
+
+		fireEvent.click(configureButton);
+		const closeButton = within(endpointRow("/api/v1/pubs/:id")).getByRole("button", {
+			name: "Close",
+		});
+		expect(closeButton.className).toBe(tryItButton.className);
+	});
+
 	it("collapses the param form when Configure is clicked again", async () => {
 		vi.mocked(useAuth).mockReturnValue({ user: AUTHENTICATED_USER, isApproved: true, isAdmin: false });
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ apiKeys: [SAMPLE_KEY] }));
