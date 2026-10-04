@@ -107,7 +107,7 @@ leaves checked items alone. `[fe]`/`[api]` tags mark which repo a finding applie
 
 ## 5. Responsive / UX
 
-- [x] [fe] `/pubs` — navigating directly to a URL with a search query (e.g. `/pubs?search=crown`) does not populate the search input or filter the list on initial load; shared/bookmarked filtered-search links silently reset to the unfiltered list. (found: 2026-09-01) (resolved: 2026-10-04, PR #TBD)
+- [x] [fe] `/pubs` — navigating directly to a URL with a search query (e.g. `/pubs?search=crown`) does not populate the search input or filter the list on initial load; shared/bookmarked filtered-search links silently reset to the unfiltered list. (found: 2026-09-01) (resolved: 2026-10-04, PR #387)
 - [ ] [fe] `/playground` — with zero API keys provisioned, disabled "Configure" buttons for key-gated endpoints are visually indistinguishable from active "Try it" buttons, a dead-end click with no feedback (UX half of the a11y finding in section 2). (found: 2026-09-01)
 - [ ] [fe] `/forgot-password` — uses a visually distinct style (plain sans-serif font, "Email:" label with trailing colon, plain white input) that breaks from the monospace/dark-accented `AuthGate` styling shared by `/login` and `/register` in the same auth flow. (found: 2026-09-01)
 - [x] [fe] `/billing` — the "CURRENT PLAN" card shows the plan the account is actually on (Hobby) tagged with an "INACTIVE" status badge, reading as contradictory since the plan shown is the one actually in use. (resolved: 2026-09-01, verified during audit — card now correctly shows a green "ACTIVE" badge on the Hobby plan)
