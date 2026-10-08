@@ -4,6 +4,7 @@
   --surface-alt: #ebebeb;
   --text-color: #111111;
   --text-muted: #5b6472;
+  --danger-text: #b91c1c;
   --brand: #111111;
   --brand-hover: #333333;
   --accent: #2563eb;
@@ -27,6 +28,7 @@
   --surface-alt: #242424;
   --text-color: #f4f4f0;
   --text-muted: #9ca3af;
+  --danger-text: #f87171;
   --brand: #f4f4f0;
   --brand-hover: #d4d4d0;
   --accent: #3b82f6;
