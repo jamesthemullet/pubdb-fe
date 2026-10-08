@@ -22,9 +22,16 @@ const FETCH_TIMEOUT_MS = 5000;
 // within the same session.
 let countriesCache: CountryOption[] | null = null;
 
-/** Reset both the in-memory and localStorage caches. Exposed for testing only. */
+// Module-level in-flight request: dedupes concurrent fetches (e.g. React
+// Strict Mode's double effect invocation, or multiple components mounting
+// useCountries before the cache is populated) so only one network request
+// is ever sent to the upstream countries endpoint at a time.
+let inFlightRequest: Promise<CountryOption[]> | null = null;
+
+/** Reset the in-memory cache, in-flight request, and localStorage cache. Exposed for testing only. */
 export function clearCountriesCache(): void {
   countriesCache = null;
+  inFlightRequest = null;
   if (typeof window !== "undefined") {
     try {
       localStorage.removeItem(STORAGE_KEY);
@@ -81,6 +88,45 @@ function writeStorageCache(data: CountryOption[]): void {
   }
 }
 
+function getOrFetchCountries(): Promise<CountryOption[]> {
+  if (inFlightRequest !== null) {
+    return inFlightRequest;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  const request = (async (): Promise<CountryOption[]> => {
+    try {
+      const res = await fetch("/api/countries", {
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        throw new Error(`Failed to fetch countries: ${res.status}`);
+      }
+
+      const data: RestCountryResponse[] = await res.json();
+      const options = data
+        .map((country) => ({
+          name: country.name.common,
+          code: country.cca2,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      countriesCache = options;
+      writeStorageCache(options);
+      return options;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  })();
+
+  inFlightRequest = request;
+  return request.finally(() => {
+    inFlightRequest = null;
+  });
+}
+
 export function useCountries(): { countries: CountryOption[]; countriesLoading: boolean; countriesError: string | null } {
   const [countries, setCountries] = useState<CountryOption[]>(
     countriesCache ?? []
@@ -107,32 +153,13 @@ export function useCountries(): { countries: CountryOption[]; countriesLoading: 
       return;
     }
 
-    // 3. Network fetch with 5 s timeout
+    // 3. Network fetch, deduped against any already in-flight request
     let ignore = false;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
     async function fetchCountries(): Promise<void> {
       setCountriesLoading(true);
       try {
-        const res = await fetch("/api/countries", {
-          signal: controller.signal,
-        });
-        if (!res.ok) {
-          throw new Error(`Failed to fetch countries: ${res.status}`);
-        }
-
-        const data: RestCountryResponse[] = await res.json();
-        const options = data
-          .map((country) => ({
-            name: country.name.common,
-            code: country.cca2,
-          }))
-          .sort((a, b) => a.name.localeCompare(b.name));
-
-        countriesCache = options;
-        writeStorageCache(options);
-
+        const options = await getOrFetchCountries();
         if (!ignore) {
           setCountries(options);
         }
@@ -143,7 +170,6 @@ export function useCountries(): { countries: CountryOption[]; countriesLoading: 
           );
         }
       } finally {
-        clearTimeout(timeoutId);
         if (!ignore) {
           setCountriesLoading(false);
         }
@@ -154,8 +180,6 @@ export function useCountries(): { countries: CountryOption[]; countriesLoading: 
 
     return () => {
       ignore = true;
-      controller.abort();
-      clearTimeout(timeoutId);
     };
   }, []);
 
