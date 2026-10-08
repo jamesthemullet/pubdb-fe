@@ -110,4 +110,30 @@ describe("useCountries", () => {
     ]);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
+
+  it("dedupes concurrent fetches from multiple mounts into a single network request", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse([
+        { name: { common: "Australia" }, cca2: "AU" },
+        { name: { common: "France" }, cca2: "FR" },
+      ])
+    );
+
+    // Two components mounting useCountries before the cache is populated
+    // (e.g. React Strict Mode's double effect invocation) should share one
+    // in-flight request rather than firing two network calls.
+    const { result: first } = renderHook(() => useCountries());
+    const { result: second } = renderHook(() => useCountries());
+
+    await waitFor(() => expect(first.current.countriesLoading).toBe(false));
+    await waitFor(() => expect(second.current.countriesLoading).toBe(false));
+
+    const expected = [
+      { name: "Australia", code: "AU" },
+      { name: "France", code: "FR" },
+    ];
+    expect(first.current.countries).toEqual(expected);
+    expect(second.current.countries).toEqual(expected);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
 });
