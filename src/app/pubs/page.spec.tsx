@@ -593,4 +593,45 @@ describe("Pubs page", () => {
 			expect(localStorage.getItem("recentSearches")).toBe("[]");
 		});
 	});
+
+	describe("saved searches", () => {
+		it("applies a saved search's filters when it is run", async () => {
+			const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+				const url = String(input);
+				if (url.includes("/api/auth/me/saved-searches")) {
+					return jsonResponse({
+						savedSearches: [
+							{
+								id: "s1",
+								name: "Croydon gardens",
+								params: { search: "CR0", type: "PUB", amenities: { hasBeerGarden: true } },
+								createdAt: "2026-10-01T00:00:00.000Z",
+								updatedAt: "2026-10-01T00:00:00.000Z",
+							},
+						],
+					});
+				}
+				if (url.includes("/api/auth/me")) return jsonResponse(AUTHED_USER);
+				return jsonResponse({ data: SAMPLE_PUBS });
+			});
+
+			render(<Pubs />);
+			fireEvent.click(await screen.findByRole("button", { name: "Saved searches (1)" }));
+			fireEvent.click(screen.getByRole("link", { name: "Croydon gardens" }));
+
+			expect(screen.getByPlaceholderText(/search by name, city/i)).toHaveValue("CR0");
+			await waitFor(() => {
+				const urls = fetchSpy.mock.calls.map(([u]) => decodeURIComponent(String(u)));
+				expect(
+					urls.some(
+						(u) =>
+							u.startsWith("/api/pubs?") &&
+							u.includes("search=CR0") &&
+							u.includes("amenities[hasBeerGarden]=true") &&
+							u.includes("type=PUB"),
+					),
+				).toBe(true);
+			});
+		});
+	});
 });

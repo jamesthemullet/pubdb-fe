@@ -24,7 +24,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRecentSearches } from "@/hooks/useRecentSearches";
 import { isHttpErrorObject } from "@/lib/errors";
 import { pubCompletenessScore } from "@/lib/pubCompletenessScore";
+import {
+  buildSavedSearchParams,
+  enabledAmenities,
+  type SavedSearchParams,
+} from "@/lib/savedSearches";
 import type { Pub, PubType } from "@/types/pub";
+import SavedSearches from "./components/SavedSearches";
 import styles from "./page.module.css";
 
 type SortOption =
@@ -523,6 +529,35 @@ function PubsContent(): ReactElement {
     });
   }
 
+  const currentSavedSearchParams = useMemo(
+    () =>
+      buildSavedSearchParams({
+        search: debouncedSearchTerm,
+        amenities: activeAmenities,
+        type: typeFilter,
+        coords,
+      }),
+    [debouncedSearchTerm, activeAmenities, typeFilter, coords]
+  );
+
+  // Amenities, type and location are only read from the URL on first load,
+  // so apply a saved search to state directly; the URL sync effect then
+  // updates the address bar to match.
+  const runSavedSearch = useCallback((params: SavedSearchParams): void => {
+    setPage(0);
+    setSearchTerm(params.search ?? "");
+    setDebouncedSearchTerm(params.search ?? "");
+    setActiveAmenities(new Set(enabledAmenities(params)));
+    setTypeFilter(params.type ?? "");
+    if (params.lat !== undefined && params.lng !== undefined) {
+      setCoords({ lat: params.lat, lng: params.lng });
+      setLocationStatus("granted");
+    } else {
+      setCoords(null);
+      setLocationStatus("idle");
+    }
+  }, []);
+
   function clearAllFilters(): void {
     setPage(0);
     setSearchTerm("");
@@ -918,6 +953,12 @@ function PubsContent(): ReactElement {
               No pub matches your current filters
             </span>
           )}
+
+          <SavedSearches
+            isLoggedIn={isLoggedIn}
+            currentParams={currentSavedSearchParams}
+            onRun={runSavedSearch}
+          />
         </div>
 
         {isLoggedIn && (
