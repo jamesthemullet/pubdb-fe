@@ -522,4 +522,75 @@ describe("Pubs page", () => {
 			vi.unstubAllGlobals();
 		});
 	});
+
+	describe("recent searches", () => {
+		function getSearchInput(): HTMLElement {
+			return screen.getByPlaceholderText(/search by name, city/i);
+		}
+
+		it("shows stored recent searches when the empty search box is focused", async () => {
+			localStorage.setItem("recentSearches", JSON.stringify(["Kensington", "CR0"]));
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
+
+			render(<Pubs />);
+			await screen.findByText("The Harp");
+
+			expect(screen.queryByText("Recent searches")).not.toBeInTheDocument();
+			fireEvent.focus(getSearchInput());
+
+			expect(screen.getByText("Recent searches")).toBeInTheDocument();
+			expect(screen.getByRole("button", { name: "Kensington" })).toBeInTheDocument();
+			expect(screen.getByRole("button", { name: "CR0" })).toBeInTheDocument();
+		});
+
+		it("runs a recent search when it is clicked", async () => {
+			localStorage.setItem("recentSearches", JSON.stringify(["Kensington"]));
+			const fetchSpy = vi
+				.spyOn(globalThis, "fetch")
+				.mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
+
+			render(<Pubs />);
+			await screen.findByText("The Harp");
+
+			fireEvent.focus(getSearchInput());
+			fireEvent.click(screen.getByRole("button", { name: "Kensington" }));
+
+			expect(getSearchInput()).toHaveValue("Kensington");
+			await waitFor(() => {
+				const urls = fetchSpy.mock.calls.map(([u]) => String(u));
+				expect(urls.some((u) => u.includes("search=Kensington"))).toBe(true);
+			});
+			expect(screen.queryByText("Recent searches")).not.toBeInTheDocument();
+		});
+
+		it("saves the search term when Enter is pressed", async () => {
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
+
+			render(<Pubs />);
+			await screen.findByText("The Harp");
+
+			const input = getSearchInput();
+			fireEvent.change(input, { target: { value: "CR0" } });
+			fireEvent.keyDown(input, { key: "Enter" });
+
+			expect(JSON.parse(localStorage.getItem("recentSearches") ?? "[]")).toEqual(["CR0"]);
+		});
+
+		it("removes a single recent search and clears them all", async () => {
+			localStorage.setItem("recentSearches", JSON.stringify(["Kensington", "CR0"]));
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
+
+			render(<Pubs />);
+			await screen.findByText("The Harp");
+			fireEvent.focus(getSearchInput());
+
+			fireEvent.click(screen.getByRole("button", { name: "Remove CR0 from recent searches" }));
+			expect(screen.queryByRole("button", { name: "CR0" })).not.toBeInTheDocument();
+			expect(JSON.parse(localStorage.getItem("recentSearches") ?? "[]")).toEqual(["Kensington"]);
+
+			fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+			expect(screen.queryByText("Recent searches")).not.toBeInTheDocument();
+			expect(localStorage.getItem("recentSearches")).toBe("[]");
+		});
+	});
 });
