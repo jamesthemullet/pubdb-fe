@@ -234,6 +234,26 @@ describe("Pubs page", () => {
 
 			expect(screen.queryByText(/Showing/i)).not.toBeInTheDocument();
 		});
+
+		it("populates the search input from a ?search= URL param, not just ?q=", async () => {
+			mockSearchParams.set("search", "crown");
+			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+				const search = new URL(url as string, "http://localhost").searchParams.get("search") ?? "";
+				const filtered = SAMPLE_PUBS.filter((p) =>
+					p.name.toLowerCase().includes(search.toLowerCase()),
+				);
+				return Promise.resolve(jsonResponse({ data: filtered }));
+			});
+
+			render(<Pubs />);
+
+			await screen.findByText("The Crown");
+
+			const searchInput = screen.getByPlaceholderText(/search by name, city/i);
+			expect(searchInput).toHaveValue("crown");
+			expect(screen.queryByText("The Harp")).not.toBeInTheDocument();
+			expect(screen.queryByText("Blue Anchor")).not.toBeInTheDocument();
+		});
 	});
 
 	describe("edit status filter", () => {

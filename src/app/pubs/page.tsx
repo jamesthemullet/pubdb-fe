@@ -215,7 +215,7 @@ const PubCard = memo(function PubCard({
 function PubsContent(): ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const urlQuery = searchParams.get("q") ?? "";
+  const urlQuery = searchParams.get("q") ?? searchParams.get("search") ?? "";
   const urlSort = searchParams.get("sort") ?? "";
   const urlAmenities = searchParams.get("amenities") ?? "";
   const urlType = searchParams.get("type") ?? "";
