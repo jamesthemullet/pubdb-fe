@@ -21,6 +21,7 @@ import {
   type PubAmenityKey,
 } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
+import { useRecentSearches } from "@/hooks/useRecentSearches";
 import { isHttpErrorObject } from "@/lib/errors";
 import { pubCompletenessScore } from "@/lib/pubCompletenessScore";
 import type { Pub, PubType } from "@/types/pub";
@@ -58,6 +59,7 @@ type ApiErrorResponse = { message?: string; error?: string };
 const PAGE_SIZE = 50;
 
 const VISIBLE_FILTER_COUNT = 6;
+const RECENT_SEARCH_SETTLE_MS = 2000;
 
 // Keyed by the full query string sent to /api/pubs. Lets a back-navigation to
 // this page reuse the results it already fetched instead of calling the API
@@ -266,6 +268,15 @@ function PubsContent(): ReactElement {
   );
   const { user } = useAuth();
   const isLoggedIn = !!user;
+  const {
+    recentSearches,
+    addRecentSearch,
+    removeRecentSearch,
+    clearRecentSearches,
+  } = useRecentSearches();
+  const [searchFocused, setSearchFocused] = useState(false);
+  const showRecentSearches =
+    searchFocused && !searchTerm && recentSearches.length > 0;
 
   const buildFilterParams = useCallback((): URLSearchParams => {
     const params = new URLSearchParams();
@@ -353,6 +364,23 @@ function PubsContent(): ReactElement {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchTerm]);
+
+  // Search runs as the user types, so only record a recent search once the
+  // term has settled — otherwise "k", "ke", "ken"... would all be saved.
+  useEffect(() => {
+    if (!debouncedSearchTerm) return;
+    const timer = setTimeout(
+      () => addRecentSearch(debouncedSearchTerm),
+      RECENT_SEARCH_SETTLE_MS
+    );
+    return () => clearTimeout(timer);
+  }, [debouncedSearchTerm, addRecentSearch]);
+
+  function selectRecentSearch(term: string): void {
+    setSearchTerm(term);
+    addRecentSearch(term);
+    setSearchFocused(false);
+  }
 
   const filteredPubs = useMemo(() => {
     if (coords) return pubs;
@@ -557,7 +585,18 @@ function PubsContent(): ReactElement {
       {/* Controls */}
       <div className={styles.controls}>
         <div className={styles.filterBar}>
-          <div className={styles.searchWrap}>
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: focus/blur bubble from the input and recent-search buttons inside */}
+          <div
+            className={styles.searchWrap}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={(e) => {
+              // Keep the recents open while focus moves between the input and
+              // its buttons; only close once focus leaves the search area.
+              if (e.currentTarget.contains(e.relatedTarget)) return;
+              setSearchFocused(false);
+              addRecentSearch(searchTerm);
+            }}
+          >
             <svg
               className={styles.searchIcon}
               width="14"
@@ -587,7 +626,54 @@ function PubsContent(): ReactElement {
               placeholder="Search by name, city, address..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") addRecentSearch(searchTerm);
+                if (e.key === "Escape") setSearchFocused(false);
+              }}
+              aria-controls={showRecentSearches ? "recent-searches" : undefined}
             />
+            {showRecentSearches && (
+              // Safari doesn't focus buttons on click, so stop mousedown from
+              // blurring the input (and closing this list) before a click lands.
+              // biome-ignore lint/a11y/noStaticElementInteractions: mousedown guard only; the interactive children are buttons
+              <div
+                id="recent-searches"
+                className={styles.recentSearches}
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                <div className={styles.recentSearchesHeader}>
+                  <span>Recent searches</span>
+                  <button
+                    type="button"
+                    className={styles.recentSearchesClear}
+                    onClick={clearRecentSearches}
+                  >
+                    Clear
+                  </button>
+                </div>
+                <ul className={styles.recentSearchesList}>
+                  {recentSearches.map((term) => (
+                    <li key={term} className={styles.recentSearchItem}>
+                      <button
+                        type="button"
+                        className={styles.recentSearchTerm}
+                        onClick={() => selectRecentSearch(term)}
+                      >
+                        {term}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.recentSearchRemove}
+                        aria-label={`Remove ${term} from recent searches`}
+                        onClick={() => removeRecentSearch(term)}
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           <div className={styles.filterChips} id="filter-chips-list">

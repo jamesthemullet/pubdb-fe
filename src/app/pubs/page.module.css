@@ -183,6 +183,81 @@
   color: var(--text-muted);
 }
 
+.recentSearches {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px var(--gray-alpha-200);
+  padding: 0.25rem 0;
+}
+
+.recentSearchesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.recentSearchesClear {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.75rem;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.recentSearchesList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.recentSearchItem {
+  display: flex;
+  align-items: center;
+}
+
+.recentSearchItem:hover {
+  background: var(--surface-alt);
+}
+
+.recentSearchTerm {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.875rem;
+  color: var(--text-color);
+  font-family: var(--font-inter), sans-serif;
+  cursor: pointer;
+}
+
+.recentSearchRemove {
+  background: none;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.recentSearchTerm:focus-visible,
+.recentSearchRemove:focus-visible,
+.recentSearchesClear:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 /* Filter chips */
 .filterChips {
   display: flex;
