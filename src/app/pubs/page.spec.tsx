@@ -234,6 +234,26 @@ describe("Pubs page", () => {
 
 			expect(screen.queryByText(/Showing/i)).not.toBeInTheDocument();
 		});
+
+		it("populates the search input from a ?search= URL param, not just ?q=", async () => {
+			mockSearchParams.set("search", "crown");
+			vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+				const search = new URL(url as string, "http://localhost").searchParams.get("search") ?? "";
+				const filtered = SAMPLE_PUBS.filter((p) =>
+					p.name.toLowerCase().includes(search.toLowerCase()),
+				);
+				return Promise.resolve(jsonResponse({ data: filtered }));
+			});
+
+			render(<Pubs />);
+
+			await screen.findByText("The Crown");
+
+			const searchInput = screen.getByPlaceholderText(/search by name, city/i);
+			expect(searchInput).toHaveValue("crown");
+			expect(screen.queryByText("The Harp")).not.toBeInTheDocument();
+			expect(screen.queryByText("Blue Anchor")).not.toBeInTheDocument();
+		});
 	});
 
 	describe("edit status filter", () => {
@@ -500,6 +520,118 @@ describe("Pubs page", () => {
 			expect(url.searchParams.get("lng")).toBe("-0.1");
 
 			vi.unstubAllGlobals();
+		});
+	});
+
+	describe("recent searches", () => {
+		function getSearchInput(): HTMLElement {
+			return screen.getByPlaceholderText(/search by name, city/i);
+		}
+
+		it("shows stored recent searches when the empty search box is focused", async () => {
+			localStorage.setItem("recentSearches", JSON.stringify(["Kensington", "CR0"]));
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
+
+			render(<Pubs />);
+			await screen.findByText("The Harp");
+
+			expect(screen.queryByText("Recent searches")).not.toBeInTheDocument();
+			fireEvent.focus(getSearchInput());
+
+			expect(screen.getByText("Recent searches")).toBeInTheDocument();
+			expect(screen.getByRole("button", { name: "Kensington" })).toBeInTheDocument();
+			expect(screen.getByRole("button", { name: "CR0" })).toBeInTheDocument();
+		});
+
+		it("runs a recent search when it is clicked", async () => {
+			localStorage.setItem("recentSearches", JSON.stringify(["Kensington"]));
+			const fetchSpy = vi
+				.spyOn(globalThis, "fetch")
+				.mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
+
+			render(<Pubs />);
+			await screen.findByText("The Harp");
+
+			fireEvent.focus(getSearchInput());
+			fireEvent.click(screen.getByRole("button", { name: "Kensington" }));
+
+			expect(getSearchInput()).toHaveValue("Kensington");
+			await waitFor(() => {
+				const urls = fetchSpy.mock.calls.map(([u]) => String(u));
+				expect(urls.some((u) => u.includes("search=Kensington"))).toBe(true);
+			});
+			expect(screen.queryByText("Recent searches")).not.toBeInTheDocument();
+		});
+
+		it("saves the search term when Enter is pressed", async () => {
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
+
+			render(<Pubs />);
+			await screen.findByText("The Harp");
+
+			const input = getSearchInput();
+			fireEvent.change(input, { target: { value: "CR0" } });
+			fireEvent.keyDown(input, { key: "Enter" });
+
+			expect(JSON.parse(localStorage.getItem("recentSearches") ?? "[]")).toEqual(["CR0"]);
+		});
+
+		it("removes a single recent search and clears them all", async () => {
+			localStorage.setItem("recentSearches", JSON.stringify(["Kensington", "CR0"]));
+			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
+
+			render(<Pubs />);
+			await screen.findByText("The Harp");
+			fireEvent.focus(getSearchInput());
+
+			fireEvent.click(screen.getByRole("button", { name: "Remove CR0 from recent searches" }));
+			expect(screen.queryByRole("button", { name: "CR0" })).not.toBeInTheDocument();
+			expect(JSON.parse(localStorage.getItem("recentSearches") ?? "[]")).toEqual(["Kensington"]);
+
+			fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+			expect(screen.queryByText("Recent searches")).not.toBeInTheDocument();
+			expect(localStorage.getItem("recentSearches")).toBe("[]");
+		});
+	});
+
+	describe("saved searches", () => {
+		it("applies a saved search's filters when it is run", async () => {
+			const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+				const url = String(input);
+				if (url.includes("/api/auth/me/saved-searches")) {
+					return jsonResponse({
+						savedSearches: [
+							{
+								id: "s1",
+								name: "Croydon gardens",
+								params: { search: "CR0", type: "PUB", amenities: { hasBeerGarden: true } },
+								createdAt: "2026-10-01T00:00:00.000Z",
+								updatedAt: "2026-10-01T00:00:00.000Z",
+							},
+						],
+					});
+				}
+				if (url.includes("/api/auth/me")) return jsonResponse(AUTHED_USER);
+				return jsonResponse({ data: SAMPLE_PUBS });
+			});
+
+			render(<Pubs />);
+			fireEvent.click(await screen.findByRole("button", { name: "Saved searches (1)" }));
+			fireEvent.click(screen.getByRole("link", { name: "Croydon gardens" }));
+
+			expect(screen.getByPlaceholderText(/search by name, city/i)).toHaveValue("CR0");
+			await waitFor(() => {
+				const urls = fetchSpy.mock.calls.map(([u]) => decodeURIComponent(String(u)));
+				expect(
+					urls.some(
+						(u) =>
+							u.startsWith("/api/pubs?") &&
+							u.includes("search=CR0") &&
+							u.includes("amenities[hasBeerGarden]=true") &&
+							u.includes("type=PUB"),
+					),
+				).toBe(true);
+			});
 		});
 	});
 });
