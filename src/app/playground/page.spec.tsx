@@ -81,6 +81,12 @@ describe("PlaygroundPage", () => {
 		for (const link of screen.getAllByRole("link", { name: "dashboard" })) {
 			expect(link).toHaveAttribute("href", "/profile");
 		}
+
+		const tryItButton = within(endpointRow("/api/v1/beer-types")).getByRole("button", {
+			name: "Try it →",
+		});
+		expect(tryItButton).toBeDisabled();
+		expect(tryItButton).toHaveAttribute("title", "Add an API key to try this endpoint");
 	});
 
 	it("renders the key picker pre-selected to the active key once keys load", async () => {

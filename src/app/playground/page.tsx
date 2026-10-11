@@ -308,6 +308,7 @@ export default function PlaygroundPage(){
                           : styles.tryBtn
                       }
                       disabled={!selectedKeyId || isRunning}
+                      title={!selectedKeyId ? "Add an API key to try this endpoint" : undefined}
                       onClick={() => toggleExpanded(endpoint)}
                     >
                       {isRunning ? "Running…" : hasParams ? (isExpanded ? "Close" : "Configure →") : "Try it →"}
