@@ -244,7 +244,7 @@ export default function AddPubPage(){
             <span className={styles.sectionIcon}><HouseIcon /></span>
             <div>
               <h2 className={styles.sectionTitle}>Basic information</h2>
-              <p className={styles.sectionDesc}>The pub's name and contact details. Only the name is required.</p>
+              <p className={styles.sectionDesc}>The pub's name and contact details.</p>
             </div>
           </div>
 
