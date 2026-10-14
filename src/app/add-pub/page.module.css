@@ -368,8 +368,14 @@ button.sectionHead:hover {
   display: flex;
   align-items: center;
   gap: 0.625rem;
+  width: 100%;
   padding: 0.75rem 1rem;
   cursor: pointer;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: inherit;
   border-right: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
   transition: background 0.12s;
@@ -405,6 +411,14 @@ button.sectionHead:hover {
   background: #e8f0fe;
 }
 
+.amenityCardUnavailable {
+  background: #fdf3f3;
+}
+
+.amenityCardUnavailable:hover {
+  background: #fbeaea;
+}
+
 .amenityCardIcon {
   color: var(--text-muted);
   flex-shrink: 0;
@@ -419,7 +433,17 @@ button.sectionHead:hover {
   color: var(--text-color);
 }
 
+.amenityCardState {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
 .amenityCardCheck {
+  position: relative;
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -434,11 +458,31 @@ button.sectionHead:hover {
   border-color: var(--accent);
 }
 
-.amenityHiddenInput {
+.amenityCardCheckOn::after {
+  content: '';
   position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
+  left: 4.5px;
+  top: 1.5px;
+  width: 5px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.amenityCardCheckOff {
+  border-color: #d78787;
+}
+
+.amenityCardCheckOff::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 6.5px;
+  width: 9px;
+  height: 2px;
+  background: #d78787;
 }
 
 /* ── Opening hours body ── */
