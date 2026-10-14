@@ -10,6 +10,7 @@ import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-edito
 import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useCountries } from "@/hooks/useCountries";
+import { parsePastedAddress } from "@/lib/parsePastedAddress";
 import { uploadPubImage, validatePubImageSize } from "@/lib/pubImageUpload";
 import type { OpeningHoursMap, PubType } from "@/types/pub";
 import styles from "./page.module.css";
@@ -51,6 +52,13 @@ function parseApiValidationErrors(data: unknown): { formErrors: string[]; fieldE
   const fallback = [...toStringArray(rootPayload.error), ...toStringArray(rootPayload.errors)];
   if (formErrors.length === 0 && fallback.length > 0) formErrors.push(...fallback);
   return { formErrors, fieldErrors };
+}
+
+// Clicking an amenity card cycles its value: unknown -> yes -> no -> unknown.
+const AMENITY_CYCLE: (boolean | null)[] = [null, true, false];
+
+function nextAmenityValue(current: boolean | null): boolean | null {
+  return AMENITY_CYCLE[(AMENITY_CYCLE.indexOf(current) + 1) % AMENITY_CYCLE.length];
 }
 
 // Amenity icon map
@@ -118,7 +126,7 @@ export default function AddPubPage(){
   const [isIndependent, setIsIndependent] = useState(true);
 
   // Amenities (excludes isIndependent, handled by toggle)
-  const [amenities, setAmenities] = useState<Partial<Record<PubAmenityKey, boolean>>>({});
+  const [amenities, setAmenities] = useState<Partial<Record<PubAmenityKey, boolean | null>>>({});
   const [openingHours, setOpeningHours] = useState<OpeningHoursMap | undefined>(undefined);
   const [hoursOpen, setHoursOpen] = useState(false);
 
@@ -160,7 +168,8 @@ export default function AddPubPage(){
         type: type || undefined,
         openingHours,
         isIndependent,
-        ...amenities,
+        // Amenities left as "Not set" are omitted rather than sent as null
+        ...Object.fromEntries(Object.entries(amenities).filter(([, v]) => v !== null)),
       };
       const res = await fetch("/api/pubs", {
         method: "POST",
@@ -244,7 +253,7 @@ export default function AddPubPage(){
             <span className={styles.sectionIcon}><HouseIcon /></span>
             <div>
               <h2 className={styles.sectionTitle}>Basic information</h2>
-              <p className={styles.sectionDesc}>The pub's name and contact details. Only the name is required.</p>
+              <p className={styles.sectionDesc}>The pub's name and contact details.</p>
             </div>
           </div>
 
@@ -424,6 +433,14 @@ export default function AddPubPage(){
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+              onPaste={(e) => {
+                const parsed = parsePastedAddress(e.clipboardData.getData("text"));
+                if (!parsed) return;
+                e.preventDefault();
+                setAddress(parsed.address);
+                setCity(parsed.city);
+                setPostcode(parsed.postcode);
+              }}
               placeholder="e.g. 44 Dean Street"
               required
               autoComplete="off"
@@ -524,27 +541,29 @@ export default function AddPubPage(){
             <span className={styles.sectionIcon}><AmenitiesIcon /></span>
             <div>
               <h2 className={styles.sectionTitle}>Amenities</h2>
-              <p className={styles.sectionDesc}>Select everything that applies — these power the browse page filters.</p>
+              <p className={styles.sectionDesc}>Click to cycle each amenity through Not set, Yes, and No — these power the browse page filters.</p>
             </div>
           </div>
 
           <div className={styles.amenitiesGrid}>
             {amenityFields.map((field) => {
-              const checked = amenities[field.key] ?? false;
+              const value = amenities[field.key] ?? null;
               const label = AMENITY_LABELS[field.key] ?? field.label;
               const icon = AMENITY_ICONS[field.key];
+              const stateLabel = value === true ? "Yes" : value === false ? "No" : "Not set";
               return (
-                <label key={field.key} className={`${styles.amenityCard} ${checked ? styles.amenityCardChecked : ""}`}>
+                <button
+                  key={field.key}
+                  type="button"
+                  className={`${styles.amenityCard} ${value === true ? styles.amenityCardChecked : ""} ${value === false ? styles.amenityCardUnavailable : ""}`}
+                  onClick={() => setAmenities((prev) => ({ ...prev, [field.key]: nextAmenityValue(value) }))}
+                  aria-label={`${label}: ${stateLabel}. Click to change.`}
+                >
                   <span className={styles.amenityCardIcon}>{icon}</span>
                   <span className={styles.amenityCardLabel}>{label}</span>
-                  <span className={`${styles.amenityCardCheck} ${checked ? styles.amenityCardCheckOn : ""}`} />
-                  <input
-                    type="checkbox"
-                    className={styles.amenityHiddenInput}
-                    checked={checked}
-                    onChange={(e) => setAmenities((prev) => ({ ...prev, [field.key]: e.target.checked }))}
-                  />
-                </label>
+                  <span className={styles.amenityCardState}>{stateLabel}</span>
+                  <span className={`${styles.amenityCardCheck} ${value === true ? styles.amenityCardCheckOn : ""} ${value === false ? styles.amenityCardCheckOff : ""}`} />
+                </button>
               );
             })}
           </div>

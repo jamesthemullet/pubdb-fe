@@ -6,6 +6,7 @@ import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
 import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey } from "@/constants/pubFormFields";
 import type { BeerType } from "@/hooks/useBeerTypes";
 import type { CountryOption } from "@/hooks/useCountries";
+import { parsePastedAddress } from "@/lib/parsePastedAddress";
 import type { BeerGarden, Pub } from "@/types/pub";
 import OpeningHoursEditor from "../../../features/opening-hours/opening-hours-editor";
 import BeerGardenEditCard from "./BeerGardenEditCard";
@@ -325,6 +326,14 @@ export default function PubEditView({
             type="text"
             value={editFields.address ?? ""}
             onChange={(e) => onFieldChange("address", e.target.value)}
+            onPaste={(e) => {
+              const parsed = parsePastedAddress(e.clipboardData.getData("text"));
+              if (!parsed) return;
+              e.preventDefault();
+              onFieldChange("address", parsed.address);
+              onFieldChange("city", parsed.city);
+              onFieldChange("postcode", parsed.postcode);
+            }}
             placeholder="e.g. 44 Dean Street"
             aria-invalid={!!fieldErrors.addressError}
             aria-describedby={fieldErrors.addressError ? "edit-address-error" : undefined}

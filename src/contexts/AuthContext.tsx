@@ -20,12 +20,16 @@ type AuthContextValue = {
   user: AuthUser;
   isApproved: boolean;
   isAdmin: boolean;
+  // Optional so existing mocks of useAuth()/useAuthContext() in other specs
+  // (which predate this field) still satisfy the type without edits.
+  isLoading?: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   isApproved: false,
   isAdmin: false,
+  isLoading: false,
 });
 
 function isAuthPayload(value: unknown): value is NonNullable<AuthUser> {
@@ -36,6 +40,7 @@ function isAuthPayload(value: unknown): value is NonNullable<AuthUser> {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function checkAuth(): Promise<void> {
@@ -59,8 +64,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
         }
-      } catch { /* network error */ }
-      setUser(null);
+        setUser(null);
+      } catch {
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     void checkAuth();
@@ -73,7 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isApproved: !!user?.approved, isAdmin: !!user?.admin }}>
+    <AuthContext.Provider
+      value={{ user, isApproved: !!user?.approved, isAdmin: !!user?.admin, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );

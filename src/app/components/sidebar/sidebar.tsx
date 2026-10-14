@@ -37,7 +37,7 @@ const ACCOUNT_LINKS = [
 export default function Sidebar(){
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [planData, setPlanData] = useState<PlanData | null>(null);
@@ -162,7 +162,7 @@ export default function Sidebar(){
                 </Link>
               </li>
             ))}
-            {!user ? (
+            {isLoading ? null : !user ? (
               <li>
                 <Link
                   href="/register"
