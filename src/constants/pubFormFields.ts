@@ -6,6 +6,8 @@ export type PubAmenityKey =
   | "hasSundayRoast"
   | "hasBeerGarden"
   | "hasCaskAle"
+  | "hasCraftBeer"
+  | "isCraftBeerPub"
   | "isBeerFocused"
   | "isDogFriendly"
   | "isFamilyFriendly"
@@ -20,6 +22,8 @@ export type PubAmenityKey =
 export type PubAmenityField = {
   key: PubAmenityKey;
   label: string;
+  /** Help text shown to contributors so everyone draws the line in the same place. */
+  description?: string;
 };
 
 export const PUB_TYPE_OPTIONS: Array<{ value: PubType; label: string }> = [
@@ -43,7 +47,19 @@ export const PUB_AMENITY_FIELDS: PubAmenityField[] = [
   { key: "hasSundayRoast", label: "Sunday roast" },
   { key: "hasBeerGarden", label: "Beer garden" },
   { key: "hasCaskAle", label: "Cask ale" },
-  { key: "isBeerFocused", label: "Beer-focused" },
+  {
+    key: "hasCraftBeer",
+    label: "Craft beer",
+    description:
+      "Serves at least one modern craft keg beer from an independent brewery. Macro-owned brands like Camden (e.g. Camden Hells), Beavertown and Goose Island don't count.",
+  },
+  {
+    key: "isCraftBeerPub",
+    label: "Craft beer pub",
+    description:
+      "Craft beer is the main draw, with several rotating independent craft taps. Implies Craft beer.",
+  },
+  { key: "isBeerFocused", label: "Drinks-led (little or no food)" },
   { key: "isDogFriendly", label: "Dog friendly" },
   { key: "isFamilyFriendly", label: "Family friendly" },
   { key: "hasStepFreeAccess", label: "Step-free access" },
@@ -54,3 +70,26 @@ export const PUB_AMENITY_FIELDS: PubAmenityField[] = [
   { key: "hasDartsBoard", label: "Darts board" },
   { key: "hasAirConditioning", label: "Air conditioning" },
 ];
+
+type AmenityValues = Partial<Record<PubAmenityKey, boolean | null | undefined>>;
+
+/**
+ * Sets one amenity and keeps dependent amenities consistent: a craft beer pub
+ * always has craft beer, so ticking "Craft beer pub" ticks "Craft beer", and
+ * unsetting "Craft beer" unsets "Craft beer pub" (the API rejects
+ * isCraftBeerPub: true with hasCraftBeer: false).
+ */
+export function withAmenityValue<T extends AmenityValues>(
+  fields: T,
+  key: string,
+  value: unknown
+): T {
+  const next: T = { ...fields, [key]: value };
+  if (key === "isCraftBeerPub" && value === true) {
+    next.hasCraftBeer = true;
+  }
+  if (key === "hasCraftBeer" && value !== true && next.isCraftBeerPub === true) {
+    next.isCraftBeerPub = value === false ? false : null;
+  }
+  return next;
+}

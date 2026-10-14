@@ -7,7 +7,7 @@ import type { ChangeEvent, ReactElement } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Typography from "@/app/components/typography/typography";
 import UnapprovedBanner from "@/app/components/unapproved-banner/UnapprovedBanner";
-import { PUB_AMENITY_FIELDS } from "@/constants/pubFormFields";
+import { PUB_AMENITY_FIELDS, withAmenityValue } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
@@ -145,7 +145,7 @@ export default function PubPage(): ReactElement {
 
   const handleFieldChange = useCallback(
     (field: keyof Pub, value: Pub[keyof Pub]) => {
-      setEditFields((prev) => ({ ...prev, [field]: value }));
+      setEditFields((prev) => withAmenityValue(prev, field, value));
       if (["name", "city", "address", "postcode", "country"].includes(field)) {
         setFieldErrors((prev) => ({
           ...prev,
@@ -265,12 +265,15 @@ export default function PubPage(): ReactElement {
     async (field: keyof Pub, value: unknown): Promise<string | null> => {
       if (!pub) return "No pub loaded";
       try {
-        const merged: Partial<Pub> = {
-          ...pub,
-          beerGardens: pub.beerGardens ? [...pub.beerGardens] : [],
-          beerTypeIds: getBeerTypeIdsFromPub(pub),
-          [field]: value,
-        };
+        const merged: Partial<Pub> = withAmenityValue(
+          {
+            ...pub,
+            beerGardens: pub.beerGardens ? [...pub.beerGardens] : [],
+            beerTypeIds: getBeerTypeIdsFromPub(pub),
+          },
+          field,
+          value
+        );
         if ((field === "lat" || field === "lng") && typeof value === "string") {
           (merged as Record<string, unknown>)[field] =
             value === "" ? null : Number.isNaN(parseFloat(value)) ? null : parseFloat(value);
@@ -730,11 +733,19 @@ function BeersTab({ pub }: { pub: Pub }): ReactElement {
       <dl className={styles.detailList}>
         <div className={styles.detailRow}>
           <dt>Cask ale</dt>
-          <dd>{pub.hasCaskAle === true ? "Yes" : pub.hasCaskAle === false ? "No" : "—"}</dd>
+          <dd>{formatTriState(pub.hasCaskAle)}</dd>
         </div>
         <div className={styles.detailRow}>
-          <dt>Beer-focused</dt>
-          <dd>{pub.isBeerFocused === true ? "Yes" : pub.isBeerFocused === false ? "No" : "—"}</dd>
+          <dt>Craft beer</dt>
+          <dd>{formatTriState(pub.hasCraftBeer)}</dd>
+        </div>
+        <div className={styles.detailRow}>
+          <dt>Craft beer pub</dt>
+          <dd>{formatTriState(pub.isCraftBeerPub)}</dd>
+        </div>
+        <div className={styles.detailRow}>
+          <dt>Drinks-led (little or no food)</dt>
+          <dd>{formatTriState(pub.isBeerFocused)}</dd>
         </div>
         <div className={styles.detailRow}>
           <dt>Beer types</dt>
@@ -1211,6 +1222,10 @@ function HistoryTab({
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
+function formatTriState(value: boolean | null | undefined): string {
+  return value === true ? "Yes" : value === false ? "No" : "—";
+}
+
 function buildJsonPreview(pub: Pub): string {
   const preview: Record<string, unknown> = {
     id: pub.id,
@@ -1223,6 +1238,7 @@ function buildJsonPreview(pub: Pub): string {
   if (pub.lng != null) preview.lng = pub.lng;
   if (pub.isIndependent != null) preview.isIndependent = pub.isIndependent;
   if (pub.hasCaskAle != null) preview.hasCaskAle = pub.hasCaskAle;
+  if (pub.hasCraftBeer != null) preview.hasCraftBeer = pub.hasCraftBeer;
   if (pub.hasBeerGarden != null) preview.hasBeerGarden = pub.hasBeerGarden;
   if (pub.hasFood != null) preview.hasFood = pub.hasFood;
   return JSON.stringify(preview, null, 2);

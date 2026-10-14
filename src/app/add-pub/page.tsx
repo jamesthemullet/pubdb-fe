@@ -7,7 +7,7 @@ import AuthGate from "@/app/components/auth-gate/AuthGate";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
 import UnapprovedBanner from "@/app/components/unapproved-banner/UnapprovedBanner";
 import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-editor";
-import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey } from "@/constants/pubFormFields";
+import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey, withAmenityValue } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useCountries } from "@/hooks/useCountries";
 import { parsePastedAddress } from "@/lib/parsePastedAddress";
@@ -67,6 +67,8 @@ const AMENITY_ICONS: Partial<Record<PubAmenityKey, ReactNode>> = {
   hasSundayRoast: <RoastIcon />,
   hasBeerGarden: <GardenIcon />,
   hasCaskAle: <CaskIcon />,
+  hasCraftBeer: <CraftBeerIcon />,
+  isCraftBeerPub: <CraftTapsIcon />,
   isBeerFocused: <BeerIcon />,
   isDogFriendly: <DogIcon />,
   isFamilyFriendly: <FamilyIcon />,
@@ -85,7 +87,9 @@ const AMENITY_LABELS: Partial<Record<PubAmenityKey, string>> = {
   hasSundayRoast: "Sunday roast",
   hasBeerGarden: "Beer garden",
   hasCaskAle: "Cask ale",
-  isBeerFocused: "Beer-focused",
+  hasCraftBeer: "Craft beer",
+  isCraftBeerPub: "Craft beer pub",
+  isBeerFocused: "Drinks-led (little or no food)",
   isDogFriendly: "Dog friendly",
   isFamilyFriendly: "Family friendly",
   hasLiveSport: "Live sport",
@@ -215,6 +219,7 @@ export default function AddPubPage(){
   }
 
   const amenityFields = PUB_AMENITY_FIELDS.filter((f) => f.key !== "isIndependent");
+  const amenityHelpFields = amenityFields.filter((f) => f.description);
 
   return (
     <div className={styles.page}>
@@ -556,8 +561,10 @@ export default function AddPubPage(){
                   key={field.key}
                   type="button"
                   className={`${styles.amenityCard} ${value === true ? styles.amenityCardChecked : ""} ${value === false ? styles.amenityCardUnavailable : ""}`}
-                  onClick={() => setAmenities((prev) => ({ ...prev, [field.key]: nextAmenityValue(value) }))}
+                  onClick={() => setAmenities((prev) => withAmenityValue(prev, field.key, nextAmenityValue(value)))}
                   aria-label={`${label}: ${stateLabel}. Click to change.`}
+                  aria-describedby={field.description ? `amenity-help-${field.key}` : undefined}
+                  title={field.description}
                 >
                   <span className={styles.amenityCardIcon}>{icon}</span>
                   <span className={styles.amenityCardLabel}>{label}</span>
@@ -567,6 +574,16 @@ export default function AddPubPage(){
               );
             })}
           </div>
+          {amenityHelpFields.length > 0 && (
+            <dl className={styles.amenityHelp}>
+              {amenityHelpFields.map((field) => (
+                <div key={field.key} id={`amenity-help-${field.key}`}>
+                  <dt>{field.label}</dt>
+                  <dd>{field.description}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
         </div>
 
         {/* ── Opening hours ── */}
@@ -653,6 +670,12 @@ function CaskIcon() {
 }
 function BeerIcon() {
   return <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4 2h6l1 9H3L4 2z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /><path d="M4 5h6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>;
+}
+function CraftBeerIcon() {
+  return <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4 3h6v9a1 1 0 01-1 1H5a1 1 0 01-1-1V3z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /><path d="M7 1v2M5.5 7l1 1 2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+function CraftTapsIcon() {
+  return <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 4h12M3 4v3M7 4v3M11 4v3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /><path d="M2 9h2v4H2zM6 9h2v4H6zM10 9h2v4h-2z" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round" /></svg>;
 }
 function DogIcon() {
   return <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2l2 2-1 1 1 3-2 1v3H5V9L3 8l1-3-1-1 2-2h4z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /></svg>;
