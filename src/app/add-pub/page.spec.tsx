@@ -505,12 +505,23 @@ describe("AddPubPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /^Independent$/i }));
 
     const amenityFields = PUB_AMENITY_FIELDS.filter((f) => f.key !== "isIndependent");
-    for (const amenity of amenityFields) {
-      const label = DISPLAY_LABELS[amenity.key] ?? amenity.label;
-      const checkbox = screen.getByRole("checkbox", { name: label });
-      fireEvent.click(checkbox);
-      expect(checkbox).toBeChecked();
+    const [noAmenity, unsetAmenity, ...yesAmenities] = amenityFields;
+    const amenityButton = (key: string, label: string, state: string) =>
+      screen.getByRole("button", { name: `${DISPLAY_LABELS[key] ?? label}: ${state}. Click to change.` });
+
+    for (const amenity of yesAmenities) {
+      fireEvent.click(amenityButton(amenity.key, amenity.label, "Not set"));
+      expect(amenityButton(amenity.key, amenity.label, "Yes")).toBeInTheDocument();
     }
+    // Not set -> Yes -> No
+    fireEvent.click(amenityButton(noAmenity.key, noAmenity.label, "Not set"));
+    fireEvent.click(amenityButton(noAmenity.key, noAmenity.label, "Yes"));
+    expect(amenityButton(noAmenity.key, noAmenity.label, "No")).toBeInTheDocument();
+    // Not set -> Yes -> No -> Not set
+    fireEvent.click(amenityButton(unsetAmenity.key, unsetAmenity.label, "Not set"));
+    fireEvent.click(amenityButton(unsetAmenity.key, unsetAmenity.label, "Yes"));
+    fireEvent.click(amenityButton(unsetAmenity.key, unsetAmenity.label, "No"));
+    expect(amenityButton(unsetAmenity.key, unsetAmenity.label, "Not set")).toBeInTheDocument();
 
     submitCurrentForm();
 
@@ -525,9 +536,11 @@ describe("AddPubPage", () => {
     const submitted = submittedBody as Record<string, unknown>;
 
     expect(submitted.chainName).toBeUndefined();
-    for (const amenity of amenityFields) {
+    for (const amenity of yesAmenities) {
       expect(submitted[amenity.key]).toBe(true);
     }
+    expect(submitted[noAmenity.key]).toBe(false);
+    expect(submitted).not.toHaveProperty(unsetAmenity.key);
     expect(submitted.isIndependent).toBe(true);
   }, 10000);
 });
