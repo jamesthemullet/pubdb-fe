@@ -73,6 +73,20 @@ describe("Sidebar", () => {
 		expect(screen.getByText("TE")).toBeInTheDocument();
 	});
 
+	it("shows neither 'Register / Log in' nor 'Log out' while the auth check is still loading", () => {
+		vi.mocked(useAuth).mockReturnValue({
+			user: null,
+			isApproved: false,
+			isAdmin: false,
+			isLoading: true,
+		});
+
+		render(<Sidebar />);
+
+		expect(screen.queryByRole("link", { name: "Register / Log in" })).not.toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: "Log out" })).not.toBeInTheDocument();
+	});
+
 	it("logging out posts to /api/auth/logout and dispatches authChanged", async () => {
 		vi.mocked(useAuth).mockReturnValue({
 			user: { email: "test@example.com", approved: true },

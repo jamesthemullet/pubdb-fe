@@ -23,7 +23,9 @@ describe("useAuth", () => {
   it("returns null user and false flags when /auth/me reports no session", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({}, 401));
     const { result } = renderHook(() => useAuth(), { wrapper });
-    await waitFor(() => expect(result.current.user).toBeNull());
+    expect(result.current.isLoading).toBe(true);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.user).toBeNull();
     expect(result.current.isApproved).toBe(false);
     expect(result.current.isAdmin).toBe(false);
   });
