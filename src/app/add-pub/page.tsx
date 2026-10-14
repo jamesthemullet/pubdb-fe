@@ -10,6 +10,7 @@ import OpeningHoursEditor from "@/app/features/opening-hours/opening-hours-edito
 import { PUB_AMENITY_FIELDS, PUB_TYPE_OPTIONS, type PubAmenityKey } from "@/constants/pubFormFields";
 import { useAuth } from "@/hooks/useAuth";
 import { useCountries } from "@/hooks/useCountries";
+import { parsePastedAddress } from "@/lib/parsePastedAddress";
 import { uploadPubImage, validatePubImageSize } from "@/lib/pubImageUpload";
 import type { OpeningHoursMap, PubType } from "@/types/pub";
 import styles from "./page.module.css";
@@ -432,6 +433,14 @@ export default function AddPubPage(){
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
+              onPaste={(e) => {
+                const parsed = parsePastedAddress(e.clipboardData.getData("text"));
+                if (!parsed) return;
+                e.preventDefault();
+                setAddress(parsed.address);
+                setCity(parsed.city);
+                setPostcode(parsed.postcode);
+              }}
               placeholder="e.g. 44 Dean Street"
               required
               autoComplete="off"
