@@ -45,7 +45,7 @@ const ENDPOINTS = [
 ];
 
 const AMENITY_TAGS = [
-  "isIndependent", "hasFood", "hasCaskAle", "hasBeerGarden",
+  "isIndependent", "hasFood", "hasCaskAle", "hasCraftBeer", "isCraftBeerPub", "hasBeerGarden",
   "hasDog", "isFamilyFocused", "isDogFriendly",
   "isLateNight", "hasLiveMusic", "hasPoolTable",
   "hasLeaderboard", "hasPremierLeague", "isLgbtFriendly",

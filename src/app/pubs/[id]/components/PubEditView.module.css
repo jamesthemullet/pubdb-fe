@@ -571,3 +571,28 @@ button.sectionHead {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Amenity definitions ── */
+.amenityHelp {
+  margin: 0.75rem 0 0;
+  display: grid;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.amenityHelp dt {
+  display: inline;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.amenityHelp dt::after {
+  content: ": ";
+}
+
+.amenityHelp dd {
+  display: inline;
+  margin: 0;
+}

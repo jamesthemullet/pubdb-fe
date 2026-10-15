@@ -543,4 +543,19 @@ describe("AddPubPage", () => {
     expect(submitted).not.toHaveProperty(unsetAmenity.key);
     expect(submitted.isIndependent).toBe(true);
   }, 10000);
+
+  it("keeps Craft beer and Craft beer pub consistent", async () => {
+    await renderApprovedPageWithSubmitResult(jsonResponse({ id: "pub-1" }, 201));
+    const card = (label: string, state: string) =>
+      screen.getByRole("button", { name: `${label}: ${state}. Click to change.` });
+
+    // Ticking "Craft beer pub" ticks "Craft beer"
+    fireEvent.click(card("Craft beer pub", "Not set"));
+    expect(card("Craft beer", "Yes")).toBeInTheDocument();
+
+    // Setting "Craft beer" to No unticks "Craft beer pub"
+    fireEvent.click(card("Craft beer", "Yes"));
+    expect(card("Craft beer", "No")).toBeInTheDocument();
+    expect(card("Craft beer pub", "No")).toBeInTheDocument();
+  });
 });

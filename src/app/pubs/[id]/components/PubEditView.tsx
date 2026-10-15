@@ -41,6 +41,8 @@ const AMENITY_FIELDS_NO_INDEPENDENT = PUB_AMENITY_FIELDS.filter(
   (f) => f.key !== "isIndependent"
 );
 
+const AMENITY_HELP_FIELDS = AMENITY_FIELDS_NO_INDEPENDENT.filter((f) => f.description);
+
 // Clicking an amenity card cycles its value: unknown -> yes -> no -> unknown.
 const AMENITY_CYCLE: (boolean | null)[] = [null, true, false];
 
@@ -53,6 +55,8 @@ const AMENITY_ICONS: Partial<Record<PubAmenityKey, ReactNode>> = {
   hasSundayRoast: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 10c0-2.761 2.239-5 5-5s5 2.239 5 5H2z" stroke="currentColor" strokeWidth="1.2" /><path d="M7 5V3M5 3h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
   hasBeerGarden: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 13V7M7 7C7 4 4 2 1 3c2 1 4 3 4 5M7 7c0-3 3-5 6-4-2 1-4 3-4 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
   hasCaskAle: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="2" y="4" width="10" height="8" rx="2" stroke="currentColor" strokeWidth="1.2" /><path d="M5 4V3a2 2 0 014 0v1" stroke="currentColor" strokeWidth="1.2" /><path d="M5 8h4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
+  hasCraftBeer: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4 3h6v9a1 1 0 01-1 1H5a1 1 0 01-1-1V3z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /><path d="M7 1v2M5.5 7l1 1 2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+  isCraftBeerPub: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 4h12M3 4v3M7 4v3M11 4v3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /><path d="M2 9h2v4H2zM6 9h2v4H6zM10 9h2v4h-2z" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round" /></svg>,
   isBeerFocused: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4 2h6l1 9H3L4 2z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /><path d="M4 5h6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
   isDogFriendly: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2l2 2-1 1 1 3-2 1v3H5V9L3 8l1-3-1-1 2-2h4z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" /></svg>,
   isFamilyFriendly: <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="5" cy="3" r="1.5" stroke="currentColor" strokeWidth="1.2" /><circle cx="10" cy="3" r="1.5" stroke="currentColor" strokeWidth="1.2" /><path d="M2 13v-3a3 3 0 016 0v3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /><path d="M8 13v-2a2 2 0 014 0v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>,
@@ -501,6 +505,8 @@ export default function PubEditView({
                   onFieldChange(field.key as keyof Pub, nextAmenityValue(value) as Pub[keyof Pub])
                 }
                 aria-label={`${field.label}: ${stateLabel}. Click to change.`}
+                aria-describedby={field.description ? `amenity-help-${field.key}` : undefined}
+                title={field.description}
               >
                 <span className={styles.amenityCardIcon}>{icon}</span>
                 <span className={styles.amenityCardLabel}>{field.label}</span>
@@ -512,6 +518,16 @@ export default function PubEditView({
             );
           })}
         </div>
+        {AMENITY_HELP_FIELDS.length > 0 && (
+          <dl className={styles.amenityHelp}>
+            {AMENITY_HELP_FIELDS.map((field) => (
+              <div key={field.key} id={`amenity-help-${field.key}`}>
+                <dt>{field.label}</dt>
+                <dd>{field.description}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
       </div>
 
       {/* ── Opening hours (collapsible) ── */}
