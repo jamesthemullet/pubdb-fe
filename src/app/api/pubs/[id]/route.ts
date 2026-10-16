@@ -1,6 +1,3 @@
-import { NextResponse } from "next/server";
-import { getServerApiUrl } from "@/lib/serverApiUrl";
-import { getAuthHeader } from "../../utils/authCookie";
 import { createApiProxyHandler } from "../../utils/proxyHandler";
 
 export function GET(request: Request, { params }: { params: Promise<{ id: string }> }): Promise<Response> {
@@ -12,50 +9,23 @@ export function GET(request: Request, { params }: { params: Promise<{ id: string
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }): Promise<Response> {
   const { id } = await params;
-  const apiUrl = getServerApiUrl();
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...getAuthHeader(request),
-  };
-
-  try {
-    const body = await request.text();
-    const response = await fetch(`${apiUrl}/pubs/${id}`, {
-      method: "PATCH",
-      headers,
-      body,
-    });
-    const data: unknown = await response.json().catch(() => null);
-    return NextResponse.json(data, { status: response.status });
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to update pub" },
-      { status: 500 }
-    );
-  }
+  const handler = createApiProxyHandler(`/pubs/${id}`, {
+    forwardAuth: true,
+    includeApiKey: false,
+    method: "PATCH",
+    forwardBody: true,
+    errorFallback: "Failed to update pub",
+  });
+  return handler(request);
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }): Promise<Response> {
   const { id } = await params;
-  const apiUrl = getServerApiUrl();
-
-  const headers: Record<string, string> = getAuthHeader(request);
-
-  try {
-    const response = await fetch(`${apiUrl}/pubs/${id}`, {
-      method: "DELETE",
-      headers,
-    });
-    if (response.status === 204 || response.headers.get("content-length") === "0") {
-      return new Response(null, { status: response.status });
-    }
-    const data: unknown = await response.json().catch(() => null);
-    return NextResponse.json(data, { status: response.status });
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to delete pub" },
-      { status: 500 }
-    );
-  }
+  const handler = createApiProxyHandler(`/pubs/${id}`, {
+    forwardAuth: true,
+    includeApiKey: false,
+    method: "DELETE",
+    errorFallback: "Failed to delete pub",
+  });
+  return handler(request);
 }
