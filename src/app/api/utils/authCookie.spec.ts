@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { clearAuthCookie, getAuthHeader, setAuthCookie } from "./authCookie";
+import { buildHeaders, clearAuthCookie, getAuthHeader, setAuthCookie } from "./authCookie";
 
 describe("getAuthHeader", () => {
   it("returns an Authorization header when the auth-token cookie is present", () => {
@@ -39,6 +39,30 @@ describe("getAuthHeader", () => {
       headers: { cookie: "  other=val ; auth-token=trimmed  ; another=x" },
     });
     expect(getAuthHeader(request)).toEqual({ Authorization: "Bearer trimmed" });
+  });
+});
+
+describe("buildHeaders", () => {
+  it("includes Content-Type when includeContentType is true", () => {
+    const request = new Request("http://localhost/");
+    expect(buildHeaders(request, true)).toEqual({
+      "Content-Type": "application/json",
+    });
+  });
+
+  it("omits Content-Type when includeContentType is false", () => {
+    const request = new Request("http://localhost/");
+    expect(buildHeaders(request, false)).toEqual({});
+  });
+
+  it("merges in the Authorization header from the auth-token cookie", () => {
+    const request = new Request("http://localhost/", {
+      headers: { cookie: "auth-token=my-secret-token" },
+    });
+    expect(buildHeaders(request, true)).toEqual({
+      "Content-Type": "application/json",
+      Authorization: "Bearer my-secret-token",
+    });
   });
 });
 
