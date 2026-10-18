@@ -1,6 +1,7 @@
 import { WEEKDAYS } from "../../../constants/pub";
 import type { OpeningHoursEntry, OpeningHoursMap } from "../../../types/pub";
 import Typography from "../../components/typography/typography";
+import styles from "./opening-hours-display.module.css";
 
 type OpeningHoursDisplayProps = {
   value?: OpeningHoursMap | string | null;
@@ -15,7 +16,7 @@ export default function OpeningHoursDisplay({
     return (
       <dl>
         {WEEKDAYS.map((day) => (
-          <div key={day} style={{ display: "flex", gap: "0.25em" }}>
+          <div key={day} className={styles.dayRow}>
             <dt>
               <Typography as="span" isBold>
                 {day}:
@@ -44,7 +45,7 @@ export default function OpeningHoursDisplay({
           value = `${entry.open || "-"} – ${entry.close || "-"}`;
         }
         return (
-          <div key={day} style={{ display: "flex", gap: "0.25em" }}>
+          <div key={day} className={styles.dayRow}>
             <dt>
               <Typography as="span" isBold>
                 {day}:
