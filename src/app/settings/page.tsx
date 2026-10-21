@@ -288,7 +288,6 @@ function ProfileTab({ user }: { user: AuthUser }) {
                 src={image}
                 alt="Profile preview"
                 className={styles.avatarCircle}
-                style={{ objectFit: "cover" }}
                 loading="eager"
                 fetchPriority="high"
               />
