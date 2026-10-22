@@ -20,6 +20,10 @@
   --foreground: #ffffff;
   --gray-alpha-100: rgba(0, 0, 0, 0.06);
   --gray-alpha-200: rgba(0, 0, 0, 0.12);
+  --terminal-bg: #111111;
+  --terminal-surface: #1e1e1e;
+  --terminal-text: #ffffff;
+  --terminal-muted: #808080;
 }
 
 :root[data-theme="dark"] {
