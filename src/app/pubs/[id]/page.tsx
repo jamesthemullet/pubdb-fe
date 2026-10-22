@@ -16,6 +16,7 @@ import type { BeerGarden, OpeningHoursMap, Pub, PubHistoryChange, PubHistoryEntr
 import addPubStyles from "../../add-pub/page.module.css";
 import CompletenessCard from "./components/CompletenessCard";
 import EditButton from "./components/EditButton";
+import NearbyPubs from "./components/NearbyPubs";
 import PubDisplayView from "./components/PubDisplayView";
 import PubEditView from "./components/PubEditView";
 import styles from "./page.module.css";
@@ -720,6 +721,8 @@ export default function PubPage(): ReactElement {
           </div>
         </div>
       </div>
+
+      <NearbyPubs pub={pub} />
     </div>
   );
 }
