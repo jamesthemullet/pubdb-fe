@@ -631,8 +631,7 @@ export default function PubEditView({
             ))}
             <button
               type="button"
-              className={styles.ownershipBtn}
-              style={{ border: "1px solid var(--border-color)", borderRadius: 6, marginTop: 4 }}
+              className={`${styles.ownershipBtn} ${styles.addGardenBtn}`}
               onClick={onAddBeerGarden}
             >
               + Add beer garden
