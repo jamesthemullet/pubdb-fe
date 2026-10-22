@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerApiUrl } from "@/lib/serverApiUrl";
+import { getServerApiUrl, getTestingApiKeyHeader } from "@/lib/serverApiUrl";
 import { getAuthHeader } from "./authCookie";
 
 export function createApiProxyHandler(
@@ -15,11 +15,10 @@ export function createApiProxyHandler(
 ): (request: Request) => Promise<NextResponse> {
   return async (request: Request) => {
     const apiUrl = getServerApiUrl();
-    const apiKey = process.env.TESTING_API_KEY;
     const method = options?.method ?? "GET";
 
     const headers: Record<string, string> = {};
-    if (apiKey && options?.includeApiKey !== false) headers["X-API-Key"] = apiKey;
+    if (options?.includeApiKey !== false) Object.assign(headers, getTestingApiKeyHeader());
     if (options?.forwardAuth) {
       Object.assign(headers, getAuthHeader(request));
     }

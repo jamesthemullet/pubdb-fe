@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { getServerApiUrl } from "./serverApiUrl";
+import { getServerApiUrl, getTestingApiKeyHeader } from "./serverApiUrl";
 
 describe("getServerApiUrl", () => {
   const originalEnv = process.env;
@@ -33,5 +33,27 @@ describe("getServerApiUrl", () => {
 
   it("returns the localhost default when neither env var is set", () => {
     expect(getServerApiUrl()).toBe("http://localhost:4000");
+  });
+});
+
+describe("getTestingApiKeyHeader", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    delete process.env.TESTING_API_KEY;
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it("returns an X-API-Key header when TESTING_API_KEY is set", () => {
+    process.env.TESTING_API_KEY = "test-key";
+    expect(getTestingApiKeyHeader()).toEqual({ "X-API-Key": "test-key" });
+  });
+
+  it("returns an empty object when TESTING_API_KEY is not set", () => {
+    expect(getTestingApiKeyHeader()).toEqual({});
   });
 });
