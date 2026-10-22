@@ -622,8 +622,7 @@ const Dashboard = (): React.JSX.Element | null => {
             </p>
             <input
               type="text"
-              className={styles.btnOutline}
-              style={{ width: "100%", marginBottom: "1rem" }}
+              className={`${styles.btnOutline} ${styles.addKeyNameInput}`}
               aria-label="API key name"
               placeholder="e.g. Staging key"
               value={addKeyName}

@@ -857,6 +857,11 @@
   margin-bottom: 1.25rem;
 }
 
+.addKeyNameInput {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
 .modalFields {
   display: flex;
   flex-direction: column;
