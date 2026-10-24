@@ -30,7 +30,7 @@
   height: 28px;
   background: #f0f0f0;
   color: #111111;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -70,7 +70,7 @@
   width: 100%;
   background: #1a1a1a;
   border: 1px solid #2a2a2a;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: #888888;
   font-size: 12px;
   padding: 7px 40px 7px 30px;
@@ -94,7 +94,7 @@
   color: #555555;
   background: #222222;
   border: 1px solid #333333;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   padding: 1px 4px;
   pointer-events: none;
   font-family: inherit;
@@ -125,7 +125,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 7px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: #a0a0a0;
   font-size: 13.5px;
   text-decoration: none;
@@ -165,7 +165,7 @@
   font-size: 11px;
   color: #8c8c8c;
   background: #1e1e1e;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   padding: 1px 7px;
 }
 
@@ -178,7 +178,7 @@
 .planCard {
   background: #1a1a1a;
   border: 1px solid #2a2a2a;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 12px;
   margin-top: 8px;
 }

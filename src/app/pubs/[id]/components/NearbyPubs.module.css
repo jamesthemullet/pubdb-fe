@@ -2,7 +2,7 @@
   margin-top: 1.5rem;
   padding: 1.1rem 1.1rem;
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   background: var(--surface);
 }
 
