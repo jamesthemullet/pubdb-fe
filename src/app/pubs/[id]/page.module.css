@@ -936,7 +936,7 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 1024px) {
+@media (--desktop) {
   .body {
     grid-template-columns: 1fr;
   }
@@ -947,7 +947,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (--tablet) {
   .page {
     padding: 1rem;
   }

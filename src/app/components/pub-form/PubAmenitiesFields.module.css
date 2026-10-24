@@ -11,7 +11,7 @@
   min-width: 10rem;
 }
 
-@media (max-width: 768px) {
+@media (--tablet) {
   .container {
     flex-direction: column;
   }

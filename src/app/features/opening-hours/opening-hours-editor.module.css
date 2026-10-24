@@ -79,7 +79,7 @@
   width: 7.5rem;
 }
 
-@media (max-width: 480px) {
+@media (--mobile) {
   .row {
     flex-wrap: wrap;
   }

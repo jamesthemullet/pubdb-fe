@@ -183,7 +183,7 @@
   color: var(--accent-hover);
 }
 
-@media (max-width: 480px) {
+@media (--mobile) {
   .wrap {
     padding: 2.5rem 1.25rem 2rem;
   }

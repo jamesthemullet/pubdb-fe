@@ -576,7 +576,7 @@ button.sectionHead:hover {
 }
 
 /* ── Responsive ── */
-@media (max-width: 768px) {
+@media (--tablet) {
   .header {
     padding: 1.25rem 1rem 1rem;
     flex-direction: column;
@@ -665,7 +665,7 @@ button.sectionHead:hover {
   }
 }
 
-@media (max-width: 480px) {
+@media (--mobile) {
   .amenitiesGrid {
     grid-template-columns: 1fr;
   }
