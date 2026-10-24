@@ -50,5 +50,29 @@ frontend today.
 2. Once available: a "save" button on pub cards/detail pages wired to it.
 3. A "my saved pubs" page.
 
+### 5. City & amenity landing pages — *Acquisition, SEO*
+Server-rendered, indexable pages such as `/pubs/in/manchester` and
+`/pubs/in/manchester/dog-friendly`, built entirely from existing pub data. These target the
+searches people actually make ("dog-friendly pubs in Leeds", "craft beer pubs in Bristol") and
+grow automatically as the database grows — content that needs no writing. Today `/pubs` is a
+client component that fetches in the browser, so none of its results are indexable, and
+individual pub pages aren't in `sitemap.ts` either.
+
+1. **Depends on `pubdbapi` — verify first:** the pubs endpoint can filter by `city` (amenity
+   filters via `amenities[key]=true` already exist), and there's a way to list cities with pub
+   counts. If either is missing, that's a `pubdbapi` change, not a `pubdb-fe` one.
+2. A pure `citySlug` helper (`"Newcastle upon Tyne"` ↔ `newcastle-upon-tyne`) + an amenity
+   key ↔ URL slug map built from `PUB_AMENITY_FIELDS` (`isDogFriendly` ↔ `dog-friendly`) + tests.
+3. `/pubs/in/[city]` server-rendered page: heading, intro line with the pub count, list of pub
+   cards linking to `/pubs/[id]`, `generateMetadata` with a unique title/description, and a
+   404 for unknown or empty cities.
+4. `/pubs/in/[city]/[amenity]` page reusing the city page's components, filtered by one amenity.
+   Only render (and only link to) combinations with at least ~3 pubs, to avoid thin pages.
+5. `ItemList` JSON-LD on both page types, alongside the existing per-pub `pubJsonLd`.
+6. Add the city/amenity pages — and individual pub pages — to `sitemap.ts`, generated from the
+   city-list endpoint. Split into a sitemap index if it passes Next's per-file limit.
+7. Internal links: "More pubs in {city}" on the pub detail page, and a "Browse by city" section
+   on the homepage, so crawlers and visitors can reach the new pages.
+
 ---
 *PubDB — product roadmap, 2 September 2026*
