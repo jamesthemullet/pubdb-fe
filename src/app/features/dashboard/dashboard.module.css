@@ -71,7 +71,7 @@
   background: var(--surface);
   color: var(--text-color);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   text-decoration: none;
   font-family: var(--font-inter), sans-serif;
@@ -92,7 +92,7 @@
   background: var(--button-primary);
   color: var(--button-primary-text);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
   transition: background 0.12s;
@@ -156,7 +156,7 @@
 .statCard {
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 1rem 1.125rem 0.875rem;
 }
 
@@ -218,7 +218,7 @@
 .chartSection {
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 1rem 1.25rem 0.75rem;
   margin-bottom: 0.875rem;
 }
@@ -252,7 +252,7 @@
   padding: 0.2rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   border: none;
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
@@ -298,7 +298,7 @@
 .keysPanel {
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -328,7 +328,7 @@
   color: var(--text-muted);
   background: var(--surface-alt);
   padding: 0.1rem 0.45rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .newKeyBtn {
@@ -410,7 +410,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 0.2rem 0.45rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .tierDev {
@@ -440,14 +440,14 @@
 .usageBarTrack {
   height: 4px;
   background: #e5e5e0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
   width: 100%;
 }
 
 .usageBarFill {
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   transition: width 0.3s;
 }
 
@@ -462,7 +462,7 @@
   font-size: 0.8rem;
   letter-spacing: 0.05em;
   padding: 0.25rem 0.35rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   line-height: 1;
   transition: background 0.1s, color 0.1s;
@@ -479,7 +479,7 @@
   top: calc(100% + 4px);
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   z-index: 50;
   min-width: 160px;
@@ -546,7 +546,7 @@
 .endpointsPanel {
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -596,7 +596,7 @@
   font-family: var(--font-jetbrains-mono), monospace;
   background: var(--surface-alt);
   padding: 0.1rem 0.3rem;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   flex-shrink: 0;
 }
 
@@ -613,14 +613,14 @@
   width: 120px;
   height: 4px;
   background: #e5e5e0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
 .endpointBar {
   height: 100%;
   background: #1a1a1a;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   transition: width 0.3s;
 }
 
@@ -723,7 +723,7 @@
 .editTypePill {
   background: var(--surface-alt);
   border: 1px solid var(--border-color);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.1rem 0.6rem;
   font-size: 0.72rem;
   color: var(--text-muted);
@@ -811,7 +811,7 @@
   line-height: 1;
   padding: 0.15rem 0.3rem;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   transition: color 0.1s;
 }
 
@@ -836,7 +836,7 @@
 .modalCard {
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   width: min(560px, 100%);
   max-height: 90vh;
   overflow-y: auto;
@@ -883,7 +883,7 @@
 .modalKeyBlock {
   background: var(--background);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.875rem 1rem;
   margin-bottom: 1.25rem;
 }
