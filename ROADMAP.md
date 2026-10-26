@@ -74,5 +74,28 @@ individual pub pages aren't in `sitemap.ts` either.
 7. Internal links: "More pubs in {city}" on the pub detail page, and a "Browse by city" section
    on the homepage, so crawlers and visitors can reach the new pages.
 
+### 6. Admin user dashboard — *Internal tooling*
+An admin-only `/admin` area that shows who has signed up and how they use the API: who never made
+a request, who tried it and left, and who keeps hitting their tier's rate limit and is ready for an
+upgrade. Today this takes hand-written SQL. `AuthContext` already exposes `isAdmin`. The
+API enforces admin access with a 403, so the frontend guard only keeps non-admins from seeing an
+empty page. Steps are checkboxes. Tick each one (`- [x]`) when its PR merges.
+
+- [ ] **Depends on `pubdbapi`:** `GET /admin/users` (summary list plus `totals` and an engagement
+  label per user) and `GET /admin/users/:id` (per-user detail). These are planned in that repo's
+  roadmap as "Admin user dashboard". Don't start the steps below until they ship.
+- [ ] `src/app/admin/layout.tsx` guard: redirect to `/` unless `isAdmin`, with `noindex` metadata,
+  and keep `/admin` out of `sitemap.ts` and `robots.ts`. Spec tests cover admin, non-admin and
+  logged out.
+- [ ] `/admin` users page: four summary tiles (users, sign-ups in the last 7 days, active in the last
+  7 days, rate-limited in the last 30 days), then a sortable, paginated users table with an
+  engagement badge per row (`never-started` / `tried-and-left` / `active` / `hitting-limits`) and a
+  filter by badge. Spec tests cover rendering, sorting and the empty state.
+- [ ] `/admin/users/[id]` detail page: profile, keys, a breakdown table by endpoint and status code,
+  and a 30-day daily-requests chart. Spec tests.
+- [ ] Add an "Admin" link to the sidebar (`src/app/components/sidebar/sidebar.tsx`), shown only when
+  `isAdmin`. Add an e2e test: an admin can open `/admin` and drill into a user; a non-admin is
+  redirected.
+
 ---
-*PubDB — product roadmap, 2 September 2026*
+*PubDB — product roadmap, 2 September 2026 (admin dashboard added 26 October 2026)*
