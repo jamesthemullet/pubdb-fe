@@ -50,5 +50,52 @@ frontend today.
 2. Once available: a "save" button on pub cards/detail pages wired to it.
 3. A "my saved pubs" page.
 
+### 5. City & amenity landing pages — *Acquisition, SEO*
+Server-rendered, indexable pages such as `/pubs/in/manchester` and
+`/pubs/in/manchester/dog-friendly`, built entirely from existing pub data. These target the
+searches people actually make ("dog-friendly pubs in Leeds", "craft beer pubs in Bristol") and
+grow automatically as the database grows — content that needs no writing. Today `/pubs` is a
+client component that fetches in the browser, so none of its results are indexable, and
+individual pub pages aren't in `sitemap.ts` either.
+
+1. **Depends on `pubdbapi` — verify first:** the pubs endpoint can filter by `city` (amenity
+   filters via `amenities[key]=true` already exist), and there's a way to list cities with pub
+   counts. If either is missing, that's a `pubdbapi` change, not a `pubdb-fe` one.
+2. A pure `citySlug` helper (`"Newcastle upon Tyne"` ↔ `newcastle-upon-tyne`) + an amenity
+   key ↔ URL slug map built from `PUB_AMENITY_FIELDS` (`isDogFriendly` ↔ `dog-friendly`) + tests.
+3. `/pubs/in/[city]` server-rendered page: heading, intro line with the pub count, list of pub
+   cards linking to `/pubs/[id]`, `generateMetadata` with a unique title/description, and a
+   404 for unknown or empty cities.
+4. `/pubs/in/[city]/[amenity]` page reusing the city page's components, filtered by one amenity.
+   Only render (and only link to) combinations with at least ~3 pubs, to avoid thin pages.
+5. `ItemList` JSON-LD on both page types, alongside the existing per-pub `pubJsonLd`.
+6. Add the city/amenity pages — and individual pub pages — to `sitemap.ts`, generated from the
+   city-list endpoint. Split into a sitemap index if it passes Next's per-file limit.
+7. Internal links: "More pubs in {city}" on the pub detail page, and a "Browse by city" section
+   on the homepage, so crawlers and visitors can reach the new pages.
+
+### 6. Admin user dashboard — *Internal tooling*
+An admin-only `/admin` area that shows who has signed up and how they use the API: who never made
+a request, who tried it and left, and who keeps hitting their tier's rate limit and is ready for an
+upgrade. Today this takes hand-written SQL. `AuthContext` already exposes `isAdmin`. The
+API enforces admin access with a 403, so the frontend guard only keeps non-admins from seeing an
+empty page. Steps are checkboxes. Tick each one (`- [x]`) when its PR merges.
+
+- [ ] **Depends on `pubdbapi`:** `GET /admin/users` (summary list plus `totals` and an engagement
+  label per user) and `GET /admin/users/:id` (per-user detail). These are planned in that repo's
+  roadmap as "Admin user dashboard". Don't start the steps below until they ship.
+- [ ] `src/app/admin/layout.tsx` guard: redirect to `/` unless `isAdmin`, with `noindex` metadata,
+  and keep `/admin` out of `sitemap.ts` and `robots.ts`. Spec tests cover admin, non-admin and
+  logged out.
+- [ ] `/admin` users page: four summary tiles (users, sign-ups in the last 7 days, active in the last
+  7 days, rate-limited in the last 30 days), then a sortable, paginated users table with an
+  engagement badge per row (`never-started` / `tried-and-left` / `active` / `hitting-limits`) and a
+  filter by badge. Spec tests cover rendering, sorting and the empty state.
+- [ ] `/admin/users/[id]` detail page: profile, keys, a breakdown table by endpoint and status code,
+  and a 30-day daily-requests chart. Spec tests.
+- [ ] Add an "Admin" link to the sidebar (`src/app/components/sidebar/sidebar.tsx`), shown only when
+  `isAdmin`. Add an e2e test: an admin can open `/admin` and drill into a user; a non-admin is
+  redirected.
+
 ---
-*PubDB — product roadmap, 2 September 2026*
+*PubDB — product roadmap, 2 September 2026 (admin dashboard added 26 October 2026)*

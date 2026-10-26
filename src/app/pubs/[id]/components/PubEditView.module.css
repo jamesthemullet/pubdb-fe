@@ -272,6 +272,12 @@ button.sectionHead {
   font-weight: 600;
 }
 
+.addGardenBtn {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
 /* ── Amenities grid ── */
 .amenitiesGrid {
   display: grid;

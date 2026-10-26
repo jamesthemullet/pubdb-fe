@@ -630,7 +630,7 @@ const Dashboard = (): React.JSX.Element | null => {
               disabled={addKeyLoading}
             />
             {addKeyError && <p className={styles.inlineError}>{addKeyError}</p>}
-            <div className={styles.modalFooter} style={{ gap: "0.5rem" }}>
+            <div className={`${styles.modalFooter} ${styles.modalFooterGap}`}>
               <button
                 type="button"
                 className={styles.btnOutline}
