@@ -824,7 +824,7 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 768px) {
+@media (--tablet) {
   .page {
     padding: 1.25rem 1rem;
   }

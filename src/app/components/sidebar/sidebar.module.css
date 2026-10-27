@@ -334,7 +334,7 @@
   z-index: 150;
 }
 
-@media (max-width: 768px) {
+@media (--tablet) {
   .mobileBar {
     display: flex;
   }

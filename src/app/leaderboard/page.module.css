@@ -898,7 +898,7 @@ button.sidebarPanelSubActive {
 }
 
 /* ── Responsive ── */
-@media (max-width: 1024px) {
+@media (--desktop) {
   .mainBody {
     grid-template-columns: 1fr;
   }
@@ -910,7 +910,7 @@ button.sidebarPanelSubActive {
   }
 }
 
-@media (max-width: 768px) {
+@media (--tablet) {
   .header {
     flex-direction: column;
     padding: 1.25rem 1rem 0.875rem;
