@@ -5,7 +5,7 @@
   gap: 0.4rem;
   min-width: 9rem;
   align-self: flex-start;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: 1px solid transparent;
   font-weight: 600;
   cursor: pointer;

@@ -2,7 +2,7 @@
 .feedbackBanner {
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .feedbackBannerSuccess {
@@ -39,7 +39,7 @@
 .modalContent {
   background: white;
   padding: 1.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   max-width: 95%;
   width: 600px;
 }
@@ -98,7 +98,7 @@
 /* Base tier card */
 .tierCard {
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   padding: 28px 24px;
   background: var(--surface);
   display: flex;
@@ -124,7 +124,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   padding: 3px 10px;
-  border-radius: 20px;
+  border-radius: var(--radius-2xl);
   white-space: nowrap;
 }
 
