@@ -226,7 +226,7 @@
 /* ── Code blocks ── */
 .codeBlock {
   position: relative;
-  background: #111111;
+  background: var(--terminal-bg);
   border-radius: var(--radius-lg);
   margin-bottom: 1rem;
   overflow: hidden;
