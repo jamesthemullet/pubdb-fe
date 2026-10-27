@@ -11,7 +11,7 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.9rem;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -61,7 +61,7 @@
 .input {
   padding: 0.4rem 0.6rem;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background: var(--input-background);
   color: var(--text-color);
   font-size: 0.875rem;
@@ -92,7 +92,7 @@
   width: min(22rem, calc(100vw - 32px));
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   box-shadow: 0 4px 12px var(--gray-alpha-200);
   padding: 0.5rem 0;
 }

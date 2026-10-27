@@ -39,7 +39,7 @@
   color: var(--text-muted);
   background: var(--surface-alt);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 2px 8px;
 }
 
@@ -67,7 +67,7 @@
   color: var(--text-muted);
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.45rem 0.875rem;
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
@@ -88,7 +88,7 @@
   color: var(--button-primary-text);
   background: var(--button-primary);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.45rem 1rem;
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
@@ -116,7 +116,7 @@
 .section {
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   margin-bottom: 1.25rem;
   overflow: hidden;
 }
@@ -154,7 +154,7 @@ button.sectionHead:hover {
 .sectionIcon {
   width: 28px;
   height: 28px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background: var(--surface-alt);
   border: 1px solid var(--border-color);
   display: flex;
@@ -248,7 +248,7 @@ button.sectionHead:hover {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   font-family: var(--font-inter), sans-serif;
@@ -270,7 +270,7 @@ button.sectionHead:hover {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   font-family: var(--font-inter), sans-serif;
@@ -289,7 +289,7 @@ button.sectionHead:hover {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.625rem 0.75rem;
   font-size: 0.875rem;
   font-family: var(--font-inter), sans-serif;
@@ -315,7 +315,7 @@ button.sectionHead:hover {
 .ownershipToggle {
   display: flex;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   width: fit-content;
   max-width: 100%;
@@ -535,7 +535,7 @@ button.sectionHead:hover {
   color: var(--accent);
   background: transparent;
   border: 1px solid var(--accent);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.45rem 0.875rem;
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
@@ -551,7 +551,7 @@ button.sectionHead:hover {
   margin: 3rem 2rem;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -653,7 +653,7 @@ button.sectionHead:hover {
   .amenityCard {
     border-right: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-radius: var(--radius-md);
   }
 
   .openingHoursBody {
