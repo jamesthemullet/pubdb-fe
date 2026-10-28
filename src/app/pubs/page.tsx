@@ -664,7 +664,7 @@ function PubsContent(): ReactElement {
               className={styles.searchInput}
               type="search"
               aria-label="Search pubs"
-              placeholder="Search by name, city, address..."
+              placeholder="Search by name, city, postcode..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => {
