@@ -223,7 +223,11 @@ const PubCard = memo(function PubCard({
 function PubsContent(): ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const urlQuery = searchParams.get("q") ?? searchParams.get("search") ?? "";
+  const urlQuery = (
+    searchParams.get("q") ??
+    searchParams.get("search") ??
+    ""
+  ).trim();
   const urlSort = searchParams.get("sort") ?? "";
   const urlAmenities = searchParams.get("amenities") ?? "";
   const urlType = searchParams.get("type") ?? "";
@@ -358,7 +362,9 @@ function PubsContent(): ReactElement {
       isFirstQuerySync.current = false;
       return;
     }
-    setSearchTerm(urlQuery);
+    // Searches are trimmed before they reach the URL, so keep the user's
+    // in-progress input (e.g. a trailing space mid-typing) when it matches.
+    setSearchTerm((prev) => (prev.trim() === urlQuery ? prev : urlQuery));
     setDebouncedSearchTerm(urlQuery);
     setPage(0);
   }, [urlQuery]);
@@ -366,7 +372,7 @@ function PubsContent(): ReactElement {
   useEffect(() => {
     const timer = setTimeout(() => {
       setPage(0);
-      setDebouncedSearchTerm(searchTerm);
+      setDebouncedSearchTerm(searchTerm.trim());
     }, 300);
     return () => clearTimeout(timer);
   }, [searchTerm]);
@@ -546,7 +552,7 @@ function PubsContent(): ReactElement {
   const runSavedSearch = useCallback((params: SavedSearchParams): void => {
     setPage(0);
     setSearchTerm(params.search ?? "");
-    setDebouncedSearchTerm(params.search ?? "");
+    setDebouncedSearchTerm((params.search ?? "").trim());
     setActiveAmenities(new Set(enabledAmenities(params)));
     setTypeFilter(params.type ?? "");
     if (params.lat !== undefined && params.lng !== undefined) {
