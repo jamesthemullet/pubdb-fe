@@ -11,7 +11,7 @@
 .section {
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -43,7 +43,7 @@ button.sectionHead {
 .sectionIcon {
   width: 30px;
   height: 30px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background: var(--surface-alt);
   border: 1px solid var(--border-color);
   display: flex;
@@ -94,7 +94,7 @@ button.sectionHead {
   justify-content: center;
   min-width: 20px;
   height: 20px;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   background: var(--button-primary);
   color: var(--button-primary-text);
   font-size: 0.6875rem;
@@ -164,7 +164,7 @@ button.sectionHead {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   font-family: var(--font-inter), sans-serif;
@@ -193,7 +193,7 @@ button.sectionHead {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   font-family: var(--font-inter), sans-serif;
@@ -213,7 +213,7 @@ button.sectionHead {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.625rem 0.75rem;
   font-size: 0.875rem;
   font-family: var(--font-inter), sans-serif;
@@ -240,7 +240,7 @@ button.sectionHead {
 .ownershipToggle {
   display: flex;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   width: fit-content;
 }
@@ -274,7 +274,7 @@ button.sectionHead {
 
 .addGardenBtn {
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   margin-top: 4px;
 }
 
@@ -418,7 +418,7 @@ button.sectionHead {
   padding: 1rem;
   background: var(--surface);
   border: 1px solid #fecaca;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .dangerRowText h3 {
@@ -446,7 +446,7 @@ button.sectionHead {
   color: #ffffff;
   background: #dc2626;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
   white-space: nowrap;
@@ -495,7 +495,7 @@ button.sectionHead {
   color: #ffffff;
   background: var(--text-color);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.5rem 1.125rem;
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
@@ -512,7 +512,7 @@ button.sectionHead {
 }
 
 /* ── Responsive ── */
-@media (max-width: 768px) {
+@media (--tablet) {
   .form {
     padding: 1rem 0 2rem;
   }
@@ -572,7 +572,7 @@ button.sectionHead {
   }
 }
 
-@media (max-width: 480px) {
+@media (--mobile) {
   .amenitiesGrid {
     grid-template-columns: 1fr;
   }

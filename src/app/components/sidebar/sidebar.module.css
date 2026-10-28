@@ -4,7 +4,7 @@
   top: 0;
   height: 100vh;
   width: 240px;
-  background: #111111;
+  background: var(--terminal-bg);
   color: #f0f0f0;
   display: flex;
   flex-direction: column;
@@ -29,8 +29,8 @@
   width: 28px;
   height: 28px;
   background: #f0f0f0;
-  color: #111111;
-  border-radius: 6px;
+  color: var(--terminal-bg);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -42,7 +42,7 @@
 .logoText {
   font-weight: 700;
   font-size: 15px;
-  color: #ffffff;
+  color: var(--terminal-text);
 }
 
 .logoVersion {
@@ -70,7 +70,7 @@
   width: 100%;
   background: #1a1a1a;
   border: 1px solid #2a2a2a;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: #888888;
   font-size: 12px;
   padding: 7px 40px 7px 30px;
@@ -94,7 +94,7 @@
   color: #555555;
   background: #222222;
   border: 1px solid #333333;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   padding: 1px 4px;
   pointer-events: none;
   font-family: inherit;
@@ -106,7 +106,7 @@
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: #808080;
+  color: var(--terminal-muted);
   padding: 10px 10px 4px;
   margin: 0;
 }
@@ -125,7 +125,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 7px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: #a0a0a0;
   font-size: 13.5px;
   text-decoration: none;
@@ -139,8 +139,8 @@
 }
 
 .navItem:hover {
-  background: #1e1e1e;
-  color: #ffffff;
+  background: var(--terminal-surface);
+  color: var(--terminal-text);
 }
 
 .navItem:focus-visible {
@@ -150,7 +150,7 @@
 
 .navItemActive {
   background: #262626;
-  color: #ffffff;
+  color: var(--terminal-text);
 }
 
 .navItemBtn {
@@ -164,8 +164,8 @@
 .navBadge {
   font-size: 11px;
   color: #8c8c8c;
-  background: #1e1e1e;
-  border-radius: 10px;
+  background: var(--terminal-surface);
+  border-radius: var(--radius-xl);
   padding: 1px 7px;
 }
 
@@ -178,7 +178,7 @@
 .planCard {
   background: #1a1a1a;
   border: 1px solid #2a2a2a;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 12px;
   margin-top: 8px;
 }
@@ -227,7 +227,7 @@
   display: block;
   text-align: center;
   background: #f0f0f0;
-  color: #111111;
+  color: var(--terminal-bg);
   font-size: 12px;
   font-weight: 600;
   padding: 7px 12px;
@@ -237,7 +237,7 @@
 }
 
 .upgradeBtn:hover {
-  background: #ffffff;
+  background: var(--terminal-text);
 }
 
 /* User row */
@@ -247,7 +247,7 @@
   gap: 8px;
   padding: 10px 8px 0;
   margin-top: 4px;
-  border-top: 1px solid #1e1e1e;
+  border-top: 1px solid var(--terminal-surface);
 }
 
 .userAvatar {
@@ -260,7 +260,7 @@
   justify-content: center;
   font-size: 11px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--terminal-text);
   flex-shrink: 0;
 }
 
@@ -282,7 +282,7 @@
   left: 0;
   right: 0;
   height: 56px;
-  background: #111111;
+  background: var(--terminal-bg);
   padding: 0 16px;
   z-index: 300;
   border: none;
@@ -293,7 +293,7 @@
 .mobileLogo {
   font-size: 16px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--terminal-text);
 }
 
 .burgerIcon {
@@ -308,7 +308,7 @@
   display: block;
   height: 2px;
   width: 100%;
-  background: #ffffff;
+  background: var(--terminal-text);
   border-radius: 2px;
   transition: transform 0.22s ease, opacity 0.22s ease;
 }
@@ -334,7 +334,7 @@
   z-index: 150;
 }
 
-@media (max-width: 768px) {
+@media (--tablet) {
   .mobileBar {
     display: flex;
   }
