@@ -443,7 +443,7 @@ button.sectionHead {
   padding: 0.45rem 0.875rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--terminal-text);
   background: #dc2626;
   border: none;
   border-radius: var(--radius-md);
@@ -492,7 +492,7 @@ button.sectionHead {
   gap: 0.3rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--terminal-text);
   background: var(--text-color);
   border: none;
   border-radius: var(--radius-md);
