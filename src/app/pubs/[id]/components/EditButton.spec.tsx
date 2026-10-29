@@ -20,7 +20,7 @@ describe("EditButton (pub detail)", () => {
 		);
 		expect(
 			screen.getByRole("link", { name: "Log in to edit this pub" }),
-		).toHaveAttribute("href", "/register");
+		).toHaveAttribute("href", "/register?redirect=%2Fpubs%2Fpub-1");
 	});
 
 	it("shows the edit button for an unapproved user, deferring to the API to enforce quota", () => {
