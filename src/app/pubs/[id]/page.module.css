@@ -105,7 +105,7 @@
 /* ── Closed banner ── */
 .closedBanner {
   background-color: #b91c1c;
-  color: #fff;
+  color: var(--terminal-text);
   padding: 0.6rem 1rem;
   border-radius: var(--radius-md);
   font-weight: 600;
