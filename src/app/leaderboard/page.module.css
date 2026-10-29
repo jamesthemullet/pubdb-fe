@@ -246,7 +246,7 @@
   justify-content: center;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--terminal-text);
 }
 
 .podiumStreak {
@@ -331,9 +331,9 @@
   gap: 1rem;
   margin: 0 2rem 1.5rem;
   padding: 1rem 1.25rem;
-  background: #111111;
+  background: var(--terminal-bg);
+  color: var(--terminal-text);
   border-radius: var(--radius-xl);
-  color: #fff;
   flex-wrap: wrap;
 }
 
@@ -357,7 +357,7 @@
   justify-content: center;
   font-size: 0.875rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--terminal-text);
   flex-shrink: 0;
   object-fit: cover;
 }
@@ -373,7 +373,7 @@
 .yourRankName {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--terminal-text);
 }
 
 .yourRankMeta {
@@ -398,20 +398,20 @@
 .yourRankStatNum {
   font-size: 1.0625rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--terminal-text);
 }
 
 .yourRankStatLabel {
   font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 0.06em;
-  color: #808080;
+  color: var(--terminal-muted);
 }
 
 .viewProfileBtn {
   margin-left: auto;
   background: var(--accent);
-  color: #fff;
+  color: var(--terminal-text);
   border: none;
   border-radius: var(--radius-md);
   padding: 0.5rem 1rem;
@@ -573,7 +573,7 @@
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--terminal-text);
   flex-shrink: 0;
 }
 
@@ -731,7 +731,7 @@ button.sidebarPanelSubActive {
   justify-content: center;
   font-size: 0.6875rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--terminal-text);
   flex-shrink: 0;
 }
 
@@ -898,7 +898,7 @@ button.sidebarPanelSubActive {
 }
 
 /* ── Responsive ── */
-@media (max-width: 1024px) {
+@media (--desktop) {
   .mainBody {
     grid-template-columns: 1fr;
   }
@@ -910,7 +910,7 @@ button.sidebarPanelSubActive {
   }
 }
 
-@media (max-width: 768px) {
+@media (--tablet) {
   .header {
     flex-direction: column;
     padding: 1.25rem 1rem 0.875rem;
