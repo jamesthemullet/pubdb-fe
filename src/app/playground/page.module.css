@@ -168,7 +168,7 @@
 
 .configureBtn:not(:disabled):hover {
   background: var(--accent);
-  color: #fff;
+  color: var(--terminal-text);
 }
 
 .paramForm {
@@ -210,7 +210,7 @@
 .sendBtn {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #fff;
+  color: var(--terminal-text);
   background: var(--accent);
   border: 1px solid var(--accent);
   border-radius: var(--radius-md);
@@ -246,7 +246,7 @@
 .resultBlock {
   position: relative;
   margin-top: 1.5rem;
-  background: #111111;
+  background: var(--terminal-bg);
   border-radius: var(--radius-lg);
   overflow: hidden;
 }

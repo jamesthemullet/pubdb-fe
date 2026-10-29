@@ -101,6 +101,12 @@ describe("PubEditView", () => {
       renderView({ editFields: { ...BASE_PUB, isIndependent: false } });
       expect(screen.getByLabelText("Chain name")).toBeInTheDocument();
     });
+
+    it("selects neither ownership option when isIndependent is unknown", () => {
+      renderView({ editFields: { ...BASE_PUB, isIndependent: null } });
+      expect(screen.getByRole("button", { name: /Independent/ })).toHaveAttribute("aria-pressed", "false");
+      expect(screen.getByRole("button", { name: /Chain/ })).toHaveAttribute("aria-pressed", "false");
+    });
   });
 
   describe("phone validation", () => {
