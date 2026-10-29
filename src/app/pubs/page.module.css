@@ -151,7 +151,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  min-width: 260px;
+  min-width: 300px;
   flex-shrink: 0;
 }
 
@@ -855,6 +855,7 @@
 
   .searchWrap {
     width: 100%;
+    min-width: 0;
   }
 
   .thAmenities,
