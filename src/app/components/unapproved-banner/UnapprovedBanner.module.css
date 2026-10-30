@@ -18,7 +18,7 @@
   height: 1.1rem;
   border-radius: 50%;
   background: #f59e0b;
-  color: #fff;
+  color: var(--terminal-text);
   font-size: 0.75rem;
   font-weight: 700;
   line-height: 1;
