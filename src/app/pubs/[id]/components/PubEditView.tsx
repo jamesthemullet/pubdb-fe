@@ -142,8 +142,8 @@ export default function PubEditView({
             <div className={styles.ownershipToggle}>
               <button
                 type="button"
-                className={`${styles.ownershipBtn} ${editFields.isIndependent !== false ? styles.ownershipBtnActive : ""}`}
-                aria-pressed={editFields.isIndependent !== false}
+                className={`${styles.ownershipBtn} ${editFields.isIndependent === true ? styles.ownershipBtnActive : ""}`}
+                aria-pressed={editFields.isIndependent === true}
                 onClick={() => onFieldChange("isIndependent", true)}
               >
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">

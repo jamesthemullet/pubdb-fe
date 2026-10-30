@@ -415,7 +415,7 @@
 
 .tierDev {
   background: #1a1a1a;
-  color: #ffffff;
+  color: var(--terminal-text);
 }
 
 .tierHobby {
@@ -793,7 +793,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   background: var(--accent, #2563eb);
-  color: #ffffff;
+  color: var(--terminal-text);
   border-radius: 5px;
   text-decoration: none;
   transition: background 0.12s;

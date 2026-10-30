@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { FormEvent, ReactElement } from "react";
 import { useState } from "react";
 import { useSavedSearches } from "@/hooks/useSavedSearches";
+import { getLoginHref } from "@/lib/loginRedirect";
 import {
   defaultSavedSearchName,
   type SavedSearch,
@@ -46,7 +47,7 @@ export default function SavedSearches({
   if (!isLoggedIn) {
     if (!currentParams) return null;
     return (
-      <Link href="/register" className={styles.btn}>
+      <Link href={getLoginHref(savedSearchToPubsUrl(currentParams))} className={styles.btn}>
         Log in to save this search
       </Link>
     );
