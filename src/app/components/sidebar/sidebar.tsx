@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { getLoginHref } from "@/lib/loginRedirect";
 import styles from "./sidebar.module.css";
 
 type Subscription = {
@@ -165,7 +166,7 @@ export default function Sidebar(){
             {isLoading ? null : !user ? (
               <li>
                 <Link
-                  href="/register"
+                  href={getLoginHref(pathname)}
                   className={`${styles.navItem} ${pathname === "/register" ? styles.navItemActive : ""}`}
                   aria-current={pathname === "/register" ? "page" : undefined}
                   onClick={() => setMenuOpen(false)}

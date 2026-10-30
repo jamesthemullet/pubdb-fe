@@ -462,7 +462,7 @@
   background: #111827;
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
-  color: #fff;
+  color: var(--terminal-text);
   position: relative;
   overflow: hidden;
   aspect-ratio: 1.586 / 1;
