@@ -34,7 +34,7 @@
   gap: 7px;
   font-size: 13px;
   color: #6b7280;
-  background: #ffffff;
+  background: var(--terminal-text);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-2xl);
   padding: 4px 12px;
