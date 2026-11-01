@@ -1,5 +1,5 @@
 .page {
-  padding: 1.5rem 2.5rem 3rem;
+  padding: var(--space-7) 2.5rem 3rem;
   max-width: 1300px;
 }
 
@@ -7,10 +7,10 @@
 .breadcrumb {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2);
   font-size: 0.8125rem;
   color: var(--text-muted);
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-4);
 }
 
 .breadcrumbLink {
@@ -38,15 +38,15 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
   flex-wrap: wrap;
 }
 
 .pageTitleRow {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 
@@ -60,7 +60,7 @@
 .apiBadge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.65rem;
+  padding: var(--space-1) 0.65rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   background: var(--surface);
@@ -76,15 +76,15 @@
 .pageActions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-3);
   flex-shrink: 0;
 }
 
 .btnOutline {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.85rem;
+  gap: var(--space-2);
+  padding: var(--space-2) 0.85rem;
   background: var(--surface);
   color: var(--text-color);
   border: 1px solid var(--border-color);
@@ -106,21 +106,21 @@
 .closedBanner {
   background-color: #b91c1c;
   color: var(--terminal-text);
-  padding: 0.6rem 1rem;
+  padding: 0.6rem var(--space-5);
   border-radius: var(--radius-md);
   font-weight: 600;
   font-size: 0.9375rem;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-5);
 }
 
 /* ── Edit mode ── */
 .editBreadcrumb {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2);
   font-size: 0.8125rem;
   color: var(--text-muted);
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-4);
 }
 
 .editBreadcrumbLink {
@@ -151,10 +151,10 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: var(--space-7);
+  margin-bottom: var(--space-7);
   flex-wrap: wrap;
-  padding-bottom: 1.25rem;
+  padding-bottom: var(--space-6);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -167,7 +167,7 @@
 .editTitleRow {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 
@@ -202,14 +202,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: var(--space-5);
+  margin-bottom: var(--space-7);
   flex-wrap: wrap;
 }
 
 .editActions {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-3);
   flex-shrink: 0;
 }
 
@@ -217,7 +217,7 @@
 .body {
   display: grid;
   grid-template-columns: 1fr 420px;
-  gap: 2rem;
+  gap: var(--space-8);
   align-items: start;
 }
 
@@ -235,7 +235,7 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
   background: var(--surface);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-7);
 }
 
 .pubImage {
@@ -249,7 +249,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: var(--space-4);
   background-image: repeating-linear-gradient(
     45deg,
     transparent,
@@ -278,7 +278,7 @@
   position: absolute;
   right: 0.75rem;
   bottom: 0.75rem;
-  padding: 0.4rem 0.75rem;
+  padding: var(--space-2) var(--space-4);
   font-size: 0.8125rem;
   font-family: var(--font-jetbrains-mono), monospace;
   background: var(--surface);
@@ -303,7 +303,7 @@
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--text-color);
-  margin-bottom: 0.4rem;
+  margin-bottom: var(--space-2);
   line-height: 1.15;
 }
 
@@ -313,7 +313,7 @@
   gap: 0.35rem;
   font-size: 0.9375rem;
   color: var(--text-muted);
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-5);
   line-height: 1.4;
 }
 
@@ -327,14 +327,14 @@
 .amenityChips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-bottom: 1.5rem;
+  gap: var(--space-2);
+  margin-bottom: var(--space-7);
 }
 
 .amenityChip {
   display: inline-flex;
   align-items: center;
-  padding: 0.3rem 0.75rem;
+  padding: 0.3rem var(--space-4);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-pill);
   font-size: 0.8125rem;
@@ -357,7 +357,7 @@
 }
 
 .tab {
-  padding: 0.65rem 1rem;
+  padding: 0.65rem var(--space-5);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -381,14 +381,14 @@
 }
 
 .tabPanel {
-  padding: 1.5rem 0;
+  padding: var(--space-7) 0;
 }
 
 /* Tab content shared */
 .tabContent {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-5);
 }
 
 .detailList {
@@ -400,7 +400,7 @@
 .detailRow {
   display: flex;
   align-items: baseline;
-  gap: 1rem;
+  gap: var(--space-5);
   padding: 0.55rem 0;
   border-bottom: 1px solid var(--border-color);
   font-size: 0.9375rem;
@@ -447,7 +447,7 @@
 .hoursCardTitle {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-3);
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--text-color);
@@ -462,7 +462,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
+  padding: var(--space-1) 0.65rem;
   border: 1px solid #bbf7d0;
   border-radius: var(--radius-pill);
   background: #f0fdf4;
@@ -487,7 +487,7 @@
 .hoursRow {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1.1rem;
+  padding: var(--space-4) 1.1rem;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -502,7 +502,7 @@
 .hoursDay {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2);
   flex: 1;
   font-size: 0.9375rem;
   color: var(--text-muted);
@@ -547,7 +547,7 @@
 }
 
 .hoursEmpty {
-  padding: 1rem 1.1rem;
+  padding: var(--space-5) 1.1rem;
   color: var(--text-muted);
   font-size: 0.9375rem;
 }
@@ -556,8 +556,8 @@
 .gardenEmptyCard {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 1.25rem;
+  gap: var(--space-3);
+  padding: var(--space-6);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-xl);
   background: var(--surface);
@@ -568,7 +568,7 @@
 .gardenTabList {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-5);
 }
 
 .gardenTabCard {
@@ -589,7 +589,7 @@
 .gardenTabTitle {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-3);
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--text-color);
@@ -601,7 +601,7 @@
 }
 
 .gardenSummaryPill {
-  padding: 0.25rem 0.7rem;
+  padding: var(--space-1) 0.7rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-pill);
   font-size: 0.8125rem;
@@ -625,7 +625,7 @@
 .gardenDetailRow {
   display: flex;
   align-items: baseline;
-  gap: 0.75rem;
+  gap: var(--space-4);
   padding: 0.65rem 1.1rem;
   border-bottom: 1px solid var(--border-color);
   font-size: 0.9375rem;
@@ -771,20 +771,20 @@
 .gardenCard {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 1rem;
+  padding: var(--space-5);
 }
 
 .gardenName {
   font-weight: 700;
   font-size: 1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-4);
 }
 
 /* ── Right column ── */
 .rightCol {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-5);
   position: sticky;
   top: 1.5rem;
 }
@@ -800,17 +800,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.6rem 1rem;
+  padding: 0.6rem var(--space-5);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .codeTabs {
   display: flex;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .codeTab {
-  padding: 0.25rem 0.6rem;
+  padding: var(--space-1) 0.6rem;
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.45);
@@ -850,7 +850,7 @@
 }
 
 .codeBlock {
-  padding: 1rem 1.25rem 1.25rem;
+  padding: var(--space-5) var(--space-6) var(--space-6);
   font-family: var(--font-jetbrains-mono), monospace;
   font-size: 0.8125rem;
   line-height: 1.7;
@@ -878,8 +878,8 @@
 .jsonPanelHeader {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1rem;
+  gap: var(--space-3);
+  padding: 0.6rem var(--space-5);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -896,7 +896,7 @@
   background: var(--background);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
-  padding: 0.1rem 0.4rem;
+  padding: 0.1rem var(--space-2);
 }
 
 .jsonCopyBtn {
@@ -917,7 +917,7 @@
 }
 
 .jsonBlock {
-  padding: 1rem 1.25rem;
+  padding: var(--space-5) var(--space-6);
   font-family: var(--font-jetbrains-mono), monospace;
   font-size: 0.8125rem;
   line-height: 1.65;
@@ -949,7 +949,7 @@
 
 @media (--tablet) {
   .page {
-    padding: 1rem;
+    padding: var(--space-5);
   }
 
   .pubNameLarge {
@@ -974,25 +974,25 @@
 
 /* ── Preserve existing display view styles used by PubDisplayView ── */
 .openingHoursDisplay {
-  margin-top: 0.5rem;
+  margin-top: var(--space-3);
 }
 
 .beerGardensDisplay {
-  margin-top: 0.5rem;
+  margin-top: var(--space-3);
   display: grid;
 }
 
 .gardenDisplayCard {
   border: 1px solid var(--border-color);
-  padding: 0.75rem;
+  padding: var(--space-4);
   border-radius: var(--radius-md);
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-4);
 }
 
 .beerTypeOptions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: var(--space-4);
 }
 
 .beerTypeLabel {
@@ -1002,7 +1002,7 @@
 }
 
 .beerTypeName {
-  margin-left: 0.5rem;
+  margin-left: var(--space-3);
 }
 
 .beerTypesOuter {
@@ -1012,13 +1012,13 @@
 
 .saveError {
   color: red;
-  margin-top: 0.5rem;
+  margin-top: var(--space-3);
 }
 
 .closedDownLabel {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-3);
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-color);
