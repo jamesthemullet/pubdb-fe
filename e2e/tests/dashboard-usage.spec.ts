@@ -145,9 +145,9 @@ test.describe("Dashboard usage stats, tier badges and upgrade nudge (/profile)",
     await page.goto("/profile");
 
     await expect(page.getByText(/You.ve used 80% of your monthly/)).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: /Upgrade/ })
-    ).toBeVisible();
+    const upgradeCta = page.getByRole("link", { name: "Upgrade →" });
+    await expect(upgradeCta).toBeVisible();
+    await expect(upgradeCta).toHaveAttribute("href", "/#pricing");
 
     await page.getByRole("button", { name: "Dismiss upgrade prompt" }).click();
     await expect(
