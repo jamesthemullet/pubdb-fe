@@ -12,30 +12,59 @@ two-repo project; the backend/API lives in the separate `pubdbapi` repo (also on
 rollout list) — treat data/API changes as out of scope here unless the user says otherwise, and
 don't assume shared infra/feature-flag systems between the two repos.
 
-Roadmap items are scored against what actually grows and deepens engagement with a pub database
-app. Covers more than new features:
+## The business model — read this first
 
-- **Findability** — making pubs easier to discover: search filters (amenities, beer garden),
-  related/nearby pubs, browsing by area.
-- **SEO** — individual pub pages, structured data.
-- **Improving what already exists** — search, pub detail view, and add/edit are all real and
-  live; extending them is often cheaper than a new feature.
+PubDB is a **paid API product**. Revenue comes from developers who sign up, get an API key and
+buy a subscription tier (see `src/app/billing/`, `src/app/features/pricing/`, the dashboard's
+usage/tier/upgrade UI, and `pubdbapi`'s `validateApiKey` / `requireTierAccess`). The public
+website exists to sell that API and to grow the dataset the API serves. Pub-goers browsing the
+site don't pay. They're only valuable when they improve the data or bring search traffic that
+also reaches developers.
+
+Score every roadmap item by how it moves these, in this order:
+
+- **Paid conversion**: a free user upgrades or buys a tier (pricing clarity, upgrade nudges at
+  the right moment, tier limits that show their value).
+- **Developer sign-ups**: developers find PubDB and create an account ("UK pub data API"
+  searches, docs, the playground, coverage showcases, sample requests).
+- **Activation**: a new sign-up makes a successful API call quickly (onboarding, first key,
+  copy-paste examples, a clear error when something goes wrong).
+- **Retention**: paying customers stay and their usage grows (reliability, changelog, new
+  fields and endpoints, usage insight).
+- **Data quality**: more pubs and more complete records, because the data is the product
+  (contribution prompts, edit flows, completeness nudges, contributor recognition).
+
+A feature aimed at pub-goers only earns a place if it clearly feeds one of these, usually data
+quality (visitors who fix or add pubs) or developer sign-ups (every consumer-facing page should
+also show the API behind it, e.g. "get this data via the API" with the exact request). State
+that link in the feature's description. Don't propose consumer features (favourites, social,
+fun extras) on engagement grounds alone.
+
+Also covers more than new features:
+
+- **Findability and SEO for developers**: docs, pricing and coverage pages that rank for API
+  and dataset searches; structured data.
+- **Improving what already exists**: docs, pricing, dashboard, billing, search, pub detail and
+  add/edit are all live. Extending them is often cheaper than building something new.
 
 ## Grounding the roadmap in the real app
 
 - `README.md` — stated features: search pubs, view details, add new pubs, edit existing entries.
 - `AUDIT.md` if present — don't duplicate known bugs/gaps as roadmap features.
-- `package.json` — Next.js 15, React 19, `@vercel/analytics`; no auth/database package here —
-  data presumably comes from the `pubdbapi` backend over HTTP; confirm in `src/lib/` before
-  assuming any client-side persistence exists.
+- The API-selling surface: `src/app/docs/`, `src/app/features/` (pricing, dashboard),
+  `src/app/billing/`, `src/app/register/`, the user dashboard (API keys, usage, tier badges,
+  upgrade nudge). Check what exists before proposing it.
+- `package.json` — Next.js, React 19, `@vercel/analytics`. Data and auth come from the
+  `pubdbapi` backend over HTTP via the route handlers in `src/app/api/`.
 - `src/app/` (routes), `src/hooks/`, `src/lib/`, `src/types/`, `src/constants/` — real structure
   to extend.
 
 ## Output format
 
 Plain markdown. Write directly to `ROADMAP.md` at the repo root, overwriting the previous
-version — leave `PLAYGROUND_PLAN.md` untouched, it's a separate document. Structure: intro + 4
-goal-tag lenses (Acquisition/Engagement/Retention/Fun) → PR-sequence explainer → Now/Next/Later
+version — leave `PLAYGROUND_PLAN.md` untouched, it's a separate document. Structure: intro + the
+5 goal-tag lenses from the business model section (Paid conversion / Developer sign-ups /
+Activation / Retention / Data quality) → PR-sequence explainer → Now/Next/Later
 sections, each feature as `### N. Name — *Goal tags*` + description + numbered PR-step list →
 Mise en place table (if any infra proposed) → footer `*PubDB — product roadmap, <date>*`.
 
