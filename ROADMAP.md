@@ -50,7 +50,7 @@ frontend today.
 - [ ] Once available: a "save" button on pub cards/detail pages wired to it.
 - [ ] A "my saved pubs" page.
 
-### 5. City & amenity landing pages — *Acquisition, SEO*
+### 5. City & amenity landing pages — *Data quality, Developer sign-ups, SEO*
 Server-rendered, indexable pages such as `/pubs/in/manchester` and
 `/pubs/in/manchester/dog-friendly`, built entirely from existing pub data. These target the
 searches people actually make ("dog-friendly pubs in Leeds", "craft beer pubs in Bristol") and
@@ -58,16 +58,35 @@ grow automatically as the database grows — content that needs no writing. Toda
 client component that fetches in the browser, so none of its results are indexable, and
 individual pub pages aren't in `sitemap.ts` either.
 
+The visitors these pages attract are mostly pub-goers, who won't buy the API. So every city and
+amenity page has two other jobs: **get visitors to improve the data** (fill in missing details,
+add missing pubs), and **show developers the API behind the page** (the exact request that
+returns this list, with a sign-up link).
+
 - [ ] **Depends on `pubdbapi` — verify first:** the pubs endpoint can filter by `city` (amenity
   filters via `amenities[key]=true` already exist), and there's a way to list cities with pub
   counts. If either is missing, that's a `pubdbapi` change, not a `pubdb-fe` one.
-- [ ] A pure `citySlug` helper (`"Newcastle upon Tyne"` ↔ `newcastle-upon-tyne`) + an amenity
+- [x] A pure `citySlug` helper (`"Newcastle upon Tyne"` ↔ `newcastle-upon-tyne`) + an amenity
   key ↔ URL slug map built from `PUB_AMENITY_FIELDS` (`isDogFriendly` ↔ `dog-friendly`) + tests.
 - [ ] `/pubs/in/[city]` server-rendered page: heading, intro line with the pub count, list of pub
   cards linking to `/pubs/[id]`, `generateMetadata` with a unique title/description, and a
   404 for unknown or empty cities.
+- [ ] "Help improve {city}" panel on the city page: uses the existing `pubCompletenessScore` to
+  list the least complete pubs in the city with what each is missing ("missing opening hours,
+  phone") and a link to edit each one, plus a "Know a pub we're missing?" link to `/add-pub`.
+  Logged-out visitors are sent through sign-up first, which also puts them one step from an API
+  key.
+- [ ] `/add-pub` reads an optional `?city=` query param and prefills the city field, so the
+  panel's link lands with the city already filled in.
+- [ ] "Get this data via the API" panel on the city page: the exact request for this page
+  (`GET /pubs?city=Leeds`), a trimmed sample JSON response built from the pubs already on the
+  page, a copy button (reuse the docs `CopyButton`), and links to `/docs`, pricing and
+  `/register`. Include the pure request-builder helper and its tests in this step.
 - [ ] `/pubs/in/[city]/[amenity]` page reusing the city page's components, filtered by one amenity.
-  Only render (and only link to) combinations with at least ~3 pubs, to avoid thin pages.
+  Only render (and only link to) combinations with at least ~3 pubs, to avoid thin pages. Reuse
+  both panels: the API panel shows the amenity filter in its request
+  (`GET /pubs?city=Leeds&amenities[isDogFriendly]=true`), and the help panel prompts visitors to
+  confirm this amenity on pubs where it's still unknown.
 - [ ] `ItemList` JSON-LD on both page types, alongside the existing per-pub `pubJsonLd`.
 - [ ] Add the city/amenity pages — and individual pub pages — to `sitemap.ts`, generated from the
   city-list endpoint. Split into a sitemap index if it passes Next's per-file limit.
