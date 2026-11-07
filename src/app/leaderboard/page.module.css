@@ -10,20 +10,20 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1.5rem;
-  padding: 2rem 2rem 1rem;
+  gap: var(--space-7);
+  padding: var(--space-8) var(--space-8) var(--space-5);
 }
 
 .headerLeft {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 
 .titleRow {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 
@@ -55,9 +55,9 @@
 .headerActions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-3);
   flex-shrink: 0;
-  padding-top: 0.25rem;
+  padding-top: var(--space-1);
 }
 
 .actionBtn {
@@ -70,7 +70,7 @@
   background: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 0.375rem 0.75rem;
+  padding: 0.375rem var(--space-4);
   cursor: pointer;
   transition: background 0.15s;
   font-family: var(--font-inter), sans-serif;
@@ -82,7 +82,7 @@
 
 /* ── Promo banner ── */
 .promoBanner {
-  margin: 0 2rem;
+  margin: 0 var(--space-8);
   padding: 0.6rem 0.9rem;
   font-size: 0.8125rem;
   color: #1e40af;
@@ -96,8 +96,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0.75rem 2rem;
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-8);
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
   background: var(--surface);
@@ -107,7 +107,7 @@
 .filterLeft {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 
@@ -157,7 +157,7 @@
 .filterMeta {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-3);
   font-size: 0.8125rem;
   color: var(--text-muted);
 }
@@ -177,13 +177,13 @@
 /* ── Loading / Error ── */
 .loading,
 .emptyMsg {
-  padding: 2rem;
+  padding: var(--space-8);
   font-size: 0.875rem;
   color: var(--text-muted);
 }
 
 .errorMsg {
-  padding: 2rem;
+  padding: var(--space-8);
   font-size: 0.875rem;
   color: #dc2626;
 }
@@ -192,8 +192,8 @@
 .podiumSection {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 1rem;
-  padding: 2rem 2rem 1rem;
+  gap: var(--space-5);
+  padding: var(--space-8) var(--space-8) var(--space-5);
   align-items: end;
 }
 
@@ -201,7 +201,7 @@
   background: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 1.25rem 1.25rem 0;
+  padding: var(--space-6) var(--space-6) 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -212,7 +212,7 @@
 .podiumCardElevated {
   background: #f0f5ff;
   border-color: #c7d7ff;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-7);
 }
 
 .podiumMedal {
@@ -233,8 +233,8 @@
 
 .podiumAvatarWrap {
   position: relative;
-  margin-top: 0.75rem;
-  margin-bottom: 0.75rem;
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .podiumAvatar {
@@ -283,14 +283,14 @@
   flex-wrap: wrap;
   gap: 0.3rem;
   justify-content: center;
-  margin-top: 0.5rem;
+  margin-top: var(--space-3);
 }
 
 .podiumStats {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   width: 100%;
-  margin-top: 1rem;
+  margin-top: var(--space-5);
   border-top: 1px solid var(--border-color);
 }
 
@@ -298,7 +298,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.75rem 0.5rem;
+  padding: var(--space-4) var(--space-3);
   gap: 0.2rem;
   border-right: 1px solid var(--border-color);
 }
@@ -328,9 +328,9 @@
 .yourRankBanner {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin: 0 2rem 1.5rem;
-  padding: 1rem 1.25rem;
+  gap: var(--space-5);
+  margin: 0 var(--space-8) var(--space-7);
+  padding: var(--space-5) var(--space-6);
   background: var(--terminal-bg);
   color: var(--terminal-text);
   border-radius: var(--radius-xl);
@@ -414,7 +414,7 @@
   color: var(--terminal-text);
   border: none;
   border-radius: var(--radius-md);
-  padding: 0.5rem 1rem;
+  padding: var(--space-3) var(--space-5);
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
@@ -431,10 +431,10 @@
 .mainBody {
   display: grid;
   grid-template-columns: 1fr 280px;
-  gap: 1.5rem;
-  padding: 0 2rem 3rem;
+  gap: var(--space-7);
+  padding: 0 var(--space-8) 3rem;
   align-items: start;
-  margin-top: 1.5rem;
+  margin-top: var(--space-7);
 }
 
 /* ── Table section ── */
@@ -449,14 +449,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.875rem 1.25rem;
+  padding: 0.875rem var(--space-6);
   border-bottom: 1px solid var(--border-color);
 }
 
 .tableHeaderLeft {
   display: flex;
   align-items: baseline;
-  gap: 0.5rem;
+  gap: var(--space-3);
 }
 
 .tableTitle {
@@ -497,7 +497,7 @@
 }
 
 .table th {
-  padding: 0.5rem 1rem;
+  padding: var(--space-3) var(--space-5);
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -507,7 +507,7 @@
 }
 
 .table td {
-  padding: 0.75rem 1rem;
+  padding: var(--space-4) var(--space-5);
   border-bottom: 1px solid var(--border-color);
   font-size: 0.875rem;
   color: var(--text-color);
@@ -561,7 +561,7 @@
 .contributorCell {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-4);
 }
 
 .rowAvatar {
@@ -587,7 +587,7 @@
 .contributorNameRow {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
@@ -654,7 +654,7 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-5);
 }
 
 .sidebarPanel {
@@ -668,7 +668,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding: 0.75rem 1rem 0.5rem;
+  padding: var(--space-4) var(--space-5) var(--space-3);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -685,7 +685,7 @@
 
 .sidebarPanelToggle {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-3);
   margin: 0;
   padding: 0;
   border: none;
@@ -714,7 +714,7 @@ button.sidebarPanelSubActive {
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  padding: 0.625rem 1rem;
+  padding: 0.625rem var(--space-5);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -788,8 +788,8 @@ button.sidebarPanelSubActive {
 .weekRow {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -843,8 +843,8 @@ button.sidebarPanelSubActive {
 .earnRow {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
+  gap: var(--space-4);
+  padding: 0.875rem var(--space-5);
 }
 
 .earnEmoji {
@@ -888,7 +888,7 @@ button.sidebarPanelSubActive {
   background: var(--surface-alt);
   border-radius: var(--radius-xs);
   overflow: hidden;
-  margin-top: 0.25rem;
+  margin-top: var(--space-1);
 }
 
 .earnBar {
@@ -906,20 +906,20 @@ button.sidebarPanelSubActive {
   .sidebar {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    gap: var(--space-5);
   }
 }
 
 @media (--tablet) {
   .header {
     flex-direction: column;
-    padding: 1.25rem 1rem 0.875rem;
+    padding: var(--space-6) var(--space-5) 0.875rem;
   }
 
   .podiumSection {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-    padding: 1.25rem 1rem;
+    gap: var(--space-7);
+    padding: var(--space-6) var(--space-5);
   }
 
   .podiumCardElevated {
@@ -928,11 +928,11 @@ button.sidebarPanelSubActive {
   }
 
   .yourRankBanner {
-    margin: 0 1rem 1.25rem;
+    margin: 0 var(--space-5) var(--space-6);
   }
 
   .mainBody {
-    padding: 0 1rem 2rem;
+    padding: 0 var(--space-5) var(--space-8);
     grid-template-columns: 1fr;
   }
 
@@ -941,7 +941,7 @@ button.sidebarPanelSubActive {
   }
 
   .filterBar {
-    padding: 0.75rem 1rem;
+    padding: var(--space-4) var(--space-5);
     flex-direction: column;
     align-items: flex-start;
   }

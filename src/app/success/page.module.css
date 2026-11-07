@@ -12,17 +12,17 @@
 
 .icon {
   font-size: 4rem;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-5);
 }
 
 .headingSuccess {
   color: green;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-5);
 }
 
 .headingError {
   color: red;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-5);
 }
 
 .subheading {
@@ -31,28 +31,28 @@
 
 .message {
   font-size: 1.2rem;
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-8);
 }
 
 .subscriptionDetails {
   background-color: #f9f9f9;
   border: 1px solid #ddd;
   border-radius: var(--radius-lg);
-  padding: 2rem;
-  margin-bottom: 2rem;
+  padding: var(--space-8);
+  margin-bottom: var(--space-8);
   text-align: left;
   width: 600px;
 }
 
 .actions {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-5);
   justify-content: center;
   flex-wrap: wrap;
 }
 
 .actionLink {
-  margin-top: 2rem;
+  margin-top: var(--space-8);
 }
 
 .btn {

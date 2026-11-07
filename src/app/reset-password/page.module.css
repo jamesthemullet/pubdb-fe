@@ -1,28 +1,28 @@
 .container {
   max-width: 400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: var(--space-8);
 }
 
 .form {
-  margin-top: 1rem;
+  margin-top: var(--space-5);
 }
 
 .label {
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-5);
 }
 
 .success {
-  margin-top: 1rem;
-  padding: 1rem;
+  margin-top: var(--space-5);
+  padding: var(--space-5);
   background-color: #d4edda;
   color: #155724;
   border-radius: var(--radius-sm);
 }
 
 .successLink {
-  margin-top: 1rem;
+  margin-top: var(--space-5);
 }
 
 .successLink a {
@@ -31,15 +31,15 @@
 }
 
 .error {
-  margin-top: 1rem;
-  padding: 1rem;
+  margin-top: var(--space-5);
+  padding: var(--space-5);
   background-color: #f8d7da;
   color: #721c24;
   border-radius: var(--radius-sm);
 }
 
 .backLink {
-  margin-top: 2rem;
+  margin-top: var(--space-8);
   text-align: center;
 }
 
@@ -48,7 +48,7 @@
 }
 
 .invalidLink {
-  margin-top: 2rem;
+  margin-top: var(--space-8);
 }
 
 .invalidLink a {
