@@ -6,7 +6,7 @@
   border: 1px solid #fcd34d;
   border-radius: var(--radius-lg);
   padding: 0.7rem 0.9rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: var(--space-6);
 }
 
 .icon {

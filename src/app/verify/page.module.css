@@ -5,27 +5,27 @@
 
 .icon {
   font-size: 4rem;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-5);
 }
 
 .headingSuccess {
   color: green;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-5);
 }
 
 .headingError {
   color: red;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-5);
 }
 
 .message {
   font-size: 1.2rem;
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-8);
 }
 
 .actions {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-5);
   justify-content: center;
   flex-wrap: wrap;
 }
