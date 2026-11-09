@@ -1,7 +1,7 @@
 .wrap {
   width: 100%;
   max-width: 500px;
-  padding: 4rem 2rem 3rem;
+  padding: 4rem var(--space-8) 3rem;
 }
 
 .context {
@@ -10,7 +10,7 @@
   color: var(--text-muted);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-4);
 }
 
 .title {
@@ -27,20 +27,20 @@
   font-size: 0.9375rem;
   color: var(--text-muted);
   line-height: 1.55;
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-8);
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--space-6);
   margin-top: 1.75rem;
 }
 
 .fieldRow2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: var(--space-5);
 }
 
 .fieldBlock {
@@ -105,13 +105,13 @@
   color: var(--button-primary-text);
   border: none;
   border-radius: var(--radius-lg);
-  padding: 0.875rem 1rem;
+  padding: 0.875rem var(--space-5);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
   transition: background 0.15s;
-  margin-top: 0.25rem;
+  margin-top: var(--space-1);
 }
 
 .submitBtn:hover:not(:disabled) {
@@ -140,7 +140,7 @@
   background: #fef2f2;
   border: 1px solid #fca5a5;
   border-radius: var(--radius-lg);
-  padding: 0.75rem 1rem;
+  padding: var(--space-4) var(--space-5);
   font-size: 0.875rem;
   color: #dc2626;
 }
@@ -149,7 +149,7 @@
   background: #f0fdf4;
   border: 1px solid #86efac;
   border-radius: var(--radius-lg);
-  padding: 0.75rem 1rem;
+  padding: var(--space-4) var(--space-5);
   font-size: 0.875rem;
   color: #15803d;
 }
@@ -157,7 +157,7 @@
 .divider {
   height: 1px;
   background: var(--border-color);
-  margin: 1.75rem 0 1.25rem;
+  margin: 1.75rem 0 var(--space-6);
 }
 
 .switchText {
@@ -185,7 +185,7 @@
 
 @media (--mobile) {
   .wrap {
-    padding: 2.5rem 1.25rem 2rem;
+    padding: 2.5rem var(--space-6) var(--space-8);
   }
 
   .fieldRow2 {
