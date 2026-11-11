@@ -4,7 +4,9 @@ import { expect, test } from "@playwright/test";
 // /pubs/[id] inline editing (covered in isolation by pub-detail.spec.ts)
 // into one flow: search results -> open pub -> edit -> back to list ->
 // verify the edited name is reflected.
-const PUBS_LIST_API = (url: URL) => url.href.includes("/pubs?limit=");
+// Match on pathname: once a search is set the query string starts with
+// `search=`, so a `/pubs?limit=` substring match would miss it.
+const PUBS_LIST_API = (url: URL) => url.pathname === "/api/pubs";
 const PUB_DETAIL_API = (url: URL) => url.pathname === "/api/pubs/42";
 const AUTH_ME_API = (url: URL) => url.pathname === "/api/auth/me";
 const COUNTRIES_API = (url: URL) => url.pathname === "/api/countries";
@@ -107,7 +109,7 @@ test.describe("Search results -> open pub -> edit -> list reflects update", () =
     await expect(page.getByRole("heading", { name: "The Crown" }).first()).toBeVisible();
 
     // Back to the list: the updated name should now appear instead of the old one.
-    await page.getByRole("link", { name: "Pubs" }).click();
+    await page.getByRole("link", { name: "Pubs", exact: true }).click();
     await expect(page).toHaveURL("/pubs");
     await expect(page.getByRole("link", { name: "The Crown" })).toBeVisible();
     await expect(page.getByRole("link", { name: "The Anchor" })).not.toBeVisible();

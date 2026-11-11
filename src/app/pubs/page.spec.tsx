@@ -3,7 +3,8 @@ import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "@/contexts/AuthContext";
 
-import Pubs, { __clearPubsResponseCacheForTests } from "./page";
+import { clearPubsResponseCache } from "@/lib/pubsResponseCache";
+import Pubs from "./page";
 
 function render(ui: ReactElement) {
 	return rtlRender(<AuthProvider>{ui}</AuthProvider>);
@@ -63,7 +64,7 @@ describe("Pubs page", () => {
 		process.env = { ...originalEnv };
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
 		localStorage.clear();
-		__clearPubsResponseCacheForTests();
+		clearPubsResponseCache();
 		mockSearchParams.clear();
 	});
 

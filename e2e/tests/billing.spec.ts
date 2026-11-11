@@ -83,7 +83,7 @@ test.describe("Billing page (/billing)", () => {
 
     await page.goto("/billing");
 
-    await expect(page.getByRole("heading", { name: "Hobby" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hobby", exact: true })).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "DEVELOPER" })
     ).toBeVisible();

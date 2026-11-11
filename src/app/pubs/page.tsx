@@ -25,6 +25,10 @@ import { useRecentSearches } from "@/hooks/useRecentSearches";
 import { isHttpErrorObject } from "@/lib/errors";
 import { pubCompletenessScore } from "@/lib/pubCompletenessScore";
 import {
+  getCachedPubsResponse,
+  setCachedPubsResponse,
+} from "@/lib/pubsResponseCache";
+import {
   buildSavedSearchParams,
   enabledAmenities,
   type SavedSearchParams,
@@ -66,40 +70,6 @@ const PAGE_SIZE = 50;
 
 const VISIBLE_FILTER_COUNT = 6;
 const RECENT_SEARCH_SETTLE_MS = 2000;
-
-// Keyed by the full query string sent to /api/pubs. Lets a back-navigation to
-// this page reuse the results it already fetched instead of calling the API
-// again for filters/page the user just saw.
-const PUBS_RESPONSE_CACHE = new Map<
-  string,
-  { data: Pub[]; responseMs: number }
->();
-const CACHE_TTL_MS = 5 * 60 * 1000;
-const pubsCacheTimestamps = new Map<string, number>();
-
-function getCachedPubsResponse(
-  key: string
-): { data: Pub[]; responseMs: number } | undefined {
-  const timestamp = pubsCacheTimestamps.get(key);
-  if (timestamp === undefined || Date.now() - timestamp > CACHE_TTL_MS) {
-    return undefined;
-  }
-  return PUBS_RESPONSE_CACHE.get(key);
-}
-
-function setCachedPubsResponse(
-  key: string,
-  value: { data: Pub[]; responseMs: number }
-): void {
-  PUBS_RESPONSE_CACHE.set(key, value);
-  pubsCacheTimestamps.set(key, Date.now());
-}
-
-/** Test-only: the cache is module-scoped, so specs must reset it between runs. */
-export function __clearPubsResponseCacheForTests(): void {
-  PUBS_RESPONSE_CACHE.clear();
-  pubsCacheTimestamps.clear();
-}
 
 const PubRow = memo(function PubRow({
   pub,
