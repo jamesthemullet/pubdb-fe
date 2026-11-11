@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useBeerTypes } from "@/hooks/useBeerTypes";
 import { useCountries } from "@/hooks/useCountries";
 import { uploadPubImage } from "@/lib/pubImageUpload";
+import { clearPubsResponseCache } from "@/lib/pubsResponseCache";
 import type { BeerGarden, OpeningHoursMap, Pub, PubHistoryChange, PubHistoryEntry } from "@/types/pub";
 import addPubStyles from "../../add-pub/page.module.css";
 import CompletenessCard from "./components/CompletenessCard";
@@ -253,6 +254,7 @@ export default function PubPage(): ReactElement {
       if (!res.ok) {
         setSaveError(extractErrorMessage(data));
       } else {
+        clearPubsResponseCache();
         setPub(data as Pub);
         setEditing(false);
         setSaveError(null);
@@ -306,6 +308,7 @@ export default function PubPage(): ReactElement {
         });
         const data: unknown = await res.json();
         if (!res.ok) return extractErrorMessage(data);
+        clearPubsResponseCache();
         setPub(data as Pub);
         return null;
       } catch {
