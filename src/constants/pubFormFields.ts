@@ -13,6 +13,7 @@ export type PubAmenityKey =
   | "hasAccessibleToilet"
   | "hasLiveSport"
   | "hasLiveMusic"
+  | "hasDj"
   | "hasPoolTable"
   | "hasDartsBoard"
   | "hasAirConditioning";
@@ -50,6 +51,7 @@ export const PUB_AMENITY_FIELDS: PubAmenityField[] = [
   { key: "hasAccessibleToilet", label: "Accessible toilet" },
   { key: "hasLiveSport", label: "Live sport" },
   { key: "hasLiveMusic", label: "Live music" },
+  { key: "hasDj", label: "DJs" },
   { key: "hasPoolTable", label: "Pool table" },
   { key: "hasDartsBoard", label: "Darts board" },
   { key: "hasAirConditioning", label: "Air conditioning" },
