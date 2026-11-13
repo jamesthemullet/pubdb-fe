@@ -82,6 +82,8 @@ export type Pub = {
   hasSundayRoast?: boolean | null;
   hasBeerGarden?: boolean | null;
   hasCaskAle?: boolean | null;
+  hasCraftBeer?: boolean | null;
+  isCraftBeerPub?: boolean | null;
   isBeerFocused?: boolean | null;
   isDogFriendly?: boolean | null;
   isFamilyFriendly?: boolean | null;

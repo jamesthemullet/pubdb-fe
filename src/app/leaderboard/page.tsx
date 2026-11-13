@@ -1,12 +1,10 @@
 import { normalizeLeaderboard } from "@/lib/normalizeLeaderboard";
-import { getServerApiUrl } from "@/lib/serverApiUrl";
+import { getServerApiUrl, getTestingApiKeyHeader } from "@/lib/serverApiUrl";
 import LeaderboardClient from "./LeaderboardClient";
 
 export default async function LeaderboardPage(){
   const apiUrl = getServerApiUrl();
-  const headers: Record<string, string> = {};
-  const apiKey = process.env.TESTING_API_KEY;
-  if (apiKey) headers["X-API-Key"] = apiKey;
+  const headers = getTestingApiKeyHeader();
 
   let payload: unknown = null;
   try {

@@ -8,7 +8,7 @@
   align-items: baseline;
   padding: 0.6rem 0;
   border-bottom: 1px solid var(--border-color);
-  gap: 1rem;
+  gap: var(--space-5);
   font-size: 0.9375rem;
 }
 
@@ -34,7 +34,7 @@
 .rowValueInner {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 
 .editLink {
@@ -53,7 +53,7 @@
 .valueWrapper {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 
 .editWrapper {
@@ -65,14 +65,14 @@
 
 .inlineInput {
   min-width: 14rem;
-  padding: 0.2rem 0.4rem;
+  padding: 0.2rem var(--space-2);
   font-size: 0.9em;
 }
 
 .inlineTextarea {
   min-width: 20rem;
   min-height: 4rem;
-  padding: 0.2rem 0.4rem;
+  padding: 0.2rem var(--space-2);
   font-size: 0.9em;
   resize: vertical;
   vertical-align: top;
@@ -80,13 +80,13 @@
 
 .selectInput {
   min-width: 10rem;
-  padding: 0.2rem 0.4rem;
+  padding: 0.2rem var(--space-2);
   font-size: 0.9em;
 }
 
 .boolOptions {
   display: inline-flex;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .inlineError {

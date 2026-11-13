@@ -14,7 +14,7 @@ test.describe("Forgot Password page", () => {
 	});
 
 	test("renders email field and submit button", async ({ page }) => {
-		await expect(page.getByLabel("Email:")).toBeVisible();
+		await expect(page.getByLabel("Email")).toBeVisible();
 		await expect(
 			page.getByRole("button", { name: "Send Reset Link" }),
 		).toBeVisible();
@@ -25,7 +25,7 @@ test.describe("Forgot Password page", () => {
 			route.fulfill(jsonResponse({ message: "Password reset email sent" })),
 		);
 
-		await page.getByLabel("Email:").fill("user@example.com");
+		await page.getByLabel("Email").fill("user@example.com");
 		await page.getByRole("button", { name: "Send Reset Link" }).click();
 
 		await expect(page.getByText("Password reset email sent")).toBeVisible();
@@ -38,11 +38,11 @@ test.describe("Forgot Password page", () => {
 			route.fulfill(jsonResponse({ message: "Email sent" })),
 		);
 
-		await page.getByLabel("Email:").fill("user@example.com");
+		await page.getByLabel("Email").fill("user@example.com");
 		await page.getByRole("button", { name: "Send Reset Link" }).click();
 
 		await expect(page.getByText("Email sent")).toBeVisible();
-		await expect(page.getByLabel("Email:")).toHaveValue("");
+		await expect(page.getByLabel("Email")).toHaveValue("");
 	});
 
 	test("shows API error on failure", async ({ page }) => {
@@ -50,7 +50,7 @@ test.describe("Forgot Password page", () => {
 			route.fulfill(jsonResponse({ error: "No account found" }, 404)),
 		);
 
-		await page.getByLabel("Email:").fill("unknown@example.com");
+		await page.getByLabel("Email").fill("unknown@example.com");
 		await page.getByRole("button", { name: "Send Reset Link" }).click();
 
 		await expect(page.getByText("No account found")).toBeVisible();
@@ -59,7 +59,7 @@ test.describe("Forgot Password page", () => {
 	test("shows network error message when request fails", async ({ page }) => {
 		await page.route("**/auth/forgot-password", (route) => route.abort());
 
-		await page.getByLabel("Email:").fill("user@example.com");
+		await page.getByLabel("Email").fill("user@example.com");
 		await page.getByRole("button", { name: "Send Reset Link" }).click();
 
 		await expect(page.getByText("Network error")).toBeVisible();

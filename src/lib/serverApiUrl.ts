@@ -5,3 +5,8 @@ export function getServerApiUrl(): string {
     "http://localhost:4000"
   );
 }
+
+export function getTestingApiKeyHeader(): Record<string, string> {
+  const apiKey = process.env.TESTING_API_KEY;
+  return apiKey ? { "X-API-Key": apiKey } : {};
+}

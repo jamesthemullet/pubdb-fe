@@ -29,7 +29,7 @@ describe("ForgotPasswordPage", () => {
 		expect(
 			screen.getByRole("heading", { name: "Forgot Password" }),
 		).toBeInTheDocument();
-		expect(screen.getByLabelText(/email:/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
 		expect(
 			screen.getByRole("button", { name: "Send Reset Link" }),
 		).toBeInTheDocument();
@@ -51,7 +51,7 @@ describe("ForgotPasswordPage", () => {
 
 		render(<ForgotPasswordPage />);
 
-		fireEvent.change(screen.getByLabelText(/email:/i), {
+		fireEvent.change(screen.getByLabelText(/email/i), {
 			target: { value: "user@example.com" },
 		});
 		// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
@@ -63,7 +63,7 @@ describe("ForgotPasswordPage", () => {
 			).toBeInTheDocument();
 		});
 
-		expect((screen.getByLabelText(/email:/i) as HTMLInputElement).value).toBe(
+		expect((screen.getByLabelText(/email/i) as HTMLInputElement).value).toBe(
 			"",
 		);
 	});
@@ -75,7 +75,7 @@ describe("ForgotPasswordPage", () => {
 
 		render(<ForgotPasswordPage />);
 
-		fireEvent.change(screen.getByLabelText(/email:/i), {
+		fireEvent.change(screen.getByLabelText(/email/i), {
 			target: { value: "test@example.com" },
 		});
 		// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
@@ -100,7 +100,7 @@ describe("ForgotPasswordPage", () => {
 
 		render(<ForgotPasswordPage />);
 
-		fireEvent.change(screen.getByLabelText(/email:/i), {
+		fireEvent.change(screen.getByLabelText(/email/i), {
 			target: { value: "unknown@example.com" },
 		});
 		// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
@@ -116,7 +116,7 @@ describe("ForgotPasswordPage", () => {
 
 		render(<ForgotPasswordPage />);
 
-		fireEvent.change(screen.getByLabelText(/email:/i), {
+		fireEvent.change(screen.getByLabelText(/email/i), {
 			target: { value: "user@example.com" },
 		});
 		// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
@@ -137,7 +137,7 @@ describe("ForgotPasswordPage", () => {
 
 		render(<ForgotPasswordPage />);
 
-		fireEvent.change(screen.getByLabelText(/email:/i), {
+		fireEvent.change(screen.getByLabelText(/email/i), {
 			target: { value: "user@example.com" },
 		});
 		// biome-ignore lint/style/noNonNullAssertion: form always exists in this test
@@ -164,7 +164,7 @@ describe("ForgotPasswordPage", () => {
 
 		render(<ForgotPasswordPage />);
 
-		fireEvent.change(screen.getByLabelText(/email:/i), {
+		fireEvent.change(screen.getByLabelText(/email/i), {
 			target: { value: "user@example.com" },
 		});
 		// biome-ignore lint/style/noNonNullAssertion: form always exists in this test

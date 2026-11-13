@@ -88,6 +88,33 @@ describe("RegisterLoginPage", () => {
       expect(localStorageSpy).not.toHaveBeenCalledWith("token", expect.anything());
     });
 
+    it("redirects to the ?redirect= path after logging in", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      window.history.pushState({}, "", "/register?redirect=%2Fpubs%2Fabc");
+      const hrefSetter = vi.fn();
+      const originalLocation = window.location;
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        value: { origin: originalLocation.origin, search: originalLocation.search, set href(v: string) { hrefSetter(v); } },
+      });
+      vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ email: "user@example.com" }));
+
+      try {
+        const { container } = render(<RegisterLoginPage />);
+        fireEvent.change(input(container, "email"), { target: { value: "user@example.com" } });
+        fireEvent.change(input(container, "password"), { target: { value: "pw" } });
+        fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+
+        await waitFor(() => expect(globalThis.fetch).toHaveBeenCalled());
+        await vi.advanceTimersByTimeAsync(300);
+        expect(hrefSetter).toHaveBeenCalledWith("/pubs/abc");
+      } finally {
+        Object.defineProperty(window, "location", { configurable: true, value: originalLocation });
+        window.history.pushState({}, "", "/");
+        vi.useRealTimers();
+      }
+    });
+
     it("shows API error on failed login", async () => {
       vi.spyOn(globalThis, "fetch").mockResolvedValue(
         jsonResponse({ error: "Invalid credentials" }, 401)

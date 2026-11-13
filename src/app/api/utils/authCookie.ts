@@ -19,6 +19,15 @@ export function getAuthHeader(request: Request): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+export function buildHeaders(
+  request: Request,
+  includeContentType: boolean
+): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (includeContentType) headers["Content-Type"] = "application/json";
+  return { ...headers, ...getAuthHeader(request) };
+}
+
 export function setAuthCookie(response: NextResponse, token: string): void {
   response.cookies.set(AUTH_COOKIE_NAME, token, {
     httpOnly: true,

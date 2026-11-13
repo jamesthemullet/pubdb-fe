@@ -11,20 +11,20 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1.5rem;
-  padding: 2rem 2rem 1rem;
+  gap: var(--space-7);
+  padding: var(--space-8) var(--space-8) var(--space-5);
 }
 
 .headerLeft {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 
 .titleRow {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 
@@ -42,7 +42,7 @@
   color: var(--text-muted);
   background: var(--surface-alt);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 2px 8px;
 }
 
@@ -55,27 +55,27 @@
 
 /* ── Empty state ── */
 .empty {
-  margin: 2rem;
-  padding: 2rem;
+  margin: var(--space-8);
+  padding: var(--space-8);
   text-align: center;
   color: var(--text-muted);
   font-size: 0.875rem;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 /* ── Timeline ── */
 .timeline {
   display: flex;
   flex-direction: column;
-  padding: 0 2rem;
+  padding: 0 var(--space-8);
   max-width: 720px;
 }
 
 .versionEntry {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-5);
 }
 
 .versionRail {
@@ -91,7 +91,7 @@
   height: 10px;
   border-radius: 50%;
   background: var(--text-color);
-  margin-top: 0.4rem;
+  margin-top: var(--space-2);
   flex-shrink: 0;
 }
 
@@ -99,7 +99,7 @@
   flex: 1;
   width: 2px;
   background: var(--border-color);
-  margin-top: 0.25rem;
+  margin-top: var(--space-1);
 }
 
 .versionEntry:last-child .versionLine {
@@ -108,14 +108,14 @@
 
 .versionBody {
   flex: 1;
-  padding-bottom: 2rem;
+  padding-bottom: var(--space-8);
 }
 
 .versionHeader {
   display: flex;
   align-items: baseline;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .versionTag {
@@ -133,7 +133,7 @@
 .itemList {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-3);
 }
 
 .itemRow {
@@ -157,7 +157,7 @@
   font-family: var(--font-mono, monospace);
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 2px 6px;
   margin-top: 0.1rem;
 }
