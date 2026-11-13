@@ -6,6 +6,7 @@ import { useState } from "react";
 import Button from "@/app/components/button/button";
 import Typography from "@/app/components/typography/typography";
 import type { AuthUser } from "@/hooks/useAuth";
+import { getLoginHref } from "@/lib/loginRedirect";
 import styles from "../page.module.css";
 
 type Props = {
@@ -25,7 +26,7 @@ export default function EditButton({ pubName, pubId, user, onEdit }: Props): Rea
   if (!user) {
     return (
       <div className={styles.editButtonMessage}>
-        <Link href="/register">Log in to edit this pub</Link>
+        <Link href={getLoginHref(`/pubs/${pubId}`)}>Log in to edit this pub</Link>
       </div>
     );
   }

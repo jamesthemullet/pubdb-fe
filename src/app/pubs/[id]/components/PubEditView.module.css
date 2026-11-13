@@ -2,8 +2,8 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  padding: 1.5rem 0 2rem;
+  gap: var(--space-6);
+  padding: var(--space-7) 0 var(--space-8);
   max-width: 860px;
 }
 
@@ -11,18 +11,18 @@
 .section {
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 1.5rem;
+  border-radius: var(--radius-xl);
+  padding: var(--space-7);
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--space-6);
 }
 
 /* ── Section header ── */
 .sectionHead {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
+  gap: var(--space-4);
   width: 100%;
   background: transparent;
   border: none;
@@ -43,7 +43,7 @@ button.sectionHead {
 .sectionIcon {
   width: 30px;
   height: 30px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background: var(--surface-alt);
   border: 1px solid var(--border-color);
   display: flex;
@@ -74,7 +74,7 @@ button.sectionHead {
   line-height: 1.3;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-3);
 }
 
 .sectionTitleDanger {
@@ -94,7 +94,7 @@ button.sectionHead {
   justify-content: center;
   min-width: 20px;
   height: 20px;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   background: var(--button-primary);
   color: var(--button-primary-text);
   font-size: 0.6875rem;
@@ -126,7 +126,7 @@ button.sectionHead {
 .fieldGrid2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: var(--space-5);
 }
 
 .fieldLabel {
@@ -135,7 +135,7 @@ button.sectionHead {
   color: var(--text-color);
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .req {
@@ -164,8 +164,8 @@ button.sectionHead {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
   font-size: 0.875rem;
   font-family: var(--font-inter), sans-serif;
   color: var(--text-color);
@@ -193,8 +193,8 @@ button.sectionHead {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
   font-size: 0.875rem;
   font-family: var(--font-inter), sans-serif;
   color: var(--text-color);
@@ -213,8 +213,8 @@ button.sectionHead {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius-md);
+  padding: 0.625rem var(--space-4);
   font-size: 0.875rem;
   font-family: var(--font-inter), sans-serif;
   color: var(--text-color);
@@ -240,7 +240,7 @@ button.sectionHead {
 .ownershipToggle {
   display: flex;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   width: fit-content;
 }
@@ -248,8 +248,8 @@ button.sectionHead {
 .ownershipBtn {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 1.25rem;
+  gap: var(--space-2);
+  padding: 0.45rem var(--space-6);
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-muted);
@@ -272,11 +272,17 @@ button.sectionHead {
   font-weight: 600;
 }
 
+.addGardenBtn {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-top: 4px;
+}
+
 /* ── Amenities grid ── */
 .amenitiesGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
+  gap: var(--space-3);
 }
 
 .amenityCard {
@@ -284,7 +290,7 @@ button.sectionHead {
   align-items: center;
   gap: 0.625rem;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: var(--space-4) var(--space-5);
   cursor: pointer;
   border: 1px solid var(--border-color);
   border-radius: 7px;
@@ -380,7 +386,7 @@ button.sectionHead {
 .closedDownLabel {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-3);
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-color);
@@ -397,10 +403,10 @@ button.sectionHead {
 /* ── Collapsible body ── */
 .collapsibleBody {
   border-top: 1px solid var(--border-color);
-  padding-top: 1.25rem;
+  padding-top: var(--space-6);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-4);
 }
 
 /* ── Danger zone row ── */
@@ -408,11 +414,11 @@ button.sectionHead {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 2rem;
-  padding: 1rem;
+  gap: var(--space-8);
+  padding: var(--space-5);
   background: var(--surface);
   border: 1px solid #fecaca;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .dangerRowText h3 {
@@ -437,10 +443,10 @@ button.sectionHead {
   padding: 0.45rem 0.875rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--terminal-text);
   background: #dc2626;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
   white-space: nowrap;
@@ -457,14 +463,14 @@ button.sectionHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--space-5);
   flex-wrap: wrap;
 }
 
 .footerLeft {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-4);
 }
 
 .requiredNote {
@@ -477,7 +483,7 @@ button.sectionHead {
   color: var(--text-muted);
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .saveBtn {
@@ -486,11 +492,11 @@ button.sectionHead {
   gap: 0.3rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--terminal-text);
   background: var(--text-color);
   border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1.125rem;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) 1.125rem;
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
   transition: background 0.15s;
@@ -506,9 +512,9 @@ button.sectionHead {
 }
 
 /* ── Responsive ── */
-@media (max-width: 768px) {
+@media (--tablet) {
   .form {
-    padding: 1rem 0 2rem;
+    padding: var(--space-5) 0 var(--space-8);
   }
 
   /* Transparent sections on mobile — sit directly on beige background */
@@ -516,7 +522,7 @@ button.sectionHead {
     background: transparent;
     border: none;
     border-radius: 0;
-    padding: 1.25rem 0;
+    padding: var(--space-6) 0;
     border-bottom: 1px solid var(--border-color);
     margin-bottom: 0;
     gap: 0;
@@ -528,7 +534,7 @@ button.sectionHead {
 
   .sectionHead {
     border-bottom: none;
-    padding-bottom: 0.25rem;
+    padding-bottom: var(--space-1);
   }
 
   .sectionTitle {
@@ -557,17 +563,42 @@ button.sectionHead {
 
   .amenitiesGrid {
     grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
+    gap: var(--space-3);
   }
 
   .dangerRow {
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--space-5);
   }
 }
 
-@media (max-width: 480px) {
+@media (--mobile) {
   .amenitiesGrid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Amenity definitions ── */
+.amenityHelp {
+  margin: var(--space-4) 0 0;
+  display: grid;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.amenityHelp dt {
+  display: inline;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.amenityHelp dt::after {
+  content: ": ";
+}
+
+.amenityHelp dd {
+  display: inline;
+  margin: 0;
 }

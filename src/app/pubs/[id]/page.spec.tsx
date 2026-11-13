@@ -271,7 +271,7 @@ describe("PubPage", () => {
 			const link = await screen.findByRole("link", {
 				name: "Log in to edit this pub",
 			});
-			expect(link).toHaveAttribute("href", "/register");
+			expect(link).toHaveAttribute("href", expect.stringMatching(/^\/register\?redirect=%2Fpubs%2F/));
 		});
 
 		it("shows the Edit button for an unapproved user, deferring to the API to enforce quota", async () => {

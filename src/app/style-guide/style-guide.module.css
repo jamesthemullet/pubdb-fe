@@ -108,7 +108,7 @@
   background: var(--surface-alt);
   color: var(--text-color);
   border: 1px solid var(--border-color);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 6px 12px;
   font-size: 12px;
   letter-spacing: 0.02em;
@@ -136,7 +136,7 @@
 .panelTag {
   background: var(--accent);
   color: var(--input-background);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 4px 10px;
   font-size: 11px;
   letter-spacing: 0.08em;
@@ -211,7 +211,7 @@
   color: var(--text-muted);
   background: var(--surface-alt);
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
 }
 
 @media (max-width: 600px) {

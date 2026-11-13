@@ -2,9 +2,6 @@
 import Link from "next/link";
 import type { FormEvent } from "react";
 import { useState } from "react";
-import Button from "@/app/components/button/button";
-import Input from "@/app/components/input/Input";
-import Typography from "@/app/components/typography/typography";
 import styles from "./page.module.css";
 
 export default function ForgotPasswordPage(){
@@ -54,46 +51,51 @@ export default function ForgotPasswordPage(){
   }
 
   return (
-    <div className={styles.container}>
-      <Typography variant="headingMedium" as="h1">Forgot Password</Typography>
-      <Typography className={styles.description}>
-        Enter your email address and we&apos;ll send you a link to reset your
-        password.
-      </Typography>
+    <div className={styles.page}>
+      <div className={styles.wrap}>
+        <h1 className={styles.title}>Forgot Password</h1>
+        <p className={styles.subtitle}>
+          Enter your email address and we&apos;ll send you a link to reset your
+          password.
+        </p>
 
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <label htmlFor="forgot-email" className={styles.label}>
-          Email:
-          <Input
-            id="forgot-email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </label>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.fieldBlock}>
+            <label className={styles.label} htmlFor="forgot-email">
+              Email
+            </label>
+            <input
+              id="forgot-email"
+              className={styles.input}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="ada@example.com"
+              autoComplete="email"
+              required
+            />
+          </div>
 
-        <Button type="submit" disabled={loading}>
-          {loading ? "Sending..." : "Send Reset Link"}
-        </Button>
-      </form>
+          {error && (
+            <div role="alert" className={styles.errorBox}>
+              {typeof error === "string" ? error : JSON.stringify(error)}
+            </div>
+          )}
 
-      {message && (
-        <output className={styles.success}>
-          <Typography>{message}</Typography>
-        </output>
-      )}
+          {message && <output className={styles.successBox}>{message}</output>}
 
-      {error && (
-        <div className={styles.error} role="alert">
-          <Typography>
-            {typeof error === "string" ? error : JSON.stringify(error)}
-          </Typography>
-        </div>
-      )}
+          <button type="submit" className={styles.submitBtn} disabled={loading}>
+            {loading ? "Sending..." : "Send Reset Link"}
+          </button>
+        </form>
 
-      <div className={styles.backLink}>
-        <Link href="/register">Back to Login</Link>
+        <div className={styles.divider} />
+
+        <p className={styles.switchText}>
+          <Link href="/register" className={styles.switchLink}>
+            Back to Login
+          </Link>
+        </p>
       </div>
     </div>
   );

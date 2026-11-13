@@ -1,8 +1,8 @@
 .container {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
 }
 
 .label {
@@ -11,7 +11,7 @@
   min-width: 10rem;
 }
 
-@media (max-width: 768px) {
+@media (--tablet) {
   .container {
     flex-direction: column;
   }

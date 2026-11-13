@@ -7,10 +7,10 @@
 
 /* ── Header ── */
 .header {
-  padding: 2rem 2rem 1.5rem;
+  padding: var(--space-8) var(--space-8) var(--space-7);
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 
 .title {
@@ -28,8 +28,8 @@
 .body {
   display: grid;
   grid-template-columns: 200px 1fr;
-  gap: 2rem;
-  padding: 0 2rem 3rem;
+  gap: var(--space-8);
+  padding: 0 var(--space-8) 3rem;
   align-items: start;
 }
 
@@ -51,7 +51,7 @@
 .navItem {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-3);
   width: 100%;
   text-align: left;
   font-size: 0.875rem;
@@ -59,7 +59,7 @@
   color: var(--text-muted);
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.45rem 0.625rem;
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
@@ -79,7 +79,7 @@
 
 .navItemDanger {
   color: var(--danger-text);
-  margin-top: 0.5rem;
+  margin-top: var(--space-3);
 }
 
 .navItemDanger:hover {
@@ -97,19 +97,19 @@
 .content {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--space-6);
 }
 
 /* ── Card ── */
 .card {
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
 }
 
 .cardHeader {
-  padding: 1.25rem 1.5rem 1rem;
+  padding: var(--space-6) var(--space-7) var(--space-5);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -123,7 +123,7 @@
 .cardDescription {
   font-size: 0.8125rem;
   color: var(--text-muted);
-  margin-top: 0.25rem;
+  margin-top: var(--space-1);
   line-height: 1.5;
 }
 
@@ -136,9 +136,9 @@
 .fieldRow {
   display: grid;
   grid-template-columns: 180px 1fr;
-  gap: 1rem;
+  gap: var(--space-5);
   align-items: start;
-  padding: 1rem 1.5rem;
+  padding: var(--space-5) var(--space-7);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -168,7 +168,7 @@
 .fieldControl {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-3);
 }
 
 /* ── Inputs ── */
@@ -176,8 +176,8 @@
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
   font-size: 0.875rem;
   font-family: var(--font-inter), sans-serif;
   color: var(--text-color);
@@ -194,7 +194,7 @@
   display: flex;
   align-items: center;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--surface);
   transition: border-color 0.15s;
@@ -205,7 +205,7 @@
 }
 
 .inputPrefix {
-  padding: 0.5rem 0.625rem;
+  padding: var(--space-3) 0.625rem;
   background: var(--surface-alt);
   font-size: 0.8125rem;
   color: var(--text-muted);
@@ -218,7 +218,7 @@
   flex: 1;
   border: none;
   background: transparent;
-  padding: 0.5rem 0.625rem;
+  padding: var(--space-3) 0.625rem;
   font-size: 0.875rem;
   font-family: var(--font-mono, monospace);
   color: var(--text-color);
@@ -234,8 +234,8 @@
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius-md);
+  padding: 0.625rem var(--space-4);
   font-size: 0.875rem;
   font-family: var(--font-inter), sans-serif;
   color: var(--text-color);
@@ -253,8 +253,8 @@
 .selectInput {
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
   font-size: 0.875rem;
   font-family: var(--font-inter), sans-serif;
   color: var(--text-color);
@@ -273,13 +273,14 @@
   height: 48px;
   border-radius: 50%;
   background: #d97706;
-  color: #fff;
+  color: var(--terminal-text);
   font-size: 1rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  object-fit: cover;
 }
 
 .avatarBtn {
@@ -288,8 +289,8 @@
   color: var(--text-color);
   background: var(--surface);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0.375rem 0.75rem;
+  border-radius: var(--radius-md);
+  padding: 0.375rem var(--space-4);
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
   transition: background 0.15s;
@@ -305,7 +306,7 @@
   color: var(--text-muted);
   background: transparent;
   border: none;
-  padding: 0.375rem 0.25rem;
+  padding: 0.375rem var(--space-1);
   cursor: pointer;
   font-family: var(--font-inter), sans-serif;
 }
@@ -339,8 +340,8 @@
   background: var(--button-primary);
   color: var(--button-primary-text);
   border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-6);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -375,8 +376,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
+  gap: var(--space-5);
+  padding: var(--space-6) var(--space-7);
 }
 
 .twoFaStatus {
@@ -390,7 +391,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.5rem;
+  padding: var(--space-6) var(--space-7);
 }
 
 .sessionInfo {
@@ -410,7 +411,7 @@
   font-weight: 600;
   background: #dbeafe;
   color: #1e40af;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 2px 8px;
 }
 
@@ -433,7 +434,7 @@
 .toggleTrack {
   width: 36px;
   height: 20px;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   background: var(--surface-alt);
   border: 1px solid var(--border-color);
   position: relative;
@@ -453,7 +454,7 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--terminal-text);
   transition: transform 0.2s;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
@@ -473,7 +474,7 @@
   display: flex;
   align-items: center;
   gap: 0.875rem;
-  padding: 1.25rem 1.5rem;
+  padding: var(--space-6) var(--space-7);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -486,7 +487,7 @@
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--terminal-text);
   flex-shrink: 0;
 }
 
@@ -508,14 +509,14 @@
   font-weight: 600;
   background: var(--surface-alt);
   color: var(--text-muted);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 2px 8px;
 }
 
 .inviteRow {
   display: flex;
-  gap: 0.75rem;
-  padding: 1.25rem 1.5rem;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-7);
 }
 
 .inviteRow .textInput {
@@ -525,18 +526,18 @@
 /* ── Appearance ── */
 .themeOptions {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-4);
 }
 
 .themeOption {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-2);
   background: transparent;
   border: 2px solid var(--border-color);
-  border-radius: 8px;
-  padding: 0.5rem;
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
   cursor: pointer;
   transition: border-color 0.15s;
   font-family: var(--font-inter), sans-serif;
@@ -554,7 +555,7 @@
 .themePreview {
   width: 56px;
   height: 36px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   display: block;
 }
 
@@ -582,8 +583,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
-  padding: 1.25rem 1.5rem;
+  gap: var(--space-8);
+  padding: var(--space-6) var(--space-7);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -602,8 +603,8 @@
   background: transparent;
   color: #dc2626;
   border: 1px solid #fca5a5;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-5);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -618,10 +619,10 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 768px) {
+@media (--tablet) {
   .body {
     grid-template-columns: 1fr;
-    padding: 0 1rem 2rem;
+    padding: 0 var(--space-5) var(--space-8);
   }
 
   .settingsNav {
@@ -629,7 +630,7 @@
     display: flex;
     overflow-x: auto;
     gap: 0;
-    padding-bottom: 0.5rem;
+    padding-bottom: var(--space-3);
   }
 
   .navList {
@@ -639,13 +640,13 @@
 
   .navItem {
     white-space: nowrap;
-    border-radius: 20px;
-    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-2xl);
+    padding: 0.35rem var(--space-4);
   }
 
   .fieldRow {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
+    gap: var(--space-3);
   }
 
   .fieldMeta {

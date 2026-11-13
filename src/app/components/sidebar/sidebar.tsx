@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { getLoginHref } from "@/lib/loginRedirect";
 import styles from "./sidebar.module.css";
 
 type Subscription = {
@@ -37,7 +38,7 @@ const ACCOUNT_LINKS = [
 export default function Sidebar(){
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [planData, setPlanData] = useState<PlanData | null>(null);
@@ -162,10 +163,10 @@ export default function Sidebar(){
                 </Link>
               </li>
             ))}
-            {!user ? (
+            {isLoading ? null : !user ? (
               <li>
                 <Link
-                  href="/register"
+                  href={getLoginHref(pathname)}
                   className={`${styles.navItem} ${pathname === "/register" ? styles.navItemActive : ""}`}
                   aria-current={pathname === "/register" ? "page" : undefined}
                   onClick={() => setMenuOpen(false)}

@@ -2,31 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
+import { getRedirectFromSearch, getSafeRedirectPath } from "@/lib/loginRedirect";
 import styles from "./page.module.css";
-
-const getSafeInternalPath = (value: string | null | undefined): string | null => {
-  if (!value || typeof window === "undefined") return null;
-  try {
-    const url = new URL(value, window.location.origin);
-    if (url.origin !== window.location.origin) return null;
-    if (!url.pathname.startsWith("/")) return null;
-    return `${url.pathname}${url.search}${url.hash}`;
-  } catch {
-    return null;
-  }
-};
 
 export default function RegisterLoginPage(){
   const [redirectTo, setRedirectTo] = useState("/");
   const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const safeReferrer = getSafeInternalPath(document.referrer);
-    const prev = safeReferrer && safeReferrer !== "/register" ? safeReferrer : "/";
-    const lastUrl = getSafeInternalPath(sessionStorage.getItem("lastUrl"));
-    setRedirectTo(lastUrl && lastUrl !== "/register" ? lastUrl : prev);
-    sessionStorage.setItem("lastUrl", window.location.pathname);
+    const { origin, search } = window.location;
+    // Prefer an explicit ?redirect= (set by "Log in" links), falling back to the
+    // referrer, which is only meaningful after a full page load.
+    setRedirectTo(
+      getRedirectFromSearch(search, origin) ?? getSafeRedirectPath(document.referrer, origin) ?? "/",
+    );
   }, []);
 
   useEffect(() => {

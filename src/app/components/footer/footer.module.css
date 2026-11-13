@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: space-between;
   height: 40px;
-  padding: 0 1.5rem;
+  padding: 0 var(--space-7);
   border-top: 1px solid var(--border-color);
   background: var(--background);
   font-family: var(--font-inter), sans-serif;
@@ -14,7 +14,7 @@
 .links {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-5);
 }
 
 .link {

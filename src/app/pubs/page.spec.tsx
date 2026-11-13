@@ -3,7 +3,8 @@ import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "@/contexts/AuthContext";
 
-import Pubs, { __clearPubsResponseCacheForTests } from "./page";
+import { clearPubsResponseCache } from "@/lib/pubsResponseCache";
+import Pubs from "./page";
 
 function render(ui: ReactElement) {
 	return rtlRender(<AuthProvider>{ui}</AuthProvider>);
@@ -63,7 +64,7 @@ describe("Pubs page", () => {
 		process.env = { ...originalEnv };
 		process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
 		localStorage.clear();
-		__clearPubsResponseCacheForTests();
+		clearPubsResponseCache();
 		mockSearchParams.clear();
 	});
 
@@ -224,6 +225,31 @@ describe("Pubs page", () => {
 			});
 		});
 
+		it("strips leading and trailing spaces from the search term", async () => {
+			const fetchSpy = vi
+				.spyOn(globalThis, "fetch")
+				.mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));
+
+			render(<Pubs />);
+
+			await screen.findByText("The Harp");
+
+			const searchInput = screen.getByPlaceholderText(
+				/search by name, city/i,
+			);
+			fireEvent.change(searchInput, { target: { value: "  harp  " } });
+
+			await waitFor(() => {
+				const searches = fetchSpy.mock.calls.map(
+					([url]) =>
+						new URL(url as string, "http://localhost").searchParams.get(
+							"search",
+						),
+				);
+				expect(searches).toContain("harp");
+				expect(searches).not.toContain("  harp  ");
+			});
+		});
 
 		it("does not show match count when search term is empty", async () => {
 			vi.spyOn(globalThis, "fetch").mockImplementation(async () => jsonResponse({ data: SAMPLE_PUBS }));

@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: flex-end;
   height: 44px;
-  padding: 0 1.5rem;
+  padding: 0 var(--space-7);
   border-bottom: 1px solid var(--border-color);
   background: var(--background);
 }
@@ -17,7 +17,7 @@
   color: var(--text-color);
   font-family: var(--font-inter), sans-serif;
   padding: 0.3rem 0.625rem;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transition: background 0.15s;
 }
 
@@ -31,11 +31,11 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  margin-left: 0.5rem;
+  margin-left: var(--space-3);
   padding: 0;
   background: transparent;
   color: var(--text-color);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transition: background 0.15s;
 }
 

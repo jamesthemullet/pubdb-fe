@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerApiUrl } from "@/lib/serverApiUrl";
-import { getAuthHeader } from "../../utils/authCookie";
-
-function buildHeaders(request: Request, includeContentType: boolean): Record<string, string> {
-  const headers: Record<string, string> = {};
-  if (includeContentType) headers["Content-Type"] = "application/json";
-  return { ...headers, ...getAuthHeader(request) };
-}
+import { buildHeaders } from "../../utils/authCookie";
 
 export async function GET(
   request: Request,

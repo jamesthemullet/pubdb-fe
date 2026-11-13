@@ -25,6 +25,10 @@ import { useRecentSearches } from "@/hooks/useRecentSearches";
 import { isHttpErrorObject } from "@/lib/errors";
 import { pubCompletenessScore } from "@/lib/pubCompletenessScore";
 import {
+  getCachedPubsResponse,
+  setCachedPubsResponse,
+} from "@/lib/pubsResponseCache";
+import {
   buildSavedSearchParams,
   enabledAmenities,
   type SavedSearchParams,
@@ -66,40 +70,6 @@ const PAGE_SIZE = 50;
 
 const VISIBLE_FILTER_COUNT = 6;
 const RECENT_SEARCH_SETTLE_MS = 2000;
-
-// Keyed by the full query string sent to /api/pubs. Lets a back-navigation to
-// this page reuse the results it already fetched instead of calling the API
-// again for filters/page the user just saw.
-const PUBS_RESPONSE_CACHE = new Map<
-  string,
-  { data: Pub[]; responseMs: number }
->();
-const CACHE_TTL_MS = 5 * 60 * 1000;
-const pubsCacheTimestamps = new Map<string, number>();
-
-function getCachedPubsResponse(
-  key: string
-): { data: Pub[]; responseMs: number } | undefined {
-  const timestamp = pubsCacheTimestamps.get(key);
-  if (timestamp === undefined || Date.now() - timestamp > CACHE_TTL_MS) {
-    return undefined;
-  }
-  return PUBS_RESPONSE_CACHE.get(key);
-}
-
-function setCachedPubsResponse(
-  key: string,
-  value: { data: Pub[]; responseMs: number }
-): void {
-  PUBS_RESPONSE_CACHE.set(key, value);
-  pubsCacheTimestamps.set(key, Date.now());
-}
-
-/** Test-only: the cache is module-scoped, so specs must reset it between runs. */
-export function __clearPubsResponseCacheForTests(): void {
-  PUBS_RESPONSE_CACHE.clear();
-  pubsCacheTimestamps.clear();
-}
 
 const PubRow = memo(function PubRow({
   pub,
@@ -223,7 +193,11 @@ const PubCard = memo(function PubCard({
 function PubsContent(): ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const urlQuery = searchParams.get("q") ?? searchParams.get("search") ?? "";
+  const urlQuery = (
+    searchParams.get("q") ??
+    searchParams.get("search") ??
+    ""
+  ).trim();
   const urlSort = searchParams.get("sort") ?? "";
   const urlAmenities = searchParams.get("amenities") ?? "";
   const urlType = searchParams.get("type") ?? "";
@@ -358,7 +332,9 @@ function PubsContent(): ReactElement {
       isFirstQuerySync.current = false;
       return;
     }
-    setSearchTerm(urlQuery);
+    // Searches are trimmed before they reach the URL, so keep the user's
+    // in-progress input (e.g. a trailing space mid-typing) when it matches.
+    setSearchTerm((prev) => (prev.trim() === urlQuery ? prev : urlQuery));
     setDebouncedSearchTerm(urlQuery);
     setPage(0);
   }, [urlQuery]);
@@ -366,7 +342,7 @@ function PubsContent(): ReactElement {
   useEffect(() => {
     const timer = setTimeout(() => {
       setPage(0);
-      setDebouncedSearchTerm(searchTerm);
+      setDebouncedSearchTerm(searchTerm.trim());
     }, 300);
     return () => clearTimeout(timer);
   }, [searchTerm]);
@@ -546,7 +522,7 @@ function PubsContent(): ReactElement {
   const runSavedSearch = useCallback((params: SavedSearchParams): void => {
     setPage(0);
     setSearchTerm(params.search ?? "");
-    setDebouncedSearchTerm(params.search ?? "");
+    setDebouncedSearchTerm((params.search ?? "").trim());
     setActiveAmenities(new Set(enabledAmenities(params)));
     setTypeFilter(params.type ?? "");
     if (params.lat !== undefined && params.lng !== undefined) {
@@ -658,7 +634,7 @@ function PubsContent(): ReactElement {
               className={styles.searchInput}
               type="search"
               aria-label="Search pubs"
-              placeholder="Search by name, city, address..."
+              placeholder="Search by name, city, postcode..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => {

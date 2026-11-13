@@ -45,7 +45,7 @@ describe("SavedSearches", () => {
 
 		expect(screen.getByRole("link", { name: "Log in to save this search" })).toHaveAttribute(
 			"href",
-			"/register",
+			"/register?redirect=%2Fpubs%3Fq%3DCR0",
 		);
 		expect(fetchSpy).not.toHaveBeenCalled();
 	});

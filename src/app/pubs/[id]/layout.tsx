@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { buildPubJsonLd, type PubForJsonLd } from "@/lib/pubJsonLd";
-import { getServerApiUrl } from "@/lib/serverApiUrl";
+import { getServerApiUrl, getTestingApiKeyHeader } from "@/lib/serverApiUrl";
 
 const SITE_URL = "https://www.thepubdb.com";
 
@@ -10,8 +10,7 @@ type PubMetaShape = Partial<PubForJsonLd>;
 async function fetchPubForLayout(id: string): Promise<PubMetaShape | null> {
   try {
     const apiUrl = getServerApiUrl();
-    const apiKey = process.env.TESTING_API_KEY;
-    const headers: Record<string, string> = apiKey ? { "X-API-Key": apiKey } : {};
+    const headers = getTestingApiKeyHeader();
     const res = await fetch(`${apiUrl}/api/v1/pubs/${id}`, {
       headers,
       next: { revalidate: 3600 },
