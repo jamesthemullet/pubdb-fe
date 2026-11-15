@@ -91,6 +91,7 @@ export type Pub = {
   hasAccessibleToilet?: boolean | null;
   hasLiveSport?: boolean | null;
   hasLiveMusic?: boolean | null;
+  hasDj?: boolean | null;
   hasPoolTable?: boolean | null;
   hasDartsBoard?: boolean | null;
   hasAirConditioning?: boolean | null;
