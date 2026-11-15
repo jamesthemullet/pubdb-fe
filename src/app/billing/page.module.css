@@ -874,7 +874,7 @@
 .invoicesColDate { font-size: 0.875rem; color: var(--text-color); }
 .invoicesColPeriod { font-size: 0.875rem; color: var(--text-muted); }
 .invoicesColAmount { text-align: right; font-size: 0.875rem; }
-.invoicesColStatus { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
+.invoicesColStatus { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-3); }
 
 .invoiceId {
   font-size: 0.8125rem;

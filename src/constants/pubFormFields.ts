@@ -15,6 +15,7 @@ export type PubAmenityKey =
   | "hasAccessibleToilet"
   | "hasLiveSport"
   | "hasLiveMusic"
+  | "hasDj"
   | "hasPoolTable"
   | "hasDartsBoard"
   | "hasAirConditioning";
@@ -66,6 +67,7 @@ export const PUB_AMENITY_FIELDS: PubAmenityField[] = [
   { key: "hasAccessibleToilet", label: "Accessible toilet" },
   { key: "hasLiveSport", label: "Live sport" },
   { key: "hasLiveMusic", label: "Live music" },
+  { key: "hasDj", label: "DJs" },
   { key: "hasPoolTable", label: "Pool table" },
   { key: "hasDartsBoard", label: "Darts board" },
   { key: "hasAirConditioning", label: "Air conditioning" },
@@ -74,22 +76,49 @@ export const PUB_AMENITY_FIELDS: PubAmenityField[] = [
 type AmenityValues = Partial<Record<PubAmenityKey, boolean | null | undefined>>;
 
 /**
+ * Remembers what "Craft beer" was before ticking "Craft beer pub" switched it
+ * on, so it can be put back if "Craft beer pub" is later moved off "yes".
+ * Symbol keys survive object spread (so other form setters keep it) but are
+ * skipped by Object.entries and JSON.stringify, so it never reaches the API.
+ */
+const IMPLIED_CRAFT_BEER_PREVIOUS = Symbol("impliedCraftBeerPrevious");
+
+type WithImpliedMemory = { [IMPLIED_CRAFT_BEER_PREVIOUS]?: boolean | null };
+
+/**
  * Sets one amenity and keeps dependent amenities consistent: a craft beer pub
  * always has craft beer, so ticking "Craft beer pub" ticks "Craft beer", and
  * unsetting "Craft beer" unsets "Craft beer pub" (the API rejects
- * isCraftBeerPub: true with hasCraftBeer: false).
+ * isCraftBeerPub: true with hasCraftBeer: false). If "Craft beer pub" is then
+ * moved off "yes", "Craft beer" goes back to what it was before it was ticked
+ * automatically.
  */
 export function withAmenityValue<T extends AmenityValues>(
   fields: T,
   key: string,
   value: unknown
 ): T {
-  const next: T = { ...fields, [key]: value };
-  if (key === "isCraftBeerPub" && value === true) {
-    next.hasCraftBeer = true;
+  const next = { ...fields, [key]: value } as T & WithImpliedMemory;
+
+  if (key === "isCraftBeerPub") {
+    if (value === true) {
+      if (next.hasCraftBeer !== true) {
+        next[IMPLIED_CRAFT_BEER_PREVIOUS] = next.hasCraftBeer ?? null;
+        (next as AmenityValues).hasCraftBeer = true;
+      }
+    } else if (IMPLIED_CRAFT_BEER_PREVIOUS in next) {
+      (next as AmenityValues).hasCraftBeer = next[IMPLIED_CRAFT_BEER_PREVIOUS] ?? null;
+      delete next[IMPLIED_CRAFT_BEER_PREVIOUS];
+    }
   }
-  if (key === "hasCraftBeer" && value !== true && next.isCraftBeerPub === true) {
-    next.isCraftBeerPub = value === false ? false : null;
+
+  if (key === "hasCraftBeer") {
+    // An explicit choice for "Craft beer" replaces the remembered value.
+    delete next[IMPLIED_CRAFT_BEER_PREVIOUS];
+    if (value !== true && next.isCraftBeerPub === true) {
+      (next as AmenityValues).isCraftBeerPub = value === false ? false : null;
+    }
   }
+
   return next;
 }
