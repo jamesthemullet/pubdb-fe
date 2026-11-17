@@ -63,12 +63,12 @@ amenity page has two other jobs: **get visitors to improve the data** (fill in m
 add missing pubs), and **show developers the API behind the page** (the exact request that
 returns this list, with a sign-up link).
 
-- [ ] **Depends on `pubdbapi` — verify first:** the pubs endpoint can filter by `city` (amenity
+- [x] **Depends on `pubdbapi` — verify first:** the pubs endpoint can filter by `city` (amenity
   filters via `amenities[key]=true` already exist), and there's a way to list cities with pub
   counts. If either is missing, that's a `pubdbapi` change, not a `pubdb-fe` one.
 - [x] A pure `citySlug` helper (`"Newcastle upon Tyne"` ↔ `newcastle-upon-tyne`) + an amenity
   key ↔ URL slug map built from `PUB_AMENITY_FIELDS` (`isDogFriendly` ↔ `dog-friendly`) + tests.
-- [ ] `/pubs/in/[city]` server-rendered page: heading, intro line with the pub count, list of pub
+- [x] `/pubs/in/[city]` server-rendered page: heading, intro line with the pub count, list of pub
   cards linking to `/pubs/[id]`, `generateMetadata` with a unique title/description, and a
   404 for unknown or empty cities.
 - [ ] "Help improve {city}" panel on the city page: uses the existing `pubCompletenessScore` to
