@@ -1,6 +1,6 @@
 ---
 name: full-audit
-description: Run a full audit of the PubDB site (pubdb-fe frontend + pub-api backend) covering test coverage (unit + e2e gaps), accessibility, performance, SEO, responsive/UX, security, and code quality (strict typing, duplication, bad patterns, dead code). Appends new findings to a persistent AUDIT.md checklist in the repo (existing checked-off items are preserved). Use when the user asks to audit, review the health of, or find improvements for the whole site — not for reviewing a single PR/diff (use /code-review for that).
+description: Run a full audit of the PubDB site (pubdb-fe frontend + pub-api backend) covering test coverage (unit + e2e gaps), accessibility, performance, SEO, responsive/UX, security, and code quality (strict typing, duplication, bad patterns, dead code). Appends frontend findings to pubdb-fe/AUDIT.md and backend findings to pub-api/AUDIT.md, persistent checklists in each repo (existing checked-off items are preserved). Use when the user asks to audit, review the health of, or find improvements for the whole site — not for reviewing a single PR/diff (use /code-review for that).
 ---
 
 # Full site audit
@@ -28,21 +28,37 @@ browser (see `pubdb-fe/src/app/api/playground/utils/playgroundProxyHandler.ts` f
 
 User asks to "audit the site", "find ways to improve pubdb", "do a full review of the app", or
 similar whole-app requests covering either or both repos. If they ask about a single PR or the
-current diff, use `/code-review` instead.
+current diff, use `/code-review` instead. If they ask to audit just `pub-api` / "this repo"
+while working in `pub-api` / the backend only, use the sibling `full-audit-api` skill instead —
+it writes to `pub-api/AUDIT.md` only.
 
 ## Output
 
-Findings live in a single persistent file at **the `pubdb-fe` repo root: `pubdb-fe/AUDIT.md`**
-— by convention this file lives in the frontend repo even though findings cover both repos
-(mirror this if running the audit from `pub-api`: still read/write
-`../pubdb-fe/AUDIT.md`, don't create a second `AUDIT.md` in `pub-api`). This is not a one-off
-report — it's a living checklist that accumulates across runs. Each run **appends**, never
-replaces:
+Findings are split by the repo the fix lands in — **frontend fixes are tracked in the frontend
+repo, backend fixes in the backend repo**:
 
-- `AUDIT.md` has one `## <n>. <Category>` section per category below, in the same order, each
+- **`[fe]` findings → `pubdb-fe/AUDIT.md`** (frontend repo root), using the seven sections in
+  the template below. This file also carries the full-site run log.
+- **`[api]` findings → `pub-api/AUDIT.md`** (backend repo root; the same file the
+  `full-audit-api` skill maintains). It has four sections — map them as: Test coverage → `## 1.
+  Test coverage — unit and integration gaps`, Performance → `## 2. Performance`, Security →
+  `## 3. Security`, Code quality → `## 4. Code quality`. Accessibility/SEO/responsive findings
+  are frontend by definition. Items in this file don't need an `[api]` prefix.
+- A finding that needs changes in both repos gets one item in each file, each scoped to that
+  repo's half of the change, cross-referencing the other (e.g. "backend half of …, see
+  `pubdb-fe/AUDIT.md`"). A frontend symptom with a backend root cause goes where the fix lands.
+- Paths: the backend repo is checked out next to the frontend (currently at `../pubdbapi`), so
+  from `pubdb-fe` the backend file is `../pubdbapi/AUDIT.md`; from the backend the frontend
+  file is `../pubdb-fe/AUDIT.md`. Each change ships as a PR in its own repo.
+
+Both are not one-off reports — they're living checklists that accumulate across runs. Each run
+**appends**, never replaces. The rules below apply to each file independently:
+
+- Each `AUDIT.md` has one `## <n>. <Category>` section per category, in the same order, each
   containing a flat markdown checklist (`- [ ] finding text (found: YYYY-MM-DD)`).
-- **Before writing anything**, read the current `AUDIT.md` in full (create it from the template
-  below if it doesn't exist yet).
+- **Before writing anything**, read both `AUDIT.md` files in full (create `pubdb-fe/AUDIT.md`
+  from the template below if it doesn't exist yet) — dedupe each finding against the file it
+  belongs in.
 - For each category, compare this run's findings against what's already listed in that section:
   - If a finding already exists (same issue, same file/route — wording may differ slightly),
     **do not duplicate it**. Leave the existing line untouched.
@@ -52,26 +68,27 @@ replaces:
   - **Never touch a line that's already checked off (`- [x]`)** — those are the user's own
     record of completed work. Leave them exactly as-is, in place.
   - Genuinely new findings get appended to the bottom of that section's list as new `- [ ]`
-    items, dated. Prefix each finding with `[fe]` or `[api]` (or both) so it's clear which repo
-    it applies to.
-- Add a line to the `## Run log` section at the top with today's date and a one-line summary
-  (e.g. "2026-08-31 — 4 new findings (2 a11y, 1 security, 1 code quality), 1 item resolved").
+    items, dated. In `pubdb-fe/AUDIT.md`, prefix each with `[fe]`.
+- Add a line to the `## Run log` section at the top of **each** file you changed, with today's
+  date and a one-line summary of that file's changes (e.g. "2026-08-31 — 4 new findings (2 a11y,
+  1 security, 1 code quality), 1 item resolved").
 - Do not renumber, reorder, or rewrite prose outside the checklists — this file is meant to be
   readable as a diff over time.
 
 Do not modify application code during the audit unless the user explicitly asks you to fix
 something after seeing the report — this skill is read-only/diagnostic aside from editing
-`AUDIT.md` itself.
+the two `AUDIT.md` files themselves.
 
-### AUDIT.md template (use this structure if the file doesn't exist yet)
+### `pubdb-fe/AUDIT.md` template (use this structure if the file doesn't exist yet)
 
 ```markdown
 # Site Audit
 
-Living checklist maintained by the `/full-audit` skill, covering both `pubdb-fe` and `pub-api`.
+Living checklist maintained by the `/full-audit` skill, covering frontend (`pubdb-fe`) findings;
+backend findings live in `pub-api/AUDIT.md`.
 Findings are appended, never rewritten; check an item off (`- [x]`) once you've fixed it and it
 won't be touched again. Re-running the audit adds new findings to the bottom of each section and
-leaves checked items alone. `[fe]`/`[api]` tags mark which repo a finding applies to.
+leaves checked items alone.
 
 ## Run log
 
@@ -96,8 +113,8 @@ leaves checked items alone. `[fe]`/`[api]` tags mark which repo a finding applie
 
 Fan out the categories below as parallel forks or a general-purpose subagent per category (they
 are independent and read-heavy — keep the raw output out of your main context). Have each one
-**report findings back as text**, not write to `AUDIT.md` directly — only you should touch that
-file, in a single merge pass at the end, so the dedup/checked-item rules above are applied
+**report findings back as text**, not write to either `AUDIT.md` directly — only you should touch those
+files, in a single merge pass at the end, so the dedup/checked-item rules above are applied
 consistently in one place. Categories needing the browser (a11y/perf/responsive/e2e-walkthrough)
 should run together in one browser-driving pass since they all need the app running.
 
