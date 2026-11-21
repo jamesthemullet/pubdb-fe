@@ -123,6 +123,14 @@ Before starting, check whether dev servers are already running; if not, start `p
 then `pubdb-fe` (`yarn dev`, port 3000) yourself for the duration of the audit, and stop them
 when done unless the user is already running them.
 
+If the local environment can't serve real data (for example, `pub-api` won't boot because an
+env var is missing, its `DATABASE_URL` credentials are rejected, or `pubdb-fe`'s
+`TESTING_API_KEY` is empty), don't add or change secrets in `.env`. A throwaway value passed
+only to that process is fine for a non-secret boot requirement. Run the browser categories
+read-only against production (`https://www.thepubdb.com`) instead: GET-only, no sign-ups,
+form submits, edits, key creation or checkout. Record the gap in the run log, including which
+authenticated views couldn't be walked.
+
 ### 1. Test coverage — unit gaps and e2e
 
 - Run `yarn test:coverage` in both `pubdb-fe` and `pub-api`. Even though CI runs `yarn test` on
@@ -196,6 +204,23 @@ when done unless the user is already running them.
 - Response headers: `helmet` is already a `pub-api` dependency — confirm it's actually mounted
   and check its configured policy (CSP, HSTS, X-Content-Type-Options) rather than assuming
   defaults are sufficient
+- Authorization on every state-changing route in `pub-api/src/routes/*` (POST/PATCH/DELETE):
+  list who can call it (anonymous / any user / approved / admin / owner) and flag mismatches.
+  Destructive or irreversible operations (deletes, key rotation) should be admin- or owner-only.
+  Check how users gain each role, e.g. a paid checkout sets `approved: true`, so "approved"
+  means "anyone who pays", not "trusted".
+- Unauthenticated endpoints that change state given only an identifier (an email, a key
+  prefix): they should send a confirmation link rather than act immediately.
+- Account enumeration: login, register and forgot-* responses that differ for existing or
+  unverified accounts *before* the credential check.
+- Session lifetime: JWT expiry, and whether a password change or reset invalidates existing
+  tokens.
+- Error handling: is there a final Express error handler, or do uncaught errors (including
+  CORS rejections) fall through to the default HTML handler with stack traces? Is
+  `NODE_ENV=production` actually set in the deploy config?
+- Password policy: minimum length, and bcrypt's silent 72-byte truncation.
+- Keyless "frontend-only" routes that bypass paid-tier gates (near search, page size) for
+  non-browser clients that send no `Origin`.
 
 ### 7. Code quality
 
