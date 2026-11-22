@@ -132,7 +132,7 @@ leaves checked items alone. `[fe]`/`[api]` tags mark which repo a finding applie
 - [x] [fe] `src/lib/pubImageUpload.ts` — 5.55% statements (lines 8-42 uncovered). Add `pubImageUpload.spec.ts` covering `validatePubImageSize`'s >8MB check and `uploadPubImage` success, non-ok with/without a string `error`, and network error. (found: 2026-11-21)
 - [x] [fe] `src/app/pubs/[id]/page.tsx` is the weakest fe file at 32.59% statements — the pure history-diff helpers (`humanizeFieldName`, `deepEqual`, `formatScalarValue`, `describeFieldChange`, `listChangedFields`, ~lines 1042-1129) are untested. Extract them to `src/lib/pubHistoryDiff.ts` with a spec (preferred), or test through the History tab in `page.spec.tsx`. (found: 2026-11-21)
 - [ ] [fe] `src/app/pubs/[id]/components/EditButton.tsx` — 35.29% coverage; `handleDelete` (lines 34-60) is untested: confirm-cancel, non-ok with API `error`, success → `router.push("/pubs")`, network error. (found: 2026-11-21)
-- [x] [fe] `src/app/leaderboard/page.tsx` and `src/app/changelog/page.tsx` server components are never loaded by a unit test (0%) — their non-ok/throw fallback branches (leaderboard `page.tsx:15-23`, changelog `page.tsx:15-24`) are unverified. Add a small `page.spec.tsx` beside each that awaits the async component with a mocked `fetch`. (found: 2026-11-21) (resolved: 2026-11-22, PR #TBD)
+- [x] [fe] `src/app/leaderboard/page.tsx` and `src/app/changelog/page.tsx` server components are never loaded by a unit test (0%) — their non-ok/throw fallback branches (leaderboard `page.tsx:15-23`, changelog `page.tsx:15-24`) are unverified. Add a small `page.spec.tsx` beside each that awaits the async component with a mocked `fetch`. (found: 2026-11-21) (resolved: 2026-11-22, PR #478)
 
 ## 2. Accessibility
 
