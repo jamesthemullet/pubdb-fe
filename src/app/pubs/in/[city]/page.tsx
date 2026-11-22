@@ -6,6 +6,7 @@ import { buildCityPageMetadata } from "@/lib/cityPageMetadata";
 import { findCityBySlug } from "@/lib/citySlug";
 import { getServerApiUrl, getTestingApiKeyHeader } from "@/lib/serverApiUrl";
 import type { Pub } from "@/types/pub";
+import HelpImprovePanel from "./components/HelpImprovePanel";
 import styles from "./page.module.css";
 
 const PAGE_SIZE = 50;
@@ -132,6 +133,8 @@ export default async function CityPubsPage({
           </Link>
         ))}
       </div>
+
+      <HelpImprovePanel city={city} pubs={pubs} />
     </div>
   );
 }

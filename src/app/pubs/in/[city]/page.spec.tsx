@@ -74,14 +74,14 @@ describe("CityPubsPage", () => {
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Pubs in Leeds");
     expect(screen.getByText(/2 pubs in Leeds/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /the angel/i })).toHaveAttribute(
-      "href",
-      "/pubs/pub-1"
-    );
-    expect(screen.getByRole("link", { name: /the oak/i })).toHaveAttribute(
-      "href",
-      "/pubs/pub-2"
-    );
+    // Both pubs are incomplete fixtures, so they also appear in the "help
+    // improve" panel below the grid — the grid's own card is the first match.
+    expect(
+      screen.getAllByRole("link", { name: /the angel/i })[0]
+    ).toHaveAttribute("href", "/pubs/pub-1");
+    expect(
+      screen.getAllByRole("link", { name: /the oak/i })[0]
+    ).toHaveAttribute("href", "/pubs/pub-2");
   });
 
   it("uses the singular 'pub' for a count of one", async () => {
