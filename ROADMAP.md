@@ -71,7 +71,7 @@ returns this list, with a sign-up link).
 - [x] `/pubs/in/[city]` server-rendered page: heading, intro line with the pub count, list of pub
   cards linking to `/pubs/[id]`, `generateMetadata` with a unique title/description, and a
   404 for unknown or empty cities.
-- [ ] "Help improve {city}" panel on the city page: uses the existing `pubCompletenessScore` to
+- [x] "Help improve {city}" panel on the city page: uses the existing `pubCompletenessScore` to
   list the least complete pubs in the city with what each is missing ("missing opening hours,
   phone") and a link to edit each one, plus a "Know a pub we're missing?" link to `/add-pub`.
   Logged-out visitors are sent through sign-up first, which also puts them one step from an API
