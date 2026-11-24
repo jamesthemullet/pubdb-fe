@@ -78,7 +78,7 @@ returns this list, with a sign-up link).
   key.
 - [ ] `/add-pub` reads an optional `?city=` query param and prefills the city field, so the
   panel's link lands with the city already filled in.
-- [ ] "Get this data via the API" panel on the city page: the exact request for this page
+- [x] "Get this data via the API" panel on the city page: the exact request for this page
   (`GET /pubs?city=Leeds`), a trimmed sample JSON response built from the pubs already on the
   page, a copy button (reuse the docs `CopyButton`), and links to `/docs`, pricing and
   `/register`. Include the pure request-builder helper and its tests in this step.
