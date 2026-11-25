@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { ChangeEvent, FormEvent, ReactNode } from "react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import AuthGate from "@/app/components/auth-gate/AuthGate";
 import FieldErrorList from "@/app/components/pub-form/FieldErrorList";
 import UnapprovedBanner from "@/app/components/unapproved-banner/UnapprovedBanner";
@@ -105,13 +105,14 @@ const AMENITY_LABELS: Partial<Record<PubAmenityKey, string>> = {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function AddPubPage(){
+function AddPubPageContent(){
   const router = useRouter();
   const { user } = useAuth();
+  const searchParams = useSearchParams();
 
   // Core fields
   const [name, setName] = useState("");
-  const [city, setCity] = useState("");
+  const [city, setCity] = useState(searchParams.get("city") ?? "");
   const [country, setCountry] = useState("GB");
   const [address, setAddress] = useState("");
   const [postcode, setPostcode] = useState("");
@@ -635,6 +636,14 @@ export default function AddPubPage(){
         </div>
       </form>
     </div>
+  );
+}
+
+export default function AddPubPage(){
+  return (
+    <Suspense>
+      <AddPubPageContent />
+    </Suspense>
   );
 }
 
