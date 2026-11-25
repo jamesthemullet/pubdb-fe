@@ -89,7 +89,9 @@ test.describe("Pub photo upload (/pubs/[id])", () => {
       buffer: TINY_PNG,
     });
 
-    await expect(page.getByRole("alert")).toHaveText("Only image files are allowed.");
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Only image files are allowed." }),
+    ).toBeVisible();
   });
 
   test("rejects a file over 8MB client-side without calling the API", async ({ page }) => {
@@ -105,9 +107,11 @@ test.describe("Pub photo upload (/pubs/[id])", () => {
       buffer: Buffer.alloc(9 * 1024 * 1024),
     });
 
-    await expect(page.getByRole("alert")).toHaveText(
-      "Image is too large — please choose a file under 8MB.",
-    );
+    await expect(
+      page
+        .getByRole("alert")
+        .filter({ hasText: "Image is too large — please choose a file under 8MB." }),
+    ).toBeVisible();
     expect(uploadCalled).toBe(false);
   });
 });
