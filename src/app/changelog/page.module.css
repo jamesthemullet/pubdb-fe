@@ -163,12 +163,12 @@
 }
 
 .typeadded {
-  color: #15803d;
+  color: var(--success-text);
   background: rgba(21, 128, 61, 0.12);
 }
 
 .typechanged {
-  color: #b45309;
+  color: var(--warning-text);
   background: rgba(180, 83, 9, 0.12);
 }
 

@@ -11,5 +11,5 @@
 .backLink {
   margin-top: var(--space-8);
   display: inline-block;
-  color: #007bff;
+  color: var(--accent);
 }
