@@ -462,8 +462,8 @@
 .typeBadge {
   font-family: var(--font-jetbrains-mono), monospace;
   font-size: 0.6875rem;
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--surface-alt);
+  color: var(--text-muted);
   border-radius: var(--radius-sm);
   padding: 0.1rem var(--space-2);
   white-space: nowrap;
