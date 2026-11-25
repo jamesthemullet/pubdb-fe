@@ -81,7 +81,7 @@ test.describe("Saved searches (/pubs)", () => {
 
     await page.getByRole("button", { name: "Save this search" }).click();
     await page.getByLabel("Name this search").fill("Harp");
-    await page.getByRole("button", { name: "Save" }).click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
 
     await expect(page.getByRole("button", { name: "Search saved" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Saved searches (1)" })).toBeVisible();
@@ -122,7 +122,7 @@ test.describe("Saved searches (/pubs)", () => {
     await page.getByRole("button", { name: "Saved searches (1)" }).click();
     await page.getByRole("button", { name: "Rename My Harp search" }).click();
     await page.getByLabel("New name for My Harp search").fill("Renamed search");
-    await page.getByRole("button", { name: "Save" }).click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
 
     await expect(page.getByRole("link", { name: "Renamed search" })).toBeVisible();
   });
