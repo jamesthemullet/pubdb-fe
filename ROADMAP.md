@@ -76,7 +76,7 @@ returns this list, with a sign-up link).
   phone") and a link to edit each one, plus a "Know a pub we're missing?" link to `/add-pub`.
   Logged-out visitors are sent through sign-up first, which also puts them one step from an API
   key.
-- [ ] `/add-pub` reads an optional `?city=` query param and prefills the city field, so the
+- [x] `/add-pub` reads an optional `?city=` query param and prefills the city field, so the
   panel's link lands with the city already filled in.
 - [ ] "Get this data via the API" panel on the city page: the exact request for this page
   (`GET /pubs?city=Leeds`), a trimmed sample JSON response built from the pubs already on the
