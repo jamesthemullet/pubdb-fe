@@ -12,9 +12,11 @@ function render(ui: ReactElement) {
 }
 
 const pushMock = vi.fn();
+let searchParams = new URLSearchParams();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: pushMock }),
+  useSearchParams: () => searchParams,
 }));
 
 function toUrl(input: RequestInfo | URL): string {
@@ -106,6 +108,7 @@ describe("AddPubPage", () => {
     clearCountriesCache();
     vi.restoreAllMocks();
     pushMock.mockReset();
+    searchParams = new URLSearchParams();
     localStorage.clear();
     process.env = { ...originalEnv };
     process.env.NEXT_PUBLIC_API_URL = "http://localhost:4000";
@@ -133,6 +136,13 @@ describe("AddPubPage", () => {
     expect(
       await screen.findByRole("heading", { name: "Log in" })
     ).toBeInTheDocument();
+  });
+
+  it("prefills the city field from a ?city= query param", async () => {
+    searchParams = new URLSearchParams({ city: "Leeds" });
+    await renderApprovedPageWithSubmitResult(jsonResponse({ id: "pub-123" }, 201));
+
+    expect(screen.getByLabelText(/^City/i)).toHaveValue("Leeds");
   });
 
   it("lets an unapproved user see and submit the form, showing the quota message on a 403", async () => {

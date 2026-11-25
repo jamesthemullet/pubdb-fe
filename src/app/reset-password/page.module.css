@@ -44,7 +44,7 @@
 }
 
 .backLink a {
-  color: #007bff;
+  color: var(--accent);
 }
 
 .invalidLink {
@@ -52,5 +52,5 @@
 }
 
 .invalidLink a {
-  color: #007bff;
+  color: var(--accent);
 }
