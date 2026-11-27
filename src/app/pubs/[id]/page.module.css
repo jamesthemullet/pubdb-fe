@@ -813,7 +813,7 @@
   padding: var(--space-1) 0.6rem;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.8125rem;
   font-family: var(--font-jetbrains-mono), monospace;
   cursor: pointer;
