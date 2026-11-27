@@ -191,7 +191,7 @@
 
 .sectionText {
   font-size: 0.875rem;
-  color: #374151;
+  color: var(--text-muted);
   line-height: 1.7;
   margin-bottom: var(--space-5);
 }
@@ -295,7 +295,7 @@
   border-radius: var(--radius-lg);
   padding: var(--space-5);
   font-size: 0.8125rem;
-  color: #374151;
+  color: var(--text-muted);
   line-height: 1.6;
   background: var(--surface);
 }
@@ -422,7 +422,7 @@
 }
 
 .fieldDesc {
-  color: #374151;
+  color: var(--text-muted);
   line-height: 1.5;
 }
 
