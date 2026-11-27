@@ -45,12 +45,6 @@
   color: var(--terminal-text);
 }
 
-.logoVersion {
-  font-size: 11px;
-  color: #666666;
-  margin-left: 2px;
-}
-
 /* Search */
 .searchWrap {
   position: relative;
@@ -78,26 +72,13 @@
 }
 
 .searchInput::placeholder {
-  color: #555555;
+  color: #888888;
 }
 
 .searchInput:focus-visible {
   border-color: #6699cc;
   box-shadow: 0 0 0 2px rgba(102, 153, 204, 0.35);
   outline: none;
-}
-
-.searchKbd {
-  position: absolute;
-  right: 8px;
-  font-size: 10px;
-  color: #555555;
-  background: #222222;
-  border: 1px solid #333333;
-  border-radius: var(--radius-xs);
-  padding: 1px 4px;
-  pointer-events: none;
-  font-family: inherit;
 }
 
 /* Nav sections */
