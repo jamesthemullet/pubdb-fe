@@ -4,18 +4,6 @@
   background: var(--background);
 }
 
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 /* ── Docs left nav ── */
 .docsNav {
   width: 200px;
@@ -243,27 +231,6 @@
   letter-spacing: 0.06em;
 }
 
-.copyBtn {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.75rem;
-  background: transparent;
-  border: 1px solid #374151;
-  border-radius: var(--radius-sm);
-  color: #9ca3af;
-  font-size: 0.6875rem;
-  font-family: var(--font-inter), sans-serif;
-  padding: 0.2rem 0.55rem;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
-}
-
-.copyBtn:hover {
-  background: transparent;
-  color: #e5e7eb;
-  border-color: #6b7280;
-}
-
 .codePre {
   padding: var(--space-5) var(--space-5) var(--space-5) var(--space-5);
   margin: 0;
@@ -462,8 +429,8 @@
 .typeBadge {
   font-family: var(--font-jetbrains-mono), monospace;
   font-size: 0.6875rem;
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--surface-alt);
+  color: var(--text-muted);
   border-radius: var(--radius-sm);
   padding: 0.1rem var(--space-2);
   white-space: nowrap;
